@@ -1,3 +1,47 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+@plugin "daisyui";
+
+/* Tema custom "atlantis": dark casi negro + acento esmeralda (según diseño de referencia) */
+@plugin "daisyui/theme" {
+  name: "atlantis";
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: oklch(16.5% 0.008 264);
+  --color-base-200: oklch(20.5% 0.01 264);
+  --color-base-300: oklch(25.5% 0.012 264);
+  --color-base-content: oklch(93% 0.008 264);
+  --color-primary: oklch(72% 0.155 160);
+  --color-primary-content: oklch(14% 0.03 160);
+  --color-secondary: oklch(65% 0.14 250);
+  --color-secondary-content: oklch(95% 0.01 250);
+  --color-accent: oklch(70% 0.15 200);
+  --color-accent-content: oklch(15% 0.02 200);
+  --color-neutral: oklch(28% 0.015 264);
+  --color-neutral-content: oklch(92% 0.01 264);
+  --color-info: oklch(70% 0.14 230);
+  --color-info-content: oklch(15% 0.02 230);
+  --color-success: oklch(72% 0.155 160);
+  --color-success-content: oklch(14% 0.03 160);
+  --color-warning: oklch(80% 0.15 85);
+  --color-warning-content: oklch(16% 0.03 85);
+  --color-error: oklch(65% 0.2 25);
+  --color-error-content: oklch(95% 0.01 25);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+}

@@ -1,0 +1,101 @@
+<aside
+  class="relative flex h-full w-72 flex-col border-r border-base-300/70 bg-base-100 text-base-content"
+>
+  <!-- Patrón de hexágonos decorativo, como en el diseño de referencia -->
+  <svg
+    class="pointer-events-none absolute inset-0 h-full w-full text-base-content opacity-[0.035]"
+    aria-hidden="true"
+  >
+    <defs>
+      <pattern id="sidebar-hexagons" width="28" height="49" patternUnits="userSpaceOnUse">
+        <path
+          fill="currentColor"
+          d="M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z"
+        />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#sidebar-hexagons)" />
+  </svg>
+
+  <!-- Brand -->
+  <div class="relative flex h-16 shrink-0 items-center gap-3 border-b border-base-300/70 px-5">
+    <span class="grid size-9 place-items-center rounded-xl bg-primary/15 text-primary">
+      <app-icon name="logo" classes="size-5" />
+    </span>
+    <span class="font-display text-xl font-bold tracking-tight">Atlantis</span>
+  </div>
+
+  <!-- Navegación -->
+  <nav class="relative flex-1 overflow-y-auto px-3 py-4" aria-label="Navegación principal">
+    @for (section of sections; track section.title) {
+      <ul class="menu menu-sm w-full gap-0.5 p-0">
+        <li
+          class="menu-title px-3 pb-1 pt-4 text-[0.65rem] font-bold uppercase tracking-[0.16em] text-base-content/40"
+        >
+          {{ section.title }}
+        </li>
+
+        @for (item of section.items; track item.label) {
+          <li>
+            @if (item.children; as children) {
+              <!-- Item con submenú colapsable -->
+              <details class="group" [open]="item.expanded">
+                <summary class="relative after:hidden" [class.menu-active]="item.expanded">
+                  @if (item.expanded) {
+                    <span
+                      class="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary"
+                    ></span>
+                  }
+                  <app-icon [name]="item.icon" classes="size-4 shrink-0 opacity-70" />
+                  <span>{{ item.label }}</span>
+                  <app-icon
+                    name="chevron-down"
+                    classes="ml-auto size-3.5 opacity-50 transition-transform duration-200 group-open:rotate-180"
+                  />
+                </summary>
+                <ul class="gap-0.5">
+                  @for (child of children; track child.label) {
+                    <li>
+                      <a
+                        [routerLink]="child.route ?? null"
+                        routerLinkActive
+                        #childRla="routerLinkActive"
+                        [class.menu-active]="childRla.isActive"
+                        class="relative"
+                      >
+                        @if (childRla.isActive) {
+                          <span
+                            class="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary"
+                          ></span>
+                        }
+                        <app-icon [name]="child.icon" classes="size-4 shrink-0 opacity-70" />
+                        <span>{{ child.label }}</span>
+                      </a>
+                    </li>
+                  }
+                </ul>
+              </details>
+            } @else {
+              <!-- Item simple -->
+              <a
+                [routerLink]="item.route ?? null"
+                routerLinkActive
+                #rla="routerLinkActive"
+                [class.menu-active]="rla.isActive"
+                class="relative"
+              >
+                @if (rla.isActive) {
+                  <span
+                    class="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary"
+                  ></span>
+                }
+                <app-icon [name]="item.icon" classes="size-4 shrink-0 opacity-70" />
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </nav>
+</aside>

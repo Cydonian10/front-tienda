@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  signal,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, signal, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { Icon, IconName } from '../../shared/icon/icon';

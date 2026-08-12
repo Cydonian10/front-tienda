@@ -1,101 +1,125 @@
-<aside
-  class="relative flex h-full w-72 flex-col border-r border-base-300/70 bg-base-100 text-base-content"
->
-  <!-- Patrón de hexágonos decorativo, como en el diseño de referencia -->
-  <svg
-    class="pointer-events-none absolute inset-0 h-full w-full text-base-content opacity-[0.035]"
-    aria-hidden="true"
-  >
-    <defs>
-      <pattern id="sidebar-hexagons" width="28" height="49" patternUnits="userSpaceOnUse">
-        <path
-          fill="currentColor"
-          d="M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z"
-        />
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#sidebar-hexagons)" />
-  </svg>
+<div class="flex flex-1 overflow-hidden">
+  <!-- ========== OVERLAY: fondo oscuro que cierra el sidebar al hacer clic (solo móvil) ========== -->
+  <div
+    class="fixed inset-0 z-30 bg-base-content/50 lg:hidden"
+    [class.hidden]="!openSidebar()"
+    (click)="toggle()"
+  ></div>
 
-  <!-- Brand -->
-  <div class="relative flex h-16 shrink-0 items-center gap-3 border-b border-base-300/70 px-5">
-    <span class="grid size-9 place-items-center rounded-xl bg-primary/15 text-primary">
-      <app-icon name="logo" classes="size-5" />
-    </span>
-    <span class="font-display text-xl font-bold tracking-tight">Atlantis</span>
+  <!-- ========== SIDEBAR PRINCIPAL ========== -->
+  <div
+    id="dashboard-sidebar"
+    [class.w-64]="openSidebar()"
+    [class.w-0]="!openSidebar()"
+    class="fixed inset-y-0 inset-s-0 z-40 flex flex-col overflow-hidden border-e border-base-300 bg-base-100 transition-all duration-300 lg:static lg:shrink-0 lg:h-full"
+  >
+    <svg
+      class="pointer-events-none absolute inset-0 h-full text-base-content opacity-[0.035] overflow-y-auto"
+      [class.w-64]="openSidebar()"
+      [class.w-0]="!openSidebar()"
+      aria-hidden="true"
+    >
+      <defs>
+        <pattern id="sidebar-hexagons" width="28" height="49" patternUnits="userSpaceOnUse">
+          <path
+            fill="currentColor"
+            d="M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z"
+          />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#sidebar-hexagons)" />
+    </svg>
+
+    <div class="flex-1 overflow-y-auto">
+      <!-- ========== ENCABEZADO: logo ========== -->
+      <div class="p-4">
+        <span class="text-base-content lg:text-2xl text-center font-bold">
+          <h3>SUB SISTEMAS</h3>
+        </span>
+
+        <!-- ========== NAVEGACIÓN: menú de enlaces ========== -->
+        <nav aria-label="Dashboard" class="mt-4">
+          <ul class="space-y-1">
+            <!-- Enlace: Overview -->
+            <li>
+              <a
+                href="#"
+                class="block rounded-lg px-4 py-2 text-sm font-medium text-base-content transition-colors hover:bg-base-200"
+              >
+                Inicio
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- ========== PIE: perfil del usuario ========== -->
+    <div class="shrink-0 border-t border-base-300">
+      <a
+        href="#"
+        class="flex items-center gap-2 bg-base-100 p-4 hover:bg-base-200 hover:transition-colors"
+      >
+        <!-- Avatar del usuario -->
+        <img
+          alt=""
+          src="https://images.unsplash.com/photo-1600486913747-55e5470d6f40?auto=format&fit=crop&q=80&w=1160"
+          class="size-10 rounded-full object-cover"
+        />
+
+        <!-- Nombre y correo del usuario -->
+        <p class="text-xs text-base-content">
+          <strong class="block font-medium">Priya Natarajan</strong>
+
+          <span>priyaorbitly.com</span>
+        </p>
+      </a>
+    </div>
   </div>
 
-  <!-- Navegación -->
-  <nav class="relative flex-1 overflow-y-auto px-3 py-4" aria-label="Navegación principal">
-    @for (section of sections; track section.title) {
-      <ul class="menu menu-sm w-full gap-0.5 p-0">
-        <li
-          class="menu-title px-3 pb-1 pt-4 text-[0.65rem] font-bold uppercase tracking-[0.16em] text-base-content/40"
-        >
-          {{ section.title }}
-        </li>
+  <div class="flex flex-1 flex-col overflow-hidden">
+    <!-- ========== HEADER: barra superior ========== -->
+    <div class="navbar h-14 min-h-14 shrink-0 border-b border-base-300 bg-base-100 px-4">
+      <div class="navbar-start gap-2">
+        <button class="btn btn-ghost btn-sm btn-square" (click)="toggle()" aria-label="Abrir menú">
+          <app-icon name="menu" />
+        </button>
+        <img src="favicon.ico" class="h-8 w-auto" alt="Logo colegio" />
+      </div>
 
-        @for (item of section.items; track item.label) {
-          <li>
-            @if (item.children; as children) {
-              <!-- Item con submenú colapsable -->
-              <details class="group" [open]="item.expanded">
-                <summary class="relative after:hidden" [class.menu-active]="item.expanded">
-                  @if (item.expanded) {
-                    <span
-                      class="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary"
-                    ></span>
-                  }
-                  <app-icon [name]="item.icon" classes="size-4 shrink-0 opacity-70" />
-                  <span>{{ item.label }}</span>
-                  <app-icon
-                    name="chevron-down"
-                    classes="ml-auto size-3.5 opacity-50 transition-transform duration-200 group-open:rotate-180"
-                  />
-                </summary>
-                <ul class="gap-0.5">
-                  @for (child of children; track child.label) {
-                    <li>
-                      <a
-                        [routerLink]="child.route ?? null"
-                        routerLinkActive
-                        #childRla="routerLinkActive"
-                        [class.menu-active]="childRla.isActive"
-                        class="relative"
-                      >
-                        @if (childRla.isActive) {
-                          <span
-                            class="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary"
-                          ></span>
-                        }
-                        <app-icon [name]="child.icon" classes="size-4 shrink-0 opacity-70" />
-                        <span>{{ child.label }}</span>
-                      </a>
-                    </li>
-                  }
-                </ul>
-              </details>
-            } @else {
-              <!-- Item simple -->
-              <a
-                [routerLink]="item.route ?? null"
-                routerLinkActive
-                #rla="routerLinkActive"
-                [class.menu-active]="rla.isActive"
-                class="relative"
-              >
-                @if (rla.isActive) {
-                  <span
-                    class="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary"
-                  ></span>
-                }
-                <app-icon [name]="item.icon" classes="size-4 shrink-0 opacity-70" />
-                <span>{{ item.label }}</span>
-              </a>
-            }
-          </li>
-        }
-      </ul>
-    }
-  </nav>
-</aside>
+      <div class="navbar-center"></div>
+
+      <div class="navbar-end gap-2">
+        <div #searchContainer class="flex items-center gap-2">
+          <input
+            #searchInput
+            type="search"
+            placeholder="Buscar..."
+            [class.w-0]="!searchOpen()"
+            [class.w-40]="searchOpen()"
+            [class.px-0]="!searchOpen()"
+            [class.px-3]="searchOpen()"
+            [class.opacity-0]="!searchOpen()"
+            class="input input-sm input-bordered transition-all duration-300"
+          />
+          <button
+            class="btn btn-ghost btn-sm btn-square"
+            (click)="toggleSearch()"
+            aria-label="Buscar"
+          >
+            <app-icon name="search" />
+          </button>
+        </div>
+        <div class="avatar avatar-placeholder">
+          <div class="w-10 rounded-full bg-primary text-primary-content">
+            <span class="font-bold">C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <main class="flex-1 overflow-y-auto p-4">
+      <router-outlet />
+    </main>
+  </div>
+</div>

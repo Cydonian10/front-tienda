@@ -1,5 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 import { Icon, IconName } from '../../shared/icon/icon';
 
@@ -18,9 +25,12 @@ interface SidebarSection {
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive, Icon],
+  imports: [RouterOutlet, Icon],
   templateUrl: './sidebar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block flex h-dvh',
+  },
 })
 export class Sidebar {
   protected readonly sections: SidebarSection[] = [
@@ -68,4 +78,26 @@ export class Sidebar {
       ],
     },
   ];
+
+  title = 'front-scap';
+
+  // ========== Servicio de iconos Font Awesome inyectado ==========
+  // public iconService = inject(FontIconService);
+  public openSidebar = signal(true);
+
+  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('searchContainer')
+  searchContainer!: ElementRef<HTMLDivElement>;
+  public searchOpen = signal(false);
+
+  toggle() {
+    this.openSidebar.update((v) => !v);
+  }
+
+  toggleSearch() {
+    this.searchOpen.update((v) => !v);
+    if (this.searchOpen()) {
+      this.searchInput?.nativeElement.focus();
+    }
+  }
 }

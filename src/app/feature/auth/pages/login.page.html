@@ -30,18 +30,18 @@
           </label>
         </fieldset>
 
-        @if (store.error(); as error) {
+        @if (error(); as errorMessage) {
           <div role="alert" class="alert alert-error">
-            <span>{{ error }}</span>
+            <span>{{ errorMessage }}</span>
           </div>
         }
 
         <button
           type="submit"
           class="btn btn-primary btn-block"
-          [disabled]="form.invalid || store.isLoading()"
+          [disabled]="form.invalid || isLoading()"
         >
-          @if (store.isLoading()) {
+          @if (isLoading()) {
             <span class="loading loading-spinner"></span>
           }
           Iniciar sesión

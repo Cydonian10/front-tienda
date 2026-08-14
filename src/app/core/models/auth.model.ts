@@ -1,3 +1,5 @@
+import { Person } from './people.model';
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -20,4 +22,10 @@ export interface JwtUser {
   personId: number;
   email: string;
   roles: string[];
+}
+
+export interface RestoredSession {
+  accessToken: string;
+  user: AuthUser;
+  person: Person;
 }

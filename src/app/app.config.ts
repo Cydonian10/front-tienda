@@ -1,6 +1,7 @@
 import {
-  APP_INITIALIZER,
   ApplicationConfig,
+  inject,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -8,6 +9,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptor/auth.interceptor';
+import { AuthService } from './core/api/auth.service';
 import { AuthStore } from './core/store/auth.store';
 
 export const appConfig: ApplicationConfig = {
@@ -15,11 +17,18 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (authStore: AuthStore) => () => authStore.init(),
-      deps: [AuthStore],
-      multi: true,
-    },
+    provideAppInitializer(() => {
+      const authService = inject(AuthService);
+      const authStore = inject(AuthStore);
+      return authService.restoreSession().then((session) => {
+        if (session) {
+          authStore.setToken(session.accessToken);
+          authStore.setUser(session.user);
+          authStore.setPerson(session.person);
+        } else {
+          authStore.logout();
+        }
+      });
+    }),
   ],
 };

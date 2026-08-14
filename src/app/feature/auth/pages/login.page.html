@@ -1,0 +1,52 @@
+<div class="flex min-h-dvh items-center justify-center bg-base-200 px-4">
+  <div class="card w-full max-w-md bg-base-100 shadow-xl">
+    <div class="card-body gap-6">
+      <div class="space-y-1 text-center">
+        <h1 class="text-2xl font-bold">SUB SISTEMAS</h1>
+        <p class="text-sm text-base-content/60">Inicia sesión con tu cuenta</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+        <fieldset class="fieldset">
+          <label class="input w-full">
+            <span class="label">Email</span>
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="admin@ferreteria.com"
+              autocomplete="email"
+              required
+            />
+          </label>
+          <label class="input w-full">
+            <span class="label">Contraseña</span>
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+        </fieldset>
+
+        @if (store.error(); as error) {
+          <div role="alert" class="alert alert-error">
+            <span>{{ error }}</span>
+          </div>
+        }
+
+        <button
+          type="submit"
+          class="btn btn-primary btn-block"
+          [disabled]="form.invalid || store.isLoading()"
+        >
+          @if (store.isLoading()) {
+            <span class="loading loading-spinner"></span>
+          }
+          Iniciar sesión
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

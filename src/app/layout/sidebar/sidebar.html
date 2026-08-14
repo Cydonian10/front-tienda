@@ -61,24 +61,31 @@
 
       <!-- ========== PIE: perfil del usuario ========== -->
       <div class="shrink-0 border-t border-base-300">
-        <a
-          href="#"
-          class="flex items-center gap-2 bg-base-100 p-4 hover:bg-base-200 hover:transition-colors"
+        <div
+          class="flex items-center gap-2 bg-base-100 p-4"
         >
           <!-- Avatar del usuario -->
-          <img
-            alt=""
-            src="https://images.unsplash.com/photo-1600486913747-55e5470d6f40?auto=format&fit=crop&q=80&w=1160"
-            class="size-10 rounded-full object-cover"
-          />
+          <div class="avatar avatar-placeholder">
+            <div class="w-10 rounded-full bg-primary text-primary-content">
+              <span class="font-bold">{{ initials() }}</span>
+            </div>
+          </div>
 
           <!-- Nombre y correo del usuario -->
-          <p class="min-w-0 text-xs text-base-content">
-            <strong class="block whitespace-nowrap font-medium">Priya Natarajan</strong>
+          <p class="min-w-0 flex-1 text-xs text-base-content">
+            <strong class="block truncate font-medium">{{ fullName() }}</strong>
 
-            <span class="block truncate">priyaorbitly.com</span>
+            <span class="block truncate">{{ user()?.email }}</span>
           </p>
-        </a>
+
+          <button
+            class="btn btn-ghost btn-sm btn-square"
+            (click)="logout()"
+            aria-label="Cerrar sesión"
+          >
+            <app-icon name="logout" />
+          </button>
+        </div>
       </div>
     </div>
   </div>

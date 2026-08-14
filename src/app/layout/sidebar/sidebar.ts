@@ -1,6 +1,15 @@
-import { ChangeDetectionStrategy, Component, ElementRef, signal, ViewChild } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 
+import { AuthStore } from '../../core/store/auth.store';
 import { Icon, IconName } from '../../shared/icon/icon';
 
 interface SidebarItem {
@@ -74,6 +83,22 @@ export class Sidebar {
 
   title = 'front-scap';
 
+  private readonly router = inject(Router);
+  private readonly authStore = inject(AuthStore);
+
+  protected readonly person = this.authStore.person;
+  protected readonly user = this.authStore.user;
+
+  protected readonly fullName = computed(() => {
+    const person = this.authStore.person();
+    return person ? `${person.firstName} ${person.lastName}` : '';
+  });
+
+  protected readonly initials = computed(() => {
+    const parts = this.fullName().trim().split(' ');
+    return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}` || '?';
+  });
+
   // ========== Servicio de iconos Font Awesome inyectado ==========
   // public iconService = inject(FontIconService);
   public openSidebar = signal(true);
@@ -92,5 +117,10 @@ export class Sidebar {
     if (this.searchOpen()) {
       this.searchInput?.nativeElement.focus();
     }
+  }
+
+  protected async logout(): Promise<void> {
+    this.authStore.logout();
+    await this.router.navigate(['/auth/login']);
   }
 }

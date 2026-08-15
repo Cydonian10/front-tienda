@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
@@ -16,5 +16,15 @@ export class ApiService {
 
   protected unwrap<T>(source: Observable<ApiResponse<T>>): Observable<T> {
     return source.pipe(map((response) => response.data));
+  }
+
+  protected buildParams<T extends object>(filter: T): HttpParams {
+    let params = new HttpParams();
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    });
+    return params;
   }
 }

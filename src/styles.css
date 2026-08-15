@@ -5,7 +5,7 @@
 
 /* Tema custom "atlantis": dark casi negro + acento esmeralda (según diseño de referencia) */
 @plugin "daisyui/theme" {
-  name: "atlantis";
+  name: 'atlantis';
   default: true;
   prefersdark: true;
   color-scheme: dark;

@@ -17,10 +17,13 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes),
-    provideAppInitializer(() => {
+    provideAppInitializer(async () => {
       const authService = inject(AuthService);
       const authStore = inject(AuthStore);
-      return authService.restoreSession().then((session) => {
+      const restore = authService.restoreSession();
+      const minTime = new Promise((resolve) => setTimeout(resolve, 200));
+      try {
+        const session = await restore;
         if (session) {
           authStore.setToken(session.accessToken);
           authStore.setUser(session.user);
@@ -28,7 +31,9 @@ export const appConfig: ApplicationConfig = {
         } else {
           authStore.logout();
         }
-      });
+      } finally {
+        await minTime;
+      }
     }),
   ],
 };

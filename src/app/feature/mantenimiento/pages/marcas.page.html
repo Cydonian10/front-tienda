@@ -1,2 +1,71 @@
 <ng-breadcrumbs />
-<h3>Comenzando con todo</h3>
+
+<div class="space-y-4">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <h3 class="text-lg font-bold">Marcas</h3>
+    <label class="input">
+      <app-icon name="search" />
+      <input type="search" placeholder="Buscar marca..." (input)="onSearch($event)" />
+    </label>
+  </div>
+
+  @if (brands.isLoading() && !brands.hasValue()) {
+    <div class="flex justify-center py-16">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else if (errorMessage(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  } @else {
+    <div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (brand of brands.value()?.data; track brand.id) {
+            <tr>
+              <th>{{ brand.id }}</th>
+              <td>{{ brand.name }}</td>
+              <td>{{ brand.description ?? '—' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3" class="py-8 text-center text-base-content/60">No hay marcas</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <span class="text-sm text-base-content/60"> Total: {{ brands.value()?.total }} </span>
+      <div class="join">
+        <button
+          type="button"
+          class="join-item btn"
+          [disabled]="page() <= 1"
+          (click)="previousPage()"
+          aria-label="Página anterior"
+        >
+          «
+        </button>
+        <button type="button" class="join-item btn btn-active">Página {{ page() }}</button>
+        <button
+          type="button"
+          class="join-item btn"
+          [disabled]="page() >= (brands.value()?.lastPage ?? 0)"
+          (click)="nextPage()"
+          aria-label="Página siguiente"
+        >
+          »
+        </button>
+      </div>
+    </div>
+  }
+</div>

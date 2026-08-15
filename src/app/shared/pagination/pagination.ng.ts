@@ -4,16 +4,20 @@ import { Component, input, model } from '@angular/core';
   selector: 'ng-pagination',
   template: `
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex items-center gap-2 text-sm text-base-content/60 w-70 bg-red-500">
-        <span>Mostrar</span>
-        <select class="select select-sm" [value]="pageSize()" (change)="onPageSizeChange($event)">
+      <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/60">
+        <span class="shrink-0">Mostrar</span>
+        <select
+          class="select select-sm w-20 shrink-0"
+          [value]="pageSize()"
+          (change)="onPageSizeChange($event)"
+        >
           @for (size of pageSizes(); track size) {
             <option [value]="size">{{ size }}</option>
           }
         </select>
 
         @if (total() > 0) {
-          <span>· Total: {{ total() }}</span>
+          <span class="shrink-0 whitespace-nowrap"> Total: {{ total() }} items</span>
         }
       </div>
       <div class="join">

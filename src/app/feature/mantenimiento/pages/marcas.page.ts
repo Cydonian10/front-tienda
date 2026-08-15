@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, startWith, Subject } from 'rxjs';
 
 import BreadcrumbsNg from '../../../shared/breadcrumbs/breadcrumbs.ng';
+import PaginationNg from '../../../shared/pagination/pagination.ng';
 import { Icon } from '../../../shared/icon/icon';
 import { environment } from '../../../../environments/environment';
 import { Brand } from '../../../core/models/brand.model';
@@ -11,13 +12,12 @@ import { PaginatedResult } from '../../../core/models/pagination.model';
 
 @Component({
   selector: 'marcas-page',
-  imports: [BreadcrumbsNg, Icon],
+  imports: [BreadcrumbsNg, PaginationNg, Icon],
   templateUrl: './marcas.page.html',
 })
 export default class MarcasPage {
-  private readonly PAGE_SIZE = 10;
-
   protected readonly page = signal(1);
+  protected readonly pageSize = signal(10);
 
   private readonly search$ = new Subject<string>();
   protected readonly search = toSignal(this.search$.pipe(startWith(''), debounceTime(300)), {
@@ -31,7 +31,7 @@ export default class MarcasPage {
         url: `${environment.apiUrl}/brands`,
         params: {
           page: this.page(),
-          limit: this.PAGE_SIZE,
+          limit: this.pageSize(),
           ...(search ? { search } : {}),
         },
       };
@@ -41,7 +41,7 @@ export default class MarcasPage {
         data: [],
         total: 0,
         page: 1,
-        limit: this.PAGE_SIZE,
+        limit: this.pageSize(),
         lastPage: 0,
       },
       parse: (raw) => raw as PaginatedResult<Brand>,
@@ -51,14 +51,6 @@ export default class MarcasPage {
   protected onSearch(event: Event): void {
     this.search$.next((event.target as HTMLInputElement).value);
     this.page.set(1);
-  }
-
-  protected previousPage(): void {
-    this.page.set(Math.max(1, this.page() - 1));
-  }
-
-  protected nextPage(): void {
-    this.page.set(Math.min(this.brands.value()?.lastPage ?? 1, this.page() + 1));
   }
 
   protected readonly errorMessage = computed<string | null>(() => {

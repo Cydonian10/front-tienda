@@ -43,29 +43,11 @@
       </table>
     </div>
 
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <span class="text-sm text-base-content/60"> Total: {{ brands.value()?.total }} </span>
-      <div class="join">
-        <button
-          type="button"
-          class="join-item btn"
-          [disabled]="page() <= 1"
-          (click)="previousPage()"
-          aria-label="Página anterior"
-        >
-          «
-        </button>
-        <button type="button" class="join-item btn btn-active">Página {{ page() }}</button>
-        <button
-          type="button"
-          class="join-item btn"
-          [disabled]="page() >= (brands.value()?.lastPage ?? 0)"
-          (click)="nextPage()"
-          aria-label="Página siguiente"
-        >
-          »
-        </button>
-      </div>
-    </div>
+    <ng-pagination
+      [total]="brands.value()?.total ?? 0"
+      [lastPage]="brands.value()?.lastPage ?? 0"
+      [(page)]="page"
+      [(pageSize)]="pageSize"
+    />
   }
 </div>

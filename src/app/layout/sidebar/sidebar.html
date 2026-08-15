@@ -45,15 +45,53 @@
           <!-- ========== NAVEGACIÓN: menú de enlaces ========== -->
           <nav aria-label="Dashboard" class="mt-4">
             <ul class="space-y-1">
-              <!-- Enlace: Overview -->
-              <li>
-                <a
-                  href="#"
-                  class="block whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium text-base-content transition-colors hover:bg-base-200"
-                >
-                  Inicio
-                </a>
-              </li>
+              @for (item of menu(); track item.id) {
+                @if (item.children?.length) {
+                  <li>
+                    <button
+                      type="button"
+                      class="flex w-full items-center justify-between gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium text-base-content transition-colors hover:bg-base-200"
+                      (click)="toggleGroup(item.id)"
+                      [attr.aria-expanded]="item.expanded"
+                    >
+                      <span class="flex min-w-0 items-center gap-2">
+                        <app-icon [name]="item.icon" />
+                        <span class="truncate">{{ item.label }}</span>
+                      </span>
+                      <span class="transition-transform" [class.rotate-180]="item.expanded">
+                        <app-icon name="chevron-down" />
+                      </span>
+                    </button>
+                    @if (item.expanded) {
+                      <ul class="mt-1 space-y-1 ps-6">
+                        @for (child of item.children; track child.id) {
+                          <li>
+                            <a
+                              [routerLink]="child.route"
+                              routerLinkActive="bg-base-200"
+                              class="flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium text-base-content transition-colors hover:bg-base-200"
+                            >
+                              <app-icon [name]="child.icon" />
+                              <span class="truncate">{{ child.label }}</span>
+                            </a>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </li>
+                } @else {
+                  <li>
+                    <a
+                      [routerLink]="item.route"
+                      routerLinkActive="bg-base-200"
+                      class="flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium text-base-content transition-colors hover:bg-base-200"
+                    >
+                      <app-icon [name]="item.icon" />
+                      <span class="truncate">{{ item.label }}</span>
+                    </a>
+                  </li>
+                }
+              }
             </ul>
           </nav>
         </div>

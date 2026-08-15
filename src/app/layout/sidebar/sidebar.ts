@@ -7,27 +7,15 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthStore } from '../../core/store/auth.store';
-import { Icon, IconName } from '../../shared/icon/icon';
-
-interface SidebarItem {
-  label: string;
-  icon: IconName;
-  route?: string;
-  expanded?: boolean;
-  children?: SidebarItem[];
-}
-
-interface SidebarSection {
-  title: string;
-  items: SidebarItem[];
-}
+import { Icon } from '../../shared/icon/icon';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterOutlet, Icon],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon],
   templateUrl: './sidebar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -35,56 +23,12 @@ interface SidebarSection {
   },
 })
 export class Sidebar {
-  protected readonly sections: SidebarSection[] = [
-    {
-      title: 'Dashboards',
-      items: [{ label: 'E-Commerce', icon: 'home' }],
-    },
-    {
-      title: 'Apps',
-      items: [
-        {
-          label: 'CMS',
-          icon: 'chat-alt',
-          expanded: true,
-          children: [
-            { label: 'Detail', icon: 'bars-3' },
-            { label: 'Detail-2', icon: 'bars-3' },
-            { label: 'List', icon: 'grid' },
-            { label: 'Edit', icon: 'pencil' },
-          ],
-        },
-        { label: 'Chat', icon: 'chat' },
-        { label: 'Files', icon: 'folder' },
-        { label: 'Mail', icon: 'mail' },
-        { label: 'Task List', icon: 'clipboard-check' },
-      ],
-    },
-    {
-      title: 'UI Kit',
-      items: [
-        { label: 'Form Layout', icon: 'layout', route: '/ui-kit/form-layout' },
-        { label: 'Input', icon: 'input' },
-        { label: 'Button', icon: 'click' },
-        { label: 'Table', icon: 'table' },
-        { label: 'List', icon: 'queue-list' },
-        { label: 'Tree', icon: 'tree' },
-        { label: 'Panel', icon: 'panel' },
-        { label: 'Overlay', icon: 'overlay' },
-        { label: 'Media', icon: 'media' },
-        { label: 'Menu', icon: 'menu' },
-        { label: 'Message', icon: 'message' },
-        { label: 'File', icon: 'file' },
-        { label: 'Chart', icon: 'chart' },
-        { label: 'Timeline', icon: 'timeline' },
-      ],
-    },
-  ];
-
-  title = 'front-scap';
-
   private readonly router = inject(Router);
   private readonly authStore = inject(AuthStore);
+  private readonly dashboardService = inject(DashboardService);
+
+  protected readonly menu = this.dashboardService.menu;
+  protected readonly toggleGroup = (id: string) => this.dashboardService.toggleGroup(id);
 
   protected readonly person = this.authStore.person;
   protected readonly user = this.authStore.user;

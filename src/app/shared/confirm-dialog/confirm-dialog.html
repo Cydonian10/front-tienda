@@ -1,0 +1,21 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-4">
+    <h2 class="card-title">{{ data.title }}</h2>
+    <p class="text-base-content/70">{{ data.message }}</p>
+
+    <div class="card-actions justify-end">
+      <button type="button" class="btn btn-soft" (click)="cancel()">
+        {{ data.cancelLabel ?? 'Cancelar' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-soft btn-error"
+        [class.btn-danger]="data.danger"
+        [class.btn-primary]="!data.danger"
+        (click)="confirm()"
+      >
+        {{ data.confirmLabel ?? 'Confirmar' }}
+      </button>
+    </div>
+  </div>
+</div>

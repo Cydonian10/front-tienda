@@ -32,6 +32,7 @@
             <th>ID</th>
             <th>Nombre</th>
             <th>Descripción</th>
+            <th class="text-right">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -40,10 +41,30 @@
               <th>{{ brand.id }}</th>
               <td>{{ brand.name }}</td>
               <td>{{ brand.description ?? '—' }}</td>
+              <td>
+                <div class="flex justify-end gap-1">
+                  <button
+                    type="button"
+                    class="btn btn-soft btn-xs"
+                    [attr.aria-label]="'Editar ' + brand.name"
+                    (click)="openEditDialog(brand)"
+                  >
+                    <app-icon name="pencil" classes="size-4" />
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-soft btn-xs text-error"
+                    [attr.aria-label]="'Eliminar ' + brand.name"
+                    (click)="onDelete(brand)"
+                  >
+                    <app-icon name="trash" classes="size-4" />
+                  </button>
+                </div>
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="3" class="py-8 text-center text-base-content/60">No hay marcas</td>
+              <td colspan="4" class="py-8 text-center text-base-content/60">No hay marcas</td>
             </tr>
           }
         </tbody>

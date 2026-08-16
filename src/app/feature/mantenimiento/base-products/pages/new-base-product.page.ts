@@ -1,13 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import {
-  FormArray,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
@@ -21,17 +14,24 @@ import { Category } from '../../../../core/models/category.model';
 import { CreateBaseProduct } from '../../../../core/models/base-product.model';
 import { MeasurementUnit } from '../../../../core/models/measurement-unit.model';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
-import { Icon } from '../../../../shared/icon/icon';
-
-interface UnitRowControls {
-  unitId: FormControl<string>;
-  factor: FormControl<number>;
-  isMain: FormControl<boolean>;
-}
+import { BaseProductGeneralData } from '../components/general-data/general-data.component';
+import { BaseProductCategoriesPicker } from '../components/categories-picker/categories-picker.component';
+import {
+  BaseProductUnitsEditor,
+  createUnitRow,
+  UnitRowControls,
+} from '../components/units-editor/units-editor.component';
 
 @Component({
   selector: 'new-base-product-page',
-  imports: [BreadcrumbsNg, ReactiveFormsModule, RouterLink, Icon],
+  imports: [
+    BreadcrumbsNg,
+    ReactiveFormsModule,
+    RouterLink,
+    BaseProductGeneralData,
+    BaseProductCategoriesPicker,
+    BaseProductUnitsEditor,
+  ],
   templateUrl: './new-base-product.page.html',
 })
 export default class NewBaseProductPage {
@@ -50,7 +50,7 @@ export default class NewBaseProductPage {
   protected readonly error = signal<string | null>(null);
 
   protected readonly unitRows = this.formBuilder.array<FormGroup<UnitRowControls>>([
-    this.createUnitRow(true),
+    createUnitRow(this.formBuilder, true),
   ]);
 
   protected readonly form = this.formBuilder.nonNullable.group({
@@ -62,14 +62,6 @@ export default class NewBaseProductPage {
 
   constructor() {
     void this.loadOptions();
-  }
-
-  private createUnitRow(isMain: boolean): FormGroup<UnitRowControls> {
-    return this.formBuilder.nonNullable.group({
-      unitId: [''],
-      factor: [1],
-      isMain: [isMain],
-    });
   }
 
   private async loadOptions(): Promise<void> {
@@ -88,48 +80,6 @@ export default class NewBaseProductPage {
     } finally {
       this.isLoading.set(false);
     }
-  }
-
-  protected isUnitUsed(unitId: number, index: number): boolean {
-    if (!unitId) {
-      return false;
-    }
-    return this.unitRows.controls.some(
-      (row, i) => i !== index && Number(row.controls.unitId.value) === unitId,
-    );
-  }
-
-  protected addUnitRow(): void {
-    this.unitRows.push(this.createUnitRow(false));
-  }
-
-  protected removeUnitRow(index: number): void {
-    if (this.unitRows.length === 1) {
-      return;
-    }
-    const wasMain = this.unitRows.at(index).controls.isMain.value;
-    this.unitRows.removeAt(index);
-    if (wasMain && this.unitRows.length > 0) {
-      this.unitRows.at(0).controls.isMain.setValue(true);
-    }
-  }
-
-  protected setMainRow(index: number): void {
-    this.unitRows.controls.forEach((row, i) => {
-      row.controls.isMain.setValue(i === index);
-    });
-  }
-
-  protected isCategorySelected(id: number): boolean {
-    return this.form.controls.categoryIds.value.includes(id);
-  }
-
-  protected toggleCategory(id: number, event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    const current = this.form.controls.categoryIds.value;
-    this.form.controls.categoryIds.setValue(
-      checked ? [...current, id] : current.filter((categoryId) => categoryId !== id),
-    );
   }
 
   protected async onSubmit(): Promise<void> {

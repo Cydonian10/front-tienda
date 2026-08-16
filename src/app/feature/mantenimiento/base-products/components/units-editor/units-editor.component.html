@@ -1,0 +1,95 @@
+<section class="card border border-base-300 bg-base-100">
+  <div class="card-body gap-6 p-6 sm:p-8">
+    <header class="flex flex-wrap items-start justify-between gap-3">
+      <div class="space-y-1">
+        <h2 class="card-title text-lg">Unidades</h2>
+        <p class="text-sm text-base-content/60">
+          Define las unidades de medida. Debe haber exactamente una principal.
+        </p>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" (click)="addUnitRow()">
+        <app-icon name="plus" classes="size-4" />
+        Agregar unidad
+      </button>
+    </header>
+
+    <div class="flex flex-col gap-4">
+      @for (row of unitRows().controls; track $index) {
+        <div
+          class="rounded-box border bg-base-100 p-4 sm:p-5"
+          [class.border-primary]="row.controls.isMain.value"
+          [class.border-base-200]="!row.controls.isMain.value"
+        >
+          <div class="mb-3 flex items-center gap-2 sm:hidden">
+            <span class="text-sm font-medium text-base-content/70"> Unidad {{ $index + 1 }} </span>
+            @if (row.controls.isMain.value) {
+              <span class="badge badge-primary badge-sm">Principal</span>
+            }
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_9rem_auto_auto] sm:items-end">
+            <div class="flex flex-col gap-2">
+              <label [for]="'unitId-' + $index" class="hidden text-sm font-medium sm:block">
+                Unidad
+              </label>
+              <select
+                class="select select-bordered w-full"
+                [id]="'unitId-' + $index"
+                [formControl]="row.controls.unitId"
+              >
+                <option value="">Seleccionar unidad...</option>
+                @for (unit of units(); track unit.id) {
+                  <option [value]="unit.id" [disabled]="isUnitUsed(unit.id, $index)">
+                    {{ unit.name }} ({{ unit.value }})
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label [for]="'factor-' + $index" class="hidden text-sm font-medium sm:block">
+                Factor
+              </label>
+              <input
+                type="number"
+                class="input input-bordered w-full"
+                min="0.01"
+                step="0.01"
+                [id]="'factor-' + $index"
+                [formControl]="row.controls.factor"
+              />
+            </div>
+
+            <label
+              class="flex cursor-pointer items-center gap-2 self-center whitespace-nowrap text-sm sm:self-end"
+            >
+              <input
+                type="radio"
+                name="isMain"
+                class="radio radio-sm radio-primary"
+                [checked]="row.controls.isMain.value"
+                (change)="setMainRow($index)"
+              />
+              @if (row.controls.isMain.value) {
+                <span class="hidden font-medium text-primary sm:inline"> Principal </span>
+              } @else {
+                <span>Principal</span>
+              }
+            </label>
+
+            <div class="flex items-center justify-end self-end">
+              <button
+                type="button"
+                class="btn btn-soft btn-sm text-error"
+                [attr.aria-label]="'Eliminar unidad ' + ($index + 1)"
+                (click)="removeUnitRow($index)"
+              >
+                <app-icon name="trash" classes="size-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

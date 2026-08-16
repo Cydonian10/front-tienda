@@ -1,0 +1,28 @@
+<section class="card border border-base-300 bg-base-100">
+  <div class="card-body gap-6 p-6 sm:p-8">
+    <header class="space-y-1">
+      <h2 class="card-title text-lg">Categorías</h2>
+      <p class="text-sm text-base-content/60">
+        Selecciona las categorías a las que pertenece el producto base.
+      </p>
+    </header>
+
+    @if (categories().length === 0) {
+      <p class="text-sm text-base-content/60">No hay categorías disponibles</p>
+    } @else {
+      <div class="flex flex-wrap gap-x-8 gap-y-3">
+        @for (category of categories(); track category.id) {
+          <label class="flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              class="checkbox checkbox-sm"
+              [checked]="isSelected(category.id)"
+              (change)="toggle(category.id, $event)"
+            />
+            <span>{{ category.name }}</span>
+          </label>
+        }
+      </div>
+    }
+  </div>
+</section>

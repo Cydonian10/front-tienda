@@ -1,8 +1,8 @@
 <ng-breadcrumbs />
 
-<div class="mt-4 max-w-3xl space-y-4">
-  <div class="flex items-center justify-between gap-2">
-    <h1 class="text-xl font-semibold">Nuevo producto base</h1>
+<div class="mx-auto mt-6 w-full max-w-3xl space-y-6 sm:space-y-8">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <h1 class="text-2xl font-semibold">Nuevo producto base</h1>
     <a routerLink="/mantenimiento/base-products" class="btn btn-soft btn-sm"> Volver al listado </a>
   </div>
 
@@ -17,125 +17,19 @@
       <span class="loading loading-spinner loading-lg"></span>
     </div>
   } @else {
-    <form class="space-y-4" [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="card border border-base-300 bg-base-100">
-        <div class="card-body space-y-4">
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">Datos generales</legend>
-            <label class="fieldset-label" for="name">Nombre *</label>
-            <input
-              id="name"
-              type="text"
-              class="input w-full"
-              placeholder="Ej. Clavo"
-              formControlName="name"
-            />
-            @if (form.controls.name.invalid && form.controls.name.touched) {
-              <p class="text-sm text-error">El nombre es obligatorio</p>
-            }
+    <form class="space-y-6 sm:space-y-8" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <base-product-general-data
+        [nameControl]="form.controls.name"
+        [brandIdControl]="form.controls.brandId"
+        [brands]="brands()"
+      />
+      <base-product-categories-picker
+        [categories]="categories()"
+        [control]="form.controls.categoryIds"
+      />
+      <base-product-units-editor [units]="units()" [unitRows]="unitRows" />
 
-            <label class="fieldset-label" for="brandId">Marca</label>
-            <select id="brandId" class="select w-full" formControlName="brandId">
-              <option value="">Sin marca</option>
-              @for (brand of brands(); track brand.id) {
-                <option [value]="brand.id">{{ brand.name }}</option>
-              }
-            </select>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">Categorías</legend>
-            @if (categories().length === 0) {
-              <p class="text-sm text-base-content/60">No hay categorías disponibles</p>
-            } @else {
-              <div class="flex flex-wrap gap-x-6 gap-y-2">
-                @for (category of categories(); track category.id) {
-                  <label class="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      class="checkbox"
-                      [checked]="isCategorySelected(category.id)"
-                      (change)="toggleCategory(category.id, $event)"
-                    />
-                    <span>{{ category.name }}</span>
-                  </label>
-                }
-              </div>
-            }
-          </fieldset>
-        </div>
-      </div>
-
-      <div class="card border border-base-300 bg-base-100">
-        <div class="card-body space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="card-title">Unidades</h2>
-            <button type="button" class="btn btn-soft btn-sm" (click)="addUnitRow()">
-              <app-icon name="plus" classes="size-4" />
-              Agregar unidad
-            </button>
-          </div>
-
-          <div class="space-y-3">
-            @for (row of unitRows.controls; track $index) {
-              <div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_8rem_auto_auto] sm:items-center">
-                <div>
-                  <label class="fieldset-label" [for]="'unitId-' + $index">Unidad</label>
-                  <select
-                    class="select w-full"
-                    [id]="'unitId-' + $index"
-                    [formControl]="row.controls.unitId"
-                  >
-                    <option value="">Seleccionar unidad...</option>
-                    @for (unit of units(); track unit.id) {
-                      <option [value]="unit.id" [disabled]="isUnitUsed(unit.id, $index)">
-                        {{ unit.name }} ({{ unit.value }})
-                      </option>
-                    }
-                  </select>
-                </div>
-                <div>
-                  <label class="fieldset-label" [for]="'factor-' + $index">Factor</label>
-                  <input
-                    type="number"
-                    class="input w-full"
-                    min="0.01"
-                    step="0.01"
-                    [id]="'factor-' + $index"
-                    [formControl]="row.controls.factor"
-                  />
-                </div>
-                <label class="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="isMain"
-                    class="radio"
-                    [checked]="row.controls.isMain.value"
-                    (change)="setMainRow($index)"
-                  />
-                  Principal
-                </label>
-                <div class="flex justify-end">
-                  <button
-                    type="button"
-                    class="btn btn-soft btn-sm text-error"
-                    [attr.aria-label]="'Eliminar unidad ' + ($index + 1)"
-                    (click)="removeUnitRow($index)"
-                  >
-                    <app-icon name="trash" classes="size-4" />
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-
-          <p class="text-sm text-base-content/60">
-            Debe haber al menos una unidad y exactamente una principal.
-          </p>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2">
+      <div class="flex flex-wrap justify-end gap-2 pt-2">
         <a routerLink="/mantenimiento/base-products" class="btn">Cancelar</a>
         <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
           @if (isSubmitting()) {

@@ -37,13 +37,6 @@ export default class MarcasPage {
       };
     },
     {
-      defaultValue: {
-        data: [],
-        total: 0,
-        page: 1,
-        limit: this.pageSize(),
-        lastPage: 0,
-      },
       parse: (raw) => raw as PaginatedResult<Brand>,
     },
   );

@@ -8,10 +8,14 @@
         <input
           type="text"
           class="input w-full"
+          [class.input-error]="form.controls.name.touched && form.controls.name.invalid"
           placeholder="Ej: Ferretería"
           formControlName="name"
           required
         />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <p class="fieldset-label text-error">El nombre es requerido</p>
+        }
       </fieldset>
 
       <fieldset class="fieldset">

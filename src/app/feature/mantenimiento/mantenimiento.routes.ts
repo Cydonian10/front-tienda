@@ -14,25 +14,19 @@ const MarcasPage: Routes = [
     title: 'Categorías',
   },
   {
-    path: '',
+    path: 'base-products',
     data: { breadcrumb: 'Producto Base' },
     children: [
       {
-        path: 'base-products',
-        data: { breadcrumb: '' },
-        children: [
-          {
-            path: '',
-            loadComponent: () => import('./base-products/pages/base-products.page'),
-            title: 'Productos base',
-          },
-          {
-            path: 'nuevo',
-            data: { breadcrumb: 'Nuevo Producto Base' },
-            loadComponent: () => import('./base-products/pages/new-base-product.page'),
-            title: 'Nuevo Producto Base',
-          },
-        ],
+        path: '',
+        loadComponent: () => import('./base-products/pages/base-products.page'),
+        title: 'Productos base',
+      },
+      {
+        path: 'nuevo',
+        data: { breadcrumb: 'Nuevo Producto Base' },
+        loadComponent: () => import('./base-products/pages/new-base-product.page'),
+        title: 'Nuevo Producto Base',
       },
     ],
   },

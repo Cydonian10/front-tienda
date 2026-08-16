@@ -48,12 +48,13 @@ export default class BreadcrumbsNg {
 
   private buildBreadcrumbs(): void {
     const items: BreadcrumbItem[] = [];
-    let segments: string[] = [];
+    const segments: string[] = [];
 
     for (const route of this.route.snapshot.pathFromRoot) {
+      segments.push(...route.url.map((segment) => segment.path));
       const label = route.data['breadcrumb'];
-      if (label) {
-        segments.push(...route.url.map((segment) => segment.path));
+
+      if (label && !items.some((item) => item.label === label)) {
         const url = segments.length ? '/' + segments.join('/') : '/';
         items.push({ label, url });
       }

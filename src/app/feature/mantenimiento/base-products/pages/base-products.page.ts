@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
 import { debounceTime, startWith, Subject, switchMap } from 'rxjs';
@@ -15,7 +16,7 @@ import PaginationNg from '../../../../shared/pagination/pagination.ng';
 
 @Component({
   selector: 'base-products-page',
-  imports: [BreadcrumbsNg, PaginationNg, Icon],
+  imports: [BreadcrumbsNg, PaginationNg, Icon, RouterLink],
   templateUrl: './base-products.page.html',
 })
 export default class BaseProductsPage {
@@ -26,10 +27,9 @@ export default class BaseProductsPage {
   protected readonly pageSize = signal(10);
 
   private readonly search$ = new Subject<string>();
-  protected readonly search = toSignal(
-    this.search$.pipe(startWith(''), debounceTime(300)),
-    { initialValue: '' },
-  );
+  protected readonly search = toSignal(this.search$.pipe(startWith(''), debounceTime(300)), {
+    initialValue: '',
+  });
 
   private readonly filter$ = combineLatest({
     page: toObservable(this.page),

@@ -2,24 +2,28 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { ApiResponse, ApiService } from './api.service';
-import { BaseProduct, BaseProductFilter } from '../models/base-product.model';
+import {
+  BaseProduct,
+  BaseProductFilter,
+  CreateBaseProduct,
+  CreateBaseProductResponse,
+} from '../models/base-product.model';
 import { PaginatedResult } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class BaseProductsService extends ApiService {
+  create(dto: CreateBaseProduct): Observable<CreateBaseProductResponse> {
+    return this.http.post<CreateBaseProductResponse>(`${this.apiUrl}/base-products`, dto);
+  }
+
   findAll(filter: BaseProductFilter): Observable<PaginatedResult<BaseProduct>> {
     const params = this.buildParams(filter);
-    return this.http.get<PaginatedResult<BaseProduct>>(
-      `${this.apiUrl}/base-products`,
-      { params },
-    );
+    return this.http.get<PaginatedResult<BaseProduct>>(`${this.apiUrl}/base-products`, { params });
   }
 
   findOne(id: number): Observable<BaseProduct> {
     return this.unwrap(
-      this.http.get<ApiResponse<BaseProduct>>(
-        `${this.apiUrl}/base-products/${id}`,
-      ),
+      this.http.get<ApiResponse<BaseProduct>>(`${this.apiUrl}/base-products/${id}`),
     );
   }
 

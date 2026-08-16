@@ -14,3 +14,21 @@ export interface BaseProductFilter extends PaginationQuery {
   brandId?: number;
   categoryId?: number;
 }
+
+export interface CreateBaseProductUnit {
+  unitId: number;
+  factor: number;
+  isMain: boolean;
+}
+
+export interface CreateBaseProduct {
+  name: string;
+  units: CreateBaseProductUnit[];
+  brandId?: number | null;
+  categoryIds?: number[];
+}
+
+export interface CreateBaseProductResponse {
+  baseProduct: BaseProduct;
+  defaultProduct: unknown;
+}

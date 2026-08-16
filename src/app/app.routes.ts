@@ -22,7 +22,7 @@ export const routes: Routes = [
       },
       {
         path: 'mantenimiento',
-        data: { breadcrumb: 'Matenimiento' },
+        data: { breadcrumb: 'Mantenimiento' },
         loadChildren: () => import('./feature/mantenimiento/mantenimiento.routes'),
       },
     ],

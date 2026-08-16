@@ -12,6 +12,7 @@ const initialMenu: MenuItem[] = [
     expanded: true,
     children: [
       { id: 'marcas', label: 'Marcas', icon: 'grid', route: '/mantenimiento/marcas' },
+      { id: 'categorias', label: 'Categorías', icon: 'folder', route: '/mantenimiento/categorias' },
       { id: 'productos', label: 'Productos', icon: 'swatch', route: '/mantenimiento/productos' },
     ],
   },

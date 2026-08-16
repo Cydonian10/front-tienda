@@ -3,8 +3,8 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
 import { firstValueFrom } from 'rxjs';
-import { Brand, CreateBrand } from '../../../../core/models/brand.model';
-import { BrandsService } from '../../../../core/api/brands.service';
+import { Brand, CreateBrand } from '../../../../../core/models/brand.model';
+import { BrandsService } from '../../../../../core/api/brands.service';
 
 export interface BrandDialogData {
   brand?: Brand | null;

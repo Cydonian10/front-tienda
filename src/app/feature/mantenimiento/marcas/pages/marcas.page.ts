@@ -6,14 +6,14 @@ import { firstValueFrom } from 'rxjs';
 import { debounceTime, startWith, Subject } from 'rxjs';
 import { toast } from 'ngx-sonner';
 
-import BreadcrumbsNg from '../../../shared/breadcrumbs/breadcrumbs.ng';
-import PaginationNg from '../../../shared/pagination/pagination.ng';
-import { Icon } from '../../../shared/icon/icon';
-import { openConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
-import { environment } from '../../../../environments/environment';
-import { Brand } from '../../../core/models/brand.model';
-import { PaginatedResult } from '../../../core/models/pagination.model';
-import { BrandsService } from '../../../core/api/brands.service';
+import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
+import PaginationNg from '../../../../shared/pagination/pagination.ng';
+import { Icon } from '../../../../shared/icon/icon';
+import { openConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
+import { environment } from '../../../../../environments/environment';
+import { Brand } from '../../../../core/models/brand.model';
+import { PaginatedResult } from '../../../../core/models/pagination.model';
+import { BrandsService } from '../../../../core/api/brands.service';
 import { openBrandDialog } from './dialogs/brand-dialog';
 
 @Component({
@@ -60,9 +60,7 @@ export default class MarcasPage {
     dialogRef.closed.subscribe((brand) => {
       if (brand) {
         this.brands.update((result) =>
-          result
-            ? { ...result, data: [...result.data, brand], total: result.total + 1 }
-            : result,
+          result ? { ...result, data: [...result.data, brand], total: result.total + 1 } : result,
         );
         toast.success('Marca creada correctamente');
       }

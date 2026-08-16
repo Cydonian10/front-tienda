@@ -1,0 +1,71 @@
+<ng-breadcrumbs />
+
+<div class="space-y-4 mt-4">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div
+      class="flex w-full flex-col gap-2 sm:w-auto sm:flex-1 sm:flex-row sm:items-center sm:justify-end"
+    >
+      <label class="input w-full sm:w-auto sm:flex-1 sm:max-w-md">
+        <app-icon name="search" />
+        <input type="search" placeholder="Buscar categoría..." (input)="onSearch($event)" />
+      </label>
+      <button type="button" class="btn w-full sm:w-auto" (click)="onCreate()">
+        <app-icon name="plus" />
+        Nueva categoría
+      </button>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th class="text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (category of categories()?.data; track category.id) {
+          <tr>
+            <th>{{ category.id }}</th>
+            <td>{{ category.name }}</td>
+            <td>{{ category.description ?? '—' }}</td>
+            <td>
+              <div class="flex justify-end gap-1">
+                <button
+                  type="button"
+                  class="btn btn-soft btn-xs"
+                  [attr.aria-label]="'Editar ' + category.name"
+                  (click)="onEdit(category)"
+                >
+                  <app-icon name="pencil" classes="size-4" />
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-soft btn-xs text-error"
+                  [attr.aria-label]="'Eliminar ' + category.name"
+                  (click)="onDelete(category)"
+                >
+                  <app-icon name="trash" classes="size-4" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="py-8 text-center text-base-content/60">No hay categorías</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <ng-pagination
+    [total]="total()"
+    [lastPage]="lastPage()"
+    [(page)]="page"
+    [(pageSize)]="pageSize"
+  />
+</div>

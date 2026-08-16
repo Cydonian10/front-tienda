@@ -30,6 +30,12 @@ const MarcasPage: Routes = [
       },
     ],
   },
+  {
+    path: 'productos',
+    data: { breadcrumb: 'Productos' },
+    loadComponent: () => import('./products/pages/products.page'),
+    title: 'Productos',
+  },
 ];
 
 export default MarcasPage;

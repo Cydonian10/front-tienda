@@ -50,6 +50,7 @@ const ICON_PATHS = {
   'chevron-down': 'm19.5 8.25-7.5 7.5-7.5-7.5',
   logout:
     'M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-9A2.25 2.25 0 0 0 2.25 5.25v13.5A2.25 2.25 0 0 0 4.5 21h9a2.25 2.25 0 0 0 2.25-2.25V15m0 0 3-3m0 0-3-3m3 3H2.25',
+  plus: 'M12 4.5v15m7.5-7.5h-15',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;

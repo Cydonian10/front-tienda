@@ -1,6 +1,7 @@
 import { HttpErrorResponse, httpResource } from '@angular/common/http';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Dialog } from '@angular/cdk/dialog';
 import { debounceTime, startWith, Subject } from 'rxjs';
 
 import BreadcrumbsNg from '../../../shared/breadcrumbs/breadcrumbs.ng';
@@ -9,6 +10,7 @@ import { Icon } from '../../../shared/icon/icon';
 import { environment } from '../../../../environments/environment';
 import { Brand } from '../../../core/models/brand.model';
 import { PaginatedResult } from '../../../core/models/pagination.model';
+import { openBrandDialog } from './dialogs/brand-dialog';
 
 @Component({
   selector: 'marcas-page',
@@ -16,6 +18,8 @@ import { PaginatedResult } from '../../../core/models/pagination.model';
   templateUrl: './marcas.page.html',
 })
 export default class MarcasPage {
+  private readonly dialog = inject(Dialog);
+
   protected readonly page = signal(1);
   protected readonly pageSize = signal(10);
 
@@ -44,6 +48,15 @@ export default class MarcasPage {
   protected onSearch(event: Event): void {
     this.search$.next((event.target as HTMLInputElement).value);
     this.page.set(1);
+  }
+
+  protected openCreateDialog(): void {
+    const dialogRef = openBrandDialog(this.dialog);
+    dialogRef.closed.subscribe((brand) => {
+      if (brand) {
+        this.brands.reload();
+      }
+    });
   }
 
   protected readonly errorMessage = computed<string | null>(() => {

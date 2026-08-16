@@ -54,7 +54,9 @@ export default class MarcasPage {
     const dialogRef = openBrandDialog(this.dialog);
     dialogRef.closed.subscribe((brand) => {
       if (brand) {
-        this.brands.reload();
+        this.brands.update((result) =>
+          result ? { ...result, data: [brand, ...result.data], total: result.total + 1 } : result,
+        );
       }
     });
   }

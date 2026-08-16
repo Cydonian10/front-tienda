@@ -13,50 +13,7 @@ export interface BrandDialogData {
 @Component({
   selector: 'brand-dialog',
   imports: [ReactiveFormsModule],
-  template: `
-    <div class="card w-full bg-base-100 shadow-xl">
-      <div class="card-body gap-4">
-        <h2 class="card-title">{{ brand ? 'Editar marca' : 'Nueva marca' }}</h2>
-
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
-          <fieldset class="fieldset">
-            <label class="input w-full">
-              <span class="label">Nombre</span>
-              <input type="text" formControlName="name" placeholder="Ej: Cerámica" required />
-            </label>
-            <label class="input w-full">
-              <span class="label">Descripción</span>
-              <input
-                type="text"
-                formControlName="description"
-                placeholder="Ej: Marca de cerámicos"
-              />
-            </label>
-          </fieldset>
-
-          @if (error(); as message) {
-            <div role="alert" class="alert alert-error">
-              <span>{{ message }}</span>
-            </div>
-          }
-
-          <div class="card-actions justify-end">
-            <button type="button" class="btn" (click)="close()">Cancelar</button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              [disabled]="form.invalid || isSubmitting()"
-            >
-              @if (isSubmitting()) {
-                <span class="loading loading-spinner"></span>
-              }
-              {{ brand ? 'Guardar cambios' : 'Guardar' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  `,
+  templateUrl: './brand-dialog.html',
 })
 export class BrandDialog {
   private readonly dialogRef = inject(DialogRef<Brand | undefined>);

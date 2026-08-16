@@ -1,0 +1,48 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-4">
+    <h2 class="card-title">{{ brand ? 'Editar marca' : 'Nueva marca' }}</h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Nombre</legend>
+        <input
+          type="text"
+          class="input w-full"
+          placeholder="Ej: Cerámica"
+          formControlName="name"
+          required
+        />
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Descripción</legend>
+        <textarea
+          class="textarea w-full py-2"
+          rows="5"
+          placeholder="Ej: Marca de cerámicos"
+          formControlName="description"
+        ></textarea>
+      </fieldset>
+
+      @if (error(); as message) {
+        <div role="alert" class="alert alert-error">
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <div class="card-actions justify-end">
+        <button type="button" class="btn btn-soft" (click)="close()">Cancelar</button>
+        <button
+          type="submit"
+          class="btn btn-primary btn-soft"
+          [disabled]="form.invalid || isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span class="loading loading-spinner"></span>
+          }
+          {{ brand ? 'Guardar cambios' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

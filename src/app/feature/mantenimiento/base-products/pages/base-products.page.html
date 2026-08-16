@@ -1,0 +1,65 @@
+<ng-breadcrumbs />
+
+<div class="space-y-4 mt-4">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div
+      class="flex w-full flex-col gap-2 sm:w-auto sm:flex-1 sm:flex-row sm:items-center sm:justify-end"
+    >
+      <label class="input w-full sm:w-auto sm:flex-1 sm:max-w-md">
+        <app-icon name="search" />
+        <input type="search" placeholder="Buscar producto base..." (input)="onSearch($event)" />
+      </label>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Marca</th>
+          <th>Categorías</th>
+          <th class="text-right">Unidades</th>
+          <th class="text-right">Productos</th>
+          <th class="text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (baseProduct of baseProducts()?.data; track baseProduct.id) {
+          <tr>
+            <th>{{ baseProduct.id }}</th>
+            <td>{{ baseProduct.name }}</td>
+            <td>{{ baseProduct.brand?.name ?? '—' }}</td>
+            <td>{{ categoriesLabel(baseProduct) }}</td>
+            <td class="text-right">{{ baseProduct.unitCount }}</td>
+            <td class="text-right">{{ baseProduct.productCount }}</td>
+            <td>
+              <div class="flex justify-end gap-1">
+                <button
+                  type="button"
+                  class="btn btn-soft btn-xs text-error"
+                  [attr.aria-label]="'Eliminar ' + baseProduct.name"
+                  (click)="onDelete(baseProduct)"
+                >
+                  <app-icon name="trash" classes="size-4" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="py-8 text-center text-base-content/60">No hay productos base</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <ng-pagination
+    [total]="total()"
+    [lastPage]="lastPage()"
+    [(page)]="page"
+    [(pageSize)]="pageSize"
+  />
+</div>

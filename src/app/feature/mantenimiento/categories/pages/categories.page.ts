@@ -5,15 +5,14 @@ import { Dialog } from '@angular/cdk/dialog';
 import { debounceTime, startWith, Subject, switchMap } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { toast } from 'ngx-sonner';
-
-import BreadcrumbsNg from '../../../shared/breadcrumbs/breadcrumbs.ng';
-import PaginationNg from '../../../shared/pagination/pagination.ng';
-import { Icon } from '../../../shared/icon/icon';
-import { openConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
-import { CategoriesService } from '../../../core/api/categories.service';
-import { Category } from '../../../core/models/category.model';
-import { PaginatedResult } from '../../../core/models/pagination.model';
-import { openCategoryDialog } from './dialogs/category-dialog';
+import { CategoriesService } from '../../../../core/api/categories.service';
+import { Category } from '../../../../core/models/category.model';
+import { PaginatedResult } from '../../../../core/models/pagination.model';
+import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
+import { openConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
+import { Icon } from '../../../../shared/icon/icon';
+import PaginationNg from '../../../../shared/pagination/pagination.ng';
+import { openCategoryDialog } from '../dialogs/category-dialog';
 
 @Component({
   selector: 'categories-page',

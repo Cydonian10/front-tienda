@@ -14,8 +14,14 @@ const MarcasPage: Routes = [
       {
         path: 'categorias',
         data: { breadcrumb: 'Categorías' },
-        loadComponent: () => import('./categories/categories.page'),
+        loadComponent: () => import('./categories/pages/categories.page'),
         title: 'Categorías',
+      },
+      {
+        path: 'base-products',
+        data: { breadcrumb: 'Productos base' },
+        loadComponent: () => import('./base-products/pages/base-products.page'),
+        title: 'Productos base',
       },
     ],
   },

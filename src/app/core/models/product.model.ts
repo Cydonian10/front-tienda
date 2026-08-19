@@ -7,6 +7,18 @@ export interface ProductAttribute {
   attributeValue: string;
 }
 
+export interface ProductAttributeItem {
+  attributeId: number;
+  attributeValueId: number;
+}
+
+export interface CreateProduct {
+  stock: number;
+  price: number;
+  baseProductId: number;
+  productAttributes: ProductAttributeItem[];
+}
+
 export interface Product {
   id: number;
   name: string;

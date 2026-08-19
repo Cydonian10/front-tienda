@@ -8,11 +8,10 @@ import { Component, input, model } from '@angular/core';
         <span class="shrink-0">Mostrar</span>
         <select
           class="select select-sm w-20 shrink-0"
-          [value]="pageSize()"
           (change)="onPageSizeChange($event)"
         >
           @for (size of pageSizes(); track size) {
-            <option [value]="size">{{ size }}</option>
+            <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
           }
         </select>
 

@@ -1,0 +1,66 @@
+<div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
+  <div class="min-w-0">
+    <label class="label">Atributo</label>
+    <button
+      type="button"
+      class="btn w-full justify-between text-left font-normal"
+      cdkOverlayOrigin
+      #attributeOrigin="cdkOverlayOrigin"
+      (click)="isOpen.set(!isOpen())"
+    >
+      <span class="truncate">{{ selectedAttribute()?.name ?? 'Buscar atributo...' }}</span>
+      <span aria-hidden="true">⌄</span>
+    </button>
+
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="attributeOrigin"
+      [cdkConnectedOverlayOpen]="isOpen()"
+      [cdkConnectedOverlayHasBackdrop]="true"
+      (backdropClick)="isOpen.set(false)"
+    >
+      <div class="mt-1 w-[min(20rem,calc(100vw-2rem))] rounded-box border border-base-300 bg-base-100 p-2 shadow-xl">
+        <input
+          type="search"
+          class="input input-sm w-full"
+          placeholder="Buscar atributo..."
+          [value]="search()"
+          (input)="search.set($any($event.target).value)"
+          autofocus
+        />
+        <div class="mt-2 max-h-56 overflow-y-auto">
+          @for (attribute of filteredAttributes(); track attribute.id) {
+            <button
+              type="button"
+              class="btn btn-ghost btn-sm w-full justify-start font-normal"
+              (click)="selectAttribute(attribute.id)"
+            >
+              {{ attribute.name }}
+            </button>
+          } @empty {
+            <p class="px-3 py-4 text-sm text-base-content/60">No hay atributos disponibles.</p>
+          }
+        </div>
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="min-w-0">
+    <label class="label">Valor</label>
+    <select
+      class="select w-full"
+      [disabled]="!selectedAttribute()"
+      [value]="selectedValueId() ?? ''"
+      (change)="onValueChange($event)"
+    >
+      <option value="">{{ selectedAttribute() ? 'Selecciona un valor' : 'Elige primero un atributo' }}</option>
+      @for (value of selectedAttribute()?.values ?? []; track value.id) {
+        <option [value]="value.id">{{ value.value }}</option>
+      }
+    </select>
+  </div>
+
+  <button type="button" class="btn btn-ghost btn-sm text-error" (click)="removed.emit()">
+    Quitar
+  </button>
+</div>

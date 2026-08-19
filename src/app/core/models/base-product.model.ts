@@ -9,6 +9,18 @@ export interface BaseProduct {
   categories: { id: number; name: string }[];
 }
 
+export interface BaseProductDetail extends Omit<BaseProduct, 'unitCount'> {
+  units: BaseProductUnit[];
+}
+
+export interface BaseProductUnit {
+  id: number;
+  name: string;
+  value: string;
+  factor: number;
+  isMain: boolean;
+}
+
 export interface BaseProductFilter extends PaginationQuery {
   search?: string;
   brandId?: number;

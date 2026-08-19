@@ -14,8 +14,8 @@
 - `ProductsService.create(dto)` en `src/app/core/api/products.service.ts` (nuevo método `POST /products`).
 - `CreateProduct` y `ProductAttributeItem` en `src/app/core/models/product.model.ts` (payload de creación).
 - Página `feature/mantenimiento/products/pages/new-product.page.ts` + `.html`:
-  - Select de base product con búsqueda/paginación contra `GET /base-products`.
-  - Atributos cargados con `GET /attributes/batch`, un selector de valor por atributo (opcional, pero al menos uno en total).
+  - Select de base product con búsqueda/paginación contra `GET /base-products` y tarjeta visual cargada desde `GET /base-products/:id/detail`.
+  - Atributos cargados con `GET /attributes/batch`, selector con buscador Angular CDK Overlay, filas dinámicas atributo-valor y prevención de duplicados.
   - Campos stock y precio numéricos.
   - Validación frontend: base product requerido, stock y precio mayores que 0, al menos un par atributo-valor seleccionado.
   - Envío a `POST /products`; estados loading/error/success con toast.
@@ -72,19 +72,22 @@ export interface CreateProduct {
 2. Crear `core/api/attributes.service.ts` con `findAllWithValues(filter)` → `GET /attributes/batch`.
 3. Añadir a `core/models/product.model.ts` los tipos `ProductAttributeItem` y `CreateProduct`.
 4. Añadir a `core/api/products.service.ts` el método `create(dto)` → `POST /products` (usar `unwrap` si la respuesta lo requiere).
-5. Crear `products/pages/new-product.page.ts` con Reactive Forms: `baseProductId`, `stock`, `price`, y un `FormArray` de atributos (un control de valor por atributo, todos opcionales). Cargar base products (paginado con búsqueda) y atributos (batch). Validadores: `required`/`min` y la regla "al menos un atributo".
-6. Crear `products/new-product.page.html`: select de base product con búsqueda, inputs de stock/precio, sección de atributos con sus valores, mensajes de error por campo, botón enviar, estados loading/error.
-7. Enviar a `POST /products`; en éxito, toast y navegación al flujo de imágenes (SPEC 03) con el `productId`. En error, toast con el mensaje de la API.
-8. En `products.page.html`, convertir el botón "Nuevo producto" en un enlace (RouterLink) a `/mantenimiento/productos/nuevo`.
-9. Registrar la ruta hija `{ path: 'nuevo', data: { breadcrumb: 'Nuevo Producto' }, loadComponent, title: 'Nuevo Producto' }` en `mantenimiento.routes.ts`.
-10. Añadir pruebas unitarias (Vitest): payload correcto de `CreateProduct`, validaciones de stock/precio/base, y regla de al menos un atributo.
-11. Verificación: `ng build` + `npm run lint` + `ng test` + prueba manual contra la API local.
+5. Extender `ApiTienda`: `GET /base-products/:id/detail` devuelve marca, categorías, unidades (nombre, abreviatura, factor y principal) y conteo de productos. Añadir `BaseProductDetail` y `BaseProductsService.findDetail(id)` en el frontend.
+6. Crear `products/components/attribute-picker/` con Angular CDK Overlay: buscar atributos, seleccionar valor y bloquear atributos ya elegidos.
+7. Crear `products/pages/new-product.page.ts` con Reactive Forms: `baseProductId`, `stock`, `price`, y un `FormArray` dinámico de pares atributo-valor. Cargar base products (paginado con búsqueda), atributos (batch) y detalle del base product seleccionado. Validadores: `required`/`min` y la regla "al menos un atributo".
+8. Crear `products/new-product.page.html`: diseño mobile-first, select de base product con búsqueda, tarjeta de detalle, inputs de stock/precio, atributos dinámicos, mensajes de error, botón enviar y estados loading/error.
+9. Enviar a `POST /products`; en éxito, toast y navegación al flujo de imágenes (SPEC 03) con el `productId`. En error, toast con el mensaje de la API.
+10. En `products.page.html`, convertir el botón "Nuevo producto" en un enlace (RouterLink) a `/mantenimiento/productos/nuevo`.
+11. Registrar la ruta hija `{ path: 'nuevo', data: { breadcrumb: 'Nuevo Producto' }, loadComponent, title: 'Nuevo Producto' }` en `mantenimiento.routes.ts`.
+12. Añadir pruebas unitarias (Vitest): payload correcto de `CreateProduct`, validaciones de stock/precio/base, y regla de al menos un atributo.
+13. Verificación: `ng build` + `npm run lint` + `ng test` + prueba manual contra la API local.
 
 ## Acceptance criteria
 
 - [ ] `/mantenimiento/productos/nuevo` muestra el formulario con breadcrumb "Nuevo Producto".
 - [ ] El botón "Nuevo producto" del listado es un enlace que navega a `/mantenimiento/productos/nuevo`.
 - [ ] El select de base product permite buscar y paginar contra `GET /base-products`.
+- [ ] Al seleccionar un base product, `GET /base-products/:id/detail` muestra marca, categorías, productos asociados y unidades con factor/principal.
 - [ ] Los atributos se cargan desde `GET /attributes/batch` y por cada uno se muestra su selector de valores.
 - [ ] Se puede enviar el formulario solo con base product, stock y precio válidos, y al menos un atributo-valor.
 - [ ] Enviar sin base product, con stock/precio `<= 0`, o sin ningún atributo muestra error de validación y no llama a la API.
@@ -98,6 +101,8 @@ export interface CreateProduct {
 - **Sí:** Reactive Forms para el formulario (validadores claros y `FormArray` para atributos).
 - **Sí:** `GET /attributes/batch` para cargar atributos con sus valores en una sola petición.
 - **Sí:** select de base product con búsqueda/paginación (evita cargar todo el catálogo).
+- **Sí:** endpoint de detalle `GET /base-products/:id/detail` para mostrar las unidades y conversiones que el listado resumido no expone.
+- **Sí:** Angular CDK Overlay para buscar atributos; el `FormArray` guarda pares atributo-valor dinámicos y evita índices acoplados al listado completo.
 - **Sí:** atributos opcionales individualmente, pero exigir al menos uno en total (respeta `@ArrayNotEmpty` de la API sin modificar el contrato).
 - **Sí:** validar en frontend base/stock/precio y al menos un atributo, replicando las reglas de la API.
 - **Sí:** solo crear; editar queda para otro spec.

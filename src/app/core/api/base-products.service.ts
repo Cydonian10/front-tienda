@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { ApiResponse, ApiService } from './api.service';
 import {
   BaseProduct,
+  BaseProductDetail,
   BaseProductFilter,
   CreateBaseProduct,
   CreateBaseProductResponse,
@@ -24,6 +25,12 @@ export class BaseProductsService extends ApiService {
   findOne(id: number): Observable<BaseProduct> {
     return this.unwrap(
       this.http.get<ApiResponse<BaseProduct>>(`${this.apiUrl}/base-products/${id}`),
+    );
+  }
+
+  findDetail(id: number): Observable<BaseProductDetail> {
+    return this.unwrap(
+      this.http.get<ApiResponse<BaseProductDetail>>(`${this.apiUrl}/base-products/${id}/detail`),
     );
   }
 

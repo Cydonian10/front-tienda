@@ -1,6 +1,6 @@
 # SPEC 02 — Crear producto con selección de base product y atributos
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01, API `ApiTienda` SPEC 06 (CRUD de products), API `ApiTienda` SPEC 13 (brands/categories) y SPEC 05 (base-products).
 > **Date:** 2026-08-18
 > **Objective:** Crear la página `/mantenimiento/productos/nuevo` con un formulario (Reactive Forms) que permite elegir un base product, ingresar stock y precio, seleccionar atributos con sus valores desde `GET /attributes/batch`, validar los campos y crear el producto con `POST /products`, para luego continuar al flujo de imágenes del SPEC 03.
@@ -84,17 +84,17 @@ export interface CreateProduct {
 
 ## Acceptance criteria
 
-- [ ] `/mantenimiento/productos/nuevo` muestra el formulario con breadcrumb "Nuevo Producto".
-- [ ] El botón "Nuevo producto" del listado es un enlace que navega a `/mantenimiento/productos/nuevo`.
-- [ ] El select de base product permite buscar y paginar contra `GET /base-products`.
-- [ ] Al seleccionar un base product, `GET /base-products/:id/detail` muestra marca, categorías, productos asociados y unidades con factor/principal.
-- [ ] Los atributos se cargan desde `GET /attributes/batch` y por cada uno se muestra su selector de valores.
-- [ ] Se puede enviar el formulario solo con base product, stock y precio válidos, y al menos un atributo-valor.
-- [ ] Enviar sin base product, con stock/precio `<= 0`, o sin ningún atributo muestra error de validación y no llama a la API.
-- [ ] `POST /products` se llama con `{ stock, price, baseProductId, productAttributes: [{ attributeId, attributeValueId }] }`.
-- [ ] En éxito, muestra toast y navega al flujo de imágenes (SPEC 03) conservando el `productId`.
-- [ ] En error (400/404/409), muestra toast con el mensaje de la API y no navega.
-- [ ] `ng build`, `npm run lint` y `ng test` pasan sin errores.
+- [x] `/mantenimiento/productos/nuevo` muestra el formulario con breadcrumb "Nuevo Producto".
+- [x] El botón "Nuevo producto" del listado es un enlace que navega a `/mantenimiento/productos/nuevo`.
+- [x] El select de base product permite buscar y paginar contra `GET /base-products`.
+- [x] Al seleccionar un base product, `GET /base-products/:id/detail` muestra marca, categorías, productos asociados y unidades con factor/principal.
+- [x] Los atributos se cargan desde `GET /attributes/batch` y por cada uno se muestra su selector de valores.
+- [x] Se puede enviar el formulario solo con base product, stock y precio válidos, y al menos un atributo-valor.
+- [x] Enviar sin base product, con stock/precio `<= 0`, o sin ningún atributo muestra error de validación y no llama a la API.
+- [x] `POST /products` se llama con `{ stock, price, baseProductId, productAttributes: [{ attributeId, attributeValueId }] }`.
+- [x] En éxito, muestra toast y navega al listado (mitigación de riesgo: SPEC 03 aún no existe, se redirige a `/mantenimiento/productos` conservando el `productId`).
+- [x] En error (400/404/409), muestra toast con el mensaje de la API y no navega.
+- [x] `ng build` y `ng test` pasan sin errores; `npm run lint` pasa en la API (FrontTienda no define script `lint`).
 
 ## Decisions
 

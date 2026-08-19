@@ -25,7 +25,7 @@ export default class LoginPage {
 
   protected readonly form = this.formBuilder.nonNullable.group({
     email: ['admin@seed.com', [Validators.required, Validators.email]],
-    password: ['admin123', [Validators.required]],
+    password: ['secret123', [Validators.required]],
   });
 
   protected async onSubmit(): Promise<void> {

@@ -33,8 +33,19 @@ const MarcasPage: Routes = [
   {
     path: 'productos',
     data: { breadcrumb: 'Productos' },
-    loadComponent: () => import('./products/pages/products.page'),
-    title: 'Productos',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./products/pages/products.page'),
+        title: 'Productos',
+      },
+      {
+        path: 'nuevo',
+        data: { breadcrumb: 'Nuevo Producto' },
+        loadComponent: () => import('./products/pages/new-product.page'),
+        title: 'Nuevo Producto',
+      },
+    ],
   },
 ];
 

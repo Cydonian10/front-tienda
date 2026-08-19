@@ -2,6 +2,7 @@ import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { debounceTime, startWith, Subject } from 'rxjs';
 import { toast } from 'ngx-sonner';
@@ -17,7 +18,7 @@ import { ProductsService } from '../../../../core/api/products.service';
 
 @Component({
   selector: 'products-page',
-  imports: [BreadcrumbsNg, PaginationNg, Icon],
+  imports: [BreadcrumbsNg, PaginationNg, Icon, RouterLink],
   templateUrl: './products.page.html',
 })
 export default class ProductsPage {

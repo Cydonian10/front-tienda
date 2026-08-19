@@ -1,0 +1,119 @@
+<ng-breadcrumbs />
+
+<div class="mx-auto mt-6 w-full max-w-3xl space-y-6 sm:space-y-8">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <div>
+      <p class="text-sm font-medium text-base-content/60">Inventario</p>
+      <h1 class="text-2xl font-semibold">Nuevo producto</h1>
+    </div>
+    <a routerLink="/mantenimiento/productos" class="btn btn-soft btn-sm">Volver al listado</a>
+  </div>
+
+  @if (error(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex justify-center py-16">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else {
+    <form class="space-y-6" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4 sm:p-6">
+        <legend class="fieldset-legend text-base">Datos del producto</legend>
+
+        <label class="label" for="base-product-search">Buscar producto base</label>
+        <input
+          id="base-product-search"
+          type="search"
+          class="input w-full"
+          placeholder="Buscar por nombre..."
+          (input)="onBaseProductSearch($event)"
+        />
+
+        <label class="label mt-3" for="baseProductId">Producto base</label>
+        <select id="baseProductId" class="select w-full" formControlName="baseProductId">
+          <option [ngValue]="null" disabled>Selecciona un producto base</option>
+          @for (baseProduct of baseProducts(); track baseProduct.id) {
+            <option [ngValue]="baseProduct.id">{{ baseProduct.name }}</option>
+          }
+        </select>
+        @if (form.controls.baseProductId.touched && form.controls.baseProductId.invalid) {
+          <p class="label text-error">Selecciona un producto base.</p>
+        }
+
+        <div class="mt-3 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            class="btn btn-sm"
+            [disabled]="baseProductsPage() <= 1"
+            (click)="previousBaseProducts()"
+          >
+            Anterior
+          </button>
+          <span class="text-sm text-base-content/60">Página {{ baseProductsPage() }}</span>
+          <button
+            type="button"
+            class="btn btn-sm"
+            [disabled]="baseProductsPage() >= baseProductsLastPage()"
+            (click)="nextBaseProducts()"
+          >
+            Siguiente
+          </button>
+        </div>
+
+        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="label" for="stock">Stock</label>
+            <input id="stock" type="number" min="0.01" step="0.01" class="input w-full" formControlName="stock" />
+            @if (form.controls.stock.touched && form.controls.stock.invalid) {
+              <p class="label text-error">Ingresa un stock mayor que 0.</p>
+            }
+          </div>
+          <div>
+            <label class="label" for="price">Precio</label>
+            <input id="price" type="number" min="0.01" step="0.01" class="input w-full" formControlName="price" />
+            @if (form.controls.price.touched && form.controls.price.invalid) {
+              <p class="label text-error">Ingresa un precio mayor que 0.</p>
+            }
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4 sm:p-6">
+        <legend class="fieldset-legend text-base">Atributos</legend>
+        <p class="label mb-3">Selecciona al menos un valor. Los demás atributos son opcionales.</p>
+
+        <div formArrayName="attributeValues" class="grid gap-4 sm:grid-cols-2">
+          @for (attribute of attributes(); track attribute.id; let index = $index) {
+            <div>
+              <label class="label" [for]="'attribute-' + attribute.id">{{ attribute.name }}</label>
+              <select [id]="'attribute-' + attribute.id" class="select w-full" [formControlName]="index">
+                <option [ngValue]="null">Sin seleccionar</option>
+                @for (value of attribute.values; track value.id) {
+                  <option [ngValue]="value.id">{{ value.value }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+
+        @if (form.touched && form.hasError('attributeRequired')) {
+          <p class="label text-error">Selecciona al menos un atributo.</p>
+        }
+      </fieldset>
+
+      <div class="flex flex-wrap justify-end gap-2">
+        <a routerLink="/mantenimiento/productos" class="btn">Cancelar</a>
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+          @if (isSubmitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          Crear producto
+        </button>
+      </div>
+    </form>
+  }
+</div>

@@ -19,14 +19,20 @@ const MarcasPage: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./base-products/pages/base-products.page'),
+        loadComponent: () => import('./base-products/pages/list/base-products.page'),
         title: 'Productos base',
       },
       {
         path: 'nuevo',
         data: { breadcrumb: 'Nuevo Producto Base' },
-        loadComponent: () => import('./base-products/pages/new-base-product.page'),
+        loadComponent: () => import('./base-products/pages/create/new-base-product.page'),
         title: 'Nuevo Producto Base',
+      },
+      {
+        path: ':id/editar',
+        data: { breadcrumb: 'Editar Producto Base' },
+        loadComponent: () => import('./base-products/pages/edit/edit-base-product.page'),
+        title: 'Editar Producto Base',
       },
     ],
   },

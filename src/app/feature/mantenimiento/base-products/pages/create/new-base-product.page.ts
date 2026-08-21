@@ -1,26 +1,29 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
 
-import { BaseProductsService } from '../../../../core/api/base-products.service';
-import { BrandsService } from '../../../../core/api/brands.service';
-import { CategoriesService } from '../../../../core/api/categories.service';
-import { MeasurementUnitsService } from '../../../../core/api/measurement-units.service';
-import { Brand } from '../../../../core/models/brand.model';
-import { Category } from '../../../../core/models/category.model';
-import { CreateBaseProduct } from '../../../../core/models/base-product.model';
-import { MeasurementUnit } from '../../../../core/models/measurement-unit.model';
-import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
-import { BaseProductGeneralData } from '../components/general-data/general-data.component';
-import { BaseProductCategoriesPicker } from '../components/categories-picker/categories-picker.component';
+import { BaseProductsService } from '../../../../../core/api/base-products.service';
+import { BrandsService } from '../../../../../core/api/brands.service';
+import { CategoriesService } from '../../../../../core/api/categories.service';
+import { MeasurementUnitsService } from '../../../../../core/api/measurement-units.service';
+import { Brand } from '../../../../../core/models/brand.model';
+import { Category } from '../../../../../core/models/category.model';
+import {
+  CreateBaseProduct,
+  CreateBaseProductResponse,
+} from '../../../../../core/models/base-product.model';
+import { MeasurementUnit } from '../../../../../core/models/measurement-unit.model';
+import BreadcrumbsNg from '../../../../../shared/breadcrumbs/breadcrumbs.ng';
+import { BaseProductGeneralData } from '../../components/general-data/general-data.component';
+import { BaseProductCategoriesPicker } from '../../components/categories-picker/categories-picker.component';
 import {
   BaseProductUnitsEditor,
   createUnitRow,
   UnitRowControls,
-} from '../components/units-editor/units-editor.component';
+} from '../../components/units-editor/units-editor.component';
 
 @Component({
   selector: 'new-base-product-page',
@@ -40,7 +43,6 @@ export default class NewBaseProductPage {
   private readonly categoriesService = inject(CategoriesService);
   private readonly measurementUnitsService = inject(MeasurementUnitsService);
   private readonly formBuilder = inject(FormBuilder);
-  private readonly router = inject(Router);
 
   protected readonly brands = signal<Brand[]>([]);
   protected readonly categories = signal<Category[]>([]);
@@ -48,6 +50,8 @@ export default class NewBaseProductPage {
   protected readonly isLoading = signal(true);
   protected readonly isSubmitting = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly createdProduct = signal<CreateBaseProductResponse | null>(null);
+  protected readonly isSuccessModalOpen = signal(false);
 
   protected readonly unitRows = this.formBuilder.array<FormGroup<UnitRowControls>>([
     createUnitRow(this.formBuilder, true),
@@ -57,6 +61,8 @@ export default class NewBaseProductPage {
     name: ['', Validators.required],
     brandId: [''],
     categoryIds: [[] as number[]],
+    initialStock: [0, [Validators.required, Validators.min(0)]],
+    initialPrice: [0, [Validators.required, Validators.min(0)]],
     units: this.unitRows,
   });
 
@@ -116,18 +122,25 @@ export default class NewBaseProductPage {
       units,
       brandId: raw.brandId ? Number(raw.brandId) : null,
       categoryIds: raw.categoryIds,
+      initialStock: raw.initialStock,
+      initialPrice: raw.initialPrice,
     };
 
     this.isSubmitting.set(true);
     try {
-      await firstValueFrom(this.baseProductsService.create(dto));
+      const response = await firstValueFrom(this.baseProductsService.create(dto));
+      this.createdProduct.set(response);
+      this.isSuccessModalOpen.set(true);
       toast.success('Producto base creado correctamente');
-      void this.router.navigate(['/mantenimiento/base-products']);
     } catch (err) {
       this.error.set(this.getErrorMessage(err));
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  protected closeSuccessModal(): void {
+    this.isSuccessModalOpen.set(false);
   }
 
   private getErrorMessage(error: unknown): string {

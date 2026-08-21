@@ -1,6 +1,6 @@
 # SPEC 04 — Creación y edición de producto base con stock/precio y producto default
 
-> **Status:** Draft
+> **Status:** Aprobado
 > **Depends on:** SPEC 01 (página de productos base), SPEC 02 (crear producto), SPEC 03 (imágenes de producto), API `ApiTienda` SPEC 05 (base-products) y contrato `PATCH /base-products/:id` ya ampliado.
 > **Date:** 2026-08-19
 > **Objective:** Extender el alta de producto base con campos obligatorios de stock y precio iniciales, mostrar tras crear una tarjeta con el producto default generado y un enlace al menú de Productos para crear variantes, y añadir la edición de nombre, marca, categorías y unidades del base-product.
@@ -47,8 +47,8 @@ export interface CreateBaseProduct {
   units: CreateBaseProductUnit[];
   brandId?: number | null;
   categoryIds?: number[];
-  initialStock: number;   // obligatorio, Min(0)
-  initialPrice: number;   // obligatorio, Min(0)
+  initialStock: number; // obligatorio, Min(0)
+  initialPrice: number; // obligatorio, Min(0)
 }
 
 export interface DefaultProduct {
@@ -111,11 +111,11 @@ export interface UpdateBaseProduct {
 
 ## Risks
 
-| Risk                                              | Mitigation                                                              |
-| ------------------------------------------------- | ----------------------------------------------------------------------- |
-| `PATCH` con unidades inválidas devuelve 400/404   | Validar en frontend igual que en creación y mostrar mensaje de la API.  |
-| Conflicto de nombre duplicado en edición          | Mostrar el mensaje 409 de la API y mantener el formulario.             |
-| El `defaultProduct` no coincide con lo mostrado   | Mapear directamente el `defaultProduct` de la respuesta de `create`.    |
+| Risk                                            | Mitigation                                                             |
+| ----------------------------------------------- | ---------------------------------------------------------------------- |
+| `PATCH` con unidades inválidas devuelve 400/404 | Validar en frontend igual que en creación y mostrar mensaje de la API. |
+| Conflicto de nombre duplicado en edición        | Mostrar el mensaje 409 de la API y mantener el formulario.             |
+| El `defaultProduct` no coincide con lo mostrado | Mapear directamente el `defaultProduct` de la respuesta de `create`.   |
 
 ## What is **not** in this spec
 

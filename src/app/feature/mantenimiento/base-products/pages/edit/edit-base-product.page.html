@@ -2,8 +2,8 @@
 
 <div class="mx-auto mt-6 w-full max-w-3xl space-y-6 sm:space-y-8">
   <div class="flex flex-wrap items-center justify-between gap-2">
-    <h1 class="text-2xl font-semibold">Nuevo producto base</h1>
-    <a routerLink="/mantenimiento/base-products" class="btn btn-soft btn-sm"> Volver al listado </a>
+    <h1 class="text-2xl font-semibold">Editar producto base</h1>
+    <a routerLink="/mantenimiento/base-products" class="btn btn-soft btn-sm">Volver al listado</a>
   </div>
 
   @if (error(); as message) {
@@ -28,14 +28,13 @@
         [control]="form.controls.categoryIds"
       />
       <base-product-units-editor [units]="units()" [unitRows]="unitRows" />
-
       <div class="flex flex-wrap justify-end gap-2 pt-2">
         <a routerLink="/mantenimiento/base-products" class="btn">Cancelar</a>
         <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
           @if (isSubmitting()) {
             <span class="loading loading-spinner loading-sm"></span>
           }
-          Crear producto base
+          Guardar cambios
         </button>
       </div>
     </form>

@@ -8,13 +8,22 @@ import {
   BaseProductFilter,
   CreateBaseProduct,
   CreateBaseProductResponse,
+  UpdateBaseProduct,
 } from '../models/base-product.model';
 import { PaginatedResult } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class BaseProductsService extends ApiService {
   create(dto: CreateBaseProduct): Observable<CreateBaseProductResponse> {
-    return this.http.post<CreateBaseProductResponse>(`${this.apiUrl}/base-products`, dto);
+    return this.unwrap(
+      this.http.post<ApiResponse<CreateBaseProductResponse>>(`${this.apiUrl}/base-products`, dto),
+    );
+  }
+
+  update(id: number, dto: UpdateBaseProduct): Observable<BaseProduct> {
+    return this.unwrap(
+      this.http.patch<ApiResponse<BaseProduct>>(`${this.apiUrl}/base-products/${id}`, dto),
+    );
   }
 
   findAll(filter: BaseProductFilter): Observable<PaginatedResult<BaseProduct>> {

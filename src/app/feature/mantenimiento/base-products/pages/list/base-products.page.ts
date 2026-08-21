@@ -1,18 +1,18 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
 import { debounceTime, startWith, Subject, switchMap } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { toast } from 'ngx-sonner';
-import { BaseProductsService } from '../../../../core/api/base-products.service';
-import { BaseProduct } from '../../../../core/models/base-product.model';
-import { PaginatedResult } from '../../../../core/models/pagination.model';
-import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
-import { openConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
-import { Icon } from '../../../../shared/icon/icon';
-import PaginationNg from '../../../../shared/pagination/pagination.ng';
+import { BaseProductsService } from '../../../../../core/api/base-products.service';
+import { BaseProduct } from '../../../../../core/models/base-product.model';
+import { PaginatedResult } from '../../../../../core/models/pagination.model';
+import BreadcrumbsNg from '../../../../../shared/breadcrumbs/breadcrumbs.ng';
+import { openConfirmDialog } from '../../../../../shared/confirm-dialog/confirm-dialog';
+import { Icon } from '../../../../../shared/icon/icon';
+import PaginationNg from '../../../../../shared/pagination/pagination.ng';
 
 @Component({
   selector: 'base-products-page',
@@ -22,6 +22,7 @@ import PaginationNg from '../../../../shared/pagination/pagination.ng';
 export default class BaseProductsPage {
   private readonly dialog = inject(Dialog);
   private readonly baseProductsService = inject(BaseProductsService);
+  private readonly router = inject(Router);
 
   protected readonly page = signal(1);
   protected readonly pageSize = signal(10);
@@ -88,6 +89,10 @@ export default class BaseProductsPage {
         error: (err) => toast.error(this.getErrorMessage(err)),
       });
     });
+  }
+
+  protected onEdit(baseProduct: BaseProduct): void {
+    void this.router.navigate(['/mantenimiento/base-products', baseProduct.id, 'editar']);
   }
 
   protected categoriesLabel(baseProduct: BaseProduct): string {

@@ -38,9 +38,41 @@ export interface CreateBaseProduct {
   units: CreateBaseProductUnit[];
   brandId?: number | null;
   categoryIds?: number[];
+  initialStock: number;
+  initialPrice: number;
+}
+
+export interface DefaultProduct {
+  id: number;
+  name: string;
+  stock: number;
+  price: number;
+  baseProductId: number;
+  baseProductName: string;
+  productAttributes: {
+    attributeId: number;
+    attributeName: string;
+    attributeValueId: number;
+    attributeValue: string;
+  }[];
+  stockLabel: string | null;
+  units: {
+    unitId: number;
+    unitName: string;
+    unitValue: string;
+    isMain: boolean;
+    factor: number;
+  }[];
 }
 
 export interface CreateBaseProductResponse {
   baseProduct: BaseProduct;
-  defaultProduct: unknown;
+  defaultProduct: DefaultProduct;
+}
+
+export interface UpdateBaseProduct {
+  name?: string;
+  brandId?: number | null;
+  categoryIds?: number[];
+  units?: CreateBaseProductUnit[];
 }

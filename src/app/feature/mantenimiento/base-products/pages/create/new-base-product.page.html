@@ -1,0 +1,202 @@
+<ng-breadcrumbs />
+
+<div class="mx-auto mt-6 w-full max-w-3xl space-y-6 sm:space-y-8">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <h1 class="text-2xl font-semibold">Nuevo producto base</h1>
+    <a routerLink="/mantenimiento/base-products" class="btn btn-soft btn-sm"> Volver al listado </a>
+  </div>
+
+  @if (error(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex justify-center py-16">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else {
+    <form class="space-y-6 sm:space-y-8" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <base-product-general-data
+        [nameControl]="form.controls.name"
+        [brandIdControl]="form.controls.brandId"
+        [brands]="brands()"
+      />
+      <base-product-categories-picker
+        [categories]="categories()"
+        [control]="form.controls.categoryIds"
+      />
+      <base-product-units-editor [units]="units()" [unitRows]="unitRows" />
+
+      <section class="card border border-base-300 bg-base-100">
+        <div class="card-body gap-6 p-6 sm:p-8">
+          <header class="space-y-1">
+            <h2 class="card-title text-lg">Inventario inicial</h2>
+            <p class="text-sm text-base-content/60">
+              Define el stock y precio del producto inicial.
+            </p>
+          </header>
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div class="flex flex-col gap-2">
+              <label for="initialStock" class="text-sm font-medium"
+                >Stock inicial <span class="text-error">*</span></label
+              >
+              <input
+                id="initialStock"
+                type="number"
+                min="0"
+                step="0.01"
+                class="input input-bordered w-full"
+                [formControl]="form.controls.initialStock"
+              />
+              @if (form.controls.initialStock.invalid && form.controls.initialStock.touched) {
+                <p class="text-sm text-error">El stock debe ser mayor o igual a 0</p>
+              }
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="initialPrice" class="text-sm font-medium"
+                >Precio inicial <span class="text-error">*</span></label
+              >
+              <input
+                id="initialPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                class="input input-bordered w-full"
+                [formControl]="form.controls.initialPrice"
+              />
+              @if (form.controls.initialPrice.invalid && form.controls.initialPrice.touched) {
+                <p class="text-sm text-error">El precio debe ser mayor o igual a 0</p>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="flex flex-wrap justify-end gap-2 pt-2">
+        <a routerLink="/mantenimiento/base-products" class="btn">Cancelar</a>
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+          @if (isSubmitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          {{ createdProduct() ? 'Crear otro producto base' : 'Crear producto base' }}
+        </button>
+      </div>
+    </form>
+
+    @if (createdProduct(); as created) {
+      <dialog
+        class="modal modal-middle"
+        [open]="isSuccessModalOpen()"
+        aria-labelledby="creation-success-title"
+      >
+        <div
+          class="modal-box w-11/12 max-w-3xl overflow-hidden border border-success/20 p-0 shadow-2xl"
+        >
+          <div class="h-2 bg-success"></div>
+          <div class="space-y-6 p-6 sm:p-8">
+            <header class="flex items-start justify-between gap-4">
+              <div>
+                <span class="badge badge-success badge-soft mb-3">Creacion completada</span>
+                <h2 id="creation-success-title" class="text-2xl font-semibold tracking-tight">
+                  Todo listo para crear variantes
+                </h2>
+                <p class="mt-2 max-w-xl text-sm leading-6 text-base-content/60">
+                  Se creo el producto base y su producto inicial. Revisa el resumen antes de
+                  continuar.
+                </p>
+              </div>
+              <button
+                type="button"
+                class="btn btn-circle btn-ghost btn-sm"
+                aria-label="Cerrar detalle de creacion"
+                (click)="closeSuccessModal()"
+              >
+                X
+              </button>
+            </header>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+              <article class="rounded-box border border-base-300 bg-base-200/40 p-5">
+                <div class="flex items-center justify-between gap-3">
+                  <h3 class="font-semibold">Producto base</h3>
+                  <span class="badge badge-outline">#{{ created.baseProduct.id }}</span>
+                </div>
+                <p class="mt-4 text-xl font-semibold">{{ created.baseProduct.name }}</p>
+                <dl class="mt-4 space-y-3 text-sm">
+                  <div class="flex justify-between gap-4">
+                    <dt class="text-base-content/60">Marca</dt>
+                    <dd>{{ created.baseProduct.brand?.name ?? 'Sin marca' }}</dd>
+                  </div>
+                  <div class="flex justify-between gap-4">
+                    <dt class="text-base-content/60">Productos asociados</dt>
+                    <dd>{{ created.baseProduct.productCount }}</dd>
+                  </div>
+                  <div class="flex justify-between gap-4">
+                    <dt class="text-base-content/60">Unidades configuradas</dt>
+                    <dd>{{ created.baseProduct.unitCount }}</dd>
+                  </div>
+                </dl>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  @for (category of created.baseProduct.categories; track category.id) {
+                    <span class="badge badge-soft">{{ category.name }}</span>
+                  } @empty {
+                    <span class="text-sm text-base-content/60">Sin categorías</span>
+                  }
+                </div>
+              </article>
+
+              <article class="rounded-box border border-primary/20 bg-primary/5 p-5">
+                <div class="flex items-center justify-between gap-3">
+                  <h3 class="font-semibold">Producto inicial</h3>
+                  <span class="badge badge-primary badge-soft"
+                    >#{{ created.defaultProduct.id }}</span
+                  >
+                </div>
+                <p class="mt-4 text-xl font-semibold">{{ created.defaultProduct.name }}</p>
+                <dl class="mt-4 space-y-3 text-sm">
+                  <div class="flex justify-between gap-4">
+                    <dt class="text-base-content/60">Stock</dt>
+                    <dd>{{ created.defaultProduct.stockLabel ?? created.defaultProduct.stock }}</dd>
+                  </div>
+                  <div class="flex justify-between gap-4">
+                    <dt class="text-base-content/60">Precio</dt>
+                    <dd>{{ created.defaultProduct.price }}</dd>
+                  </div>
+                  <div class="flex justify-between gap-4">
+                    <dt class="text-base-content/60">Producto base</dt>
+                    <dd>{{ created.defaultProduct.baseProductName }}</dd>
+                  </div>
+                </dl>
+                <div class="mt-4 text-sm text-base-content/60">
+                  <span class="font-medium text-base-content">Unidades:</span>
+                  @for (unit of created.defaultProduct.units; track unit.unitId) {
+                    <span>
+                      {{ unit.unitName }}{{ unit.isMain ? ' (principal)' : ''
+                      }}{{ $last ? '' : ', ' }}
+                    </span>
+                  } @empty {
+                    <span>Sin unidades</span>
+                  }
+                </div>
+              </article>
+            </div>
+
+            <div class="modal-action mt-0 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button type="button" class="btn" (click)="closeSuccessModal()">
+                Seguir creando
+              </button>
+              <a routerLink="/mantenimiento/productos" class="btn btn-primary">Crear variantes</a>
+            </div>
+          </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+          <button type="button" aria-label="Cerrar modal" (click)="closeSuccessModal()">
+            Cerrar
+          </button>
+        </form>
+      </dialog>
+    }
+  }
+</div>

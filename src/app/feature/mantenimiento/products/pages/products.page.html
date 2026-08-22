@@ -52,7 +52,6 @@
           <tr>
             <th>ID</th>
             <th>Nombre</th>
-            <th>Base</th>
             <th>Attributes</th>
             <th class="text-right">Stock</th>
             <th class="text-right">Precio</th>
@@ -63,7 +62,6 @@
           @for (product of products.value()?.data; track product.id) {
             <tr>
               <th>{{ product.id }}</th>
-              <td>{{ product.name }}</td>
               <td>{{ product.baseProductName }}</td>
               <td>{{ attributesLabel(product) }}</td>
               <td class="text-right">{{ product.stock }}</td>
@@ -73,7 +71,7 @@
                   <button
                     type="button"
                     class="btn btn-soft btn-xs text-error"
-                    [attr.aria-label]="'Eliminar ' + product.name"
+                    [attr.aria-label]="'Eliminar ' + product.baseProductName"
                     (click)="onDelete(product)"
                   >
                     <app-icon name="trash" classes="size-4" />

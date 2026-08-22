@@ -21,7 +21,6 @@ export interface CreateProduct {
 
 export interface Product {
   id: number;
-  name: string;
   stock: number;
   price: number;
   baseProductId: number;

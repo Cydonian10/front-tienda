@@ -106,7 +106,7 @@ export default class ProductsPage {
   protected async onDelete(product: Product): Promise<void> {
     const dialogRef = openConfirmDialog(this.dialog, {
       title: 'Eliminar producto',
-      message: `¿Estás seguro de que deseas eliminar el producto "${product.name}"? Esta acción no se puede deshacer.`,
+      message: `¿Estás seguro de que deseas eliminar el producto "${product.baseProductName}"? Esta acción no se puede deshacer.`,
       confirmLabel: 'Eliminar',
       danger: true,
     });

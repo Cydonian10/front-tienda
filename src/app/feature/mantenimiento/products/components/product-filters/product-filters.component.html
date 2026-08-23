@@ -1,0 +1,35 @@
+<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+  <div
+    class="flex w-full flex-col gap-2 sm:w-auto sm:flex-1 sm:flex-row sm:items-center sm:justify-end"
+  >
+    <label class="input w-full sm:w-auto sm:flex-1 sm:max-w-md">
+      <app-icon name="search" />
+      <input type="search" placeholder="Buscar producto..." (input)="onSearch($event)" />
+    </label>
+    <input
+      type="number"
+      min="0"
+      placeholder="Precio mín"
+      class="input w-full sm:w-32"
+      (input)="onMinPrice($event)"
+    />
+    <input
+      type="number"
+      min="0"
+      placeholder="Precio máx"
+      class="input w-full sm:w-32"
+      (input)="onMaxPrice($event)"
+    />
+    <input
+      type="number"
+      min="0"
+      placeholder="Stock mín"
+      class="input w-full sm:w-32"
+      (input)="onMinStock($event)"
+    />
+    <a routerLink="/mantenimiento/productos/nuevo" class="btn w-full sm:w-auto">
+      <app-icon name="plus" />
+      Nuevo producto
+    </a>
+  </div>
+</div>

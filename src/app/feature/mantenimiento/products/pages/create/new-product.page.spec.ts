@@ -3,9 +3,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AttributesService } from '../../../../core/api/attributes.service';
-import { BaseProductsService } from '../../../../core/api/base-products.service';
-import { ProductsService } from '../../../../core/api/products.service';
+import { AttributesService } from '../../../../../core/api/attributes.service';
+import { BaseProductsService } from '../../../../../core/api/base-products.service';
+import { ProductsService } from '../../../../../core/api/products.service';
 import NewProductPage from './new-product.page';
 
 describe('NewProductPage', () => {
@@ -97,40 +97,6 @@ describe('NewProductPage', () => {
 
     expect(page.form.hasError('attributeRequired')).toBe(true);
     expect(productsService.create).not.toHaveBeenCalled();
-  });
-
-  it('assigns buffered orders when adding and moving attributes', async () => {
-    const page = await createPage();
-    page.form.patchValue({
-      baseProductId: 3,
-      stock: 12,
-      price: 29.9,
-    });
-    page.attributeRows.at(0).patchValue({ attributeId: 7, attributeValueId: 70 });
-
-    page.addAttribute();
-    page.attributeRows.at(1).patchValue({ attributeId: 8, attributeValueId: 80 });
-    page.addAttribute();
-    page.attributeRows.at(2).patchValue({ attributeId: 9, attributeValueId: 90 });
-
-    page.dropAttribute({ previousIndex: 2, currentIndex: 0 });
-
-    expect(page.attributeRows.controls.map((row: any) => row.controls.order.value)).toEqual([
-      5, 10, 20,
-    ]);
-
-    await page.onSubmit();
-
-    expect(productsService.create).toHaveBeenCalledWith({
-      baseProductId: 3,
-      stock: 12,
-      price: 29.9,
-      productAttributes: [
-        { attributeId: 9, attributeValueId: 90, order: 5 },
-        { attributeId: 7, attributeValueId: 70, order: 10 },
-        { attributeId: 8, attributeValueId: 80, order: 20 },
-      ],
-    });
   });
 
   it('rejects missing or non-positive stock and price', async () => {

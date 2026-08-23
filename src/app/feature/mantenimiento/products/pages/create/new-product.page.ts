@@ -1,18 +1,8 @@
-import {
-  CdkDrag,
-  CdkDragDrop,
-  CdkDragHandle,
-  CdkDropList,
-  moveItemInArray,
-} from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import {
   AbstractControl,
-  FormArray,
   FormBuilder,
-  FormControl,
-  FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
   Validators,
@@ -21,33 +11,20 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
 
-import { AttributesService } from '../../../../core/api/attributes.service';
-import { BaseProductsService } from '../../../../core/api/base-products.service';
-import { ProductsService } from '../../../../core/api/products.service';
-import { AttributeWithValues } from '../../../../core/models/attribute.model';
-import { BaseProduct, BaseProductDetail } from '../../../../core/models/base-product.model';
-import { CreateProduct } from '../../../../core/models/product.model';
-import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
-import { ProductAttributePicker } from '../components/attribute-picker/attribute-picker.component';
-
-type AttributeRowControls = {
-  attributeId: FormControl<number | null>;
-  attributeValueId: FormControl<number | null>;
-  order: FormControl<number>;
-};
-
-const attributeOrderBuffer = 10;
-
-function createAttributeRow(
-  formBuilder: FormBuilder,
-  order: number,
-): FormGroup<AttributeRowControls> {
-  return formBuilder.group({
-    attributeId: formBuilder.control<number | null>(null),
-    attributeValueId: formBuilder.control<number | null>(null),
-    order: formBuilder.control(order, { nonNullable: true }),
-  });
-}
+import { AttributesService } from '../../../../../core/api/attributes.service';
+import { BaseProductsService } from '../../../../../core/api/base-products.service';
+import { ProductsService } from '../../../../../core/api/products.service';
+import { AttributeWithValues } from '../../../../../core/models/attribute.model';
+import { BaseProduct, BaseProductDetail } from '../../../../../core/models/base-product.model';
+import { CreateProduct } from '../../../../../core/models/product.model';
+import BreadcrumbsNg from '../../../../../shared/breadcrumbs/breadcrumbs.ng';
+import { BaseProductSelector } from '../../components/base-product-selector/base-product-selector.component';
+import {
+  createProductAttributeRow,
+  ProductAttributesEditor,
+  ProductAttributeRow,
+} from '../../components/product-attributes-editor/product-attributes-editor.component';
+import { ProductInventoryFields } from '../../components/product-inventory-fields/product-inventory-fields.component';
 
 function atLeastOneAttribute(control: AbstractControl): ValidationErrors | null {
   const attributes = control.get('attributes')?.value as
@@ -62,11 +39,10 @@ function atLeastOneAttribute(control: AbstractControl): ValidationErrors | null 
 @Component({
   selector: 'new-product-page',
   imports: [
+    BaseProductSelector,
     BreadcrumbsNg,
-    CdkDrag,
-    CdkDragHandle,
-    CdkDropList,
-    ProductAttributePicker,
+    ProductAttributesEditor,
+    ProductInventoryFields,
     ReactiveFormsModule,
     RouterLink,
   ],
@@ -90,8 +66,8 @@ export default class NewProductPage {
   protected readonly isSubmitting = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  protected readonly attributeRows = this.formBuilder.array<FormGroup<AttributeRowControls>>([
-    createAttributeRow(this.formBuilder, attributeOrderBuffer),
+  protected readonly attributeRows = this.formBuilder.array<ProductAttributeRow>([
+    createProductAttributeRow(this.formBuilder, 10),
   ]);
   protected readonly form = this.formBuilder.group(
     {
@@ -107,9 +83,9 @@ export default class NewProductPage {
     void this.loadOptions();
   }
 
-  protected async onBaseProductSearch(event: Event): Promise<void> {
+  protected async onBaseProductSearch(search: string): Promise<void> {
     this.baseProductsPage.set(1);
-    this.baseProductSearch.set((event.target as HTMLInputElement).value);
+    this.baseProductSearch.set(search);
     await this.loadBaseProducts();
   }
 
@@ -129,9 +105,8 @@ export default class NewProductPage {
     await this.loadBaseProducts();
   }
 
-  protected async onBaseProductSelected(event: Event): Promise<void> {
-    const id = Number((event.target as HTMLSelectElement).value);
-    this.form.controls.baseProductId.setValue(id || null);
+  protected async onBaseProductSelected(id: number | null): Promise<void> {
+    this.form.controls.baseProductId.setValue(id);
     this.form.controls.baseProductId.markAsDirty();
     if (!id) {
       this.baseProductDetail.set(null);
@@ -146,45 +121,6 @@ export default class NewProductPage {
     } finally {
       this.isLoadingBaseProductDetail.set(false);
     }
-  }
-
-  protected addAttribute(): void {
-    const order = this.getPositionNewCard(this.attributeRows.controls);
-    this.attributeRows.push(createAttributeRow(this.formBuilder, order));
-  }
-
-  protected removeAttribute(index: number): void {
-    this.attributeRows.removeAt(index);
-    this.form.updateValueAndValidity();
-  }
-
-  protected dropAttribute(event: CdkDragDrop<FormGroup<AttributeRowControls>[]>): void {
-    if (event.previousIndex === event.currentIndex) {
-      return;
-    }
-
-    moveItemInArray(this.attributeRows.controls, event.previousIndex, event.currentIndex);
-    const order = this.getPosition(this.attributeRows.controls, event.currentIndex);
-    this.attributeRows.at(event.currentIndex).controls.order.setValue(order);
-    this.attributeRows.updateValueAndValidity();
-    this.form.markAsDirty();
-  }
-
-  protected selectedAttributeIds(excludeId: number | null): number[] {
-    return this.attributeRows.controls
-      .map((row) => row.controls.attributeId.value)
-      .filter((id): id is number => id !== null && id !== excludeId);
-  }
-
-  protected setAttribute(row: FormGroup<AttributeRowControls>, attributeId: number): void {
-    row.controls.attributeId.setValue(attributeId);
-    row.controls.attributeValueId.setValue(null);
-    row.updateValueAndValidity();
-  }
-
-  protected setAttributeValue(row: FormGroup<AttributeRowControls>, valueId: number | null): void {
-    row.controls.attributeValueId.setValue(valueId);
-    row.updateValueAndValidity();
   }
 
   protected async onSubmit(): Promise<void> {
@@ -267,33 +203,6 @@ export default class NewProductPage {
       ),
     );
     return [...firstPage.data, ...remainingPages.flatMap((page) => page.data)];
-  }
-
-  private getPosition(cards: FormGroup<AttributeRowControls>[], currentIndex: number): number {
-    if (cards.length === 1) {
-      return attributeOrderBuffer;
-    }
-
-    if (currentIndex === 0) {
-      return cards[1].controls.order.value / 2;
-    }
-
-    const lastIndex = cards.length - 1;
-    if (currentIndex < lastIndex) {
-      const previousPosition = cards[currentIndex - 1].controls.order.value;
-      const nextPosition = cards[currentIndex + 1].controls.order.value;
-      return (previousPosition + nextPosition) / 2;
-    }
-
-    return cards[lastIndex - 1].controls.order.value + attributeOrderBuffer;
-  }
-
-  private getPositionNewCard(cards: FormGroup<AttributeRowControls>[]): number {
-    if (cards.length === 0) {
-      return attributeOrderBuffer;
-    }
-
-    return cards[cards.length - 1].controls.order.value + attributeOrderBuffer;
   }
 
   private getErrorMessage(error: unknown): string {

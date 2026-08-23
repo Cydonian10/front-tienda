@@ -42,13 +42,13 @@ const MarcasPage: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./products/pages/products.page'),
+        loadComponent: () => import('./products/pages/list/products.page'),
         title: 'Productos',
       },
       {
         path: 'nuevo',
         data: { breadcrumb: 'Nuevo Producto' },
-        loadComponent: () => import('./products/pages/new-product.page'),
+        loadComponent: () => import('./products/pages/create/new-product.page'),
         title: 'Nuevo Producto',
       },
     ],

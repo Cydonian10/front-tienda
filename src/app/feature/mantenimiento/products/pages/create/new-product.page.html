@@ -1,0 +1,67 @@
+<ng-breadcrumbs />
+
+<div class="mx-auto mt-6 w-full max-w-3xl space-y-6 sm:space-y-8">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <div>
+      <p class="text-sm font-medium text-base-content/60">Inventario</p>
+      <h1 class="text-2xl font-semibold">Nuevo producto</h1>
+    </div>
+    <a routerLink="/mantenimiento/productos" class="btn btn-soft btn-sm">Volver al listado</a>
+  </div>
+
+  @if (error(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex justify-center py-16">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else {
+    <form class="space-y-6" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4 sm:p-6">
+        <legend class="fieldset-legend text-base">Datos del producto</legend>
+
+        <product-base-selector
+          [baseProducts]="baseProducts()"
+          [baseProductId]="form.controls.baseProductId"
+          [page]="baseProductsPage()"
+          [lastPage]="baseProductsLastPage()"
+          [detail]="baseProductDetail()"
+          [isLoadingDetail]="isLoadingBaseProductDetail()"
+          (searchChanged)="onBaseProductSearch($event)"
+          (selected)="onBaseProductSelected($event)"
+          (previousPage)="previousBaseProducts()"
+          (nextPage)="nextBaseProducts()"
+        />
+
+        <product-inventory-fields [stock]="form.controls.stock" [price]="form.controls.price" />
+      </fieldset>
+
+      <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4 sm:p-6">
+        <legend class="fieldset-legend text-base">Atributos</legend>
+        <p class="label mb-3">
+          Agrega al menos un atributo y elige su valor. No se pueden repetir.
+        </p>
+
+        <product-attributes-editor [attributes]="attributes()" [attributeRows]="attributeRows" />
+
+        @if (form.touched && form.hasError('attributeRequired')) {
+          <p class="label text-error">Selecciona al menos un atributo.</p>
+        }
+      </fieldset>
+
+      <div class="flex flex-wrap justify-end gap-2">
+        <a routerLink="/mantenimiento/productos" class="btn">Cancelar</a>
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+          @if (isSubmitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          Crear producto
+        </button>
+      </div>
+    </form>
+  }
+</div>

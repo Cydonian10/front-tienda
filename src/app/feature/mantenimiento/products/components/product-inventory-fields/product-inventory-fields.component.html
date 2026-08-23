@@ -1,0 +1,30 @@
+<div class="mt-5 grid gap-4 sm:grid-cols-2">
+  <div>
+    <label class="label" for="stock">Stock</label>
+    <input
+      id="stock"
+      type="number"
+      min="0.01"
+      step="0.01"
+      class="input w-full"
+      [formControl]="stock()"
+    />
+    @if (stock().touched && stock().invalid) {
+      <p class="label text-error">Ingresa un stock mayor que 0.</p>
+    }
+  </div>
+  <div>
+    <label class="label" for="price">Precio</label>
+    <input
+      id="price"
+      type="number"
+      min="0.01"
+      step="0.01"
+      class="input w-full"
+      [formControl]="price()"
+    />
+    @if (price().touched && price().invalid) {
+      <p class="label text-error">Ingresa un precio mayor que 0.</p>
+    }
+  </div>
+</div>

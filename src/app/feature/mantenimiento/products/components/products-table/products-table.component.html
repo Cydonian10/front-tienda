@@ -1,0 +1,41 @@
+<div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Attributes</th>
+        <th class="text-right">Stock</th>
+        <th class="text-right">Precio</th>
+        <th class="text-right">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products(); track product.id) {
+        <tr>
+          <th>{{ product.id }}</th>
+          <td><name-product [product]="product" /></td>
+          <td>{{ attributesLabel(product) }}</td>
+          <td class="text-right">{{ product.stock }}</td>
+          <td class="text-right">{{ product.price }}</td>
+          <td>
+            <div class="flex justify-end gap-1">
+              <button
+                type="button"
+                class="btn btn-soft btn-xs text-error"
+                [attr.aria-label]="'Eliminar ' + product.baseProductName"
+                (click)="deleteRequested.emit(product)"
+              >
+                <app-icon name="trash" classes="size-4" />
+              </button>
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7" class="py-8 text-center text-base-content/60">No hay productos</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

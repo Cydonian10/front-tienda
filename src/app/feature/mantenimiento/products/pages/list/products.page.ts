@@ -2,24 +2,23 @@ import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
-import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { debounceTime, startWith, Subject } from 'rxjs';
 import { toast } from 'ngx-sonner';
 
-import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
-import PaginationNg from '../../../../shared/pagination/pagination.ng';
-import { Icon } from '../../../../shared/icon/icon';
-import { openConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
-import { environment } from '../../../../../environments/environment';
-import { Product } from '../../../../core/models/product.model';
-import { PaginatedResult } from '../../../../core/models/pagination.model';
-import { ProductsService } from '../../../../core/api/products.service';
-import { NameProduct } from '../components/name-product/name-product.component';
+import { ProductFilters } from '../../components/product-filters/product-filters.component';
+import { ProductsTable } from '../../components/products-table/products-table.component';
+import { openConfirmDialog } from '../../../../../shared/confirm-dialog/confirm-dialog';
+import BreadcrumbsNg from '../../../../../shared/breadcrumbs/breadcrumbs.ng';
+import PaginationNg from '../../../../../shared/pagination/pagination.ng';
+import { environment } from '../../../../../../environments/environment';
+import { Product } from '../../../../../core/models/product.model';
+import { PaginatedResult } from '../../../../../core/models/pagination.model';
+import { ProductsService } from '../../../../../core/api/products.service';
 
 @Component({
   selector: 'products-page',
-  imports: [BreadcrumbsNg, PaginationNg, Icon, RouterLink, NameProduct],
+  imports: [BreadcrumbsNg, PaginationNg, ProductFilters, ProductsTable],
   templateUrl: './products.page.html',
 })
 export default class ProductsPage {
@@ -75,33 +74,24 @@ export default class ProductsPage {
     },
   );
 
-  protected onSearch(event: Event): void {
-    this.search$.next((event.target as HTMLInputElement).value);
+  protected onSearch(value: string): void {
+    this.search$.next(value);
     this.page.set(1);
   }
 
-  protected onMinPrice(event: Event): void {
-    this.minPrice$.next(this.parseNumber((event.target as HTMLInputElement).value));
+  protected onMinPrice(value: string): void {
+    this.minPrice$.next(this.parseNumber(value));
     this.page.set(1);
   }
 
-  protected onMaxPrice(event: Event): void {
-    this.maxPrice$.next(this.parseNumber((event.target as HTMLInputElement).value));
+  protected onMaxPrice(value: string): void {
+    this.maxPrice$.next(this.parseNumber(value));
     this.page.set(1);
   }
 
-  protected onMinStock(event: Event): void {
-    this.minStock$.next(this.parseNumber((event.target as HTMLInputElement).value));
+  protected onMinStock(value: string): void {
+    this.minStock$.next(this.parseNumber(value));
     this.page.set(1);
-  }
-
-  protected attributesLabel(product: Product): string {
-    if (product.productAttributes.length === 0) {
-      return '—';
-    }
-    return product.productAttributes
-      .map((attr) => `${attr.attributeName}: ${attr.attributeValue}`)
-      .join(', ');
   }
 
   protected async onDelete(product: Product): Promise<void> {

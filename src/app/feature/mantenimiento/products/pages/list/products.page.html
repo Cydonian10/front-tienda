@@ -1,0 +1,32 @@
+<ng-breadcrumbs />
+
+<div class="mt-4 space-y-4">
+  <product-filters
+    (searchChanged)="onSearch($event)"
+    (minPriceChanged)="onMinPrice($event)"
+    (maxPriceChanged)="onMaxPrice($event)"
+    (minStockChanged)="onMinStock($event)"
+  />
+
+  @if (products.isLoading()) {
+    <div class="flex justify-center py-16">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else if (errorMessage(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  } @else {
+    <products-table
+      [products]="products.value()?.data ?? []"
+      (deleteRequested)="onDelete($event)"
+    />
+
+    <ng-pagination
+      [total]="products.value()?.total ?? 0"
+      [lastPage]="products.value()?.lastPage ?? 0"
+      [(page)]="page"
+      [(pageSize)]="pageSize"
+    />
+  }
+</div>

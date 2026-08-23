@@ -62,7 +62,7 @@
           @for (product of products.value()?.data; track product.id) {
             <tr>
               <th>{{ product.id }}</th>
-              <td>{{ product.baseProductName }}</td>
+              <td><name-product [product]="product" /></td>
               <td>{{ attributesLabel(product) }}</td>
               <td class="text-right">{{ product.stock }}</td>
               <td class="text-right">{{ product.price }}</td>

@@ -15,10 +15,11 @@ import { environment } from '../../../../../environments/environment';
 import { Product } from '../../../../core/models/product.model';
 import { PaginatedResult } from '../../../../core/models/pagination.model';
 import { ProductsService } from '../../../../core/api/products.service';
+import { NameProduct } from '../components/name-product/name-product.component';
 
 @Component({
   selector: 'products-page',
-  imports: [BreadcrumbsNg, PaginationNg, Icon, RouterLink],
+  imports: [BreadcrumbsNg, PaginationNg, Icon, RouterLink, NameProduct],
   templateUrl: './products.page.html',
 })
 export default class ProductsPage {

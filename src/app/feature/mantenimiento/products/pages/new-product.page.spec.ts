@@ -72,7 +72,7 @@ describe('NewProductPage', () => {
       stock: 12,
       price: 29.9,
     });
-    page.attributeRows.at(0).setValue({ attributeId: 7, attributeValueId: 70 });
+    page.attributeRows.at(0).patchValue({ attributeId: 7, attributeValueId: 70 });
 
     await page.onSubmit();
 
@@ -80,7 +80,7 @@ describe('NewProductPage', () => {
       baseProductId: 3,
       stock: 12,
       price: 29.9,
-      productAttributes: [{ attributeId: 7, attributeValueId: 70 }],
+      productAttributes: [{ attributeId: 7, attributeValueId: 70, order: 10 }],
     });
     expect(router.navigate).toHaveBeenCalledWith(['/mantenimiento/productos']);
   });
@@ -99,6 +99,40 @@ describe('NewProductPage', () => {
     expect(productsService.create).not.toHaveBeenCalled();
   });
 
+  it('assigns buffered orders when adding and moving attributes', async () => {
+    const page = await createPage();
+    page.form.patchValue({
+      baseProductId: 3,
+      stock: 12,
+      price: 29.9,
+    });
+    page.attributeRows.at(0).patchValue({ attributeId: 7, attributeValueId: 70 });
+
+    page.addAttribute();
+    page.attributeRows.at(1).patchValue({ attributeId: 8, attributeValueId: 80 });
+    page.addAttribute();
+    page.attributeRows.at(2).patchValue({ attributeId: 9, attributeValueId: 90 });
+
+    page.dropAttribute({ previousIndex: 2, currentIndex: 0 });
+
+    expect(page.attributeRows.controls.map((row: any) => row.controls.order.value)).toEqual([
+      5, 10, 20,
+    ]);
+
+    await page.onSubmit();
+
+    expect(productsService.create).toHaveBeenCalledWith({
+      baseProductId: 3,
+      stock: 12,
+      price: 29.9,
+      productAttributes: [
+        { attributeId: 9, attributeValueId: 90, order: 5 },
+        { attributeId: 7, attributeValueId: 70, order: 10 },
+        { attributeId: 8, attributeValueId: 80, order: 20 },
+      ],
+    });
+  });
+
   it('rejects missing or non-positive stock and price', async () => {
     const page = await createPage();
     page.form.patchValue({
@@ -106,7 +140,7 @@ describe('NewProductPage', () => {
       stock: 0,
       price: -1,
     });
-    page.attributeRows.at(0).setValue({ attributeId: 7, attributeValueId: 70 });
+    page.attributeRows.at(0).patchValue({ attributeId: 7, attributeValueId: 70 });
 
     await page.onSubmit();
 

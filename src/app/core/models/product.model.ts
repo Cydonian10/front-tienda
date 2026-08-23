@@ -5,11 +5,13 @@ export interface ProductAttribute {
   attributeName: string;
   attributeValueId: number;
   attributeValue: string;
+  order: number;
 }
 
 export interface ProductAttributeItem {
   attributeId: number;
   attributeValueId: number;
+  order: number;
 }
 
 export interface CreateProduct {

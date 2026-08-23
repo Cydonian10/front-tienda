@@ -79,7 +79,10 @@
             </div>
           </div>
         } @else if (baseProductDetail(); as detail) {
-          <section class="mt-5 rounded-box border border-base-300 bg-base-200/50 p-4" aria-label="Detalle del producto base">
+          <section
+            class="mt-5 rounded-box border border-base-300 bg-base-200/50 p-4"
+            aria-label="Detalle del producto base"
+          >
             <div class="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <p class="text-sm text-base-content/60">Producto base seleccionado</p>
@@ -109,10 +112,15 @@
               <p class="text-sm text-base-content/60">Unidades y conversiones</p>
               <div class="mt-2 grid gap-2 sm:grid-cols-2">
                 @for (unit of detail.units; track unit.id) {
-                  <div class="flex items-center justify-between gap-2 rounded-field bg-base-100 px-3 py-2 text-sm">
+                  <div
+                    class="flex items-center justify-between gap-2 rounded-field bg-base-100 px-3 py-2 text-sm"
+                  >
                     <span>{{ unit.name }} ({{ unit.value }})</span>
                     <span class="text-base-content/60">
-                      × {{ unit.factor }} @if (unit.isMain) { <span class="badge badge-sm">Principal</span> }
+                      × {{ unit.factor }}
+                      @if (unit.isMain) {
+                        <span class="badge badge-sm">Principal</span>
+                      }
                     </span>
                   </div>
                 } @empty {
@@ -126,14 +134,28 @@
         <div class="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
             <label class="label" for="stock">Stock</label>
-            <input id="stock" type="number" min="0.01" step="0.01" class="input w-full" formControlName="stock" />
+            <input
+              id="stock"
+              type="number"
+              min="0.01"
+              step="0.01"
+              class="input w-full"
+              formControlName="stock"
+            />
             @if (form.controls.stock.touched && form.controls.stock.invalid) {
               <p class="label text-error">Ingresa un stock mayor que 0.</p>
             }
           </div>
           <div>
             <label class="label" for="price">Precio</label>
-            <input id="price" type="number" min="0.01" step="0.01" class="input w-full" formControlName="price" />
+            <input
+              id="price"
+              type="number"
+              min="0.01"
+              step="0.01"
+              class="input w-full"
+              formControlName="price"
+            />
             @if (form.controls.price.touched && form.controls.price.invalid) {
               <p class="label text-error">Ingresa un precio mayor que 0.</p>
             }
@@ -143,20 +165,49 @@
 
       <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4 sm:p-6">
         <legend class="fieldset-legend text-base">Atributos</legend>
-        <p class="label mb-3">Agrega al menos un atributo y elige su valor. No se pueden repetir.</p>
+        <p class="label mb-3">
+          Agrega al menos un atributo y elige su valor. No se pueden repetir.
+        </p>
 
-        <div formArrayName="attributes" class="space-y-3">
-          @for (row of attributeRows.controls; track $index; let index = $index) {
-            <div [formGroupName]="index" class="rounded-box border border-base-300 p-3">
-              <product-attribute-picker
-                [attributes]="attributes()"
-                [excludedAttributeIds]="selectedAttributeIds(row.controls.attributeId.value)"
-                [selectedAttributeId]="row.controls.attributeId.value"
-                [selectedValueId]="row.controls.attributeValueId.value"
-                (attributeSelected)="setAttribute(row, $event)"
-                (valueSelected)="setAttributeValue(row, $event)"
-                (removed)="removeAttribute(index)"
-              />
+        <div
+          formArrayName="attributes"
+          cdkDropList
+          [cdkDropListData]="attributeRows.controls"
+          (cdkDropListDropped)="dropAttribute($event)"
+          class="space-y-3"
+        >
+          @for (row of attributeRows.controls; track row; let index = $index) {
+            <div
+              [formGroupName]="index"
+              cdkDrag
+              class="rounded-box border border-base-300 bg-base-100 p-3"
+            >
+              <div class="flex items-start gap-3">
+                <button
+                  type="button"
+                  cdkDragHandle
+                  class="btn btn-ghost btn-sm cursor-grab touch-none"
+                  aria-label="Mover atributo"
+                  title="Mover atributo"
+                >
+                  Mover
+                </button>
+                <div class="min-w-0 flex-1">
+                  <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <span class="text-sm text-base-content/60">Atributo {{ index + 1 }}</span>
+                    <span class="badge badge-sm">Orden {{ row.controls.order.value }}</span>
+                  </div>
+                  <product-attribute-picker
+                    [attributes]="attributes()"
+                    [excludedAttributeIds]="selectedAttributeIds(row.controls.attributeId.value)"
+                    [selectedAttributeId]="row.controls.attributeId.value"
+                    [selectedValueId]="row.controls.attributeValueId.value"
+                    (attributeSelected)="setAttribute(row, $event)"
+                    (valueSelected)="setAttributeValue(row, $event)"
+                    (removed)="removeAttribute(index)"
+                  />
+                </div>
+              </div>
             </div>
           }
         </div>

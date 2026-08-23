@@ -1,3 +1,10 @@
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDragHandle,
+  CdkDropList,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import {
@@ -26,19 +33,25 @@ import { ProductAttributePicker } from '../components/attribute-picker/attribute
 type AttributeRowControls = {
   attributeId: FormControl<number | null>;
   attributeValueId: FormControl<number | null>;
+  order: FormControl<number>;
 };
 
-function createAttributeRow(formBuilder: FormBuilder): FormGroup<AttributeRowControls> {
+const attributeOrderBuffer = 10;
+
+function createAttributeRow(
+  formBuilder: FormBuilder,
+  order: number,
+): FormGroup<AttributeRowControls> {
   return formBuilder.group({
     attributeId: formBuilder.control<number | null>(null),
     attributeValueId: formBuilder.control<number | null>(null),
+    order: formBuilder.control(order, { nonNullable: true }),
   });
 }
 
 function atLeastOneAttribute(control: AbstractControl): ValidationErrors | null {
   const attributes = control.get('attributes')?.value as
-    | Array<{ attributeId: number | null; attributeValueId: number | null }>
-    | undefined;
+    Array<{ attributeId: number | null; attributeValueId: number | null }> | undefined;
   return attributes?.some(
     (attribute) => attribute.attributeId !== null && attribute.attributeValueId !== null,
   )
@@ -48,7 +61,15 @@ function atLeastOneAttribute(control: AbstractControl): ValidationErrors | null 
 
 @Component({
   selector: 'new-product-page',
-  imports: [BreadcrumbsNg, ProductAttributePicker, ReactiveFormsModule, RouterLink],
+  imports: [
+    BreadcrumbsNg,
+    CdkDrag,
+    CdkDragHandle,
+    CdkDropList,
+    ProductAttributePicker,
+    ReactiveFormsModule,
+    RouterLink,
+  ],
   templateUrl: './new-product.page.html',
 })
 export default class NewProductPage {
@@ -70,7 +91,7 @@ export default class NewProductPage {
   protected readonly error = signal<string | null>(null);
 
   protected readonly attributeRows = this.formBuilder.array<FormGroup<AttributeRowControls>>([
-    createAttributeRow(this.formBuilder),
+    createAttributeRow(this.formBuilder, attributeOrderBuffer),
   ]);
   protected readonly form = this.formBuilder.group(
     {
@@ -128,12 +149,25 @@ export default class NewProductPage {
   }
 
   protected addAttribute(): void {
-    this.attributeRows.push(createAttributeRow(this.formBuilder));
+    const order = this.getPositionNewCard(this.attributeRows.controls);
+    this.attributeRows.push(createAttributeRow(this.formBuilder, order));
   }
 
   protected removeAttribute(index: number): void {
     this.attributeRows.removeAt(index);
     this.form.updateValueAndValidity();
+  }
+
+  protected dropAttribute(event: CdkDragDrop<FormGroup<AttributeRowControls>[]>): void {
+    if (event.previousIndex === event.currentIndex) {
+      return;
+    }
+
+    moveItemInArray(this.attributeRows.controls, event.previousIndex, event.currentIndex);
+    const order = this.getPosition(this.attributeRows.controls, event.currentIndex);
+    this.attributeRows.at(event.currentIndex).controls.order.setValue(order);
+    this.attributeRows.updateValueAndValidity();
+    this.form.markAsDirty();
   }
 
   protected selectedAttributeIds(excludeId: number | null): number[] {
@@ -169,6 +203,7 @@ export default class NewProductPage {
         {
           attributeId: attribute.attributeId,
           attributeValueId: attribute.attributeValueId,
+          order: attribute.order,
         },
       ];
     });
@@ -196,10 +231,7 @@ export default class NewProductPage {
   private async loadOptions(): Promise<void> {
     this.isLoading.set(true);
     try {
-      const [attributes] = await Promise.all([
-        this.loadAttributes(),
-        this.loadBaseProducts(),
-      ]);
+      const [attributes] = await Promise.all([this.loadAttributes(), this.loadBaseProducts()]);
       this.attributes.set(attributes);
       this.form.updateValueAndValidity();
     } catch (err) {
@@ -235,6 +267,33 @@ export default class NewProductPage {
       ),
     );
     return [...firstPage.data, ...remainingPages.flatMap((page) => page.data)];
+  }
+
+  private getPosition(cards: FormGroup<AttributeRowControls>[], currentIndex: number): number {
+    if (cards.length === 1) {
+      return attributeOrderBuffer;
+    }
+
+    if (currentIndex === 0) {
+      return cards[1].controls.order.value / 2;
+    }
+
+    const lastIndex = cards.length - 1;
+    if (currentIndex < lastIndex) {
+      const previousPosition = cards[currentIndex - 1].controls.order.value;
+      const nextPosition = cards[currentIndex + 1].controls.order.value;
+      return (previousPosition + nextPosition) / 2;
+    }
+
+    return cards[lastIndex - 1].controls.order.value + attributeOrderBuffer;
+  }
+
+  private getPositionNewCard(cards: FormGroup<AttributeRowControls>[]): number {
+    if (cards.length === 0) {
+      return attributeOrderBuffer;
+    }
+
+    return cards[cards.length - 1].controls.order.value + attributeOrderBuffer;
   }
 
   private getErrorMessage(error: unknown): string {

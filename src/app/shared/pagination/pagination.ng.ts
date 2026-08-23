@@ -6,10 +6,7 @@ import { Component, input, model } from '@angular/core';
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/60">
         <span class="shrink-0">Mostrar</span>
-        <select
-          class="select select-sm w-20 shrink-0"
-          (change)="onPageSizeChange($event)"
-        >
+        <select class="select select-sm w-20 shrink-0" (change)="onPageSizeChange($event)">
           @for (size of pageSizes(); track size) {
             <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
           }
@@ -42,6 +39,9 @@ import { Component, input, model } from '@angular/core';
       </div>
     </div>
   `,
+  host: {
+    class: 'class',
+  },
 })
 export default class PaginationNg {
   readonly page = model<number>(1);

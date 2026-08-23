@@ -8,6 +8,9 @@ import { NameProduct } from '../name-product/name-product.component';
   selector: 'products-table',
   imports: [Icon, NameProduct],
   templateUrl: './products-table.component.html',
+  host: {
+    class: 'block',
+  },
 })
 export class ProductsTable {
   readonly products = input.required<Product[]>();

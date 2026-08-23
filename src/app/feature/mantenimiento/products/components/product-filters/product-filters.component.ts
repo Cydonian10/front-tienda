@@ -7,6 +7,9 @@ import { Icon } from '../../../../../shared/icon/icon';
   selector: 'product-filters',
   imports: [Icon, RouterLink],
   templateUrl: './product-filters.component.html',
+  host: {
+    class: 'block',
+  },
 })
 export class ProductFilters {
   readonly searchChanged = output<string>();

@@ -20,6 +20,7 @@
     <products-table
       [products]="products.value()?.data ?? []"
       (deleteRequested)="onDelete($event)"
+      (editRequested)="onEdit($event)"
     />
 
     <ng-pagination

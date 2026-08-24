@@ -21,6 +21,12 @@ export interface CreateProduct {
   productAttributes: ProductAttributeItem[];
 }
 
+export interface UpdateProduct {
+  stock?: number;
+  price?: number;
+  productAttributes?: ProductAttributeItem[];
+}
+
 export interface Product {
   id: number;
   stock: number;

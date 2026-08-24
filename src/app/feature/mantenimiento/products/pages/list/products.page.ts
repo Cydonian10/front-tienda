@@ -2,6 +2,7 @@ import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { debounceTime, startWith, Subject } from 'rxjs';
 import { toast } from 'ngx-sonner';
@@ -24,6 +25,7 @@ import { ProductsService } from '../../../../../core/api/products.service';
 export default class ProductsPage {
   private readonly dialog = inject(Dialog);
   private readonly productsService = inject(ProductsService);
+  private readonly router = inject(Router);
 
   protected readonly page = signal(1);
   protected readonly pageSize = signal(10);
@@ -120,6 +122,10 @@ export default class ProductsPage {
     } catch (err) {
       toast.error(this.getErrorMessage(err));
     }
+  }
+
+  protected async onEdit(product: Product): Promise<void> {
+    await this.router.navigate(['/mantenimiento/productos', product.id, 'editar']);
   }
 
   protected readonly errorMessage = computed<string | null>(() => {

@@ -1,6 +1,6 @@
 # SPEC 05 — Edición de productos
 
-> **Status:** Draft
+> **Status:** Aprobado
 > **Depends on:** SPEC 01 (listado de productos), SPEC 02 (creación de productos), API `ApiTienda` SPEC 06 (CRUD de products), API `ApiTienda` SPEC 15 (eliminación de `product.name`).
 > **Date:** 2026-08-23
 > **Objective:** Añadir la edición de stock, precio y atributos de un producto mediante `PATCH /products/:id`, incluyendo el orden de los atributos en el mismo guardado y permitiendo dejar el producto sin atributos.
@@ -131,12 +131,12 @@ Convenciones:
 
 ## Risks
 
-| Risk | Mitigation |
-| ---- | ---------- |
+| Risk                                                                                                 | Mitigation                                                                                                            |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | El PATCH general reemplaza todos los atributos y puede eliminar datos si el payload está incompleto. | Construir el payload desde el estado completo del `FormArray` y probar cambios de valores, orden y eliminación total. |
-| Un error durante el guardado puede dejar al usuario con datos locales distintos del servidor. | No navegar ante errores, conservar el formulario y usar la respuesta completa del PATCH cuando sea exitoso. |
-| El cambio de validación para `PATCH` puede confundirse con la validación de creación. | Ajustar únicamente `UpdateProductDto` y mantener `ArrayNotEmpty` en `CreateProductDto`, con pruebas para ambos casos. |
-| El orden visual puede perderse al mapear la respuesta. | Mapear siempre el campo `order` y ordenar las filas según el orden recibido antes de mostrar el formulario. |
+| Un error durante el guardado puede dejar al usuario con datos locales distintos del servidor.        | No navegar ante errores, conservar el formulario y usar la respuesta completa del PATCH cuando sea exitoso.           |
+| El cambio de validación para `PATCH` puede confundirse con la validación de creación.                | Ajustar únicamente `UpdateProductDto` y mantener `ArrayNotEmpty` en `CreateProductDto`, con pruebas para ambos casos. |
+| El orden visual puede perderse al mapear la respuesta.                                               | Mapear siempre el campo `order` y ordenar las filas según el orden recibido antes de mostrar el formulario.           |
 
 ## What is **not** in this spec
 

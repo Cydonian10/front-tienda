@@ -1,0 +1,67 @@
+<ng-breadcrumbs />
+
+<div class="mx-auto mt-6 w-full max-w-3xl space-y-6 sm:space-y-8">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <div>
+      <p class="text-sm font-medium text-base-content/60">Inventario</p>
+      <h1 class="text-2xl font-semibold">Editar producto</h1>
+      @if (product(); as currentProduct) {
+        <p class="mt-1 text-sm text-base-content/60">{{ currentProduct.baseProductName }}</p>
+      }
+    </div>
+    <a routerLink="/mantenimiento/productos" class="btn btn-soft btn-sm">Volver al listado</a>
+  </div>
+
+  @if (error(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex justify-center py-16">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else {
+    <form class="space-y-6 sm:space-y-8" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4 sm:p-6">
+        <legend class="fieldset-legend text-base">Datos del producto</legend>
+
+        <div class="rounded-box bg-base-200 px-4 py-3">
+          <p class="text-xs font-medium uppercase tracking-wide text-base-content/60">
+            Producto base
+          </p>
+          <p class="mt-1 font-medium">{{ product()?.baseProductName }}</p>
+        </div>
+
+        <product-inventory-fields [stock]="stockControl" [price]="priceControl" />
+      </fieldset>
+
+      <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4 sm:p-6">
+        <legend class="fieldset-legend text-base">Atributos</legend>
+        <p class="label mb-3">
+          Puedes cambiar los valores, reordenar los atributos o dejar el producto sin atributos.
+        </p>
+
+        <product-attributes-editor [attributes]="attributes()" [attributeRows]="attributeRows" />
+
+        @if (form.touched && form.hasError('attributeIncomplete')) {
+          <p class="label text-error">Completa o quita las filas de atributos incompletas.</p>
+        }
+        @if (form.touched && form.hasError('attributeDuplicate')) {
+          <p class="label text-error">No se puede repetir el mismo atributo.</p>
+        }
+      </fieldset>
+
+      <div class="flex flex-wrap justify-end gap-2">
+        <a routerLink="/mantenimiento/productos" class="btn">Cancelar</a>
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+          @if (isSubmitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          Guardar cambios
+        </button>
+      </div>
+    </form>
+  }
+</div>

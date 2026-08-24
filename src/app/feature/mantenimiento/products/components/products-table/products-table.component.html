@@ -22,6 +22,14 @@
             <div class="flex justify-end gap-1">
               <button
                 type="button"
+                class="btn btn-soft btn-xs"
+                [attr.aria-label]="'Editar ' + product.baseProductName"
+                (click)="editRequested.emit(product)"
+              >
+                Editar
+              </button>
+              <button
+                type="button"
                 class="btn btn-soft btn-xs text-error"
                 [attr.aria-label]="'Eliminar ' + product.baseProductName"
                 (click)="deleteRequested.emit(product)"

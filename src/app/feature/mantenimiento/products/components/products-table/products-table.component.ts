@@ -15,6 +15,7 @@ import { NameProduct } from '../name-product/name-product.component';
 export class ProductsTable {
   readonly products = input.required<Product[]>();
   readonly deleteRequested = output<Product>();
+  readonly editRequested = output<Product>();
 
   protected attributesLabel(product: Product): string {
     if (product.productAttributes.length === 0) {

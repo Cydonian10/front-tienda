@@ -51,6 +51,12 @@ const MarcasPage: Routes = [
         loadComponent: () => import('./products/pages/create/new-product.page'),
         title: 'Nuevo Producto',
       },
+      {
+        path: ':id/editar',
+        data: { breadcrumb: 'Editar Producto' },
+        loadComponent: () => import('./products/pages/edit/edit-product.page'),
+        title: 'Editar Producto',
+      },
     ],
   },
 ];

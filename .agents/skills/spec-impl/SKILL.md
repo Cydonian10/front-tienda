@@ -166,7 +166,8 @@ After showing the spec summary, tell the user:
 
 ```
 I am going to implement the spec following the implementation plan exactly.
-I will pause after each step so you can review the diff.
+By default, I will pause after each step so you can review the diff.
+You can ask me to continue in batches of 3 or 4 steps at any point.
 
 Shall we start with Step 1?
 ```
@@ -181,10 +182,16 @@ Once confirmed, follow these rules during the entire implementation:
 
 **Work rhythm:**
 
-- Implement one step of the plan.
-- Show a summary of which files you touched and what you did.
-- Say: `Step N completed. Could you review the diff and let me know if I continue with Step N+1?`
-- Wait for confirmation before continuing.
+- The default batch size is one step.
+- If the user explicitly asks for "the next 3 steps" / "los próximos 3 pasos", implement one batch of up to 3 consecutive plan steps. The same applies to 4 steps.
+- If the user asks to continue "3 at a time" / "de 3 en 3", or "4 at a time" / "de 4 en 4", keep that batch size for subsequent batches until they request a different size or return to one-by-one execution.
+- Never skip, reorder, or combine plan steps merely to fill a batch. If fewer steps remain, implement only the remaining steps.
+- Implement the selected number of consecutive steps. Internally verify each step, but do not pause between steps in the same batch.
+- Show a summary of which files you touched and what you did across the completed batch.
+- For one step, say: `Step N completed. Could you review the diff and let me know if I continue with Step N+1?`
+- For a batch, say: `Steps N-M completed. Could you review the diff and let me know if I continue with Step M+1?`
+- Wait for explicit confirmation before continuing with the next step or batch.
+- If the user asks for a batch size other than 3 or 4, ask them to choose one step, 3 steps, or 4 steps before implementing it.
 
 **If during the implementation you find an ambiguity** the spec does not resolve:
 
@@ -220,9 +227,10 @@ in your repo's language) and make the final commit before merging this branch.
   Phase 1  →  Finds specs/01-mvp-arkanoid.md
   Phase 2  →  Reads the state → "Approved" (or "Aprobado", etc.) → ✅ continues
   Phase 3  →  git checkout -b spec-01-mvp-arkanoid → git checkout spec-01-mvp-arkanoid
-              Shows objective, scope, plan and criteria
-  Phase 4  →  Implements step by step with pauses
-              Ends by reminding to verify the acceptance criteria
+               Shows objective, scope, plan and criteria
+  Phase 4  →  Implements one step at a time by default, or batches of 3/4
+               when explicitly requested, with pauses after each batch
+               Ends by reminding to verify the acceptance criteria
 
 /spec-impl 02-powerups  (state: Draft / Borrador)
 

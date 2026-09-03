@@ -1,0 +1,47 @@
+<div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Valor</th>
+        <th class="text-right">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (unit of units(); track unit.id) {
+        <tr>
+          <th>{{ unit.id }}</th>
+          <td>{{ unit.name }}</td>
+          <td>{{ unit.value }}</td>
+          <td>
+            <div class="flex justify-end gap-1">
+              <button
+                type="button"
+                class="btn btn-soft btn-xs"
+                [attr.aria-label]="'Editar ' + unit.name"
+                (click)="editRequested.emit(unit)"
+              >
+                <app-icon name="pencil" classes="size-4" />
+              </button>
+              <button
+                type="button"
+                class="btn btn-soft btn-xs text-error"
+                [attr.aria-label]="'Eliminar ' + unit.name"
+                (click)="deleteRequested.emit(unit)"
+              >
+                <app-icon name="trash" classes="size-4" />
+              </button>
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="4" class="py-8 text-center text-base-content/60">
+            No hay unidades de medida
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

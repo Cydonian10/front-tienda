@@ -1,0 +1,14 @@
+<div class="w-full sm:max-w-md">
+  <label for="measurement-units-search" class="sr-only">
+    Buscar unidades de medida por nombre
+  </label>
+  <label class="input w-full">
+    <app-icon name="search" />
+    <input
+      id="measurement-units-search"
+      type="search"
+      placeholder="Buscar unidad por nombre..."
+      (input)="onSearch($event)"
+    />
+  </label>
+</div>

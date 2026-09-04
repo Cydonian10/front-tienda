@@ -1,6 +1,6 @@
 # SPEC 05 — Edición de productos
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01 (listado de productos), SPEC 02 (creación de productos), API `ApiTienda` SPEC 06 (CRUD de products), API `ApiTienda` SPEC 15 (eliminación de `product.name`).
 > **Date:** 2026-08-23
 > **Objective:** Añadir la edición de stock, precio y atributos de un producto mediante `PATCH /products/:id`, incluyendo el orden de los atributos en el mismo guardado y permitiendo dejar el producto sin atributos.

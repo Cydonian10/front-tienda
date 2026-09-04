@@ -1,6 +1,6 @@
 # SPEC 06 — CRUD de unidades de medida
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** API `ApiTienda` SPEC 08 (CRUD de `measurement-units`)
 > **Date:** 2026-09-02
 > **Objective:** Añadir al frontend una pantalla de mantenimiento para listar, crear, editar y eliminar unidades de medida mediante un formulario modal reutilizable.
@@ -97,30 +97,30 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] La ruta `/mantenimiento/unidades-medida` carga sin errores.
-- [ ] El menú de mantenimiento contiene **Unidades de medida** y navega a la ruta correcta.
-- [ ] La página solicita `GET /measurement-units` con `page` y `limit`.
-- [ ] El buscador envía `search` al API y reinicia la página a `1`.
-- [ ] El listado muestra ID, nombre, valor y acciones para cada unidad.
-- [ ] El listado muestra un estado vacío cuando la respuesta no contiene registros.
-- [ ] La paginación reutiliza `ng-pagination` con tamaños `10`, `25` y `50`.
-- [ ] El modal de creación muestra los campos `name` y `value`.
-- [ ] El modal no permite enviar cuando `name` está vacío o contiene únicamente espacios.
-- [ ] El modal no permite enviar cuando `value` está vacío o contiene únicamente espacios.
-- [ ] El modal no permite enviar un `value` con más de 5 caracteres.
-- [ ] Crear una unidad envía `POST /measurement-units` con los valores recortados.
-- [ ] Tras crear correctamente, el modal se cierra, aparece un toast y la unidad aparece en el estado local.
-- [ ] La acción **Editar** abre el mismo modal con los valores actuales de la unidad.
-- [ ] Editar una unidad envía `PATCH /measurement-units/:id` con los valores recortados.
-- [ ] Tras editar correctamente, el modal se cierra, aparece un toast y la fila se reemplaza con la respuesta del API.
-- [ ] La acción **Eliminar** solicita confirmación antes de llamar al API.
-- [ ] Cancelar la confirmación no elimina la unidad.
-- [ ] Tras eliminar correctamente, aparece un toast y la unidad desaparece del estado local.
-- [ ] Si se elimina la última fila de una página posterior, la página se ajusta a la anterior y se consultan sus datos.
-- [ ] Los errores de validación o conflicto del API se muestran sin cerrar el modal ni perder los valores introducidos.
-- [ ] Los errores de eliminación se muestran mediante toast y conservan el registro en la tabla.
-- [ ] La página muestra un estado de carga mientras consulta el listado.
-- [ ] `npm run build` y `npm test` pasan sin errores en `FrontTienda`.
+- [x] La ruta `/mantenimiento/unidades-medida` carga sin errores.
+- [x] El menú de mantenimiento contiene **Unidades de medida** y navega a la ruta correcta.
+- [x] La página solicita `GET /measurement-units` con `page` y `limit`.
+- [x] El buscador envía `search` al API y reinicia la página a `1`.
+- [x] El listado muestra ID, nombre, valor y acciones para cada unidad.
+- [x] El listado muestra un estado vacío cuando la respuesta no contiene registros.
+- [x] La paginación reutiliza `ng-pagination` con tamaños `10`, `25` y `50`.
+- [x] El modal de creación muestra los campos `name` y `value`.
+- [x] El modal no permite enviar cuando `name` está vacío o contiene únicamente espacios.
+- [x] El modal no permite enviar cuando `value` está vacío o contiene únicamente espacios.
+- [x] El modal no permite enviar un `value` con más de 5 caracteres.
+- [x] Crear una unidad envía `POST /measurement-units` con los valores recortados.
+- [x] Tras crear correctamente, el modal se cierra, aparece un toast y la unidad aparece en el estado local.
+- [x] La acción **Editar** abre el mismo modal con los valores actuales de la unidad.
+- [x] Editar una unidad envía `PATCH /measurement-units/:id` con los valores recortados.
+- [x] Tras editar correctamente, el modal se cierra, aparece un toast y la fila se reemplaza con la respuesta del API.
+- [x] La acción **Eliminar** solicita confirmación antes de llamar al API.
+- [x] Cancelar la confirmación no elimina la unidad.
+- [x] Tras eliminar correctamente, aparece un toast y la unidad desaparece del estado local.
+- [x] Si se elimina la última fila de una página posterior, la página se ajusta a la anterior y se consultan sus datos.
+- [x] Los errores de validación o conflicto del API se muestran sin cerrar el modal ni perder los valores introducidos.
+- [x] Los errores de eliminación se muestran mediante toast y conservan el registro en la tabla.
+- [x] La página muestra un estado de carga mientras consulta el listado.
+- [x] `npm run build` y `npm test` pasan sin errores en `FrontTienda`.
 
 ## Decisions
 

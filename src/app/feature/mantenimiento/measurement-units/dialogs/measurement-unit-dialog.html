@@ -9,7 +9,7 @@
       </p>
     </div>
 
-    <form (submit)="onSubmit($event)" class="space-y-4">
+    <form [formRoot]="form" class="space-y-4">
       <fieldset class="fieldset">
         <legend class="fieldset-legend">Nombre</legend>
         <input
@@ -47,15 +47,16 @@
       }
 
       <div class="card-actions justify-end">
-        <button type="button" class="btn btn-soft" (click)="close()" [disabled]="isSubmitting()">
+        <button
+          type="button"
+          class="btn btn-soft"
+          (click)="close()"
+          [disabled]="form().submitting()"
+        >
           Cancelar
         </button>
-        <button
-          type="submit"
-          class="btn btn-soft btn-success"
-          [disabled]="form().invalid() || isSubmitting()"
-        >
-          @if (isSubmitting()) {
+        <button type="submit" class="btn btn-soft btn-success" [disabled]="form().submitting()">
+          @if (form().submitting()) {
             <span class="loading loading-spinner loading-sm"></span>
           }
           {{ measurementUnit ? 'Guardar cambios' : 'Guardar' }}

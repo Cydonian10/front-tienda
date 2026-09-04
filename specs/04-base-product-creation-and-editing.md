@@ -1,6 +1,6 @@
 # SPEC 04 — Creación y edición de producto base con stock/precio y producto default
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01 (página de productos base), SPEC 02 (crear producto), SPEC 03 (imágenes de producto), API `ApiTienda` SPEC 05 (base-products) y contrato `PATCH /base-products/:id` ya ampliado.
 > **Date:** 2026-08-19
 > **Objective:** Extender el alta de producto base con campos obligatorios de stock y precio iniciales, mostrar tras crear una tarjeta con el producto default generado y un enlace al menú de Productos para crear variantes, y añadir la edición de nombre, marca, categorías y unidades del base-product.

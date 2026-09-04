@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
 import {
   FormField,
+  FormRoot,
   form,
   maxLength,
   required,
@@ -28,7 +29,7 @@ interface MeasurementUnitFormModel {
 
 @Component({
   selector: 'measurement-unit-dialog',
-  imports: [FormField],
+  imports: [FormField, FormRoot],
   templateUrl: './measurement-unit-dialog.html',
 })
 export class MeasurementUnitDialog {
@@ -39,26 +40,55 @@ export class MeasurementUnitDialog {
   private readonly measurementUnitsService = inject(MeasurementUnitsService);
 
   protected readonly measurementUnit = this.data?.measurementUnit ?? null;
-  protected readonly isSubmitting = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly model = signal<MeasurementUnitFormModel>({
     name: this.measurementUnit?.name ?? '',
     value: this.measurementUnit?.value ?? '',
   });
 
-  protected readonly form = form(this.model, (path) => {
-    required(path.name, { message: 'El nombre es obligatorio.' });
-    required(path.value, { message: 'El valor es obligatorio.' });
-    validate(path.name, ({ value }) =>
-      value().trim() ? undefined : requiredError({ message: 'El nombre es obligatorio.' }),
-    );
-    validate(path.value, ({ value }) =>
-      value().trim() ? undefined : requiredError({ message: 'El valor es obligatorio.' }),
-    );
-    maxLength(path.value, 5, {
-      message: 'El valor no puede superar 5 caracteres.',
-    });
-  });
+  protected readonly form = form(
+    this.model,
+    (path) => {
+      required(path.name, { message: 'El nombre es obligatorio.' });
+      required(path.value, { message: 'El valor es obligatorio.' });
+      validate(path.name, ({ value }) =>
+        value().trim() ? undefined : requiredError({ message: 'El nombre es obligatorio.' }),
+      );
+      validate(path.value, ({ value }) =>
+        value().trim() ? undefined : requiredError({ message: 'El valor es obligatorio.' }),
+      );
+      maxLength(path.value, 5, {
+        message: 'El valor no puede superar 5 caracteres.',
+      });
+    },
+    {
+      submission: {
+        action: async (field) => {
+          this.error.set(null);
+
+          const { name, value } = field().value();
+          const dto: CreateMeasurementUnit = {
+            name: name.trim(),
+            value: value.trim(),
+          };
+
+          try {
+            const measurementUnit = this.measurementUnit
+              ? await firstValueFrom(
+                  this.measurementUnitsService.update(this.measurementUnit.id, dto),
+                )
+              : await firstValueFrom(this.measurementUnitsService.create(dto));
+            this.dialogRef.close(measurementUnit);
+            return undefined;
+          } catch (err) {
+            const message = this.getErrorMessage(err);
+            this.error.set(message);
+            return { kind: 'serverError', message };
+          }
+        },
+      },
+    },
+  );
 
   protected readonly nameError = computed(() => {
     const field = this.form.name();
@@ -78,33 +108,6 @@ export class MeasurementUnitDialog {
     }
     return 'El valor es obligatorio y no puede contener solo espacios.';
   });
-
-  protected async onSubmit(event: SubmitEvent): Promise<void> {
-    event.preventDefault();
-    this.form().markAsTouched();
-    if (this.form().invalid()) {
-      return;
-    }
-
-    const { name, value } = this.form().value();
-    const dto: CreateMeasurementUnit = {
-      name: name.trim(),
-      value: value.trim(),
-    };
-    this.isSubmitting.set(true);
-    this.error.set(null);
-
-    try {
-      const measurementUnit = this.measurementUnit
-        ? await firstValueFrom(this.measurementUnitsService.update(this.measurementUnit.id, dto))
-        : await firstValueFrom(this.measurementUnitsService.create(dto));
-      this.dialogRef.close(measurementUnit);
-    } catch (err) {
-      this.error.set(this.getErrorMessage(err));
-    } finally {
-      this.isSubmitting.set(false);
-    }
-  }
 
   protected close(): void {
     this.dialogRef.close();

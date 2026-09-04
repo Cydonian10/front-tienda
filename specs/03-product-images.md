@@ -1,6 +1,6 @@
 # SPEC 03 — Subida de imágenes de producto con principal
 
-> **Status:** Draft
+> **Status:** Aprobado
 > **Depends on:** SPEC 02 (crear producto, aporta el `productId`), API `ApiTienda` SPEC 07 (imágenes polimórficas).
 > **Date:** 2026-08-18
 > **Objective:** Tras crear un producto, permitir subir una o varias imágenes con `POST /images` (una petición por archivo, con estado y progreso individuales), elegir una imagen principal con `PATCH /images/:id`, y finalizar para volver al listado, conservando el `productId` si una imagen falla.
@@ -91,11 +91,11 @@ export interface Image {
 
 ## Risks
 
-| Risk                                                       | Mitigation                                                          |
-| ---------------------------------------------------------- | ------------------------------------------------------------------- |
-| Falla de una imagen deja el producto creado sin todas      | Estado por archivo, reintento selectivo y producto conservado.      |
-| El endpoint actual no acepta varias imágenes a la vez      | Una petición por archivo; no se modifica la API.                    |
-| Dependencia de SPEC 02 para el `productId`                 | El flujo de imágenes solo se alcanza tras una creación exitosa.     |
+| Risk                                                  | Mitigation                                                      |
+| ----------------------------------------------------- | --------------------------------------------------------------- |
+| Falla de una imagen deja el producto creado sin todas | Estado por archivo, reintento selectivo y producto conservado.  |
+| El endpoint actual no acepta varias imágenes a la vez | Una petición por archivo; no se modifica la API.                |
+| Dependencia de SPEC 02 para el `productId`            | El flujo de imágenes solo se alcanza tras una creación exitosa. |
 
 ## What is **not** in this spec
 

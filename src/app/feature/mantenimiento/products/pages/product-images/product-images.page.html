@@ -1,0 +1,93 @@
+<ng-breadcrumbs />
+
+<div class="mx-auto mt-6 w-full max-w-4xl space-y-6 sm:space-y-8">
+  <header class="flex flex-col gap-4 border-b border-base-300 pb-5 sm:flex-row sm:items-end sm:justify-between">
+    <div class="space-y-1">
+      <p class="text-sm font-medium text-base-content/60">Producto #{{ productId }}</p>
+      <h1 class="text-2xl font-semibold tracking-tight">Imágenes del producto</h1>
+      <p class="max-w-xl text-sm text-base-content/60">
+        Añade imágenes para que el catálogo muestre el producto con claridad.
+      </p>
+    </div>
+    <span class="badge badge-soft">{{ uploads().length }} seleccionadas</span>
+  </header>
+
+  @if (pageError(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  } @else {
+    <section class="card card-border bg-base-100">
+      <div class="card-body gap-5">
+        <div class="space-y-1">
+          <h2 class="card-title text-lg">Seleccionar archivos</h2>
+          <p class="text-sm text-base-content/60">JPEG, PNG o WebP. Cada archivo puede pesar hasta 5 MB.</p>
+        </div>
+
+        <input
+          id="product-image-files"
+          type="file"
+          class="file-input w-full"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          (change)="onFilesSelected($event)"
+        />
+
+        @if (uploads().length) {
+          <div class="grid gap-3 sm:grid-cols-2">
+            @for (upload of uploads(); track upload.id) {
+              <article class="flex gap-3 rounded-box border border-base-300 bg-base-200 p-3">
+                <img
+                  [src]="upload.previewUrl"
+                  [alt]="'Vista previa de ' + upload.file.name"
+                  class="size-20 shrink-0 rounded-field object-cover"
+                />
+                <div class="min-w-0 flex-1 space-y-2">
+                  <div class="flex items-start justify-between gap-2">
+                    <p class="truncate text-sm font-medium">{{ upload.file.name }}</p>
+                    <span
+                      class="badge badge-sm badge-soft"
+                      [class.badge-success]="upload.status === 'success'"
+                      [class.badge-warning]="upload.status === 'pending' || upload.status === 'uploading'"
+                      [class.badge-error]="upload.status === 'error'"
+                    >
+                      {{ statusLabel(upload.status) }}
+                    </span>
+                  </div>
+                  <p class="text-xs text-base-content/60">{{ upload.file.size / 1024 / 1024 | number: '1.1-1' }} MB</p>
+                  @if (upload.status === 'uploading' || upload.status === 'success') {
+                    <progress
+                      class="progress h-1"
+                      [class.progress-success]="upload.status === 'success'"
+                      [value]="upload.progress"
+                      max="100"
+                    ></progress>
+                  }
+                  @if (upload.error; as message) {
+                    <p class="text-xs text-error">{{ message }}</p>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        }
+
+        <div class="card-actions justify-end">
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!hasPendingUploads() || isUploading()"
+            (click)="uploadPending()"
+          >
+            @if (isUploading()) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              <app-icon name="media" />
+            }
+            Cargar imágenes
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+</div>

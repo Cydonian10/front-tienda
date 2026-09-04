@@ -14,6 +14,12 @@ const MarcasPage: Routes = [
     title: 'Categorías',
   },
   {
+    path: 'unidades-medida',
+    data: { breadcrumb: 'Unidades de medida' },
+    loadComponent: () => import('./measurement-units/pages/measurement-units.page'),
+    title: 'Unidades de medida',
+  },
+  {
     path: 'base-products',
     data: { breadcrumb: 'Producto Base' },
     children: [

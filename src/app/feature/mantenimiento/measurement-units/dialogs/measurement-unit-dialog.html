@@ -1,0 +1,66 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-6 p-6 sm:p-8">
+    <div class="space-y-1">
+      <h2 class="card-title">
+        {{ measurementUnit ? 'Editar unidad de medida' : 'Nueva unidad de medida' }}
+      </h2>
+      <p class="text-sm text-base-content/60">
+        Define el nombre visible y el valor corto de la unidad.
+      </p>
+    </div>
+
+    <form (submit)="onSubmit($event)" class="space-y-4">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Nombre</legend>
+        <input
+          id="measurement-unit-name"
+          type="text"
+          class="input w-full"
+          [class.input-error]="nameError()"
+          placeholder="Ej: Kilogramo"
+          [formField]="form.name"
+        />
+        @if (nameError(); as message) {
+          <p class="fieldset-label text-error">{{ message }}</p>
+        }
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Valor</legend>
+        <input
+          id="measurement-unit-value"
+          type="text"
+          class="input w-full"
+          [class.input-error]="valueError()"
+          placeholder="Ej: kg"
+          [formField]="form.value"
+        />
+        @if (valueError(); as message) {
+          <p class="fieldset-label text-error">{{ message }}</p>
+        }
+      </fieldset>
+
+      @if (error(); as message) {
+        <div role="alert" class="alert alert-error">
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <div class="card-actions justify-end">
+        <button type="button" class="btn btn-soft" (click)="close()" [disabled]="isSubmitting()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-soft btn-success"
+          [disabled]="form().invalid() || isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          {{ measurementUnit ? 'Guardar cambios' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<ng-breadcrumbs />
+
+<div class="mt-4 space-y-4">
+  <header class="flex justify-end flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div></div>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+      <measurement-units-search (searchChanged)="onSearch($event)" />
+      <button type="button" class="btn w-full sm:w-auto" (click)="onCreate()">
+        <app-icon name="plus" />
+        Nueva unidad
+      </button>
+    </div>
+  </header>
+
+  @if (listError(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div
+      role="status"
+      class="flex items-center gap-3 rounded-box border border-base-300 bg-base-100 p-6"
+    >
+      <span class="loading loading-spinner loading-sm"></span>
+      <span>Cargando unidades de medida...</span>
+    </div>
+  }
+
+  @if (measurementUnits(); as result) {
+    <measurement-units-table
+      [units]="result.data"
+      (editRequested)="onEdit($event)"
+      (deleteRequested)="onDelete($event)"
+    />
+  } @else if (!isLoading()) {
+    <measurement-units-table
+      [units]="[]"
+      (editRequested)="onEdit($event)"
+      (deleteRequested)="onDelete($event)"
+    />
+  }
+
+  <ng-pagination
+    [total]="total()"
+    [lastPage]="lastPage()"
+    [pageSizes]="pageSizes"
+    [(page)]="page"
+    [(pageSize)]="pageSize"
+  />
+</div>

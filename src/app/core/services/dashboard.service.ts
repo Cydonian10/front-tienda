@@ -14,6 +14,12 @@ const initialMenu: MenuItem[] = [
       { id: 'marcas', label: 'Marcas', icon: 'grid', route: '/mantenimiento/marcas' },
       { id: 'categorias', label: 'Categorías', icon: 'folder', route: '/mantenimiento/categorias' },
       {
+        id: 'unidades-medida',
+        label: 'Unidades de medida',
+        icon: 'queue-list',
+        route: '/mantenimiento/unidades-medida',
+      },
+      {
         id: 'base-products',
         label: 'Productos Base',
         icon: 'folder',

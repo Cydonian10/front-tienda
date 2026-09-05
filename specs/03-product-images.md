@@ -1,6 +1,6 @@
 # SPEC 03 — Subida de imágenes de producto con principal
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 02 (crear producto, aporta el `productId`), API `ApiTienda` SPEC 07 (imágenes polimórficas).
 > **Date:** 2026-08-18
 > **Objective:** Tras crear un producto, permitir subir una o varias imágenes con `POST /images` (una petición por archivo, con estado y progreso individuales), elegir una imagen principal con `PATCH /images/:id`, y finalizar para volver al listado, conservando el `productId` si una imagen falla.

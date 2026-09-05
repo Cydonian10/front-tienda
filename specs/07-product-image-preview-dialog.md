@@ -1,6 +1,6 @@
 # SPEC 07 — Visor ampliado de imágenes de producto
 
-> **Status:** Draft
+> **Status:** Aprobado
 > **Depends on:** SPEC 03 (subida de imágenes de producto)
 > **Date:** 2026-09-05
 > **Objective:** Permitir abrir en un diálogo la imagen de una miniatura del flujo de imágenes de producto mediante una transición compartida suave y accesible.
@@ -102,13 +102,13 @@ Convenciones:
 
 ## Risks
 
-| Risk                                                                 | Mitigation                                                                                         |
-| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| El navegador no soporta la View Transition API.                      | Detectar la API y usar una transición CSS equivalente sin impedir la apertura ni el cierre.         |
-| El nombre de transición se duplica entre varias miniaturas.          | Activar el nombre compartido únicamente en la miniatura seleccionada y usar el identificador local. |
-| La imagen guardada o el blob local deja de estar disponible.         | Mostrar un mensaje de error dentro del diálogo y mantener el cierre disponible.                     |
-| El foco se pierde al cerrar un overlay creado por CDK Dialog.        | Conservar la referencia al botón activador y devolverle el foco en el cierre.                       |
-| La animación afecta a usuarios con sensibilidad al movimiento.       | Desactivar el movimiento no esencial bajo `prefers-reduced-motion: reduce`.                         |
+| Risk                                                           | Mitigation                                                                                          |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| El navegador no soporta la View Transition API.                | Detectar la API y usar una transición CSS equivalente sin impedir la apertura ni el cierre.         |
+| El nombre de transición se duplica entre varias miniaturas.    | Activar el nombre compartido únicamente en la miniatura seleccionada y usar el identificador local. |
+| La imagen guardada o el blob local deja de estar disponible.   | Mostrar un mensaje de error dentro del diálogo y mantener el cierre disponible.                     |
+| El foco se pierde al cerrar un overlay creado por CDK Dialog.  | Conservar la referencia al botón activador y devolverle el foco en el cierre.                       |
+| La animación afecta a usuarios con sensibilidad al movimiento. | Desactivar el movimiento no esencial bajo `prefers-reduced-motion: reduce`.                         |
 
 ## What is **not** in this spec
 

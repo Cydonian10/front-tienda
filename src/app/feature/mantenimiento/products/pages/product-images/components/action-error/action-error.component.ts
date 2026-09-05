@@ -4,7 +4,8 @@ import { Component, input } from '@angular/core';
   selector: 'product-images-action-error',
   templateUrl: './action-error.component.html',
   host: {
-    class: 'block',
+    class: 'block alert alert-error',
+    role: 'alert',
   },
 })
 export class ProductImagesActionError {

@@ -16,6 +16,7 @@ import { ProductsService } from '../../../../../core/api/products.service';
 import { AttributeWithValues } from '../../../../../core/models/attribute.model';
 import { Product, ProductAttributeItem, UpdateProduct } from '../../../../../core/models/product.model';
 import BreadcrumbsNg from '../../../../../shared/breadcrumbs/breadcrumbs.ng';
+import { Icon } from '../../../../../shared/icon/icon';
 import {
   createProductAttributeRow,
   ProductAttributesEditor,
@@ -54,6 +55,7 @@ interface EditableProductState {
   selector: 'edit-product-page',
   imports: [
     BreadcrumbsNg,
+    Icon,
     ProductAttributesEditor,
     ProductInventoryFields,
     ReactiveFormsModule,
@@ -71,6 +73,7 @@ export default class EditProductPage {
 
   protected readonly attributes = signal<AttributeWithValues[]>([]);
   protected readonly product = signal<Product | null>(null);
+  protected readonly productId = this.id;
   protected readonly isLoading = signal(true);
   protected readonly isSubmitting = signal(false);
   protected readonly error = signal<string | null>(null);

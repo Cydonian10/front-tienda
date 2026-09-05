@@ -12,68 +12,76 @@
         Añade imágenes para que el catálogo muestre el producto con claridad.
       </p>
     </div>
-    <span class="badge badge-soft">{{ uploads().length }} seleccionadas</span>
+    <span class="badge badge-soft">{{ uploads().length }} imágenes</span>
   </header>
 
   @if (pageError(); as message) {
     <product-images-page-error [message]="message" />
   } @else {
-    @if (actionError(); as message) {
-      <product-images-action-error [message]="message" />
-    }
+    @if (isLoading()) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg"></span>
+      </div>
+    } @else {
+      @if (actionError(); as message) {
+        <product-images-action-error [message]="message" />
+      }
 
-    <section class="card card-border bg-base-100">
-      <div class="card-body gap-5">
-        <product-images-files-input (filesSelected)="onFilesSelected($event)" />
+      <section class="card card-border bg-base-100">
+        <div class="card-body gap-5">
+          <product-images-files-input (filesSelected)="onFilesSelected($event)" />
 
-        @if (uploads().length) {
-          <div class="grid gap-3 sm:grid-cols-2">
-            @for (upload of uploads(); track upload.id) {
-              <product-images-upload
-                [upload]="upload"
-                [isSettingMain]="isSettingMain()"
-                (setMain)="setMain($event)"
-              />
-            }
-          </div>
-        }
-
-        <div class="card-actions justify-between gap-2">
-          @if (hasRetryableErrors()) {
-            <button
-              type="button"
-              class="btn btn-soft"
-              [disabled]="isUploading()"
-              (click)="retryFailed()"
-            >
-              Reintentar fallidas
-            </button>
-          }
-          <div class="ml-auto flex flex-wrap justify-end gap-2">
-            <button
-              type="button"
-              class="btn"
-              [disabled]="!hasPendingUploads() || isUploading()"
-              (click)="uploadPending()"
-            >
-              @if (isUploading()) {
-                <span class="loading loading-spinner loading-sm"></span>
-              } @else {
-                <app-icon name="media" />
+          @if (uploads().length) {
+            <div class="grid gap-3 sm:grid-cols-2">
+              @for (upload of uploads(); track upload.id) {
+                <product-images-upload
+                  [upload]="upload"
+                  [isSettingMain]="isSettingMain()"
+                  [isRemoving]="isRemoving()"
+                  (setMain)="setMain($event)"
+                  (removeRequested)="removeImage($event)"
+                />
               }
-              Cargar imágenes
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              [disabled]="!canFinish()"
-              (click)="finish()"
-            >
-              Finalizar
-            </button>
+            </div>
+          }
+
+          <div class="card-actions justify-between gap-2">
+            @if (hasRetryableErrors()) {
+              <button
+                type="button"
+                class="btn btn-soft"
+                [disabled]="isUploading() || isRemoving() !== null"
+                (click)="retryFailed()"
+              >
+                Reintentar fallidas
+              </button>
+            }
+            <div class="ml-auto flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                class="btn"
+                [disabled]="!hasPendingUploads() || isUploading() || isRemoving() !== null"
+                (click)="uploadPending()"
+              >
+                @if (isUploading()) {
+                  <span class="loading loading-spinner loading-sm"></span>
+                } @else {
+                  <app-icon name="media" />
+                }
+                Cargar imágenes
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="!canFinish() || isRemoving() !== null"
+                (click)="finish()"
+              >
+                Finalizar
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    }
   }
 </div>

@@ -30,6 +30,15 @@
               </button>
               <button
                 type="button"
+                class="btn btn-soft btn-xs"
+                [attr.aria-label]="'Gestionar imágenes de ' + product.baseProductName"
+                (click)="imagesRequested.emit(product)"
+              >
+                <app-icon name="media" classes="size-4" />
+                Imágenes
+              </button>
+              <button
+                type="button"
                 class="btn btn-soft btn-xs text-error"
                 [attr.aria-label]="'Eliminar ' + product.baseProductName"
                 (click)="deleteRequested.emit(product)"

@@ -82,7 +82,7 @@ describe('NewProductPage', () => {
       price: 29.9,
       productAttributes: [{ attributeId: 7, attributeValueId: 70, order: 10 }],
     });
-    expect(router.navigate).toHaveBeenCalledWith(['/mantenimiento/productos']);
+    expect(router.navigate).toHaveBeenCalledWith(['/mantenimiento/productos', 12, 'imagenes']);
   });
 
   it('does not submit without at least one complete attribute pair', async () => {

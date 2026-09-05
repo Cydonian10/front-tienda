@@ -4,7 +4,7 @@ export type UploadStatus = 'pending' | 'uploading' | 'success' | 'error';
 
 export interface ImageUpload {
   id: number;
-  file: File;
+  file?: File;
   previewUrl: string;
   status: UploadStatus;
   progress: number;

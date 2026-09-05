@@ -9,7 +9,16 @@
         <p class="mt-1 text-sm text-base-content/60">{{ currentProduct.baseProductName }}</p>
       }
     </div>
-    <a routerLink="/mantenimiento/productos" class="btn btn-soft btn-sm">Volver al listado</a>
+    <div class="flex flex-wrap justify-end gap-2">
+      <a
+        [routerLink]="['/mantenimiento/productos', productId, 'imagenes']"
+        class="btn btn-soft btn-sm"
+      >
+        <app-icon name="media" />
+        Gestionar imágenes
+      </a>
+      <a routerLink="/mantenimiento/productos" class="btn btn-soft btn-sm">Volver al listado</a>
+    </div>
   </div>
 
   @if (error(); as message) {

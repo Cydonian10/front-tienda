@@ -128,6 +128,10 @@ export default class ProductsPage {
     await this.router.navigate(['/mantenimiento/productos', product.id, 'editar']);
   }
 
+  protected async onImages(product: Product): Promise<void> {
+    await this.router.navigate(['/mantenimiento/productos', product.id, 'imagenes']);
+  }
+
   protected readonly errorMessage = computed<string | null>(() => {
     const error = this.products.error();
     if (error instanceof HttpErrorResponse) {

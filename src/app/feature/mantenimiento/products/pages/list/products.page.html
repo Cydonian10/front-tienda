@@ -21,6 +21,7 @@
       [products]="products.value()?.data ?? []"
       (deleteRequested)="onDelete($event)"
       (editRequested)="onEdit($event)"
+      (imagesRequested)="onImages($event)"
     />
 
     <ng-pagination

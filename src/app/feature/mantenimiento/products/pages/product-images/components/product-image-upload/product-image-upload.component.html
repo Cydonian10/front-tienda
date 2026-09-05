@@ -1,26 +1,28 @@
 <article class="flex gap-3 rounded-box border border-base-300 bg-base-200 p-3">
   <img
     [src]="upload().previewUrl"
-    [alt]="'Vista previa de ' + upload().file.name"
+    [alt]="upload().file ? 'Vista previa de ' + upload().file?.name : 'Imagen del producto'"
     class="size-20 shrink-0 rounded-field object-cover"
   />
   <div class="min-w-0 flex-1 space-y-2">
     <div class="flex items-start justify-between gap-2">
-      <p class="truncate text-sm font-medium">{{ upload().file.name }}</p>
+      <p class="truncate text-sm font-medium">
+        {{ upload().file?.name ?? 'Imagen #' + upload().image?.id }}
+      </p>
       <span
         class="badge badge-sm badge-soft"
         [class.badge-success]="upload().status === 'success'"
-        [class.badge-warning]="
-          upload().status === 'pending' || upload().status === 'uploading'
-        "
+        [class.badge-warning]="upload().status === 'pending' || upload().status === 'uploading'"
         [class.badge-error]="upload().status === 'error'"
       >
         {{ statusLabel(upload().status) }}
       </span>
     </div>
-    <p class="text-xs text-base-content/60">
-      {{ upload().file.size / 1024 / 1024 | number: '1.1-1' }} MB
-    </p>
+    @if (upload().file; as file) {
+      <p class="text-xs text-base-content/60">{{ file.size / 1024 / 1024 | number: '1.1-1' }} MB</p>
+    } @else {
+      <p class="text-xs text-base-content/60">Imagen guardada</p>
+    }
     @if (upload().status === 'uploading' || upload().status === 'success') {
       <progress
         class="progress h-1"
@@ -32,25 +34,43 @@
     @if (upload().error; as message) {
       <p class="text-xs text-error">{{ message }}</p>
     }
-    @if (upload().image; as image) {
-      <div class="flex items-center justify-between gap-2 pt-1">
+    <div class="flex items-center justify-between gap-2 pt-1">
+      @if (upload().image; as image) {
         @if (image.isMain) {
           <span class="badge badge-success badge-sm">Imagen principal</span>
         } @else {
-          <span class="text-xs text-base-content/60">Imagen secundaria</span>
-          <button
-            type="button"
-            class="btn btn-ghost btn-xs"
-            [disabled]="isSettingMain() !== null"
-            (click)="setMain.emit(upload())"
-          >
-            @if (isSettingMain() === upload().id) {
-              <span class="loading loading-spinner loading-xs"></span>
-            }
-            Marcar principal
-          </button>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-base-content/60">Imagen secundaria</span>
+            <button
+              type="button"
+              class="btn btn-ghost btn-xs"
+              [disabled]="isSettingMain() !== null || isRemoving() !== null"
+              (click)="setMain.emit(upload())"
+            >
+              @if (isSettingMain() === upload().id) {
+                <span class="loading loading-spinner loading-xs"></span>
+              }
+              Marcar principal
+            </button>
+          </div>
         }
-      </div>
-    }
+      }
+      <button
+        type="button"
+        class="btn btn-ghost btn-xs text-error"
+        [attr.aria-label]="'Eliminar imagen ' + (upload().image?.id ?? upload().file?.name)"
+        [disabled]="
+          isSettingMain() !== null || isRemoving() !== null || upload().status === 'uploading'
+        "
+        (click)="removeRequested.emit(upload())"
+      >
+        @if (isRemoving() === upload().id) {
+          <span class="loading loading-spinner loading-xs"></span>
+        } @else {
+          <app-icon name="trash" classes="size-4" />
+        }
+        Eliminar
+      </button>
+    </div>
   </div>
 </article>

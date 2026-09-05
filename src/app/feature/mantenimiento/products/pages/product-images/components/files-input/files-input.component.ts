@@ -14,7 +14,6 @@ export class ProductImagesFilesInput {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     input.value = '';
-
     this.filesSelected.emit(files);
   }
 }

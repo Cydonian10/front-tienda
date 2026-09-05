@@ -63,6 +63,12 @@ const MarcasPage: Routes = [
         loadComponent: () => import('./products/pages/edit/edit-product.page'),
         title: 'Editar Producto',
       },
+      {
+        path: ':id/imagenes',
+        data: { breadcrumb: 'Imágenes' },
+        loadComponent: () => import('./products/pages/product-images/product-images.page'),
+        title: 'Imágenes del producto',
+      },
     ],
   },
 ];

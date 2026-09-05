@@ -1,7 +1,10 @@
 <ng-breadcrumbs />
 
 <div class="mx-auto mt-6 w-full max-w-4xl space-y-6 sm:space-y-8">
-  <header class="flex flex-col gap-4 border-b border-base-300 pb-5 sm:flex-row sm:items-end sm:justify-between">
+  <!-- Header -->
+  <header
+    class="flex flex-col gap-4 border-b border-base-300 pb-5 sm:flex-row sm:items-end sm:justify-between"
+  >
     <div class="space-y-1">
       <p class="text-sm font-medium text-base-content/60">Producto #{{ productId }}</p>
       <h1 class="text-2xl font-semibold tracking-tight">Imágenes del producto</h1>
@@ -13,15 +16,26 @@
   </header>
 
   @if (pageError(); as message) {
+    <!-- Componente de error page-->
     <div role="alert" class="alert alert-error">
       <span>{{ message }}</span>
     </div>
   } @else {
+    @if (actionError(); as message) {
+      <!-- Componente de action error -->
+      <div role="alert" class="alert alert-error">
+        <span>{{ message }}</span>
+      </div>
+    }
+
     <section class="card card-border bg-base-100">
       <div class="card-body gap-5">
+        <!-- Componente para seleccionar files -->
         <div class="space-y-1">
           <h2 class="card-title text-lg">Seleccionar archivos</h2>
-          <p class="text-sm text-base-content/60">JPEG, PNG o WebP. Cada archivo puede pesar hasta 5 MB.</p>
+          <p class="text-sm text-base-content/60">
+            JPEG, PNG o WebP. Cada archivo puede pesar hasta 5 MB.
+          </p>
         </div>
 
         <input
@@ -36,6 +50,7 @@
         @if (uploads().length) {
           <div class="grid gap-3 sm:grid-cols-2">
             @for (upload of uploads(); track upload.id) {
+              <!-- Componente de upload -->
               <article class="flex gap-3 rounded-box border border-base-300 bg-base-200 p-3">
                 <img
                   [src]="upload.previewUrl"
@@ -48,13 +63,17 @@
                     <span
                       class="badge badge-sm badge-soft"
                       [class.badge-success]="upload.status === 'success'"
-                      [class.badge-warning]="upload.status === 'pending' || upload.status === 'uploading'"
+                      [class.badge-warning]="
+                        upload.status === 'pending' || upload.status === 'uploading'
+                      "
                       [class.badge-error]="upload.status === 'error'"
                     >
                       {{ statusLabel(upload.status) }}
                     </span>
                   </div>
-                  <p class="text-xs text-base-content/60">{{ upload.file.size / 1024 / 1024 | number: '1.1-1' }} MB</p>
+                  <p class="text-xs text-base-content/60">
+                    {{ upload.file.size / 1024 / 1024 | number: '1.1-1' }} MB
+                  </p>
                   @if (upload.status === 'uploading' || upload.status === 'success') {
                     <progress
                       class="progress h-1"
@@ -66,26 +85,66 @@
                   @if (upload.error; as message) {
                     <p class="text-xs text-error">{{ message }}</p>
                   }
+                  @if (upload.image; as image) {
+                    <div class="flex items-center justify-between gap-2 pt-1">
+                      @if (image.isMain) {
+                        <span class="badge badge-success badge-sm">Imagen principal</span>
+                      } @else {
+                        <span class="text-xs text-base-content/60">Imagen secundaria</span>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs"
+                          [disabled]="isSettingMain() !== null"
+                          (click)="setMain(upload)"
+                        >
+                          @if (isSettingMain() === upload.id) {
+                            <span class="loading loading-spinner loading-xs"></span>
+                          }
+                          Marcar principal
+                        </button>
+                      }
+                    </div>
+                  }
                 </div>
               </article>
             }
           </div>
         }
 
-        <div class="card-actions justify-end">
-          <button
-            type="button"
-            class="btn btn-primary"
-            [disabled]="!hasPendingUploads() || isUploading()"
-            (click)="uploadPending()"
-          >
-            @if (isUploading()) {
-              <span class="loading loading-spinner loading-sm"></span>
-            } @else {
-              <app-icon name="media" />
-            }
-            Cargar imágenes
-          </button>
+        <div class="card-actions justify-between gap-2">
+          @if (hasRetryableErrors()) {
+            <button
+              type="button"
+              class="btn btn-soft"
+              [disabled]="isUploading()"
+              (click)="retryFailed()"
+            >
+              Reintentar fallidas
+            </button>
+          }
+          <div class="ml-auto flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              class="btn"
+              [disabled]="!hasPendingUploads() || isUploading()"
+              (click)="uploadPending()"
+            >
+              @if (isUploading()) {
+                <span class="loading loading-spinner loading-sm"></span>
+              } @else {
+                <app-icon name="media" />
+              }
+              Cargar imágenes
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="!canFinish()"
+              (click)="finish()"
+            >
+              Finalizar
+            </button>
+          </div>
         </div>
       </div>
     </section>

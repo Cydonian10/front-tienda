@@ -152,9 +152,9 @@ export default class NewProductPage {
 
     this.isSubmitting.set(true);
     try {
-      await firstValueFrom(this.productsService.create(dto));
+      const product = await firstValueFrom(this.productsService.create(dto));
       toast.success('Producto creado correctamente');
-      await this.router.navigate(['/mantenimiento/productos']);
+      await this.router.navigate(['/mantenimiento/productos', product.id, 'imagenes']);
     } catch (err) {
       const message = this.getErrorMessage(err);
       this.error.set(message);

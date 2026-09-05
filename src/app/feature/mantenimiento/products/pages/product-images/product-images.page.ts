@@ -1,7 +1,9 @@
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { toast } from 'ngx-sonner';
 
 import { ImagesService } from '../../../../../core/api/images.service';
 import { Image } from '../../../../../core/models/image.model';
@@ -32,11 +34,13 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 export default class ProductImagesPage implements OnDestroy {
   private readonly imagesService = inject(ImagesService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private nextUploadId = 0;
 
   protected readonly productId = Number(this.route.snapshot.paramMap.get('id'));
   protected readonly uploads = signal<ImageUpload[]>([]);
   protected readonly isUploading = signal(false);
+  protected readonly isSettingMain = signal<number | null>(null);
   protected readonly pageError = signal<string | null>(
     Number.isInteger(this.productId) && this.productId > 0
       ? null
@@ -45,6 +49,16 @@ export default class ProductImagesPage implements OnDestroy {
   protected readonly hasPendingUploads = computed(() =>
     this.uploads().some((upload) => upload.status === 'pending' && upload.retryable),
   );
+  protected readonly hasRetryableErrors = computed(() =>
+    this.uploads().some((upload) => upload.status === 'error' && upload.retryable),
+  );
+  protected readonly images = computed(() =>
+    this.uploads().flatMap((upload) => (upload.image ? [upload.image] : [])),
+  );
+  protected readonly canFinish = computed(
+    () => this.images().length === 0 || this.images().some((image) => image.isMain),
+  );
+  protected readonly actionError = signal<string | null>(null);
 
   ngOnDestroy(): void {
     this.uploads().forEach((upload) => URL.revokeObjectURL(upload.previewUrl));
@@ -73,6 +87,54 @@ export default class ProductImagesPage implements OnDestroy {
     } finally {
       this.isUploading.set(false);
     }
+  }
+
+  protected async retryFailed(): Promise<void> {
+    if (!this.hasRetryableErrors() || this.isUploading()) {
+      return;
+    }
+
+    this.uploads.update((uploads) =>
+      uploads.map((upload) =>
+        upload.status === 'error' && upload.retryable
+          ? { ...upload, status: 'pending' as const, progress: 0, error: null }
+          : upload,
+      ),
+    );
+    await this.uploadPending();
+  }
+
+  protected async setMain(upload: ImageUpload): Promise<void> {
+    if (!upload.image || upload.image.isMain || this.isSettingMain() !== null) {
+      return;
+    }
+
+    this.actionError.set(null);
+    this.isSettingMain.set(upload.id);
+    try {
+      const mainImage = await firstValueFrom(this.imagesService.setMain(upload.image.id));
+      this.uploads.update((uploads) =>
+        uploads.map((current) =>
+          current.image
+            ? { ...current, image: { ...current.image, isMain: current.image.id === mainImage.id } }
+            : current,
+        ),
+      );
+    } catch (error) {
+      this.actionError.set(this.getErrorMessage(error));
+    } finally {
+      this.isSettingMain.set(null);
+    }
+  }
+
+  protected async finish(): Promise<void> {
+    if (!this.canFinish()) {
+      this.actionError.set('Selecciona una imagen principal antes de finalizar.');
+      return;
+    }
+
+    await this.router.navigate(['/mantenimiento/productos']);
+    toast.success('Imágenes del producto guardadas correctamente');
   }
 
   protected statusLabel(status: UploadStatus): string {

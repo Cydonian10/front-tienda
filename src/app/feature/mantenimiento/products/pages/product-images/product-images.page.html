@@ -16,97 +16,24 @@
   </header>
 
   @if (pageError(); as message) {
-    <!-- Componente de error page-->
-    <div role="alert" class="alert alert-error">
-      <span>{{ message }}</span>
-    </div>
+    <product-images-page-error [message]="message" />
   } @else {
     @if (actionError(); as message) {
-      <!-- Componente de action error -->
-      <div role="alert" class="alert alert-error">
-        <span>{{ message }}</span>
-      </div>
+      <product-images-action-error [message]="message" />
     }
 
     <section class="card card-border bg-base-100">
       <div class="card-body gap-5">
-        <!-- Componente para seleccionar files -->
-        <div class="space-y-1">
-          <h2 class="card-title text-lg">Seleccionar archivos</h2>
-          <p class="text-sm text-base-content/60">
-            JPEG, PNG o WebP. Cada archivo puede pesar hasta 5 MB.
-          </p>
-        </div>
-
-        <input
-          id="product-image-files"
-          type="file"
-          class="file-input w-full"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          (change)="onFilesSelected($event)"
-        />
+        <product-images-files-input (filesSelected)="onFilesSelected($event)" />
 
         @if (uploads().length) {
           <div class="grid gap-3 sm:grid-cols-2">
             @for (upload of uploads(); track upload.id) {
-              <!-- Componente de upload -->
-              <article class="flex gap-3 rounded-box border border-base-300 bg-base-200 p-3">
-                <img
-                  [src]="upload.previewUrl"
-                  [alt]="'Vista previa de ' + upload.file.name"
-                  class="size-20 shrink-0 rounded-field object-cover"
-                />
-                <div class="min-w-0 flex-1 space-y-2">
-                  <div class="flex items-start justify-between gap-2">
-                    <p class="truncate text-sm font-medium">{{ upload.file.name }}</p>
-                    <span
-                      class="badge badge-sm badge-soft"
-                      [class.badge-success]="upload.status === 'success'"
-                      [class.badge-warning]="
-                        upload.status === 'pending' || upload.status === 'uploading'
-                      "
-                      [class.badge-error]="upload.status === 'error'"
-                    >
-                      {{ statusLabel(upload.status) }}
-                    </span>
-                  </div>
-                  <p class="text-xs text-base-content/60">
-                    {{ upload.file.size / 1024 / 1024 | number: '1.1-1' }} MB
-                  </p>
-                  @if (upload.status === 'uploading' || upload.status === 'success') {
-                    <progress
-                      class="progress h-1"
-                      [class.progress-success]="upload.status === 'success'"
-                      [value]="upload.progress"
-                      max="100"
-                    ></progress>
-                  }
-                  @if (upload.error; as message) {
-                    <p class="text-xs text-error">{{ message }}</p>
-                  }
-                  @if (upload.image; as image) {
-                    <div class="flex items-center justify-between gap-2 pt-1">
-                      @if (image.isMain) {
-                        <span class="badge badge-success badge-sm">Imagen principal</span>
-                      } @else {
-                        <span class="text-xs text-base-content/60">Imagen secundaria</span>
-                        <button
-                          type="button"
-                          class="btn btn-ghost btn-xs"
-                          [disabled]="isSettingMain() !== null"
-                          (click)="setMain(upload)"
-                        >
-                          @if (isSettingMain() === upload.id) {
-                            <span class="loading loading-spinner loading-xs"></span>
-                          }
-                          Marcar principal
-                        </button>
-                      }
-                    </div>
-                  }
-                </div>
-              </article>
+              <product-images-upload
+                [upload]="upload"
+                [isSettingMain]="isSettingMain()"
+                (setMain)="setMain($event)"
+              />
             }
           </div>
         }

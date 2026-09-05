@@ -1,0 +1,15 @@
+<div class="space-y-1">
+  <h2 class="card-title text-lg">Seleccionar archivos</h2>
+  <p class="text-sm text-base-content/60">
+    JPEG, PNG o WebP. Cada archivo puede pesar hasta 5 MB.
+  </p>
+</div>
+
+<input
+  id="product-image-files"
+  type="file"
+  class="file-input w-full"
+  accept="image/jpeg,image/png,image/webp"
+  multiple
+  (change)="onFilesSelected($event)"
+/>

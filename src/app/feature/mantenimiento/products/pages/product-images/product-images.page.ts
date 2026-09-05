@@ -1,34 +1,31 @@
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
-import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
 
 import { ImagesService } from '../../../../../core/api/images.service';
-import { Image } from '../../../../../core/models/image.model';
 import BreadcrumbsNg from '../../../../../shared/breadcrumbs/breadcrumbs.ng';
 import { Icon } from '../../../../../shared/icon/icon';
-
-type UploadStatus = 'pending' | 'uploading' | 'success' | 'error';
-
-interface ImageUpload {
-  id: number;
-  file: File;
-  previewUrl: string;
-  status: UploadStatus;
-  progress: number;
-  error: string | null;
-  retryable: boolean;
-  image?: Image;
-}
+import { ProductImagesActionError } from './components/action-error/action-error.component';
+import { ProductImagesFilesInput } from './components/files-input/files-input.component';
+import { ProductImagesPageError } from './components/page-error/page-error.component';
+import { ProductImagesUpload } from './components/product-image-upload/product-image-upload.component';
+import { ImageUpload } from './product-images.types';
 
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 @Component({
   selector: 'product-images-page',
-  imports: [BreadcrumbsNg, DecimalPipe, Icon],
+  imports: [
+    BreadcrumbsNg,
+    Icon,
+    ProductImagesActionError,
+    ProductImagesFilesInput,
+    ProductImagesPageError,
+    ProductImagesUpload,
+  ],
   templateUrl: './product-images.page.html',
 })
 export default class ProductImagesPage implements OnDestroy {
@@ -64,12 +61,8 @@ export default class ProductImagesPage implements OnDestroy {
     this.uploads().forEach((upload) => URL.revokeObjectURL(upload.previewUrl));
   }
 
-  protected onFilesSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const selectedFiles = Array.from(input.files ?? []);
-    input.value = '';
-
-    selectedFiles.forEach((file) => this.addFile(file));
+  protected onFilesSelected(files: File[]): void {
+    files.forEach((file) => this.addFile(file));
   }
 
   protected async uploadPending(): Promise<void> {
@@ -135,19 +128,6 @@ export default class ProductImagesPage implements OnDestroy {
 
     await this.router.navigate(['/mantenimiento/productos']);
     toast.success('Imágenes del producto guardadas correctamente');
-  }
-
-  protected statusLabel(status: UploadStatus): string {
-    switch (status) {
-      case 'pending':
-        return 'Pendiente';
-      case 'uploading':
-        return 'Subiendo';
-      case 'success':
-        return 'Cargada';
-      case 'error':
-        return 'Error';
-    }
   }
 
   private addFile(file: File): void {

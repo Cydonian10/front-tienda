@@ -14,7 +14,7 @@ describe('AttributesPage', () => {
     name: 'Color',
     values: [{ id: 2, value: 'Rojo', attributeId: 1 }],
   };
-  const attributesService = { findAllWithValues: vi.fn() };
+  const attributesService = { findAllWithValues: vi.fn(), remove: vi.fn() };
   const dialog = { open: vi.fn() };
   const router = { events: of() };
 
@@ -23,6 +23,7 @@ describe('AttributesPage', () => {
     attributesService.findAllWithValues.mockReturnValue(
       of({ data: [color], total: 1, page: 1, limit: 10, lastPage: 1 }),
     );
+    attributesService.remove.mockReturnValue(of(null));
 
     await TestBed.configureTestingModule({
       imports: [AttributesPage],
@@ -99,5 +100,27 @@ describe('AttributesPage', () => {
       expect.anything(),
       expect.objectContaining({ data: color }),
     );
+  });
+
+  it('updates the visible row after the edit dialog closes', async () => {
+    const { page } = await createPage();
+    const updated = { ...color, name: 'Tono' };
+    dialog.open.mockReturnValue({ closed: of(updated) });
+
+    page.onEdit(color);
+
+    expect(page.attributes().data[0]).toEqual(updated);
+  });
+
+  it('removes an attribute after confirmation and a successful delete', async () => {
+    const { page } = await createPage();
+    dialog.open.mockReturnValue({ closed: of(true) });
+
+    page.onDelete(color);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(attributesService.remove).toHaveBeenCalledWith(1);
+    expect(page.attributes().data).toEqual([]);
+    expect(page.attributes().total).toBe(0);
   });
 });

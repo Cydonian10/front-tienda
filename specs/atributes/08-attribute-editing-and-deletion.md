@@ -1,6 +1,6 @@
 # SPEC 08 — Edición y eliminación de atributos
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 07 (Página de atributos) y los endpoints existentes de `ApiTienda` para `attributes` y `attribute-values`.
 > **Date:** 2026-09-06
 > **Objective:** Extender la pantalla de atributos para editar su nombre y administrar individualmente sus valores, con confirmaciones de eliminación y actualización local del listado.

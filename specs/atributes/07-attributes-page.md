@@ -1,6 +1,6 @@
 # SPEC 07 — Página de atributos
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** API `ApiTienda` SPEC 04 (batch de `attributes` con UnitOfWork + tests del módulo)
 > **Date:** 2026-09-05
 > **Objective:** Añadir al frontend una pantalla de atributos con listado paginado y buscable, visualización responsive de valores mediante overlay y creación batch de atributos con sus valores usando Reactive Forms.

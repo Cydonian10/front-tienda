@@ -6,9 +6,12 @@ export interface AttributeValue {
   attributeId: number;
 }
 
-export interface AttributeWithValues {
+export interface Attribute {
   id: number;
   name: string;
+}
+
+export interface AttributeWithValues extends Attribute {
   values: AttributeValue[];
 }
 
@@ -23,6 +26,19 @@ export interface CreateAttributeBatchValue {
 export interface CreateAttributeBatch {
   name: string;
   values: CreateAttributeBatchValue[];
+}
+
+export interface UpdateAttribute {
+  name: string;
+}
+
+export interface CreateAttributeValue {
+  value: string;
+  attributeId: number;
+}
+
+export interface UpdateAttributeValue {
+  value: string;
 }
 
 export interface AttributeBatchResult {

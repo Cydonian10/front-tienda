@@ -1,9 +1,11 @@
 import { Component, input, output } from '@angular/core';
 
 import { AttributeWithValues } from '../../../../../core/models/attribute.model';
+import { Icon } from '../../../../../shared/icon/icon';
 
 @Component({
   selector: 'attribute-table',
+  imports: [Icon],
   templateUrl: './attribute-table.component.html',
   host: {
     class: 'block',
@@ -12,4 +14,6 @@ import { AttributeWithValues } from '../../../../../core/models/attribute.model'
 export class AttributeTable {
   readonly attributes = input.required<AttributeWithValues[]>();
   readonly valuesRequested = output<AttributeWithValues>();
+  readonly editRequested = output<AttributeWithValues>();
+  readonly deleteRequested = output<AttributeWithValues>();
 }

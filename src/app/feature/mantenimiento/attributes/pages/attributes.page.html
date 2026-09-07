@@ -29,9 +29,19 @@
   }
 
   @if (attributes(); as result) {
-    <attribute-table [attributes]="result.data" (valuesRequested)="onShowValues($event)" />
+    <attribute-table
+      [attributes]="result.data"
+      (valuesRequested)="onShowValues($event)"
+      (editRequested)="onEdit($event)"
+      (deleteRequested)="onDelete($event)"
+    />
   } @else if (!isLoading()) {
-    <attribute-table [attributes]="[]" (valuesRequested)="onShowValues($event)" />
+    <attribute-table
+      [attributes]="[]"
+      (valuesRequested)="onShowValues($event)"
+      (editRequested)="onEdit($event)"
+      (deleteRequested)="onDelete($event)"
+    />
   }
 
   <ng-pagination

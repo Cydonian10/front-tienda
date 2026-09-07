@@ -2,10 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import {
   AbstractControl,
-  FormArray,
   FormBuilder,
   FormControl,
-  FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
   Validators,
@@ -21,16 +19,12 @@ import {
 } from '../../../../../core/models/attribute.model';
 import { Icon } from '../../../../../shared/icon/icon';
 
-interface AttributeValueRowControls {
-  value: FormControl<string>;
-}
-
 function requiredTrimmed(control: AbstractControl): ValidationErrors | null {
   return String(control.value ?? '').trim() ? null : { required: true };
 }
 
 function uniqueTrimmedValues(control: AbstractControl): ValidationErrors | null {
-  const values = (control.value as Array<{ value: string }>).map(({ value }) => value.trim());
+  const values = (control.value as string[]).map((value) => value.trim());
   return values.length === new Set(values).size ? null : { duplicateValues: true };
 }
 
@@ -46,25 +40,25 @@ export class CreateAttributeDialog {
 
   protected readonly error = signal<string | null>(null);
   protected readonly isSubmitting = signal(false);
-  protected readonly valueRows = this.formBuilder.array<FormGroup<AttributeValueRowControls>>(
-    [this.createValueRow()],
+  protected readonly values = this.formBuilder.nonNullable.array<FormControl<string>>(
+    [this.createValueControl()],
     {
       validators: [Validators.required, Validators.maxLength(50), uniqueTrimmedValues],
     },
   );
   protected readonly form = this.formBuilder.nonNullable.group({
     name: ['', [Validators.required, requiredTrimmed]],
-    values: this.valueRows,
+    values: this.values,
   });
 
-  protected addValueRow(): void {
-    if (this.valueRows.length < 50) {
-      this.valueRows.push(this.createValueRow());
+  protected addValue(): void {
+    if (this.values.length < 50) {
+      this.values.push(this.createValueControl());
     }
   }
 
-  protected removeValueRow(index: number): void {
-    this.valueRows.removeAt(index);
+  protected removeValue(index: number): void {
+    this.values.removeAt(index);
   }
 
   protected async onSubmit(): Promise<void> {
@@ -77,7 +71,7 @@ export class CreateAttributeDialog {
     const raw = this.form.getRawValue();
     const dto: CreateAttributeBatch = {
       name: raw.name.trim(),
-      values: raw.values.map(({ value }) => ({ value: value.trim() })),
+      values: raw.values.map((value) => ({ value: value.trim() })),
     };
 
     this.isSubmitting.set(true);
@@ -97,10 +91,8 @@ export class CreateAttributeDialog {
     this.dialogRef.close();
   }
 
-  private createValueRow(): FormGroup<AttributeValueRowControls> {
-    return this.formBuilder.nonNullable.group({
-      value: ['', [Validators.required, requiredTrimmed]],
-    });
+  private createValueControl(): FormControl<string> {
+    return this.formBuilder.nonNullable.control('', [Validators.required, requiredTrimmed]);
   }
 
   private getErrorMessage(error: unknown): string {

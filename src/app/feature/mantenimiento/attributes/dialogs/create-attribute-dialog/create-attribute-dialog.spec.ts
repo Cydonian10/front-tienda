@@ -1,6 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { DialogRef } from '@angular/cdk/dialog';
+import { FormArrayName, FormControlName } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -35,39 +37,42 @@ describe('CreateAttributeDialog', () => {
     return { fixture, dialog: fixture.componentInstance as any };
   }
 
-  it('starts with one required value row', () => {
-    const { dialog } = createDialog();
+  it('uses a FormArray of controls with the formArrayName pattern', () => {
+    const { fixture, dialog } = createDialog();
 
-    expect(dialog.valueRows.length).toBe(1);
+    expect(dialog.values.length).toBe(1);
+    expect(dialog.values.at(0).value).toBe('');
+    expect(fixture.debugElement.query(By.directive(FormArrayName))).not.toBeNull();
+    expect(fixture.debugElement.queryAll(By.directive(FormControlName))).toHaveLength(2);
     expect(dialog.form.invalid).toBe(true);
   });
 
   it('blocks empty and duplicate values after trimming', () => {
     const { dialog } = createDialog();
     dialog.form.controls.name.setValue('Color');
-    dialog.valueRows.at(0).controls.value.setValue(' Rojo ');
-    dialog.addValueRow();
-    dialog.valueRows.at(1).controls.value.setValue('Rojo');
+    dialog.values.at(0).setValue(' Rojo ');
+    dialog.addValue();
+    dialog.values.at(1).setValue('Rojo');
 
-    expect(dialog.valueRows.hasError('duplicateValues')).toBe(true);
+    expect(dialog.values.hasError('duplicateValues')).toBe(true);
     expect(dialog.form.invalid).toBe(true);
   });
 
   it('does not submit without values', async () => {
     const { dialog } = createDialog();
     dialog.form.controls.name.setValue('Color');
-    dialog.removeValueRow(0);
+    dialog.removeValue(0);
 
     await dialog.onSubmit();
 
-    expect(dialog.valueRows.hasError('required')).toBe(true);
+    expect(dialog.values.hasError('required')).toBe(true);
     expect(attributesService.createWithValues).not.toHaveBeenCalled();
   });
 
   it('sends trimmed values and closes with the batch result', async () => {
     const { dialog } = createDialog();
     dialog.form.controls.name.setValue(' Color ');
-    dialog.valueRows.at(0).controls.value.setValue(' Rojo ');
+    dialog.values.at(0).setValue(' Rojo ');
 
     await dialog.onSubmit();
 
@@ -90,7 +95,7 @@ describe('CreateAttributeDialog', () => {
     );
     const { fixture, dialog } = createDialog();
     dialog.form.controls.name.setValue('Color');
-    dialog.valueRows.at(0).controls.value.setValue('Rojo');
+    dialog.values.at(0).setValue('Rojo');
 
     await dialog.onSubmit();
     fixture.detectChanges();

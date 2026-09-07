@@ -29,16 +29,16 @@
           <button
             type="button"
             class="btn btn-soft btn-sm"
-            [disabled]="valueRows.length >= 50"
-            (click)="addValueRow()"
+            [disabled]="values.length >= 50"
+            (click)="addValue()"
           >
             <app-icon name="plus" classes="size-4" />
             Agregar valor
           </button>
         </div>
 
-        <div class="space-y-2">
-          @for (row of valueRows.controls; track $index) {
+        <div class="space-y-2" formArrayName="values">
+          @for (control of values.controls; track $index) {
             <div class="flex items-start gap-2">
               <div class="min-w-0 flex-1">
                 <label [for]="'attribute-value-' + $index" class="sr-only">
@@ -48,11 +48,11 @@
                   [id]="'attribute-value-' + $index"
                   type="text"
                   class="input w-full"
-                  [class.input-error]="row.controls.value.invalid && row.controls.value.touched"
+                  [class.input-error]="control.invalid && control.touched"
                   [placeholder]="'Valor ' + ($index + 1)"
-                  formControlName="row.controls.value"
+                  [formControlName]="$index"
                 />
-                @if (row.controls.value.invalid && row.controls.value.touched) {
+                @if (control.invalid && control.touched) {
                   <p class="fieldset-label text-error">El valor es obligatorio.</p>
                 }
               </div>
@@ -60,7 +60,7 @@
                 type="button"
                 class="btn btn-soft btn-sm text-error"
                 [attr.aria-label]="'Eliminar valor ' + ($index + 1)"
-                (click)="removeValueRow($index)"
+                (click)="removeValue($index)"
               >
                 <app-icon name="trash" classes="size-4" />
               </button>
@@ -68,10 +68,10 @@
           }
         </div>
 
-        @if (valueRows.hasError('required') && valueRows.touched) {
+        @if (values.hasError('required') && values.touched) {
           <p class="fieldset-label text-error">Agrega al menos un valor.</p>
         }
-        @if (valueRows.hasError('duplicateValues') && valueRows.touched) {
+        @if (values.hasError('duplicateValues') && values.touched) {
           <p class="fieldset-label text-error">Los valores no pueden repetirse.</p>
         }
       </fieldset>

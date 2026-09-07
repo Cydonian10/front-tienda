@@ -1,0 +1,57 @@
+<div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Valores</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (attribute of attributes(); track attribute.id) {
+        <tr>
+          <th>{{ attribute.id }}</th>
+          <td class="font-medium">{{ attribute.name }}</td>
+          <td>
+            @if (attribute.values.length) {
+              <div class="flex flex-wrap items-center gap-1.5">
+                @for (attributeValue of attribute.values; track attributeValue.id; let index = $index) {
+                  @if (index < 2) {
+                    <span class="badge badge-soft">{{ attributeValue.value }}</span>
+                  } @else if (index < 5) {
+                    <span class="badge badge-soft hidden sm:inline-flex">{{ attributeValue.value }}</span>
+                  }
+                }
+
+                @if (attribute.values.length > 2) {
+                  <button
+                    type="button"
+                    class="btn btn-link btn-xs sm:hidden"
+                    (click)="valuesRequested.emit(attribute)"
+                  >
+                    Ver todos ({{ attribute.values.length }})
+                  </button>
+                }
+                @if (attribute.values.length > 5) {
+                  <button
+                    type="button"
+                    class="btn btn-link btn-xs hidden sm:inline-flex"
+                    (click)="valuesRequested.emit(attribute)"
+                  >
+                    Ver todos ({{ attribute.values.length }})
+                  </button>
+                }
+              </div>
+            } @else {
+              <span class="text-sm text-base-content/60">Sin valores</span>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="3" class="py-8 text-center text-base-content/60">No hay atributos</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,18 +1,37 @@
+import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
-import { AttributeWithValues, AttributeWithValuesFilter } from '../models/attribute.model';
+import {
+  AttributeBatchResult,
+  AttributeFilter,
+  AttributeWithValues,
+  CreateAttributeBatch,
+} from '../models/attribute.model';
 import { PaginatedResult } from '../models/pagination.model';
-import { ApiService } from './api.service';
+import { ApiResponse, ApiService } from './api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AttributesService extends ApiService {
   findAllWithValues(
-    filter: AttributeWithValuesFilter,
+    filter: AttributeFilter,
   ): Observable<PaginatedResult<AttributeWithValues>> {
     const params = this.buildParams(filter);
     return this.http.get<PaginatedResult<AttributeWithValues>>(`${this.apiUrl}/attributes/batch`, {
       params,
     });
+  }
+
+  createWithValues(dto: CreateAttributeBatch): Observable<AttributeBatchResult> {
+    return this.http
+      .post<ApiResponse<AttributeWithValues>>(`${this.apiUrl}/attributes/batch`, dto, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response: HttpResponse<ApiResponse<AttributeWithValues>>) => ({
+          attribute: response.body!.data,
+          created: response.status === 201,
+        })),
+      );
   }
 }

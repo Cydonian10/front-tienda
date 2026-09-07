@@ -1,0 +1,12 @@
+<div class="w-full sm:max-w-md">
+  <label for="attributes-search" class="sr-only">Buscar atributos por nombre</label>
+  <label class="input w-full">
+    <app-icon name="search" />
+    <input
+      id="attributes-search"
+      type="search"
+      placeholder="Buscar atributo por nombre..."
+      (input)="onSearch($event)"
+    />
+  </label>
+</div>

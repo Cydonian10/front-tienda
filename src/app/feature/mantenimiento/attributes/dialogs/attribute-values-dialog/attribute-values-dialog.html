@@ -1,0 +1,25 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-5 p-6 sm:p-8">
+    <div class="space-y-1">
+      <h2 class="card-title">Valores de {{ attribute.name }}</h2>
+      <p class="text-sm text-base-content/60">
+        {{ attribute.values.length }}
+        {{ attribute.values.length === 1 ? 'valor disponible' : 'valores disponibles' }}
+      </p>
+    </div>
+
+    <div class="max-h-80 overflow-y-auto rounded-box border border-base-300">
+      <ul class="divide-y divide-base-300">
+        @for (attributeValue of attribute.values; track attributeValue.id) {
+          <li class="px-4 py-3">{{ attributeValue.value }}</li>
+        } @empty {
+          <li class="px-4 py-6 text-center text-sm text-base-content/60">Sin valores</li>
+        }
+      </ul>
+    </div>
+
+    <div class="card-actions justify-end">
+      <button type="button" class="btn btn-soft" (click)="close()">Cerrar</button>
+    </div>
+  </div>
+</div>

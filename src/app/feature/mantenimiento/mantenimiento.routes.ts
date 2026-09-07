@@ -20,6 +20,12 @@ const MarcasPage: Routes = [
     title: 'Unidades de medida',
   },
   {
+    path: 'atributos',
+    data: { breadcrumb: 'Atributos' },
+    loadComponent: () => import('./attributes/pages/attributes.page'),
+    title: 'Atributos',
+  },
+  {
     path: 'base-products',
     data: { breadcrumb: 'Producto Base' },
     children: [

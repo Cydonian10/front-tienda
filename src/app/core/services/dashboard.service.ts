@@ -19,6 +19,7 @@ const initialMenu: MenuItem[] = [
         icon: 'queue-list',
         route: '/mantenimiento/unidades-medida',
       },
+      { id: 'atributos', label: 'Atributos', icon: 'grid', route: '/mantenimiento/atributos' },
       {
         id: 'base-products',
         label: 'Productos Base',

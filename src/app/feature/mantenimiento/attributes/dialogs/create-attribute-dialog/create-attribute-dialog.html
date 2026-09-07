@@ -1,0 +1,98 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-6 p-6 sm:p-8">
+    <div class="space-y-1">
+      <h2 class="card-title">Nuevo atributo</h2>
+      <p class="text-sm text-base-content/60">
+        Crea un atributo y agrega los valores que podrán seleccionarse en los productos.
+      </p>
+    </div>
+
+    <form class="space-y-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Nombre</legend>
+        <input
+          id="attribute-name"
+          type="text"
+          class="input w-full"
+          [class.input-error]="form.controls.name.invalid && form.controls.name.touched"
+          placeholder="Ej: Color"
+          formControlName="name"
+        />
+        @if (form.controls.name.invalid && form.controls.name.touched) {
+          <p class="fieldset-label text-error">El nombre es obligatorio.</p>
+        }
+      </fieldset>
+
+      <fieldset class="fieldset gap-3">
+        <div class="flex items-center justify-between gap-3">
+          <legend class="fieldset-legend">Valores</legend>
+          <button
+            type="button"
+            class="btn btn-soft btn-sm"
+            [disabled]="valueRows.length >= 50"
+            (click)="addValueRow()"
+          >
+            <app-icon name="plus" classes="size-4" />
+            Agregar valor
+          </button>
+        </div>
+
+        <div class="space-y-2">
+          @for (row of valueRows.controls; track $index) {
+            <div class="flex items-start gap-2">
+              <div class="min-w-0 flex-1">
+                <label [for]="'attribute-value-' + $index" class="sr-only">
+                  Valor {{ $index + 1 }}
+                </label>
+                <input
+                  [id]="'attribute-value-' + $index"
+                  type="text"
+                  class="input w-full"
+                  [class.input-error]="row.controls.value.invalid && row.controls.value.touched"
+                  [placeholder]="'Valor ' + ($index + 1)"
+                  formControlName="row.controls.value"
+                />
+                @if (row.controls.value.invalid && row.controls.value.touched) {
+                  <p class="fieldset-label text-error">El valor es obligatorio.</p>
+                }
+              </div>
+              <button
+                type="button"
+                class="btn btn-soft btn-sm text-error"
+                [attr.aria-label]="'Eliminar valor ' + ($index + 1)"
+                (click)="removeValueRow($index)"
+              >
+                <app-icon name="trash" classes="size-4" />
+              </button>
+            </div>
+          }
+        </div>
+
+        @if (valueRows.hasError('required') && valueRows.touched) {
+          <p class="fieldset-label text-error">Agrega al menos un valor.</p>
+        }
+        @if (valueRows.hasError('duplicateValues') && valueRows.touched) {
+          <p class="fieldset-label text-error">Los valores no pueden repetirse.</p>
+        }
+      </fieldset>
+
+      @if (error(); as message) {
+        <div role="alert" class="alert alert-error">
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <div class="card-actions justify-end">
+        <button type="button" class="btn btn-soft" [disabled]="isSubmitting()" (click)="close()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-success" [disabled]="isSubmitting()">
+          @if (isSubmitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          Guardar atributo
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

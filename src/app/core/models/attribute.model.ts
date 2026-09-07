@@ -3,6 +3,7 @@ import { PaginationQuery } from './pagination.model';
 export interface AttributeValue {
   id: number;
   value: string;
+  attributeId: number;
 }
 
 export interface AttributeWithValues {
@@ -11,6 +12,22 @@ export interface AttributeWithValues {
   values: AttributeValue[];
 }
 
-export interface AttributeWithValuesFilter extends PaginationQuery {
+export interface AttributeFilter extends PaginationQuery {
   search?: string;
 }
+
+export interface CreateAttributeBatchValue {
+  value: string;
+}
+
+export interface CreateAttributeBatch {
+  name: string;
+  values: CreateAttributeBatchValue[];
+}
+
+export interface AttributeBatchResult {
+  attribute: AttributeWithValues;
+  created: boolean;
+}
+
+export type AttributeWithValuesFilter = AttributeFilter;

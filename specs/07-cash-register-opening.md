@@ -1,6 +1,6 @@
 # SPEC 07 — Cajas y aperturas de caja
 
-> **Status:** Draft
+> **Status:** Aprobado
 > **Depends on:** API `ApiTienda` SPEC 11 (personas y roles), API `ApiTienda` SPEC 12 (autenticación y guards), API `ApiTienda` SPEC 16 (cajas, aperturas y cierres).
 > **Date:** 2026-09-08
 > **Objective:** Gestionar cajas y abrirlas desde `Operaciones > Cajas`, asignando responsable según el rol y consultando su historial mensual de aperturas.

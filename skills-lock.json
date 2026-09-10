@@ -3,8 +3,9 @@
   "skills": {
     "angular-developer": {
       "source": "angular/skills",
-      "sourceType": "autoskills-registry",
-      "computedHash": "fc045be84cd51d105e4523a555510e3fd465a3e931f9b0049b0dfbdf68775eac"
+      "sourceType": "github",
+      "skillPath": "angular-developer/SKILL.md",
+      "computedHash": "0850aa966b6a7da1151daa9d0ef2081bf397f052573a35c1643fb92b948f0f00"
     },
     "daisyui": {
       "source": "saadeghi/daisyui",

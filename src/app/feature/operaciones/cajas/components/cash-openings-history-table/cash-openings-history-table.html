@@ -1,0 +1,35 @@
+<div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+  <table class="table table-zebra">
+    <thead>
+      <tr>
+        <th>Fecha y hora</th>
+        <th>Responsable</th>
+        <th>Monto inicial</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (opening of openings(); track opening.id) {
+        <tr>
+          <td>{{ opening.openedAt | businessDate }}</td>
+          <td>{{ opening.responsible.firstName }} {{ opening.responsible.lastName }}</td>
+          <td>{{ opening.openingAmount | number: '1.2-2' }}</td>
+          <td>
+            <span
+              class="badge"
+              [class.badge-success]="opening.status === 'open'"
+              [class.badge-ghost]="opening.status === 'closed'"
+              >{{ opening.status === 'open' ? 'Abierta' : 'Cerrada' }}</span
+            >
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="4" class="py-10 text-center text-base-content/60">
+            No hay aperturas en este mes.
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

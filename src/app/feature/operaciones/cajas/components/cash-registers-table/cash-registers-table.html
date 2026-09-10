@@ -1,0 +1,59 @@
+<div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+  <table class="table table-zebra">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Caja</th>
+        <th>Estado</th>
+        <th>Sesión</th>
+        <th class="text-right">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (register of registers(); track register.id) {
+        <tr [class.bg-base-200]="register.id === selectedId()" (click)="selected.emit(register)">
+          <td class="font-mono font-semibold">{{ register.code }}</td>
+          <td>{{ register.name }}</td>
+          <td>
+            <span
+              class="badge"
+              [class.badge-success]="register.active"
+              [class.badge-ghost]="!register.active"
+              >{{ register.active ? 'Activa' : 'Inactiva' }}</span
+            >
+          </td>
+          <td>
+            @if (register.openOpening; as opening) {
+              <span class="text-sm"
+                >Abierta por {{ opening.responsible.firstName }}
+                {{ opening.responsible.lastName }}</span
+              >
+            } @else {
+              <span class="text-base-content/60">Sin sesión abierta</span>
+            }
+          </td>
+          <td (click)="$event.stopPropagation()">
+            <div class="flex justify-end gap-1">
+            @if (register.active && !register.openOpening) {
+              <button type="button" class="btn btn-soft btn-xs" [attr.aria-label]="'Abrir ' + register.name" (click)="openRequested.emit(register)">
+                Abrir caja
+              </button>
+            }
+            @if (canManage()) {
+              <button type="button" class="btn btn-soft btn-xs" [attr.aria-label]="'Editar ' + register.name" (click)="editRequested.emit(register)">
+                <app-icon name="pencil" classes="size-4" />
+              </button>
+            }
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="py-12 text-center text-base-content/60">
+            No hay cajas disponibles.
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

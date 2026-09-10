@@ -217,6 +217,7 @@ Convenciones:
 - [ ] Un trabajador puede abrir una caja activa y queda registrado como `openedBy` y `responsible`.
 - [ ] Un trabajador no puede asignar a otra persona como responsable aunque envíe un `responsibleId` distinto.
 - [ ] Una caja inactiva no puede abrirse.
+- [ ] Desactivar una caja con una apertura en estado `open` devuelve conflicto y conserva su estado activo.
 - [ ] La segunda apertura de una misma caja en estado `open` devuelve conflicto y no crea otra sesión.
 - [ ] `GET /cash-register-openings?cashRegisterId=:id&year=:year&month=:month` devuelve solo aperturas cuyo `openedAt` pertenece al mes calendario solicitado.
 - [ ] Cada fila del historial incluye fecha y hora de apertura, responsable, monto inicial y estado.
@@ -247,7 +248,7 @@ Convenciones:
 - **Sí:** conservar `openedBy` como auditoría de quien ejecutó la acción y agregar `responsible` para la persona a cargo de la caja.
 - **Sí:** permitir al administrador seleccionar como responsable a una persona con cuenta y rol `ADMINISTRADOR` o `TRABAJADOR`.
 - **Sí:** asignar forzosamente al trabajador autenticado como responsable de su propia apertura.
-- **Sí:** bloquear la acción de apertura cuando ya exista una sesión abierta y mostrar su resumen en la caja.
+- **Sí:** bloquear la apertura y la desactivación cuando ya exista una sesión abierta, y mostrar su resumen en la caja.
 - **Sí:** recargar cajas e historial tras un conflicto de doble apertura para reflejar el estado persistido.
 - **Sí:** filtrar el historial por mes calendario local, comenzando en el mes actual y navegando con controles anterior/siguiente.
 - **No:** usar solamente el endpoint existente de aperturas; no ofrece el responsable, fecha ni filtros requeridos.
@@ -262,7 +263,7 @@ Convenciones:
 | La migración no puede asignar responsable a aperturas históricas.            | Usar `openedBy` como responsable de las filas existentes antes de hacer obligatoria la relación.                                |
 | Un administrador intenta asignar una persona sin acceso o sin rol operativo. | Validar la elegibilidad en el servidor, sin confiar en el selector del frontend.                                                |
 | El cálculo del mes cambia según la zona horaria del servidor.                | Definir la zona horaria local del negocio para construir el rango mensual y probar límites de inicio y fin de mes.              |
-| Una caja se desactiva mientras tiene una apertura abierta.                   | Mantener la apertura existente visible; la desactivación solo impide aperturas futuras y no crea ni cierra sesiones.            |
+| Un administrador intenta desactivar una caja con una apertura abierta.       | Rechazar la desactivación con conflicto; primero debe cerrarse la sesión.                                                        |
 
 ## What is **not** in this spec
 

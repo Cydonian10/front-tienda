@@ -29,6 +29,13 @@ const initialMenu: MenuItem[] = [
       { id: 'productos', label: 'Productos', icon: 'swatch', route: '/mantenimiento/productos' },
     ],
   },
+  {
+    id: 'operaciones',
+    label: 'Operaciones',
+    icon: 'clipboard-check',
+    expanded: true,
+    children: [{ id: 'cajas', label: 'Cajas', icon: 'table', route: '/operaciones/cajas' }],
+  },
   { id: 'mensajes', label: 'Mensajes', icon: 'mail', route: '/mensajes' },
 ];
 

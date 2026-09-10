@@ -1,0 +1,61 @@
+<ng-breadcrumbs />
+
+<div class="mt-4 space-y-4">
+  <header
+    class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+  >
+    <div>
+      <h1 class="text-xl font-semibold">Cajas</h1>
+      <p class="mt-1 text-sm text-base-content/60">Aperturas y sesiones activas por caja.</p>
+    </div>
+    @if (canManage()) {
+      <button type="button" class="btn btn-primary" (click)="create()">Nueva caja</button>
+    }
+  </header>
+  @if (registersError(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  }
+  @if (isLoadingRegisters()) {
+    <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
+      <span class="loading loading-spinner"></span><span>Cargando cajas...</span>
+    </div>
+  } @else {
+    <cash-registers-table
+      [registers]="registers()"
+      [selectedId]="selected()?.id ?? null"
+      [canManage]="canManage()"
+      (selected)="select($event)"
+      (editRequested)="edit($event)"
+      (openRequested)="open($event)"
+    />
+  }
+  @if (selected(); as register) {
+    <section class="space-y-4">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold text-base-content/70">Historial mensual</p>
+          <h2 class="text-lg font-semibold">{{ register.code }} · {{ register.name }}</h2>
+          <p class="text-sm text-base-content/60">{{ currentMonth() }}/{{ currentYear() }}</p>
+        </div>
+        <div class="join">
+          <button type="button" class="btn btn-sm join-item" (click)="changeMonth(-1)">Anterior</button>
+          <button type="button" class="btn btn-sm join-item" (click)="changeMonth(1)">Siguiente</button>
+        </div>
+      </div>
+      @if (historyError(); as message) {
+        <div role="alert" class="alert alert-error">
+          <span>{{ message }}</span>
+        </div>
+      }
+      @if (isLoadingHistory()) {
+        <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
+          <span class="loading loading-spinner loading-sm"></span><span>Cargando historial...</span>
+        </div>
+      } @else {
+        <cash-openings-history-table [openings]="openings()" />
+      }
+    </section>
+  }
+</div>

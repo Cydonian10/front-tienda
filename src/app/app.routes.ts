@@ -25,6 +25,11 @@ export const routes: Routes = [
         data: { breadcrumb: 'Mantenimiento' },
         loadChildren: () => import('./feature/mantenimiento/mantenimiento.routes'),
       },
+      {
+        path: 'operaciones',
+        data: { breadcrumb: 'Operaciones' },
+        loadChildren: () => import('./feature/operaciones/operaciones.routes'),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

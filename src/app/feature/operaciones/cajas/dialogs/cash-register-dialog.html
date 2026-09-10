@@ -1,0 +1,64 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-4">
+    <h2 class="card-title">{{ register ? 'Editar caja' : 'Nueva caja' }}</h2>
+    <form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Código</legend>
+        <input
+          class="input w-full"
+          formControlName="code"
+          [class.input-error]="form.controls.code.touched && form.controls.code.invalid"
+        />
+        <p
+          class="fieldset-label text-error"
+          [class.hidden]="!form.controls.code.touched || form.controls.code.valid"
+        >
+          El código es obligatorio.
+        </p>
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Nombre</legend>
+        <input
+          class="input w-full"
+          formControlName="name"
+          [class.input-error]="form.controls.name.touched && form.controls.name.invalid"
+        />
+        <p
+          class="fieldset-label text-error"
+          [class.hidden]="!form.controls.name.touched || form.controls.name.valid"
+        >
+          El nombre es obligatorio.
+        </p>
+      </fieldset>
+      @if (register) {
+        <label class="label cursor-pointer justify-start gap-3">
+          <input
+            type="checkbox"
+            class="toggle"
+            formControlName="active"
+            [disabled]="register.openOpening !== null"
+          /><span
+            >La caja está activa</span
+          >
+        </label>
+        @if (register.openOpening) {
+          <p class="fieldset-label text-warning">No puede desactivarse mientras tenga una sesión abierta.</p>
+        }
+      }
+      @if (error(); as message) {
+        <div role="alert" class="alert alert-error">
+          <span>{{ message }}</span>
+        </div>
+      }
+      <div class="card-actions justify-end">
+        <button type="button" class="btn btn-soft" (click)="close()">Cancelar</button
+        ><button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting()">
+          @if (isSubmitting()) {
+            <span class="loading loading-spinner"></span>
+          }
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

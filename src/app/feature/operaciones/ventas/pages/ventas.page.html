@@ -37,7 +37,7 @@
     </section>
   } @else {
     <section class="card card-border border-base-300 bg-base-100">
-      <div class="card-body gap-4">
+      <div class="card-body gap-4 p-4 sm:p-5">
         <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 class="card-title">Sesión de venta</h2>
@@ -71,25 +71,84 @@
       </div>
     </section>
 
-    <section class="grid gap-3 sm:grid-cols-3">
-      <article class="card card-border border-base-300 bg-base-100">
-        <div class="card-body gap-1 p-4">
-          <p class="text-sm text-base-content/60">Productos disponibles</p>
-          <p class="text-2xl font-semibold">{{ products()?.total ?? 0 }}</p>
-        </div>
-      </article>
-      <article class="card card-border border-base-300 bg-base-100">
-        <div class="card-body gap-1 p-4">
-          <p class="text-sm text-base-content/60">Clientes disponibles</p>
-          <p class="text-2xl font-semibold">{{ customers()?.total ?? 0 }}</p>
-        </div>
-      </article>
-      <article class="card card-border border-base-300 bg-base-100">
-        <div class="card-body gap-1 p-4">
-          <p class="text-sm text-base-content/60">Métodos de pago activos</p>
-          <p class="text-2xl font-semibold">{{ paymentMethods().length }}</p>
-        </div>
-      </article>
+    <section class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(24rem,0.9fr)]">
+      <sales-product-picker
+        [result]="products()"
+        [isLoading]="isLoadingProducts()"
+        [page]="productPage()"
+        (searchChanged)="searchProducts($event)"
+        (pageChanged)="changeProductPage($event)"
+        (productAdded)="addProduct($event)"
+      />
+      <sale-cart
+        [lines]="cartLines()"
+        [customers]="customers()"
+        [customerPage]="customerPage()"
+        [customerId]="customerId()"
+        [discount]="discount()"
+        [subtotal]="subtotal()"
+        [total]="total()"
+        [isSaving]="isSaving()"
+        [isEditing]="editingSale() !== null"
+        [canSubmit]="canSubmitSale()"
+        (customerChanged)="updateCustomer($event)"
+        (customerPageChanged)="changeCustomerPage($event)"
+        (quantityChanged)="updateQuantity($event)"
+        (lineRemoved)="removeLine($event)"
+        (discountChanged)="updateDiscount($event)"
+        (saveRequested)="savePending()"
+        (payRequested)="payCurrentSale()"
+      />
+    </section>
+
+    @if (catalogError(); as message) {
+      <div role="alert" class="alert alert-error">
+        <span>{{ message }}</span>
+      </div>
+    }
+  }
+
+  <sales-filters
+    [filters]="historyFilters()"
+    [canFilterSeller]="canManage()"
+    (filtersChanged)="updateHistoryFilters($event)"
+    (applyRequested)="applyHistoryFilters()"
+    (clearRequested)="clearHistoryFilters()"
+  />
+
+  @if (historyError(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  @if (isLoadingHistory()) {
+    <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
+      <span class="loading loading-spinner loading-sm"></span>
+      <span>Cargando historial...</span>
+    </div>
+  } @else if (history(); as result) {
+    <section class="card card-border border-base-300 bg-base-100">
+      <div class="card-body gap-4 p-4 sm:p-5">
+        <sales-history-table
+          [sales]="result.data"
+          [currentPersonId]="currentPersonId()"
+          [canManage]="canManage()"
+          (editRequested)="editSale($event)"
+          (payRequested)="paySale($event)"
+          (detailRequested)="showDetail($event)"
+          (cancelRequested)="cancelSale($event)"
+        />
+        <ng-pagination
+          [page]="historyPage()"
+          [pageSize]="historyPageSize()"
+          [lastPage]="result.lastPage"
+          [total]="result.total"
+          [pageSizes]="[20, 50, 100]"
+          (pageChange)="changeHistoryPage($event)"
+          (pageSizeChange)="changeHistoryPageSize($event)"
+        />
+      </div>
     </section>
   }
 </div>

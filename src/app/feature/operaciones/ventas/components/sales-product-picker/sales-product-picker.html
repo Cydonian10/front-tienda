@@ -1,0 +1,72 @@
+<section class="card card-border border-base-300 bg-base-100">
+  <div class="card-body gap-4 p-4 sm:p-5">
+    <div>
+      <h2 class="card-title">Productos</h2>
+      <p class="text-sm text-base-content/60">Busca y agrega productos al carrito.</p>
+    </div>
+
+    <label class="input w-full">
+      <input type="search" placeholder="Buscar producto" (input)="onSearch($event)" />
+    </label>
+
+    @if (isLoading()) {
+      <div class="flex items-center gap-2 py-4 text-sm text-base-content/60">
+        <span class="loading loading-spinner loading-sm"></span>
+        Buscando productos...
+      </div>
+    } @else if (result(); as products) {
+      @if (products.data.length === 0) {
+        <p class="py-4 text-sm text-base-content/60">No se encontraron productos.</p>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th class="text-right">Stock</th>
+                <th class="text-right">Precio</th>
+                <th><span class="sr-only">Acción</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of products.data; track product.id) {
+                <tr>
+                  <td>{{ productLabel(product) }}</td>
+                  <td class="text-right">{{ product.stock }}</td>
+                  <td class="text-right">{{ product.price }}</td>
+                  <td class="text-right">
+                    <button type="button" class="btn btn-sm" (click)="productAdded.emit(product)">
+                      Agregar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (products.lastPage > 1) {
+        <div class="join self-end">
+          <button
+            type="button"
+            class="btn btn-sm join-item"
+            [disabled]="page() <= 1"
+            (click)="previousPage()"
+          >
+            Anterior
+          </button>
+          <span class="btn btn-sm join-item btn-active">{{ page() }}</span>
+          <button
+            type="button"
+            class="btn btn-sm join-item"
+            [disabled]="page() >= products.lastPage"
+            (click)="nextPage()"
+          >
+            Siguiente
+          </button>
+        </div>
+      }
+    }
+  </div>
+</section>

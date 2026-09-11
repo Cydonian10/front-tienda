@@ -1,8 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -24,9 +21,7 @@ describe('PeopleService', () => {
 
   it('loads eligible cash responsibles', async () => {
     const request = firstValueFrom(service.findCashResponsibles());
-    const httpRequest = httpTesting.expectOne(
-      `${environment.apiUrl}/people/cash-responsibles`,
-    );
+    const httpRequest = httpTesting.expectOne(`${environment.apiUrl}/people/cash-responsibles`);
 
     expect(httpRequest.request.method).toBe('GET');
     httpRequest.flush({
@@ -34,8 +29,22 @@ describe('PeopleService', () => {
       message: 'OK',
     });
 
-    await expect(request).resolves.toEqual([
-      { id: 1, firstName: 'Ana', lastName: 'Pérez' },
-    ]);
+    await expect(request).resolves.toEqual([{ id: 1, firstName: 'Ana', lastName: 'Pérez' }]);
+  });
+
+  it('loads people with pagination filters', async () => {
+    const request = firstValueFrom(service.findAll({ page: 2, limit: 20, hasAuth: false }));
+    const httpRequest = httpTesting.expectOne(
+      (request) =>
+        request.url === `${environment.apiUrl}/people` &&
+        request.params.get('page') === '2' &&
+        request.params.get('limit') === '20' &&
+        request.params.get('hasAuth') === 'false',
+    );
+
+    expect(httpRequest.request.method).toBe('GET');
+    httpRequest.flush({ data: [], total: 0, page: 2, limit: 20, lastPage: 0 });
+
+    await expect(request).resolves.toMatchObject({ page: 2, limit: 20, data: [] });
   });
 });

@@ -1,0 +1,72 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-5 p-6 sm:p-8">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h2 class="card-title">Venta #{{ data.sale.id }}</h2>
+        <p class="text-sm text-base-content/60">{{ data.sale.saleDate }}</p>
+      </div>
+      <span class="badge badge-outline">{{ data.sale.status }}</span>
+    </div>
+
+    <dl class="grid gap-3 text-sm sm:grid-cols-2">
+      <div>
+        <dt class="text-base-content/60">Cliente</dt>
+        <dd>{{ data.sale.customerName }}</dd>
+      </div>
+      <div>
+        <dt class="text-base-content/60">Vendedor</dt>
+        <dd>{{ data.sale.sellerName }}</dd>
+      </div>
+      <div>
+        <dt class="text-base-content/60">Sesión</dt>
+        <dd>#{{ data.sale.cashOpeningId }}</dd>
+      </div>
+      <div>
+        <dt class="text-base-content/60">Descuento</dt>
+        <dd>{{ data.sale.discount }}</dd>
+      </div>
+    </dl>
+
+    <div class="overflow-x-auto">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="text-right">Precio</th>
+            <th class="text-right">Cantidad</th>
+            <th class="text-right">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (detail of data.sale.details; track detail.id) {
+            <tr>
+              <td>{{ detail.productName }}</td>
+              <td class="text-right">{{ detail.unitPrice }}</td>
+              <td class="text-right">{{ detail.quantity }}</td>
+              <td class="text-right">{{ detail.subtotal }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rounded-box bg-base-200 p-4 text-right">
+      <p class="text-lg font-semibold">Total: {{ data.sale.totalAmount }}</p>
+      @if (data.sale.payment; as payment) {
+        <p class="mt-1 text-sm text-base-content/60">
+          {{ payment.paymentMethodName }} · {{ payment.amount }} · {{ payment.status }}
+        </p>
+      }
+    </div>
+
+    @if (data.sale.cancellationReason) {
+      <div role="alert" class="alert alert-warning">
+        <span>Cancelada: {{ data.sale.cancellationReason }}</span>
+      </div>
+    }
+
+    <div class="card-actions justify-end">
+      <button type="button" class="btn" (click)="close()">Cerrar</button>
+    </div>
+  </div>
+</div>

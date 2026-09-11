@@ -1,0 +1,70 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-6 p-6 sm:p-8">
+    <div>
+      <h2 class="card-title">Cobrar venta #{{ data.sale.id }}</h2>
+      <p class="mt-1 text-sm text-base-content/60">
+        El importe debe coincidir exactamente con el total de la venta.
+      </p>
+    </div>
+
+    <div class="rounded-box bg-base-200 p-4 text-right">
+      <p class="text-sm text-base-content/60">Total a cobrar</p>
+      <p class="text-2xl font-semibold">{{ data.sale.totalAmount }}</p>
+    </div>
+
+    <form [formRoot]="form" class="space-y-4">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Método de pago</legend>
+        <select
+          class="select w-full"
+          [class.select-error]="paymentMethodError()"
+          [formField]="form.paymentMethodId"
+        >
+          @for (method of data.paymentMethods; track method.id) {
+            <option [value]="method.id">{{ method.name }}</option>
+          }
+        </select>
+        @if (paymentMethodError(); as message) {
+          <p class="fieldset-label text-error">{{ message }}</p>
+        }
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Importe</legend>
+        <input
+          type="number"
+          step="0.01"
+          class="input w-full"
+          [class.input-error]="amountError()"
+          [formField]="form.amount"
+        />
+        @if (amountError(); as message) {
+          <p class="fieldset-label text-error">{{ message }}</p>
+        }
+      </fieldset>
+
+      @if (error(); as message) {
+        <div role="alert" class="alert alert-error">
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <div class="card-actions justify-end">
+        <button
+          type="button"
+          class="btn btn-soft"
+          [disabled]="form().submitting()"
+          (click)="close()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="form().submitting()">
+          @if (form().submitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          Cobrar {{ data.sale.totalAmount }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

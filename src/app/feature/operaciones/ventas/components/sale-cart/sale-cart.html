@@ -1,0 +1,132 @@
+<section class="card card-border border-base-300 bg-base-100">
+  <div class="card-body gap-5 p-4 sm:p-5">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h2 class="card-title">Carrito</h2>
+        <p class="text-sm text-base-content/60">
+          {{
+            isEditing()
+              ? 'Editando una venta pendiente.'
+              : 'Agrega productos y selecciona el cliente.'
+          }}
+        </p>
+      </div>
+      <span class="badge badge-outline">{{ lines().length }} líneas</span>
+    </div>
+
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Cliente</legend>
+      <select class="select w-full" [value]="customerId() ?? ''" (change)="onCustomer($event)">
+        <option value="">Selecciona un cliente</option>
+        @for (customer of customers()?.data ?? []; track customer.id) {
+          <option [value]="customer.id">{{ customerLabel(customer) }}</option>
+        }
+      </select>
+      @if ((customers()?.lastPage ?? 0) > 1) {
+        <div class="join mt-2 self-end">
+          <button
+            type="button"
+            class="btn btn-xs join-item"
+            [disabled]="customerPage() <= 1"
+            (click)="previousCustomerPage()"
+          >
+            Anterior
+          </button>
+          <span class="btn btn-xs join-item btn-active">{{ customerPage() }}</span>
+          <button
+            type="button"
+            class="btn btn-xs join-item"
+            [disabled]="customerPage() >= (customers()?.lastPage ?? 0)"
+            (click)="nextCustomerPage()"
+          >
+            Siguiente
+          </button>
+        </div>
+      }
+    </fieldset>
+
+    @if (lines().length === 0) {
+      <p class="rounded-box border border-dashed border-base-300 p-4 text-sm text-base-content/60">
+        El carrito está vacío.
+      </p>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th class="text-right">Precio</th>
+              <th class="text-right">Cantidad</th>
+              <th class="text-right">Subtotal</th>
+              <th><span class="sr-only">Quitar</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of lines(); track line.product.id) {
+              <tr>
+                <td>{{ line.product.baseProductName }}</td>
+                <td class="text-right">{{ line.product.price }}</td>
+                <td class="text-right">
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    class="input input-sm w-20 text-right"
+                    [value]="line.quantity"
+                    (change)="onQuantity(line.product.id, $event)"
+                  />
+                </td>
+                <td class="text-right">{{ line.product.price * line.quantity }}</td>
+                <td class="text-right">
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-xs"
+                    (click)="lineRemoved.emit(line.product.id)"
+                  >
+                    Quitar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <fieldset class="fieldset max-w-48">
+      <legend class="fieldset-legend">Descuento</legend>
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        class="input w-full"
+        [value]="discount()"
+        (change)="onDiscount($event)"
+      />
+    </fieldset>
+
+    <div class="rounded-box bg-base-200 p-4 text-right">
+      <p class="text-sm text-base-content/60">Subtotal: {{ subtotal() }}</p>
+      <p class="mt-1 text-lg font-semibold">Total: {{ total() }}</p>
+    </div>
+
+    <div class="card-actions justify-end">
+      <button
+        type="button"
+        class="btn"
+        [disabled]="isSaving() || !canSubmit()"
+        (click)="saveRequested.emit()"
+      >
+        {{ isEditing() ? 'Guardar cambios' : 'Guardar pendiente' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="isSaving() || !canSubmit()"
+        (click)="payRequested.emit()"
+      >
+        Cobrar
+      </button>
+    </div>
+  </div>
+</section>

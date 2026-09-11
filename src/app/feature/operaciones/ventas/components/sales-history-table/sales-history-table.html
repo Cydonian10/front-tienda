@@ -1,0 +1,80 @@
+@if (sales().length === 0) {
+  <p class="rounded-box border border-dashed border-base-300 p-6 text-sm text-base-content/60">
+    No hay ventas para los filtros seleccionados.
+  </p>
+} @else {
+  <div class="overflow-x-auto">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Venta</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Vendedor</th>
+          <th>Sesión</th>
+          <th class="text-right">Total</th>
+          <th>Estado</th>
+          <th><span class="sr-only">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (sale of sales(); track sale.id) {
+          <tr>
+            <td>#{{ sale.id }}</td>
+            <td>{{ sale.saleDate }}</td>
+            <td>{{ sale.customerName }}</td>
+            <td>{{ sale.sellerName }}</td>
+            <td>#{{ sale.cashOpeningId }}</td>
+            <td class="text-right">{{ sale.totalAmount }}</td>
+            <td>
+              <span
+                class="badge badge-outline"
+                [class.badge-warning]="sale.status === 'PENDING'"
+                [class.badge-success]="sale.status === 'PAID'"
+                [class.badge-error]="sale.status === 'CANCELLED'"
+              >
+                {{ statusLabel(sale.status) }}
+              </span>
+            </td>
+            <td class="text-right">
+              <div class="join">
+                <button
+                  type="button"
+                  class="btn btn-xs join-item"
+                  (click)="detailRequested.emit(sale)"
+                >
+                  Ver
+                </button>
+                @if (sale.status === 'PENDING') {
+                  <button
+                    type="button"
+                    class="btn btn-xs join-item"
+                    (click)="editRequested.emit(sale)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-xs join-item"
+                    (click)="payRequested.emit(sale)"
+                  >
+                    Cobrar
+                  </button>
+                }
+                @if (canCancel(sale)) {
+                  <button
+                    type="button"
+                    class="btn btn-error btn-xs join-item"
+                    (click)="cancelRequested.emit(sale)"
+                  >
+                    {{ sale.status === 'PAID' ? 'Anular' : 'Cancelar' }}
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

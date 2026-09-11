@@ -34,7 +34,10 @@ const initialMenu: MenuItem[] = [
     label: 'Operaciones',
     icon: 'clipboard-check',
     expanded: true,
-    children: [{ id: 'cajas', label: 'Cajas', icon: 'table', route: '/operaciones/cajas' }],
+    children: [
+      { id: 'cajas', label: 'Cajas', icon: 'table', route: '/operaciones/cajas' },
+      { id: 'ventas', label: 'Ventas', icon: 'clipboard-check', route: '/operaciones/ventas' },
+    ],
   },
   { id: 'mensajes', label: 'Mensajes', icon: 'mail', route: '/mensajes' },
 ];

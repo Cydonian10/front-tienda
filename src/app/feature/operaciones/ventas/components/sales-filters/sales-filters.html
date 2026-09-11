@@ -1,0 +1,69 @@
+<section class="card card-border border-base-300 bg-base-100">
+  <div class="card-body gap-4 p-4 sm:p-5">
+    <div>
+      <h2 class="card-title">Historial de ventas</h2>
+      <p class="text-sm text-base-content/60">Filtra el registro antes de consultar.</p>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Estado</legend>
+        <select
+          class="select w-full"
+          [value]="filters().status"
+          (change)="update('status', $event)"
+        >
+          <option value="">Todos</option>
+          <option value="PENDING">Pendiente</option>
+          <option value="PAID">Pagada</option>
+          <option value="CANCELLED">Cancelada</option>
+        </select>
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">ID de sesión</legend>
+        <input
+          type="number"
+          min="1"
+          class="input w-full"
+          [value]="filters().cashOpeningId"
+          (input)="update('cashOpeningId', $event)"
+        />
+      </fieldset>
+      @if (canFilterSeller()) {
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">ID de vendedor</legend>
+          <input
+            type="number"
+            min="1"
+            class="input w-full"
+            [value]="filters().sellerId"
+            (input)="update('sellerId', $event)"
+          />
+        </fieldset>
+      }
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Desde</legend>
+        <input
+          type="date"
+          class="input w-full"
+          [value]="filters().startDate"
+          (change)="update('startDate', $event)"
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Hasta</legend>
+        <input
+          type="date"
+          class="input w-full"
+          [value]="filters().endDate"
+          (change)="update('endDate', $event)"
+        />
+      </fieldset>
+    </div>
+
+    <div class="card-actions justify-end">
+      <button type="button" class="btn btn-soft" (click)="clearRequested.emit()">Limpiar</button>
+      <button type="button" class="btn" (click)="applyRequested.emit()">Aplicar filtros</button>
+    </div>
+  </div>
+</section>

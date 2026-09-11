@@ -1,0 +1,54 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-6 p-6 sm:p-8">
+    <div>
+      <h2 class="card-title">
+        {{ data.sale.status === 'PAID' ? 'Anular venta' : 'Cancelar venta' }} #{{ data.sale.id }}
+      </h2>
+      <p class="mt-1 text-sm text-base-content/60">
+        {{
+          data.sale.status === 'PAID'
+            ? 'Se restaurará el stock y se registrará el egreso de caja.'
+            : 'La venta quedará cancelada sin modificar el stock.'
+        }}
+      </p>
+    </div>
+
+    <form [formRoot]="form" class="space-y-4">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Motivo</legend>
+        <textarea
+          rows="4"
+          class="textarea w-full"
+          [class.textarea-error]="reasonError()"
+          [formField]="form.cancellationReason"
+        ></textarea>
+        @if (reasonError(); as message) {
+          <p class="fieldset-label text-error">{{ message }}</p>
+        }
+      </fieldset>
+
+      @if (error(); as message) {
+        <div role="alert" class="alert alert-error">
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <div class="card-actions justify-end">
+        <button
+          type="button"
+          class="btn btn-soft"
+          [disabled]="form().submitting()"
+          (click)="close()"
+        >
+          Volver
+        </button>
+        <button type="submit" class="btn btn-error" [disabled]="form().submitting()">
+          @if (form().submitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          {{ data.sale.status === 'PAID' ? 'Anular venta' : 'Cancelar venta' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

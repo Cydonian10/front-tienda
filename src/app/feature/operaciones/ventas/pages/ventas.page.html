@@ -1,0 +1,95 @@
+<ng-breadcrumbs />
+
+<div class="mt-4 space-y-4">
+  <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-semibold tracking-wide text-primary">Operaciones</p>
+      <h1 class="text-xl font-semibold">Ventas</h1>
+      <p class="mt-1 text-sm text-base-content/60">
+        Prepara y cobra ventas desde tu sesión de caja.
+      </p>
+    </div>
+    <button type="button" class="btn btn-sm" [disabled]="isLoading()" (click)="reload()">
+      Actualizar
+    </button>
+  </header>
+
+  @if (error(); as message) {
+    <div role="alert" class="alert alert-error">
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
+      <span class="loading loading-spinner"></span>
+      <span>Cargando punto de venta...</span>
+    </div>
+  } @else if (ownRegisters().length === 0) {
+    <section class="card card-border border-warning bg-base-100">
+      <div class="card-body">
+        <h2 class="card-title">No tienes una sesión de caja abierta</h2>
+        <p>Para crear o cobrar una venta debes ser responsable de una apertura en curso.</p>
+        <div class="card-actions">
+          <a routerLink="/operaciones/cajas" class="btn btn-primary">Ir a Cajas</a>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <section class="card card-border border-base-300 bg-base-100">
+      <div class="card-body gap-4">
+        <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="card-title">Sesión de venta</h2>
+            <p class="text-sm text-base-content/60">
+              Selecciona la sesión propia que se asociará a las nuevas ventas.
+            </p>
+          </div>
+          <span class="badge badge-outline">{{ ownRegisters().length }} abiertas</span>
+        </div>
+
+        <label class="flex max-w-md flex-col gap-1 text-sm font-medium">
+          Sesión de caja
+          <select
+            class="select w-full"
+            [value]="selectedOpeningId() ?? ''"
+            (change)="selectOpening($event)"
+          >
+            @for (register of ownRegisters(); track register.id) {
+              <option [value]="register.openOpening?.id">
+                {{ register.code }} · {{ register.name }}
+              </option>
+            }
+          </select>
+        </label>
+
+        @if (selectedOpening(); as opening) {
+          <p class="text-sm text-base-content/70">
+            Apertura #{{ opening.id }} · monto inicial {{ opening.openingAmount }}
+          </p>
+        }
+      </div>
+    </section>
+
+    <section class="grid gap-3 sm:grid-cols-3">
+      <article class="card card-border border-base-300 bg-base-100">
+        <div class="card-body gap-1 p-4">
+          <p class="text-sm text-base-content/60">Productos disponibles</p>
+          <p class="text-2xl font-semibold">{{ products()?.total ?? 0 }}</p>
+        </div>
+      </article>
+      <article class="card card-border border-base-300 bg-base-100">
+        <div class="card-body gap-1 p-4">
+          <p class="text-sm text-base-content/60">Clientes disponibles</p>
+          <p class="text-2xl font-semibold">{{ customers()?.total ?? 0 }}</p>
+        </div>
+      </article>
+      <article class="card card-border border-base-300 bg-base-100">
+        <div class="card-body gap-1 p-4">
+          <p class="text-sm text-base-content/60">Métodos de pago activos</p>
+          <p class="text-2xl font-semibold">{{ paymentMethods().length }}</p>
+        </div>
+      </article>
+    </section>
+  }
+</div>

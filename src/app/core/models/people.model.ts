@@ -20,3 +20,9 @@ export interface Person {
   hasAuth: boolean;
   auth: PersonAuth | null;
 }
+
+export interface PersonFilter extends PaginationQuery {
+  roleName?: string;
+  hasAuth?: boolean;
+}
+import { PaginationQuery } from './pagination.model';

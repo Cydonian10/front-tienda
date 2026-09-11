@@ -4,15 +4,20 @@ import { Observable } from 'rxjs';
 
 import { ApiResponse, ApiService } from './api.service';
 import { CashResponsible } from '../models/cash-register.model';
-import { Person } from '../models/people.model';
+import { PaginatedResult } from '../models/pagination.model';
+import { Person, PersonFilter } from '../models/people.model';
 
 @Injectable({ providedIn: 'root' })
 export class PeopleService extends ApiService {
+  findAll(filter: PersonFilter): Observable<PaginatedResult<Person>> {
+    return this.http.get<PaginatedResult<Person>>(`${this.apiUrl}/people`, {
+      params: this.buildParams(filter),
+    });
+  }
+
   findCashResponsibles(): Observable<CashResponsible[]> {
     return this.unwrap(
-      this.http.get<ApiResponse<CashResponsible[]>>(
-        `${this.apiUrl}/people/cash-responsibles`,
-      ),
+      this.http.get<ApiResponse<CashResponsible[]>>(`${this.apiUrl}/people/cash-responsibles`),
     );
   }
 

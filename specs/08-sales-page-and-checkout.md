@@ -1,6 +1,6 @@
 # SPEC 08 — Página de ventas y cobro
 
-> **Status:** Borrador
+> **Status:** Aprobado
 > **Depends on:** SPEC 07 (cajas y aperturas), API `TiendaApi` SPEC 06, API `TiendaApi` SPEC 11, API `TiendaApi` SPEC 12, API `TiendaApi` SPEC 16, API `TiendaApi` SPEC 17
 > **Date:** 2026-09-11
 > **Objective:** Añadir una página en `Operaciones > Ventas` para que administradores y trabajadores gestionen ventas mediante una sesión de caja propia abierta.
@@ -272,13 +272,13 @@ Convenciones:
 
 ## Risks
 
-| Riesgo | Mitigación |
-| --- | --- |
-| La sesión puede cerrarse mientras se prepara una venta. | El API valida nuevamente la apertura y la interfaz muestra el conflicto. |
-| El stock o precio puede cambiar antes del pago. | El servidor recalcula y valida durante la operación. |
-| El carrito puede contener datos obsoletos. | El borrador no se persiste y la respuesta del API es la fuente de verdad. |
-| Existen varias sesiones propias abiertas. | Mostrar únicamente las sesiones propias y exigir una selección. |
-| Un trabajador intenta operar otra sesión. | Aplicar validación de responsable en el backend. |
+| Riesgo                                                  | Mitigación                                                                |
+| ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| La sesión puede cerrarse mientras se prepara una venta. | El API valida nuevamente la apertura y la interfaz muestra el conflicto.  |
+| El stock o precio puede cambiar antes del pago.         | El servidor recalcula y valida durante la operación.                      |
+| El carrito puede contener datos obsoletos.              | El borrador no se persiste y la respuesta del API es la fuente de verdad. |
+| Existen varias sesiones propias abiertas.               | Mostrar únicamente las sesiones propias y exigir una selección.           |
+| Un trabajador intenta operar otra sesión.               | Aplicar validación de responsable en el backend.                          |
 
 ## What is **not** in this spec
 

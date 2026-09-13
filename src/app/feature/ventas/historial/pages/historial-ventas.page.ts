@@ -7,11 +7,13 @@ import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
 
 import { ReportsService } from '../../../../core/api/reports.service';
+import { PeopleService } from '../../../../core/api/people.service';
 import { SalesService } from '../../../../core/api/sales.service';
 import { PaginatedResult } from '../../../../core/models/pagination.model';
 import { SalesSummary } from '../../../../core/models/report.model';
 import { ROLE_NAMES } from '../../../../core/models/role.model';
 import { Sale, SaleFilter } from '../../../../core/models/sale.model';
+import { Person } from '../../../../core/models/people.model';
 import { AuthStore } from '../../../../core/store/auth.store';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
 import PaginationNg from '../../../../shared/pagination/pagination.ng';
@@ -34,6 +36,7 @@ export default class HistorialVentasPage {
   private readonly dialog = inject(Dialog);
   private readonly router = inject(Router);
   private readonly reportsService = inject(ReportsService);
+  private readonly peopleService = inject(PeopleService);
   private readonly salesService = inject(SalesService);
   private readonly authStore = inject(AuthStore);
 
@@ -42,12 +45,14 @@ export default class HistorialVentasPage {
   protected readonly page = signal(1);
   protected readonly pageSize = signal(20);
   protected readonly sales = signal<PaginatedResult<Sale> | null>(null);
+  protected readonly sellers = signal<Person[]>([]);
   protected readonly summary = signal<SalesSummary | null>(null);
   protected readonly isLoadingTable = signal(true);
   protected readonly isLoadingSummary = signal(true);
   protected readonly tableError = signal<string | null>(null);
   protected readonly summaryError = signal<string | null>(null);
   protected readonly periodError = signal<string | null>(null);
+  protected readonly sellersError = signal<string | null>(null);
   protected readonly isSummaryEmpty = computed(() => {
     const summary = this.summary();
     return !!summary && summary.paidCount === 0 && summary.cancelledCount === 0;
@@ -77,6 +82,7 @@ export default class HistorialVentasPage {
 
   constructor() {
     void this.loadPeriod();
+    void this.loadSellers();
   }
 
   protected setPeriod(preset: Exclude<PeriodPreset, 'custom'>): void {
@@ -221,6 +227,18 @@ export default class HistorialVentasPage {
     }
   }
 
+  protected async loadSellers(): Promise<void> {
+    this.sellersError.set(null);
+    try {
+      const result = await firstValueFrom(
+        this.peopleService.findAll({ hasAuth: true, page: 1, limit: 100 }),
+      );
+      this.sellers.set(result.data);
+    } catch (error) {
+      this.sellersError.set(this.message(error));
+    }
+  }
+
   private periodRange(): PeriodRange | null {
     const { startDate, endDate } = this.filters();
     const start = DateTime.fromISO(startDate, { zone: BUSINESS_TIME_ZONE });
@@ -242,7 +260,6 @@ export default class HistorialVentasPage {
       page: this.page(),
       limit: this.pageSize(),
       status: filters.status || undefined,
-      cashOpeningId: this.positiveInteger(filters.cashOpeningId),
       sellerId: this.positiveInteger(filters.sellerId),
       startDate: range.from,
       endDate: range.to,
@@ -251,7 +268,7 @@ export default class HistorialVentasPage {
 
   private defaultFilters(): SalesHistoryFilters {
     const today = DateTime.now().setZone(BUSINESS_TIME_ZONE).toISODate()!;
-    return { status: '', cashOpeningId: '', sellerId: '', startDate: today, endDate: today };
+    return { status: '', sellerId: '', startDate: today, endDate: today };
   }
 
   private positiveInteger(value: string): number | undefined {

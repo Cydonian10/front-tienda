@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ReportsService } from '../../../../core/api/reports.service';
+import { PeopleService } from '../../../../core/api/people.service';
 import { SalesService } from '../../../../core/api/sales.service';
 import { AuthStore } from '../../../../core/store/auth.store';
 import HistorialVentasPage from './historial-ventas.page';
@@ -13,6 +14,7 @@ import HistorialVentasPage from './historial-ventas.page';
 describe('HistorialVentasPage', () => {
   const salesService = { findAll: vi.fn() };
   const reportsService = { findSalesSummary: vi.fn() };
+  const peopleService = { findAll: vi.fn() };
   const authStore = {
     person: vi.fn(() => ({ id: 2, firstName: 'Ana', lastName: 'Pérez' })),
     user: vi.fn(() => ({ roles: ['RESPONSABLE'] })),
@@ -34,10 +36,14 @@ describe('HistorialVentasPage', () => {
         cancelledAmount: 25,
       }),
     );
+    peopleService.findAll.mockReturnValue(
+      of({ data: [], total: 0, page: 1, limit: 100, lastPage: 0 }),
+    );
     await TestBed.configureTestingModule({
       imports: [HistorialVentasPage],
       providers: [
         { provide: ReportsService, useValue: reportsService },
+        { provide: PeopleService, useValue: peopleService },
         { provide: SalesService, useValue: salesService },
         { provide: AuthStore, useValue: authStore },
         { provide: Dialog, useValue: { open: vi.fn() } },
@@ -90,7 +96,7 @@ describe('HistorialVentasPage', () => {
     await fixture.whenStable();
     const page = fixture.componentInstance as any;
     const tomorrow = DateTime.now().setZone('America/Lima').plus({ days: 1 }).toISODate();
-    page.filters.set({ status: '', cashOpeningId: '', sellerId: '', startDate: tomorrow, endDate: tomorrow });
+    page.filters.set({ status: '', sellerId: '', startDate: tomorrow, endDate: tomorrow });
     page.periodPreset.set('today');
     const tableCalls = salesService.findAll.mock.calls.length;
     const summaryCalls = reportsService.findSalesSummary.mock.calls.length;

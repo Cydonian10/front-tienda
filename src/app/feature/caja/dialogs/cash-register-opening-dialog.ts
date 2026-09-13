@@ -3,13 +3,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { CashRegisterOpeningsService } from '../../../../core/api/cash-register-openings.service';
+import { CashRegisterOpeningsService } from '../../../core/api/cash-register-openings.service';
 import {
   CashRegister,
   CashRegisterOpening,
   CashResponsible,
   CreateCashRegisterOpening,
-} from '../../../../core/models/cash-register.model';
+} from '../../../core/models/cash-register.model';
 
 export interface CashRegisterOpeningDialogData {
   register: CashRegister;

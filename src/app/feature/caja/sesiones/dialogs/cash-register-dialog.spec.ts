@@ -6,18 +6,35 @@ import { CashRegistersService } from '../../../../core/api/cash-registers.servic
 import { CashRegisterDialog } from './cash-register-dialog';
 
 describe('CashRegisterDialog', () => {
-  const service = { create: vi.fn(), update: vi.fn() }; const dialogRef = { close: vi.fn() };
-  beforeEach(async () => { vi.clearAllMocks(); service.create.mockReturnValue(of({ id: 1, code: 'CAJA-01', name: 'Principal', active: true, openOpening: null })); await TestBed.configureTestingModule({ imports: [CashRegisterDialog], providers: [{ provide: CashRegistersService, useValue: service }, { provide: DialogRef, useValue: dialogRef }, { provide: DIALOG_DATA, useValue: null }] }).compileComponents(); });
+  const service = { create: vi.fn(), update: vi.fn() };
+  const dialogRef = { close: vi.fn() };
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    service.create.mockReturnValue(
+      of({ id: 1, code: 'CAJA-01', name: 'Principal', active: true, openOpening: null }),
+    );
+    await TestBed.configureTestingModule({
+      imports: [CashRegisterDialog],
+      providers: [
+        { provide: CashRegistersService, useValue: service },
+        { provide: DialogRef, useValue: dialogRef },
+        { provide: DIALOG_DATA, useValue: null },
+      ],
+    }).compileComponents();
+  });
 
   it('rejects whitespace-only code and name', () => {
-    const fixture = TestBed.createComponent(CashRegisterDialog); const dialog = fixture.componentInstance as any;
+    const fixture = TestBed.createComponent(CashRegisterDialog);
+    const dialog = fixture.componentInstance as any;
     dialog.form.setValue({ code: '   ', name: '  ', active: true });
     expect(dialog.form.invalid).toBe(true);
   });
 
   it('trims values before creating a register', async () => {
-    const fixture = TestBed.createComponent(CashRegisterDialog); const dialog = fixture.componentInstance as any;
-    dialog.form.setValue({ code: ' CAJA-01 ', name: ' Principal ', active: true }); await dialog.submit();
+    const fixture = TestBed.createComponent(CashRegisterDialog);
+    const dialog = fixture.componentInstance as any;
+    dialog.form.setValue({ code: ' CAJA-01 ', name: ' Principal ', active: true });
+    await dialog.submit();
     expect(service.create).toHaveBeenCalledWith({ code: 'CAJA-01', name: 'Principal' });
   });
 

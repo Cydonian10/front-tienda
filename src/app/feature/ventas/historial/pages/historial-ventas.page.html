@@ -5,7 +5,9 @@
     <div>
       <p class="text-sm font-semibold tracking-wide text-primary">Control operativo</p>
       <h1 class="text-xl font-semibold">Historial de ventas</h1>
-      <p class="mt-1 text-sm text-base-content/60">Consulta el período y sus indicadores de caja.</p>
+      <p class="mt-1 text-sm text-base-content/60">
+        Consulta el período y sus indicadores de caja.
+      </p>
     </div>
     <span class="badge badge-outline">{{ periodLabel() }}</span>
   </header>
@@ -18,20 +20,42 @@
           <p class="text-sm text-base-content/60">Los límites se calculan en America/Lima.</p>
         </div>
         <div class="join self-start lg:self-auto">
-          <button type="button" class="btn btn-sm join-item" (click)="setPeriod('today')">Hoy</button>
-          <button type="button" class="btn btn-sm join-item" (click)="setPeriod('week')">Esta semana</button>
-          <button type="button" class="btn btn-sm join-item" (click)="setPeriod('month')">Este mes</button>
+          <button type="button" class="btn btn-sm join-item" (click)="setPeriod('today')">
+            Hoy
+          </button>
+          <button type="button" class="btn btn-sm join-item" (click)="setPeriod('week')">
+            Esta semana
+          </button>
+          <button type="button" class="btn btn-sm join-item" (click)="setPeriod('month')">
+            Este mes
+          </button>
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <span class="text-sm font-medium">Vista diaria</span>
         <div class="join">
-          <button type="button" class="btn btn-sm join-item" (click)="previousDay()" aria-label="Día anterior">Anterior</button>
-          <button type="button" class="btn btn-sm join-item" [disabled]="isNextDayDisabled()" (click)="nextDay()">Siguiente</button>
+          <button
+            type="button"
+            class="btn btn-sm join-item"
+            (click)="previousDay()"
+            aria-label="Día anterior"
+          >
+            Anterior
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm join-item"
+            [disabled]="isNextDayDisabled()"
+            (click)="nextDay()"
+          >
+            Siguiente
+          </button>
         </div>
       </div>
       @if (periodError(); as message) {
-        <div role="alert" class="alert alert-error"><span>{{ message }}</span></div>
+        <div role="alert" class="alert alert-error">
+          <span>{{ message }}</span>
+        </div>
       }
     </div>
   </section>
@@ -39,10 +63,18 @@
   <sales-filters
     [filters]="filters()"
     [canFilterSeller]="true"
+    [sellers]="sellers()"
     (filtersChanged)="updateFilters($event)"
     (applyRequested)="applyFilters()"
     (clearRequested)="clearFilters()"
   />
+
+  @if (sellersError(); as message) {
+    <div role="alert" class="alert alert-warning sm:alert-horizontal">
+      <span>No se pudieron cargar todos los vendedores: {{ message }}</span>
+      <button type="button" class="btn btn-sm" (click)="loadSellers()">Reintentar</button>
+    </div>
+  }
 
   @if (isLoadingSummary()) {
     <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">

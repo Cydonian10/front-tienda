@@ -16,7 +16,7 @@ import {
 import { AuthStore } from '../../../../core/store/auth.store';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
 import { BusinessDatePipe } from '../../../../shared/pipes/business-date.pipe';
-import { openCashRegisterOpeningDialog } from '../../../operaciones/cajas/dialogs/cash-register-opening-dialog';
+import { openCashRegisterOpeningDialog } from '../../dialogs/cash-register-opening-dialog';
 import { openCashMovementDialog } from '../dialogs/cash-movement-dialog';
 import { openCashRegisterClosingDialog } from '../dialogs/cash-register-closing-dialog';
 

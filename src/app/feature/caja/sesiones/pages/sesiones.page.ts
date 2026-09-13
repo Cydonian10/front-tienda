@@ -15,13 +15,15 @@ import {
 import { ROLE_NAMES } from '../../../../core/models/role.model';
 import { AuthStore } from '../../../../core/store/auth.store';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
-import { openCashRegisterOpeningDialog } from '../../../operaciones/cajas/dialogs/cash-register-opening-dialog';
+import { CashRegistersTable } from '../components/cash-registers-table/cash-registers-table';
 import { CashSessionsTable } from '../components/cash-sessions-table/cash-sessions-table';
+import { openCashRegisterDialog } from '../dialogs/cash-register-dialog';
+import { openCashRegisterOpeningDialog } from '../../dialogs/cash-register-opening-dialog';
 import { openCashSessionDetailDialog } from '../dialogs/cash-session-detail-dialog';
 
 @Component({
   selector: 'cash-sessions-page',
-  imports: [BreadcrumbsNg, CashSessionsTable],
+  imports: [BreadcrumbsNg, CashRegistersTable, CashSessionsTable],
   templateUrl: './sesiones.page.html',
 })
 export default class SesionesPage {
@@ -42,9 +44,6 @@ export default class SesionesPage {
   protected readonly currentMonth = signal(this.today.getMonth() + 1);
   protected readonly canOpenForAnother = computed(
     () => this.authStore.user()?.roles.includes(ROLE_NAMES.ADMINISTRATOR) ?? false,
-  );
-  protected readonly availableRegisters = computed(() =>
-    this.registers().filter((register) => register.active && !register.openOpening),
   );
 
   constructor() {
@@ -116,6 +115,24 @@ export default class SesionesPage {
     } finally {
       this.isOpening.set(false);
     }
+  }
+
+  protected createRegister(): void {
+    const ref = openCashRegisterDialog(this.dialog);
+    ref.closed.subscribe((register) => {
+      if (!register) return;
+      toast.success('Caja creada correctamente');
+      void this.load();
+    });
+  }
+
+  protected editRegister(register: CashRegister): void {
+    const ref = openCashRegisterDialog(this.dialog, register);
+    ref.closed.subscribe((updated) => {
+      if (!updated) return;
+      toast.success('Caja actualizada correctamente');
+      void this.load();
+    });
   }
 
   protected async showDetail(opening: CashRegisterOpening): Promise<void> {

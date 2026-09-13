@@ -37,12 +37,12 @@
             class="toggle"
             formControlName="active"
             [disabled]="register.openOpening !== null"
-          /><span
-            >La caja está activa</span
-          >
+          /><span>La caja está activa</span>
         </label>
         @if (register.openOpening) {
-          <p class="fieldset-label text-warning">No puede desactivarse mientras tenga una sesión abierta.</p>
+          <p class="fieldset-label text-warning">
+            No puede desactivarse mientras tenga una sesión abierta.
+          </p>
         }
       }
       @if (error(); as message) {

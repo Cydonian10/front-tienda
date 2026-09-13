@@ -28,30 +28,33 @@
           Actualizar
         </button>
       </div>
-
-      @if (canOpenForAnother()) {
-        <div class="border-t border-base-300 pt-4">
-          <p class="mb-3 text-sm font-semibold">Abrir sesión asignada</p>
-          @if (availableRegisters().length) {
-            <div class="flex flex-wrap gap-2">
-              @for (register of availableRegisters(); track register.id) {
-                <button
-                  type="button"
-                  class="btn btn-sm btn-primary"
-                  [disabled]="isOpening()"
-                  (click)="open(register)"
-                >
-                  {{ register.code }} · Abrir
-                </button>
-              }
-            </div>
-          } @else {
-            <p class="text-sm text-base-content/60">No hay cajas activas disponibles.</p>
-          }
-        </div>
-      }
     </div>
   </section>
+
+  @if (canOpenForAnother()) {
+    <section class="card card-border border-base-300 bg-base-100">
+      <div class="card-body gap-4 p-4 sm:p-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="card-title">Cajas operativas</h2>
+            <p class="text-sm text-base-content/60">
+              Administra cajas y abre una sesión asignada a otra persona.
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="createRegister()">
+            Nueva caja
+          </button>
+        </div>
+        <cash-registers-table
+          [registers]="registers()"
+          [canOpen]="!isOpening()"
+          [canManage]="true"
+          (openRequested)="open($event)"
+          (editRequested)="editRegister($event)"
+        />
+      </div>
+    </section>
+  }
 
   @if (actionError(); as message) {
     <div role="alert" class="alert alert-error sm:alert-horizontal">

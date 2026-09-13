@@ -23,6 +23,7 @@
             <thead>
               <tr>
                 <th>Producto</th>
+                <th>Presentación</th>
                 <th class="text-right">Stock</th>
                 <th class="text-right">Precio</th>
                 <th><span class="sr-only">Acción</span></th>
@@ -32,10 +33,36 @@
               @for (product of products.data; track product.id) {
                 <tr>
                   <td>{{ productLabel(product) }}</td>
-                  <td class="text-right">{{ product.stock }}</td>
-                  <td class="text-right">{{ product.price }}</td>
+                  <td>
+                    <select
+                      class="select select-sm w-32"
+                      [value]="unitFor(product)?.unitId ?? ''"
+                      [disabled]="product.units.length === 0"
+                      (change)="onUnitChanged(product, $event)"
+                    >
+                      @for (unit of product.units; track unit.unitId) {
+                        <option [value]="unit.unitId">
+                          {{ unit.unitName }} x{{ unit.factor }}
+                        </option>
+                      }
+                    </select>
+                  </td>
+                  <td class="text-right text-sm">
+                    <div>{{ formatQuantity(product.stock, 4) }} {{ mainUnit(product)?.unitValue }}</div>
+                    @if (unitFor(product); as unit) {
+                      <div class="text-base-content/60">
+                        {{ formatQuantity(availableInUnit(product)) }} {{ unit.unitValue }} disponibles
+                      </div>
+                    }
+                  </td>
+                  <td class="text-right">{{ presentationPrice(product) }}</td>
                   <td class="text-right">
-                    <button type="button" class="btn btn-sm" (click)="productAdded.emit(product)">
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [disabled]="unitFor(product) === null"
+                      (click)="addProduct(product)"
+                    >
                       Agregar
                     </button>
                   </td>

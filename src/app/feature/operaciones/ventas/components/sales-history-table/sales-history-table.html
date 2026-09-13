@@ -12,6 +12,7 @@
           <th>Cliente</th>
           <th>Vendedor</th>
           <th>Sesión</th>
+          <th>Presentaciones</th>
           <th class="text-right">Total</th>
           <th>Estado</th>
           <th><span class="sr-only">Acciones</span></th>
@@ -25,6 +26,11 @@
             <td>{{ sale.customerName }}</td>
             <td>{{ sale.sellerName }}</td>
             <td>#{{ sale.cashOpeningId }}</td>
+            <td class="text-xs">
+              @for (detail of sale.details; track detail.id) {
+                <p>{{ detail.quantity }} {{ detail.unitValue }} · {{ detail.unitPrice }}</p>
+              }
+            </td>
             <td class="text-right">{{ sale.totalAmount }}</td>
             <td>
               <span

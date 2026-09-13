@@ -55,6 +55,7 @@
           <thead>
             <tr>
               <th>Producto</th>
+              <th>Presentación</th>
               <th class="text-right">Precio</th>
               <th class="text-right">Cantidad</th>
               <th class="text-right">Subtotal</th>
@@ -62,26 +63,42 @@
             </tr>
           </thead>
           <tbody>
-            @for (line of lines(); track line.product.id) {
+            @for (line of lines(); track line.product.id + '-' + line.unit.unitId) {
               <tr>
                 <td>{{ line.product.baseProductName }}</td>
-                <td class="text-right">{{ line.product.price }}</td>
+                <td>
+                  <select
+                    class="select select-sm w-32"
+                    [value]="line.unit.unitId"
+                    (change)="onUnit(line, $event)"
+                  >
+                    @for (unit of line.product.units; track unit.unitId) {
+                      <option [value]="unit.unitId">
+                        {{ unit.unitName }} x{{ unit.factor }}
+                      </option>
+                    }
+                  </select>
+                  <p class="mt-1 text-xs text-base-content/60">
+                    {{ formatQuantity(availability(line)) }} {{ line.unit.unitValue }} disponibles
+                  </p>
+                </td>
+                <td class="text-right">{{ presentationPrice(line) }}</td>
                 <td class="text-right">
                   <input
                     type="number"
-                    min="1"
-                    step="1"
+                    min="0.01"
+                    step="0.01"
                     class="input input-sm w-20 text-right"
                     [value]="line.quantity"
-                    (change)="onQuantity(line.product.id, $event)"
+                    (change)="onQuantity(line.product.id, line.unit.unitId, $event)"
                   />
                 </td>
-                <td class="text-right">{{ line.product.price * line.quantity }}</td>
+                <td class="text-right">{{ lineSubtotal(line) }}</td>
                 <td class="text-right">
                   <button
                     type="button"
                     class="btn btn-ghost btn-xs"
-                    (click)="lineRemoved.emit(line.product.id)"
+                    (click)="lineRemoved.emit({ productId: line.product.id, unitId: line.unit.unitId })"
                   >
                     Quitar
                   </button>

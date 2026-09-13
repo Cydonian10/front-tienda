@@ -9,10 +9,25 @@ import { PaymentMethodsService } from '../../../../core/api/payment-methods.serv
 import { PeopleService } from '../../../../core/api/people.service';
 import { ProductsService } from '../../../../core/api/products.service';
 import { SalesService } from '../../../../core/api/sales.service';
+import { Product } from '../../../../core/models/product.model';
+import { Sale } from '../../../../core/models/sale.model';
 import { AuthStore } from '../../../../core/store/auth.store';
 import VentasPage from './ventas.page';
 
 describe('VentasPage', () => {
+  const product: Product = {
+    id: 1,
+    stock: 30,
+    price: 10,
+    baseProductId: 1,
+    baseProductName: 'Tornillo',
+    productAttributes: [],
+    stockLabel: '30 u',
+    units: [
+      { unitId: 1, unitName: 'Unidad', unitValue: 'u', factor: 1, isMain: true },
+      { unitId: 2, unitName: 'Caja', unitValue: 'cj', factor: 12, isMain: false },
+    ],
+  };
   const registersService = { findAll: vi.fn() };
   const paymentMethodsService = { findActive: vi.fn() };
   const peopleService = { findAll: vi.fn(), findOne: vi.fn() };
@@ -81,5 +96,63 @@ describe('VentasPage', () => {
     expect(productsService.findAll).toHaveBeenCalledWith({ page: 1, limit: 20, search: undefined });
     expect(peopleService.findAll).toHaveBeenCalledWith({ page: 1, limit: 20 });
     expect(salesService.findAll).toHaveBeenCalled();
+  });
+
+  it('restores each pending detail with its original presentation', async () => {
+    const fixture = TestBed.createComponent(VentasPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    productsService.findOne.mockReturnValue(of(product));
+    peopleService.findOne.mockReturnValue(of({ id: 3, firstName: 'Cliente', lastName: 'Uno' }));
+    const sale: Sale = {
+      id: 8,
+      saleDate: '2026-09-11T10:00:00.000Z',
+      customerId: 3,
+      customerName: 'Cliente Uno',
+      sellerId: 2,
+      sellerName: 'Ana Pérez',
+      cashOpeningId: 4,
+      discount: 0,
+      totalAmount: 130,
+      status: 'PENDING',
+      paidAt: null,
+      cancelledAt: null,
+      cancelledById: null,
+      cancellationReason: null,
+      payment: null,
+      details: [
+        {
+          id: 1,
+          productId: 1,
+          productName: 'Tornillo',
+          unitId: 1,
+          unitName: 'Unidad',
+          unitValue: 'u',
+          unitFactor: 1,
+          quantity: 1,
+          unitPrice: 10,
+          subtotal: 10,
+        },
+        {
+          id: 2,
+          productId: 1,
+          productName: 'Tornillo',
+          unitId: 2,
+          unitName: 'Caja',
+          unitValue: 'cj',
+          unitFactor: 12,
+          quantity: 2,
+          unitPrice: 60,
+          subtotal: 120,
+        },
+      ],
+    };
+    const page = fixture.componentInstance as any;
+
+    await expect(page.loadPendingSale(sale)).resolves.toBe(true);
+    expect(page.cartLines()).toEqual([
+      { product, unit: product.units[0], quantity: 1 },
+      { product, unit: product.units[1], quantity: 2 },
+    ]);
   });
 });

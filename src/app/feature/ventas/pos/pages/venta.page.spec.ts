@@ -98,6 +98,31 @@ describe('VentasPage', () => {
     expect(salesService.findAll).toHaveBeenCalled();
   });
 
+  it('debounces product searches and only requests the latest term', async () => {
+    const fixture = TestBed.createComponent(VentasPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const page = fixture.componentInstance as any;
+    productsService.findAll.mockClear();
+    vi.useFakeTimers();
+
+    page.searchProducts('tor');
+    vi.advanceTimersByTime(200);
+    page.searchProducts('tornillo');
+    vi.advanceTimersByTime(299);
+
+    expect(productsService.findAll).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
+
+    expect(productsService.findAll).toHaveBeenCalledWith({
+      page: 1,
+      limit: 20,
+      search: 'tornillo',
+    });
+    vi.useRealTimers();
+  });
+
   it('restores each pending detail with its original presentation', async () => {
     const fixture = TestBed.createComponent(VentasPage);
     fixture.detectChanges();

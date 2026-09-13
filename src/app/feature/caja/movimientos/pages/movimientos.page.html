@@ -9,56 +9,56 @@
         Consulta ingresos y egresos registrados en las sesiones de caja.
       </p>
     </div>
-    <button type="button" class="btn" [disabled]="isLoading()" (click)="load()">
-      Actualizar
-    </button>
+    <button type="button" class="btn" [disabled]="isLoading()" (click)="load()">Actualizar</button>
   </header>
 
   <section class="card card-border border-base-300 bg-base-100">
     <div class="card-body gap-4 p-4 sm:p-5">
       <div>
         <h2 class="card-title">Filtros</h2>
-        <p class="text-sm text-base-content/60">Usa identificadores para acotar el registro auditado.</p>
+        <p class="text-sm text-base-content/60">
+          Acota el historial por caja, persona, tipo y período.
+        </p>
       </div>
 
       <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">ID de sesión</legend>
-          <input
-            type="number"
-            min="1"
-            class="input w-full"
-            [value]="filters().cashOpeningId"
-            (input)="updateFilter('cashOpeningId', $event)"
-          />
-        </fieldset>
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">ID de caja</legend>
-          <input
-            type="number"
-            min="1"
-            class="input w-full"
+          <legend class="fieldset-legend">Caja</legend>
+          <select
+            class="select w-full"
             [value]="filters().cashRegisterId"
-            (input)="updateFilter('cashRegisterId', $event)"
-          />
+            (change)="updateFilter('cashRegisterId', $event)"
+          >
+            <option value="">Todas las cajas</option>
+            @for (register of registers(); track register.id) {
+              <option [value]="register.id">{{ register.code }} · {{ register.name }}</option>
+            }
+          </select>
         </fieldset>
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Tipo</legend>
-          <select class="select w-full" [value]="filters().type" (change)="updateFilter('type', $event)">
+          <select
+            class="select w-full"
+            [value]="filters().type"
+            (change)="updateFilter('type', $event)"
+          >
             <option value="">Todos</option>
             <option value="income">Ingreso</option>
             <option value="expense">Egreso</option>
           </select>
         </fieldset>
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">ID de creador</legend>
-          <input
-            type="number"
-            min="1"
-            class="input w-full"
+          <legend class="fieldset-legend">Registrado por</legend>
+          <select
+            class="select w-full"
             [value]="filters().createdById"
-            (input)="updateFilter('createdById', $event)"
-          />
+            (change)="updateFilter('createdById', $event)"
+          >
+            <option value="">Todo el personal</option>
+            @for (person of creators(); track person.id) {
+              <option [value]="person.id">{{ person.firstName }} {{ person.lastName }}</option>
+            }
+          </select>
         </fieldset>
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Desde</legend>
@@ -81,7 +81,12 @@
       </div>
 
       <div class="card-actions justify-end">
-        <button type="button" class="btn btn-soft" [disabled]="isLoading()" (click)="clearFilters()">
+        <button
+          type="button"
+          class="btn btn-soft"
+          [disabled]="isLoading()"
+          (click)="clearFilters()"
+        >
           Limpiar
         </button>
         <button type="button" class="btn" [disabled]="isLoading()" (click)="applyFilters()">
@@ -90,6 +95,13 @@
       </div>
     </div>
   </section>
+
+  @if (catalogError(); as message) {
+    <div role="alert" class="alert alert-warning sm:alert-horizontal">
+      <span>No se pudieron cargar todas las opciones de filtro: {{ message }}</span>
+      <button type="button" class="btn btn-sm" (click)="loadCatalogs()">Reintentar</button>
+    </div>
+  }
 
   @if (isLoading()) {
     <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
@@ -144,7 +156,8 @@
                       </span>
                     </td>
                     <td class="text-right font-medium whitespace-nowrap">
-                      {{ movement.type === 'income' ? '+' : '-' }}{{ movement.amount | number: '1.2-2' }}
+                      {{ movement.type === 'income' ? '+' : '-'
+                      }}{{ movement.amount | number: '1.2-2' }}
                     </td>
                     <td class="min-w-52">{{ movement.reason }}</td>
                   </tr>

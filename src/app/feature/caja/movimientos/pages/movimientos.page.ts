@@ -4,18 +4,21 @@ import { Component, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { CashMovementsService } from '../../../../core/api/cash-movements.service';
+import { CashRegistersService } from '../../../../core/api/cash-registers.service';
+import { PeopleService } from '../../../../core/api/people.service';
 import {
   CashMovement,
   CashMovementFilter,
   CashMovementType,
 } from '../../../../core/models/cash-movement.model';
 import { PaginatedResult } from '../../../../core/models/pagination.model';
+import { CashRegister } from '../../../../core/models/cash-register.model';
+import { Person } from '../../../../core/models/people.model';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
 import PaginationNg from '../../../../shared/pagination/pagination.ng';
 import { BusinessDatePipe } from '../../../../shared/pipes/business-date.pipe';
 
 interface MovementFilters {
-  cashOpeningId: string;
   cashRegisterId: string;
   type: CashMovementType | '';
   createdById: string;
@@ -30,16 +33,22 @@ interface MovementFilters {
 })
 export default class MovimientosPage {
   private readonly movementsService = inject(CashMovementsService);
+  private readonly registersService = inject(CashRegistersService);
+  private readonly peopleService = inject(PeopleService);
 
   protected readonly filters = signal<MovementFilters>(this.defaultFilters());
+  protected readonly registers = signal<CashRegister[]>([]);
+  protected readonly creators = signal<Person[]>([]);
   protected readonly page = signal(1);
   protected readonly pageSize = signal(20);
   protected readonly movements = signal<PaginatedResult<CashMovement> | null>(null);
   protected readonly isLoading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly catalogError = signal<string | null>(null);
 
   constructor() {
     void this.load();
+    void this.loadCatalogs();
   }
 
   protected updateFilter(key: keyof MovementFilters, event: Event): void {
@@ -88,12 +97,25 @@ export default class MovimientosPage {
     }
   }
 
+  protected async loadCatalogs(): Promise<void> {
+    this.catalogError.set(null);
+    try {
+      const [registers, people] = await Promise.all([
+        firstValueFrom(this.registersService.findAll()),
+        firstValueFrom(this.peopleService.findAll({ hasAuth: true, page: 1, limit: 100 })),
+      ]);
+      this.registers.set(registers);
+      this.creators.set(people.data);
+    } catch (error) {
+      this.catalogError.set(this.message(error));
+    }
+  }
+
   private movementFilter(): CashMovementFilter {
     const filters = this.filters();
     return {
       page: this.page(),
       limit: this.pageSize(),
-      cashOpeningId: this.positiveInteger(filters.cashOpeningId),
       cashRegisterId: this.positiveInteger(filters.cashRegisterId),
       type: filters.type || undefined,
       createdById: this.positiveInteger(filters.createdById),
@@ -104,7 +126,6 @@ export default class MovimientosPage {
 
   private defaultFilters(): MovementFilters {
     return {
-      cashOpeningId: '',
       cashRegisterId: '',
       type: '',
       createdById: '',

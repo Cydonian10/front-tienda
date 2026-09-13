@@ -6,3 +6,5 @@ export const ROLE_NAMES = {
 } as const;
 
 export type RoleName = (typeof ROLE_NAMES)[keyof typeof ROLE_NAMES];
+
+export type OperationalRole = Exclude<RoleName, typeof ROLE_NAMES.CUSTOMER>;

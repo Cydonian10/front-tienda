@@ -1,6 +1,6 @@
 # SPEC 11 — Navegación y rutas por rol
 
-> **Status:** Borrador
+> **Status:** Implementado
 > **Depends on:** SPEC 10 (rol responsable y permisos operativos)
 > **Date:** 2026-09-12
 > **Objective:** Reorganizar la navegación en áreas de primer nivel y proteger cada ruta Angular según los roles autorizados.
@@ -49,17 +49,17 @@ export interface MenuItem {
 
 Mapa de rutas objetivo:
 
-| Ruta | Roles |
-| --- | --- |
-| `/inicio` | ADMINISTRADOR, RESPONSABLE, TRABAJADOR |
-| `/ventas/nueva` | ADMINISTRADOR, RESPONSABLE, TRABAJADOR |
-| `/ventas/historial` | ADMINISTRADOR, RESPONSABLE |
-| `/caja/mi-caja` | ADMINISTRADOR, RESPONSABLE, TRABAJADOR |
-| `/caja/sesiones` | ADMINISTRADOR, RESPONSABLE |
-| `/caja/movimientos` | ADMINISTRADOR, RESPONSABLE |
-| `/reportes/**` | ADMINISTRADOR, RESPONSABLE |
-| `/mantenimiento/**` | ADMINISTRADOR |
-| `/administracion/**` | ADMINISTRADOR |
+| Ruta                 | Roles                                  |
+| -------------------- | -------------------------------------- |
+| `/inicio`            | ADMINISTRADOR, RESPONSABLE, TRABAJADOR |
+| `/ventas/nueva`      | ADMINISTRADOR, RESPONSABLE, TRABAJADOR |
+| `/ventas/historial`  | ADMINISTRADOR, RESPONSABLE             |
+| `/caja/mi-caja`      | ADMINISTRADOR, RESPONSABLE, TRABAJADOR |
+| `/caja/sesiones`     | ADMINISTRADOR, RESPONSABLE             |
+| `/caja/movimientos`  | ADMINISTRADOR, RESPONSABLE             |
+| `/reportes/**`       | ADMINISTRADOR, RESPONSABLE             |
+| `/mantenimiento/**`  | ADMINISTRADOR                          |
+| `/administracion/**` | ADMINISTRADOR                          |
 
 Convenciones:
 
@@ -116,11 +116,11 @@ Archivos principales:
 
 ## Risks
 
-| Riesgo | Mitigación |
-| --- | --- |
-| Una ruta lazy no declara roles. | Hacer obligatoria la revisión de `data.roles` y cubrirla con pruebas de rutas. |
+| Riesgo                                             | Mitigación                                                                             |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Una ruta lazy no declara roles.                    | Hacer obligatoria la revisión de `data.roles` y cubrirla con pruebas de rutas.         |
 | El usuario se restaura después de evaluar la ruta. | El guard espera el estado de autenticación restaurado o redirige de forma consistente. |
-| Un enlace del menú apunta a una página futura. | Mostrar solo entradas cuya ruta esté registrada en esta entrega. |
+| Un enlace del menú apunta a una página futura.     | Mostrar solo entradas cuya ruta esté registrada en esta entrega.                       |
 
 ## What is **not** in this spec
 

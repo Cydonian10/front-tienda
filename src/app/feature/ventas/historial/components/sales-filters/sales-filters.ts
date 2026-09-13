@@ -1,10 +1,10 @@
 import { Component, input, output } from '@angular/core';
 
 import { SaleStatus } from '../../../../../core/models/sale.model';
+import { Person } from '../../../../../core/models/people.model';
 
 export interface SalesHistoryFilters {
   status: SaleStatus | '';
-  cashOpeningId: string;
   sellerId: string;
   startDate: string;
   endDate: string;
@@ -20,6 +20,7 @@ export interface SalesHistoryFilters {
 export class SalesFilters {
   readonly filters = input.required<SalesHistoryFilters>();
   readonly canFilterSeller = input(false);
+  readonly sellers = input<Person[]>([]);
   readonly filtersChanged = output<Partial<SalesHistoryFilters>>();
   readonly applyRequested = output<void>();
   readonly clearRequested = output<void>();

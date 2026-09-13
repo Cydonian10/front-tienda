@@ -11,6 +11,7 @@ import { Icon } from '../../../../../shared/icon/icon';
 export class CashRegistersTable {
   readonly registers = input.required<CashRegister[]>();
   readonly selectedId = input<number | null>(null);
+  readonly canOpen = input(true);
   readonly canManage = input(false);
   readonly selected = output<CashRegister>();
   readonly editRequested = output<CashRegister>();

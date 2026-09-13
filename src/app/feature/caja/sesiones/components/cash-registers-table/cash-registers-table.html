@@ -34,16 +34,26 @@
           </td>
           <td (click)="$event.stopPropagation()">
             <div class="flex justify-end gap-1">
-            @if (register.active && !register.openOpening) {
-              <button type="button" class="btn btn-soft btn-xs" [attr.aria-label]="'Abrir ' + register.name" (click)="openRequested.emit(register)">
-                Abrir caja
-              </button>
-            }
-            @if (canManage()) {
-              <button type="button" class="btn btn-soft btn-xs" [attr.aria-label]="'Editar ' + register.name" (click)="editRequested.emit(register)">
-                <app-icon name="pencil" classes="size-4" />
-              </button>
-            }
+              @if (canOpen() && register.active && !register.openOpening) {
+                <button
+                  type="button"
+                  class="btn btn-soft btn-xs"
+                  [attr.aria-label]="'Abrir ' + register.name"
+                  (click)="openRequested.emit(register)"
+                >
+                  Abrir caja
+                </button>
+              }
+              @if (canManage()) {
+                <button
+                  type="button"
+                  class="btn btn-soft btn-xs"
+                  [attr.aria-label]="'Editar ' + register.name"
+                  (click)="editRequested.emit(register)"
+                >
+                  <app-icon name="pencil" classes="size-4" />
+                </button>
+              }
             </div>
           </td>
         </tr>

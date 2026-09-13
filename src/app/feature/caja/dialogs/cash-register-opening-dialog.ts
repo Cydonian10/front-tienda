@@ -3,13 +3,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { CashRegisterOpeningsService } from '../../../../core/api/cash-register-openings.service';
+import { CashRegisterOpeningsService } from '../../../core/api/cash-register-openings.service';
 import {
   CashRegister,
   CashRegisterOpening,
   CashResponsible,
   CreateCashRegisterOpening,
-} from '../../../../core/models/cash-register.model';
+} from '../../../core/models/cash-register.model';
 
 export interface CashRegisterOpeningDialogData {
   register: CashRegister;
@@ -29,6 +29,7 @@ export class CashRegisterOpeningDialog {
   private readonly formBuilder = inject(FormBuilder);
   protected readonly isSubmitting = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly isConflict = signal(false);
   protected readonly form = this.formBuilder.nonNullable.group({
     openingAmount: [0, [Validators.required, Validators.min(0)]],
     responsibleId: [this.data.currentPerson.id, this.data.isAdmin ? Validators.required : []],
@@ -43,9 +44,11 @@ export class CashRegisterOpeningDialog {
     };
     this.isSubmitting.set(true);
     this.error.set(null);
+    this.isConflict.set(false);
     try {
       this.dialogRef.close(await firstValueFrom(this.service.create(dto)));
     } catch (error) {
+      this.isConflict.set(error instanceof HttpErrorResponse && error.status === 409);
       this.error.set(this.message(error));
     } finally {
       this.isSubmitting.set(false);

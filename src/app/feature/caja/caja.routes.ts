@@ -11,7 +11,7 @@ const cajaRoutes: Routes = [
       breadcrumb: 'Mi caja',
       roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER],
     },
-    loadComponent: () => import('../operaciones/cajas/pages/cajas.page'),
+    loadComponent: () => import('./mi-caja/pages/mi-caja.page'),
     title: 'Mi caja',
   },
   {
@@ -21,7 +21,7 @@ const cajaRoutes: Routes = [
       breadcrumb: 'Sesiones de caja',
       roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE],
     },
-    loadComponent: () => import('../operaciones/cajas/pages/cajas.page'),
+    loadComponent: () => import('./sesiones/pages/sesiones.page'),
     title: 'Sesiones de caja',
   },
   {
@@ -31,7 +31,7 @@ const cajaRoutes: Routes = [
       breadcrumb: 'Movimientos de caja',
       roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE],
     },
-    loadComponent: () => import('../operaciones/cajas/pages/cajas.page'),
+    loadComponent: () => import('./movimientos/pages/movimientos.page'),
     title: 'Movimientos de caja',
   },
 ];

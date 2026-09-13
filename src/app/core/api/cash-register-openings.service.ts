@@ -5,19 +5,17 @@ import { ApiResponse, ApiService } from './api.service';
 import {
   CashRegisterOpening,
   CashRegisterOpeningFilter,
+  CloseCashRegisterOpening,
   CreateCashRegisterOpening,
 } from '../models/cash-register.model';
 
 @Injectable({ providedIn: 'root' })
 export class CashRegisterOpeningsService extends ApiService {
-  findAll(
-    filter: CashRegisterOpeningFilter,
-  ): Observable<CashRegisterOpening[]> {
+  findAll(filter: CashRegisterOpeningFilter): Observable<CashRegisterOpening[]> {
     return this.unwrap(
-      this.http.get<ApiResponse<CashRegisterOpening[]>>(
-        `${this.apiUrl}/cash-register-openings`,
-        { params: this.buildParams(filter) },
-      ),
+      this.http.get<ApiResponse<CashRegisterOpening[]>>(`${this.apiUrl}/cash-register-openings`, {
+        params: this.buildParams(filter),
+      }),
     );
   }
 
@@ -25,6 +23,23 @@ export class CashRegisterOpeningsService extends ApiService {
     return this.unwrap(
       this.http.post<ApiResponse<CashRegisterOpening>>(
         `${this.apiUrl}/cash-register-openings`,
+        dto,
+      ),
+    );
+  }
+
+  findOne(id: number): Observable<CashRegisterOpening> {
+    return this.unwrap(
+      this.http.get<ApiResponse<CashRegisterOpening>>(
+        `${this.apiUrl}/cash-register-openings/${id}`,
+      ),
+    );
+  }
+
+  close(id: number, dto: CloseCashRegisterOpening): Observable<CashRegisterOpening> {
+    return this.unwrap(
+      this.http.patch<ApiResponse<CashRegisterOpening>>(
+        `${this.apiUrl}/cash-register-openings/${id}/close`,
         dto,
       ),
     );

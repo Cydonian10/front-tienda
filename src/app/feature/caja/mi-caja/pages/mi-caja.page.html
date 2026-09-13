@@ -1,0 +1,98 @@
+<ng-breadcrumbs />
+
+<div class="mt-4 space-y-4">
+  <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-semibold tracking-wide text-primary">Operación diaria</p>
+      <h1 class="text-xl font-semibold">Mi caja</h1>
+      <p class="mt-1 text-sm text-base-content/60">
+        Administra únicamente las sesiones bajo tu responsabilidad.
+      </p>
+    </div>
+    <button type="button" class="btn" [disabled]="isLoading()" (click)="load()">Actualizar</button>
+  </header>
+
+  @if (actionError(); as message) {
+    <div role="alert" class="alert alert-error sm:alert-horizontal">
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-sm" (click)="actionError.set(null)">Cerrar</button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
+      <span class="loading loading-spinner loading-sm"></span><span>Cargando tu sesión...</span>
+    </div>
+  } @else if (error(); as message) {
+    <div role="alert" class="alert alert-error sm:alert-horizontal">
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-sm" (click)="load()">Reintentar</button>
+    </div>
+  } @else {
+    @if (openings().length) {
+      <section class="grid gap-4 lg:grid-cols-2">
+        @for (opening of openings(); track opening.id) {
+          <article class="card card-border border-base-300 bg-base-100">
+            <div class="card-body gap-4 p-4 sm:p-5">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h2 class="card-title">{{ opening.cashRegister.name }}</h2>
+                  <p class="text-sm text-base-content/60">
+                    {{ opening.cashRegister.code }} · Sesión #{{ opening.id }}
+                  </p>
+                </div>
+                <span class="badge badge-success">Abierta</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3 rounded-box bg-base-200 p-4 text-sm">
+                <p>
+                  <span class="block text-base-content/60">Apertura</span
+                  >{{ opening.openingAmount | number: '1.2-2' }}
+                </p>
+                <p>
+                  <span class="block text-base-content/60">Abierta</span
+                  >{{ opening.openedAt | businessDate }}
+                </p>
+              </div>
+              <div class="card-actions justify-end">
+                <button type="button" class="btn btn-soft" (click)="addMovement(opening)">
+                  Movimiento
+                </button>
+                <button type="button" class="btn btn-primary" (click)="close(opening)">
+                  Cerrar sesión
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      </section>
+    } @else {
+      <section class="card card-border border-base-300 bg-base-100">
+        <div class="card-body gap-4 p-4 sm:p-5">
+          <div>
+            <h2 class="card-title">No tienes una sesión abierta</h2>
+            <p class="text-sm text-base-content/60">
+              Elige una caja activa y disponible para iniciar tu turno.
+            </p>
+          </div>
+          @if (availableRegisters().length) {
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              @for (register of availableRegisters(); track register.id) {
+                <div class="rounded-box border border-base-300 p-4">
+                  <p class="font-medium">{{ register.name }}</p>
+                  <p class="mb-3 text-sm text-base-content/60">{{ register.code }}</p>
+                  <button type="button" class="btn btn-sm btn-primary" (click)="open(register)">
+                    Abrir mi caja
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <div role="status" class="alert alert-info">
+              <span>No hay cajas activas disponibles en este momento.</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

@@ -1,0 +1,82 @@
+<ng-breadcrumbs />
+
+<div class="mt-4 space-y-4">
+  <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-semibold tracking-wide text-primary">Supervisión</p>
+      <h1 class="text-xl font-semibold">Sesiones de caja</h1>
+      <p class="mt-1 text-sm text-base-content/60">
+        Historial global de aperturas, cierres y arqueos.
+      </p>
+    </div>
+    <div class="join self-start sm:self-auto">
+      <button type="button" class="btn btn-sm join-item" (click)="changeMonth(-1)">Anterior</button>
+      <button type="button" class="btn btn-sm join-item" (click)="changeMonth(1)">Siguiente</button>
+    </div>
+  </header>
+
+  <section class="card card-border border-base-300 bg-base-100">
+    <div class="card-body gap-4 p-4 sm:p-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="card-title">Período consultado</h2>
+          <p class="text-sm text-base-content/60">
+            {{ currentMonth() }}/{{ currentYear() }} · Se consultan todas las cajas.
+          </p>
+        </div>
+        <button type="button" class="btn btn-sm" [disabled]="isLoading()" (click)="load()">
+          Actualizar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (canOpenForAnother()) {
+    <section class="card card-border border-base-300 bg-base-100">
+      <div class="card-body gap-4 p-4 sm:p-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="card-title">Cajas operativas</h2>
+            <p class="text-sm text-base-content/60">
+              Administra cajas y abre una sesión asignada a otra persona.
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="createRegister()">
+            Nueva caja
+          </button>
+        </div>
+        <cash-registers-table
+          [registers]="registers()"
+          [canOpen]="!isOpening()"
+          [canManage]="true"
+          (openRequested)="open($event)"
+          (editRequested)="editRegister($event)"
+        />
+      </div>
+    </section>
+  }
+
+  @if (actionError(); as message) {
+    <div role="alert" class="alert alert-error sm:alert-horizontal">
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-sm" (click)="actionError.set(null)">Cerrar</button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
+      <span class="loading loading-spinner loading-sm"></span><span>Cargando sesiones...</span>
+    </div>
+  } @else if (error(); as message) {
+    <div role="alert" class="alert alert-error sm:alert-horizontal">
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-sm" (click)="load()">Reintentar</button>
+    </div>
+  } @else if (openings().length === 0) {
+    <div role="status" class="alert alert-info">
+      <span>No hay sesiones en el período seleccionado.</span>
+    </div>
+  } @else {
+    <cash-sessions-table [openings]="openings()" (detailRequested)="showDetail($event)" />
+  }
+</div>

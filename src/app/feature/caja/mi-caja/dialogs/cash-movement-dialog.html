@@ -1,0 +1,72 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-4">
+    <div>
+      <h2 class="card-title">Registrar movimiento</h2>
+      <p class="text-sm text-base-content/60">
+        {{ opening.cashRegister.code }} · {{ opening.cashRegister.name }}
+      </p>
+    </div>
+
+    <form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Tipo</legend>
+        <select class="select w-full" formControlName="type">
+          <option value="income">Ingreso</option>
+          <option value="expense">Egreso</option>
+        </select>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Importe</legend>
+        <input
+          type="number"
+          min="0.01"
+          step="0.01"
+          class="input w-full"
+          formControlName="amount"
+          [class.input-error]="form.controls.amount.touched && form.controls.amount.invalid"
+        />
+        @if (form.controls.amount.touched && form.controls.amount.invalid) {
+          <p class="fieldset-label text-error">El importe debe ser mayor que cero.</p>
+        }
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Motivo</legend>
+        <textarea
+          class="textarea w-full"
+          rows="3"
+          maxlength="255"
+          formControlName="reason"
+          [class.textarea-error]="form.controls.reason.touched && form.controls.reason.invalid"
+        ></textarea>
+        @if (form.controls.reason.touched && form.controls.reason.invalid) {
+          <p class="fieldset-label text-error">Indica el motivo del movimiento.</p>
+        }
+      </fieldset>
+
+      @if (error(); as message) {
+        <div
+          role="alert"
+          class="alert"
+          [class.alert-warning]="isConflict()"
+          [class.alert-error]="!isConflict()"
+        >
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <div class="card-actions justify-end">
+        <button type="button" class="btn btn-soft" [disabled]="isSubmitting()" (click)="close()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting()">
+          @if (isSubmitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          Registrar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

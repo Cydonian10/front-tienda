@@ -84,4 +84,16 @@ describe('role-aware routes', () => {
       await historialVentasRoute.loadComponent(),
     );
   });
+
+  it('loads separate pages for my cash and global cash sessions', async () => {
+    const miCajaRoute = findRoute(cajaRoutes, 'mi-caja');
+    const sesionesRoute = findRoute(cajaRoutes, 'sesiones');
+    if (!miCajaRoute.loadComponent || !sesionesRoute.loadComponent) {
+      throw new Error('Cash routes must lazy load their pages');
+    }
+
+    await expect(miCajaRoute.loadComponent()).resolves.not.toBe(
+      await sesionesRoute.loadComponent(),
+    );
+  });
 });

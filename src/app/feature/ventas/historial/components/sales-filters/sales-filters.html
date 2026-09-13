@@ -5,7 +5,7 @@
       <p class="text-sm text-base-content/60">Filtra el registro antes de consultar.</p>
     </div>
 
-    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <fieldset class="fieldset">
         <legend class="fieldset-legend">Estado</legend>
         <select
@@ -19,26 +19,19 @@
           <option value="CANCELLED">Cancelada</option>
         </select>
       </fieldset>
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">ID de sesión</legend>
-        <input
-          type="number"
-          min="1"
-          class="input w-full"
-          [value]="filters().cashOpeningId"
-          (input)="update('cashOpeningId', $event)"
-        />
-      </fieldset>
       @if (canFilterSeller()) {
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">ID de vendedor</legend>
-          <input
-            type="number"
-            min="1"
-            class="input w-full"
+          <legend class="fieldset-legend">Vendedor</legend>
+          <select
+            class="select w-full"
             [value]="filters().sellerId"
-            (input)="update('sellerId', $event)"
-          />
+            (change)="update('sellerId', $event)"
+          >
+            <option value="">Todos los vendedores</option>
+            @for (seller of sellers(); track seller.id) {
+              <option [value]="seller.id">{{ seller.firstName }} {{ seller.lastName }}</option>
+            }
+          </select>
         </fieldset>
       }
       <fieldset class="fieldset">

@@ -1,6 +1,6 @@
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
@@ -28,15 +28,10 @@ import { openSalePaymentDialog } from '../../dialogs/sale-payment-dialog';
 
 @Component({
   selector: 'ventas-page',
-  imports: [
-    BreadcrumbsNg,
-    RouterLink,
-    SaleCart,
-    SalesProductPicker,
-  ],
+  imports: [BreadcrumbsNg, RouterLink, SaleCart, SalesProductPicker],
   templateUrl: './venta.page.html',
 })
-export default class VentasPage {
+export default class VentasPage implements OnDestroy {
   private readonly dialog = inject(Dialog);
   private readonly cashRegistersService = inject(CashRegistersService);
   private readonly paymentMethodsService = inject(PaymentMethodsService);
@@ -45,6 +40,7 @@ export default class VentasPage {
   private readonly salesService = inject(SalesService);
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
+  private productSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly registers = signal<CashRegister[]>([]);
   protected readonly products = signal<PaginatedResult<Product> | null>(null);
@@ -81,12 +77,7 @@ export default class VentasPage {
     return selected?.openOpening ?? null;
   });
   protected readonly subtotal = computed(() =>
-    this.round2(
-      this.cartLines().reduce(
-        (total, line) => total + this.lineSubtotal(line),
-        0,
-      ),
-    ),
+    this.round2(this.cartLines().reduce((total, line) => total + this.lineSubtotal(line), 0)),
   );
   protected readonly total = computed(() => this.round2(this.subtotal() - this.discount()));
   protected readonly canSubmitSale = computed(
@@ -100,8 +91,7 @@ export default class VentasPage {
 
   constructor() {
     const state = this.router.getCurrentNavigation()?.extras.state as
-      | { sale?: Sale; collect?: boolean }
-      | undefined;
+      { sale?: Sale; collect?: boolean } | undefined;
     void this.loadInitialData(state?.sale, state?.collect ?? false);
   }
 
@@ -169,13 +159,14 @@ export default class VentasPage {
         (line) => line.product.id === productId && line.unit.unitId === unitId,
       );
       if (!targetLine) {
-        return lines.map((line) =>
-          line === currentLine ? { ...line, unit } : line,
-        );
+        return lines.map((line) => (line === currentLine ? { ...line, unit } : line));
       }
       return lines
         .filter((line) => line !== currentLine && line !== targetLine)
-        .concat({ ...targetLine, quantity: this.round2(targetLine.quantity + currentLine.quantity) });
+        .concat({
+          ...targetLine,
+          quantity: this.round2(targetLine.quantity + currentLine.quantity),
+        });
     });
   }
 
@@ -196,7 +187,15 @@ export default class VentasPage {
   protected searchProducts(search: string): void {
     this.productSearch.set(search);
     this.productPage.set(1);
-    void this.loadProducts();
+    if (this.productSearchTimer) clearTimeout(this.productSearchTimer);
+    this.productSearchTimer = setTimeout(() => {
+      this.productSearchTimer = null;
+      void this.loadProducts();
+    }, 300);
+  }
+
+  ngOnDestroy(): void {
+    if (this.productSearchTimer) clearTimeout(this.productSearchTimer);
   }
 
   protected changeProductPage(page: number): void {
@@ -329,9 +328,7 @@ export default class VentasPage {
     this.isLoadingRecentSales.set(true);
     this.recentSalesError.set(null);
     try {
-      this.recentSales.set(
-        await firstValueFrom(this.salesService.findAll({ page: 1, limit: 5 })),
-      );
+      this.recentSales.set(await firstValueFrom(this.salesService.findAll({ page: 1, limit: 5 })));
     } catch (error) {
       this.recentSales.set(null);
       this.recentSalesError.set(this.message(error));
@@ -419,11 +416,7 @@ export default class VentasPage {
   }
 
   private isValidQuantity(quantity: number): boolean {
-    return (
-      Number.isFinite(quantity) &&
-      quantity > 0 &&
-      Number(quantity.toFixed(2)) === quantity
-    );
+    return Number.isFinite(quantity) && quantity > 0 && Number(quantity.toFixed(2)) === quantity;
   }
 
   private round2(value: number): number {

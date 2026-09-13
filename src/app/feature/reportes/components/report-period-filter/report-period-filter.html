@@ -1,0 +1,71 @@
+<section class="card card-border border-base-300 bg-base-100">
+  <div class="card-body gap-4 p-4 sm:p-5">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <h2 class="card-title">Período de consulta</h2>
+        <p class="text-sm text-base-content/60">Los límites se calculan en America/Lima.</p>
+      </div>
+      <div class="join self-start lg:self-auto">
+        <button
+          type="button"
+          class="btn btn-sm join-item"
+          [disabled]="disabled()"
+          (click)="setPreset('today')"
+        >
+          Hoy
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm join-item"
+          [disabled]="disabled()"
+          (click)="setPreset('week')"
+        >
+          Esta semana
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm join-item"
+          [disabled]="disabled()"
+          (click)="setPreset('month')"
+        >
+          Este mes
+        </button>
+      </div>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Desde</legend>
+        <input
+          type="date"
+          class="input w-full"
+          [disabled]="disabled()"
+          [value]="period().startDate"
+          (change)="update('startDate', $event)"
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Hasta</legend>
+        <input
+          type="date"
+          class="input w-full"
+          [disabled]="disabled()"
+          [value]="period().endDate"
+          (change)="update('endDate', $event)"
+        />
+      </fieldset>
+    </div>
+
+    @if (error(); as message) {
+      <div role="alert" class="alert alert-error">
+        <span>{{ message }}</span>
+      </div>
+    }
+
+    <div class="card-actions justify-end">
+      <button type="button" class="btn" [disabled]="disabled()" (click)="applyCurrentPeriod()">
+        Aplicar período
+      </button>
+    </div>
+  </div>
+</section>

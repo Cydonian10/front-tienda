@@ -1,0 +1,138 @@
+- generic [ref=f10e7]:
+  - generic [ref=f10e9]:
+    - generic [ref=f10e11]:
+      - heading "VASQUEZ" [level=3] [ref=f10e13]
+      - navigation "Dashboard" [ref=f10e14]:
+        - list [ref=f10e15]:
+          - listitem [ref=f10e16]:
+            - link "Inicio" [ref=f10e17] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f10e22]:
+            - button "Ventas" [expanded] [ref=f10e23]
+            - list [ref=f10e35]:
+              - listitem [ref=f10e36]:
+                - link "Nueva venta" [ref=f10e37] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f10e42]:
+                - link "Historial" [ref=f10e43] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f10e48]:
+            - button "Caja" [expanded] [ref=f10e49]
+            - list [ref=f10e61]:
+              - listitem [ref=f10e62]:
+                - link "Mi caja" [ref=f10e63] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f10e68]:
+                - link "Sesiones" [ref=f10e69] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f10e74]:
+                - link "Movimientos" [ref=f10e75] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f10e80]:
+            - link "Reportes" [ref=f10e81] [cursor=pointer]:
+              - /url: /reportes
+    - generic [ref=f10e87]:
+      - generic [ref=f10e88]: GR
+      - paragraph [ref=f10e91]:
+        - strong [ref=f10e92]: Gabriel Responsable
+        - generic [ref=f10e93]: responsible@seed.com
+      - button "Cerrar sesión" [ref=f10e94] [cursor=pointer]
+  - generic [ref=f10e98]:
+    - generic [ref=f10e99]:
+      - generic [ref=f10e100]:
+        - button "Abrir menú" [ref=f10e101] [cursor=pointer]
+        - img "Logo colegio" [ref=f10e105]
+      - generic [ref=f10e106]:
+        - generic [ref=f10e107]:
+          - searchbox "Buscar..." [ref=f10e108]
+          - button "Buscar" [ref=f10e109] [cursor=pointer]
+        - generic [ref=f10e113]: C
+    - main [ref=f10e116]:
+      - generic [ref=f10e117]:
+        - navigation "Breadcrumb" [ref=f10e119]:
+          - list [ref=f10e120]:
+            - listitem [ref=f10e121]:
+              - link "Caja" [ref=f10e122] [cursor=pointer]:
+                - /url: /caja
+            - listitem [aria-hidden] [ref=f10e123]: /
+            - listitem [ref=f10e124]: Movimientos de caja
+        - generic [ref=f10e125]:
+          - generic [ref=f10e126]:
+            - generic [ref=f10e127]:
+              - paragraph [ref=f10e128]: Auditoría de caja
+              - heading "Movimientos de caja" [level=1] [ref=f10e129]
+              - paragraph [ref=f10e130]: Consulta ingresos y egresos registrados en las sesiones de caja.
+            - button "Actualizar" [ref=f10e131] [cursor=pointer]
+          - generic [ref=f10e133]:
+            - generic [ref=f10e134]:
+              - heading "Filtros" [level=2] [ref=f10e135]
+              - paragraph [ref=f10e136]: Acota el historial por caja, persona, tipo y período.
+            - generic [ref=f10e137]:
+              - group "Caja" [ref=f10e138]:
+                - combobox [ref=f10e140]:
+                  - option "Todas las cajas" [selected]
+                  - option "Caja-01 · Caja Principal"
+                  - option "Caja-02 · Meseria"
+              - group "Tipo" [ref=f10e141]:
+                - combobox [ref=f10e143]:
+                  - option "Todos" [selected]
+                  - option "Ingreso"
+                  - option "Egreso"
+              - group "Registrado por" [ref=f10e144]:
+                - combobox [ref=f10e146]:
+                  - option "Todo el personal" [selected]
+                  - option "Admin Seed"
+                  - option "María Trabajadora"
+                  - option "Gabriel Responsable"
+              - group "Desde" [ref=f10e147]:
+                - textbox [ref=f10e149]
+              - group "Hasta" [ref=f10e150]:
+                - textbox [ref=f10e152]
+            - generic [ref=f10e153]:
+              - button "Limpiar" [ref=f10e154] [cursor=pointer]
+              - button "Aplicar filtros" [ref=f10e155] [cursor=pointer]
+          - generic [ref=f10e157]:
+            - table [ref=f10e159]:
+              - rowgroup [ref=f10e160]:
+                - row [ref=f10e161]:
+                  - columnheader "Fecha" [ref=f10e162]
+                  - columnheader "Creador" [ref=f10e163]
+                  - columnheader "Caja / sesión" [ref=f10e164]
+                  - columnheader "Tipo" [ref=f10e165]
+                  - columnheader "Monto" [ref=f10e166]
+                  - columnheader "Motivo" [ref=f10e167]
+              - rowgroup [ref=f10e168]:
+                - row [ref=f10e169]:
+                  - cell "13/09/2026, 14:51" [ref=f10e170]
+                  - 'cell "Admin Seed #4" [ref=f10e171]':
+                    - generic [ref=f10e172]: Admin Seed
+                    - text: "#4"
+                  - 'cell "Meseria Caja #2 · Sesión #2" [ref=f10e173]':
+                    - generic [ref=f10e174]: Meseria
+                    - text: "Caja #2 · Sesión #2"
+                  - cell "Ingreso" [ref=f10e175]
+                  - cell "+1.25" [ref=f10e177]
+                  - cell "Playwright SPEC13" [ref=f10e178]
+                - row [ref=f10e179]:
+                  - cell "13/09/2026, 14:02" [ref=f10e180]
+                  - 'cell "Admin Seed #4" [ref=f10e181]':
+                    - generic [ref=f10e182]: Admin Seed
+                    - text: "#4"
+                  - 'cell "Meseria Caja #2 · Sesión #2" [ref=f10e183]':
+                    - generic [ref=f10e184]: Meseria
+                    - text: "Caja #2 · Sesión #2"
+                  - cell "Ingreso" [ref=f10e185]
+                  - cell "+20.00" [ref=f10e187]
+                  - cell "asdfasdfasdf" [ref=f10e188]
+            - generic [ref=f10e190]:
+              - generic [ref=f10e191]:
+                - generic [ref=f10e192]: Mostrar
+                - combobox [ref=f10e193]:
+                  - option "20" [selected]
+                  - option "50"
+                  - option "100"
+                - generic [ref=f10e194]: "Total: 2 items"
+              - generic [ref=f10e195]:
+                - button "Página anterior" [disabled]: «
+                - button "Página 1" [ref=f10e196] [cursor=pointer]
+                - button "Página siguiente" [disabled]: »

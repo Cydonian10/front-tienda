@@ -1,0 +1,124 @@
+- generic [ref=f3e7]:
+  - generic [ref=f3e9]:
+    - generic [ref=f3e11]:
+      - heading "VASQUEZ" [level=3] [ref=f3e13]
+      - navigation "Dashboard" [ref=f3e14]:
+        - list [ref=f3e15]:
+          - listitem [ref=f3e16]:
+            - link "Inicio" [ref=f3e17] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f3e22]:
+            - button "Ventas" [expanded] [ref=f3e23]
+            - list [ref=f3e35]:
+              - listitem [ref=f3e36]:
+                - link "Nueva venta" [ref=f3e37] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f3e42]:
+                - link "Historial" [ref=f3e43] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f3e48]:
+            - button "Caja" [expanded] [ref=f3e49]
+            - list [ref=f3e61]:
+              - listitem [ref=f3e62]:
+                - link "Mi caja" [ref=f3e63] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f3e68]:
+                - link "Sesiones" [ref=f3e69] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f3e74]:
+                - link "Movimientos" [ref=f3e75] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f3e80]:
+            - link "Reportes" [ref=f3e81] [cursor=pointer]:
+              - /url: /reportes
+    - generic [ref=f3e87]:
+      - generic [ref=f3e88]: GR
+      - paragraph [ref=f3e91]:
+        - strong [ref=f3e92]: Gabriel Responsable
+        - generic [ref=f3e93]: responsible@seed.com
+      - button "Cerrar sesión" [ref=f3e94] [cursor=pointer]
+  - generic [ref=f3e98]:
+    - generic [ref=f3e99]:
+      - generic [ref=f3e100]:
+        - button "Abrir menú" [ref=f3e101] [cursor=pointer]
+        - img "Logo colegio" [ref=f3e105]
+      - generic [ref=f3e106]:
+        - generic [ref=f3e107]:
+          - searchbox "Buscar..." [ref=f3e108]
+          - button "Buscar" [ref=f3e109] [cursor=pointer]
+        - generic [ref=f3e113]: C
+    - main [ref=f3e116]:
+      - generic [ref=f3e117]:
+        - navigation "Breadcrumb" [ref=f3e119]:
+          - list [ref=f3e120]:
+            - listitem [ref=f3e121]:
+              - link "Caja" [ref=f3e122] [cursor=pointer]:
+                - /url: /caja
+            - listitem [aria-hidden] [ref=f3e123]: /
+            - listitem [ref=f3e124]: Sesiones de caja
+        - generic [ref=f3e125]:
+          - generic [ref=f3e126]:
+            - generic [ref=f3e127]:
+              - paragraph [ref=f3e128]: Supervisión
+              - heading "Sesiones de caja" [level=1] [ref=f3e129]
+              - paragraph [ref=f3e130]: Historial global de aperturas, cierres y arqueos.
+            - generic [ref=f3e131]:
+              - button "Anterior" [ref=f3e132] [cursor=pointer]
+              - button "Siguiente" [ref=f3e133] [cursor=pointer]
+          - generic [ref=f3e136]:
+            - generic [ref=f3e137]:
+              - heading "Período consultado" [level=2] [ref=f3e138]
+              - paragraph [ref=f3e139]: 9/2026 · Se consultan todas las cajas.
+            - button "Actualizar" [ref=f3e140] [cursor=pointer]
+          - table [ref=f3e143]:
+            - rowgroup [ref=f3e144]:
+              - row [ref=f3e145]:
+                - columnheader "Sesión" [ref=f3e146]
+                - columnheader "Responsable" [ref=f3e147]
+                - columnheader "Abrió" [ref=f3e148]
+                - columnheader "Cerró" [ref=f3e149]
+                - columnheader "Fechas" [ref=f3e150]
+                - columnheader "Inicial" [ref=f3e151]
+                - columnheader "Esperado" [ref=f3e152]
+                - columnheader "Real" [ref=f3e153]
+                - columnheader "Estado" [ref=f3e154]
+                - columnheader "Detalle" [ref=f3e155]
+            - rowgroup [ref=f3e157]:
+              - row [ref=f3e158]:
+                - 'cell "PW-CAJA-20260913 · #3" [ref=f3e159]'
+                - cell "Gabriel Responsable" [ref=f3e160]
+                - cell "Gabriel Responsable" [ref=f3e161]
+                - cell "Gabriel Responsable" [ref=f3e162]
+                - cell [ref=f3e163]:
+                  - paragraph [ref=f3e164]: 13/09/2026, 10:04
+                  - paragraph [ref=f3e165]: 13/09/2026, 10:06
+                - cell "0.00" [ref=f3e166]
+                - cell "10.50" [ref=f3e167]
+                - cell "10.50" [ref=f3e168]
+                - cell "Cerrada" [ref=f3e169]
+                - cell [ref=f3e171]:
+                  - button "Arqueo" [ref=f3e172] [cursor=pointer]
+              - row [ref=f3e173]:
+                - 'cell "Caja-02 · #2" [ref=f3e174]'
+                - cell "Admin Seed" [ref=f3e175]
+                - cell "Admin Seed" [ref=f3e176]
+                - cell "Pendiente" [ref=f3e177]
+                - cell [ref=f3e178]:
+                  - paragraph [ref=f3e179]: 09/09/2026, 22:30
+                - cell "300.00" [ref=f3e180]
+                - cell "0.00" [ref=f3e181]
+                - cell "-" [ref=f3e182]
+                - cell "Abierta" [ref=f3e183]
+                - cell [ref=f3e185]
+              - row [ref=f3e186]:
+                - 'cell "Caja-01 · #1" [ref=f3e187]'
+                - cell "María Trabajadora" [ref=f3e188]
+                - cell "Admin Seed" [ref=f3e189]
+                - cell "Pendiente" [ref=f3e190]
+                - cell [ref=f3e191]:
+                  - paragraph [ref=f3e192]: 09/09/2026, 22:19
+                - cell "200.00" [ref=f3e193]
+                - cell "0.00" [ref=f3e194]
+                - cell "-" [ref=f3e195]
+                - cell "Abierta" [ref=f3e196]
+                - cell [ref=f3e198]

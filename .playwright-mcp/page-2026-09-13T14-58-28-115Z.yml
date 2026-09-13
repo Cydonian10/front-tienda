@@ -1,0 +1,55 @@
+- generic [ref=f7e270]:
+  - generic [ref=f7e272]:
+    - generic [ref=f7e274]:
+      - heading "VASQUEZ" [level=3] [ref=f7e276]
+      - navigation "Dashboard" [ref=f7e277]:
+        - list [ref=f7e278]:
+          - listitem [ref=f7e279]:
+            - link "Inicio" [ref=f7e280] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f7e285]:
+            - button "Ventas" [expanded] [ref=f7e286]
+            - list [ref=f7e298]:
+              - listitem [ref=f7e299]:
+                - link "Nueva venta" [ref=f7e300] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f7e305]:
+                - link "Historial" [ref=f7e306] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f7e311]:
+            - button "Caja" [expanded] [ref=f7e312]
+            - list [ref=f7e324]:
+              - listitem [ref=f7e325]:
+                - link "Mi caja" [ref=f7e326] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f7e331]:
+                - link "Sesiones" [ref=f7e332] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f7e337]:
+                - link "Movimientos" [ref=f7e338] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f7e343]:
+            - link "Reportes" [ref=f7e344] [cursor=pointer]:
+              - /url: /reportes
+    - generic [ref=f7e350]:
+      - generic [ref=f7e351]: GR
+      - paragraph [ref=f7e354]:
+        - strong [ref=f7e355]: Gabriel Responsable
+        - generic [ref=f7e356]: responsible@seed.com
+      - button "Cerrar sesión" [ref=f7e357] [cursor=pointer]
+  - generic [ref=f7e361]:
+    - generic [ref=f7e362]:
+      - generic [ref=f7e363]:
+        - button "Abrir menú" [ref=f7e364] [cursor=pointer]
+        - img "Logo colegio" [ref=f7e368]
+      - generic [ref=f7e369]:
+        - generic [ref=f7e370]:
+          - searchbox "Buscar..." [ref=f7e371]
+          - button "Buscar" [ref=f7e372] [cursor=pointer]
+        - generic [ref=f7e376]: C
+    - main [ref=f7e379]:
+      - generic [ref=f7e380]:
+        - navigation "Breadcrumb" [ref=f7e382]:
+          - list [ref=f7e383]:
+            - listitem [ref=f7e384]: Inicio
+        - heading "Dashboard" [level=3] [ref=f7e385]

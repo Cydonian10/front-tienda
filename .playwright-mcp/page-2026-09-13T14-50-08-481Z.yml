@@ -1,0 +1,79 @@
+- generic [ref=f3e116]:
+  - generic [ref=f3e118]:
+    - generic [ref=f3e120]:
+      - heading "VASQUEZ" [level=3] [ref=f3e122]
+      - navigation "Dashboard" [ref=f3e123]:
+        - list [ref=f3e124]:
+          - listitem [ref=f3e125]:
+            - link "Inicio" [ref=f3e126] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f3e131]:
+            - button "Ventas" [expanded] [ref=f3e132]
+            - list [ref=f3e144]:
+              - listitem [ref=f3e145]:
+                - link "Nueva venta" [ref=f3e146] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f3e151]:
+                - link "Historial" [ref=f3e152] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f3e157]:
+            - button "Caja" [expanded] [ref=f3e158]
+            - list [ref=f3e170]:
+              - listitem [ref=f3e171]:
+                - link "Mi caja" [ref=f3e172] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f3e177]:
+                - link "Sesiones" [ref=f3e178] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f3e183]:
+                - link "Movimientos" [ref=f3e184] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f3e189]:
+            - link "Reportes" [ref=f3e190] [cursor=pointer]:
+              - /url: /reportes
+          - listitem [ref=f3e195]:
+            - button "Mantenimiento" [expanded] [ref=f3e196]
+            - list [ref=f3e208]:
+              - listitem [ref=f3e209]:
+                - link "Marcas" [ref=f3e210] [cursor=pointer]:
+                  - /url: /mantenimiento/marcas
+              - listitem [ref=f3e215]:
+                - link "Categorías" [ref=f3e216] [cursor=pointer]:
+                  - /url: /mantenimiento/categorias
+              - listitem [ref=f3e221]:
+                - link "Unidades de medida" [ref=f3e222] [cursor=pointer]:
+                  - /url: /mantenimiento/unidades-medida
+              - listitem [ref=f3e227]:
+                - link "Atributos" [ref=f3e228] [cursor=pointer]:
+                  - /url: /mantenimiento/atributos
+              - listitem [ref=f3e233]:
+                - link "Productos Base" [ref=f3e234] [cursor=pointer]:
+                  - /url: /mantenimiento/base-products
+              - listitem [ref=f3e239]:
+                - link "Productos" [ref=f3e240] [cursor=pointer]:
+                  - /url: /mantenimiento/productos
+          - listitem [ref=f3e245]:
+            - link "Administración" [ref=f3e246] [cursor=pointer]:
+              - /url: /administracion
+    - generic [ref=f3e252]:
+      - generic [ref=f3e253]: AS
+      - paragraph [ref=f3e256]:
+        - strong [ref=f3e257]: Admin Seed
+        - generic [ref=f3e258]: admin@seed.com
+      - button "Cerrar sesión" [ref=f3e259] [cursor=pointer]
+  - generic [ref=f3e263]:
+    - generic [ref=f3e264]:
+      - generic [ref=f3e265]:
+        - button "Abrir menú" [ref=f3e266] [cursor=pointer]
+        - img "Logo colegio" [ref=f3e270]
+      - generic [ref=f3e271]:
+        - generic [ref=f3e272]:
+          - searchbox "Buscar..." [ref=f3e273]
+          - button "Buscar" [ref=f3e274] [cursor=pointer]
+        - generic [ref=f3e278]: C
+    - main [ref=f3e281]:
+      - generic [ref=f3e282]:
+        - navigation "Breadcrumb" [ref=f3e284]:
+          - list [ref=f3e285]:
+            - listitem [ref=f3e286]: Inicio
+        - heading "Dashboard" [level=3] [ref=f3e287]

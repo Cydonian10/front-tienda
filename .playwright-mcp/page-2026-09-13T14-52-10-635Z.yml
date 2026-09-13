@@ -1,0 +1,161 @@
+- generic [ref=f7e7]:
+  - generic [ref=f7e9]:
+    - generic [ref=f7e11]:
+      - heading "VASQUEZ" [level=3] [ref=f7e13]
+      - navigation "Dashboard" [ref=f7e14]:
+        - list [ref=f7e15]:
+          - listitem [ref=f7e16]:
+            - link "Inicio" [ref=f7e17] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f7e22]:
+            - button "Ventas" [expanded] [ref=f7e23]
+            - list [ref=f7e35]:
+              - listitem [ref=f7e36]:
+                - link "Nueva venta" [ref=f7e37] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f7e42]:
+                - link "Historial" [ref=f7e43] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f7e48]:
+            - button "Caja" [expanded] [ref=f7e49]
+            - list [ref=f7e61]:
+              - listitem [ref=f7e62]:
+                - link "Mi caja" [ref=f7e63] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f7e68]:
+                - link "Sesiones" [ref=f7e69] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f7e74]:
+                - link "Movimientos" [ref=f7e75] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f7e80]:
+            - link "Reportes" [ref=f7e81] [cursor=pointer]:
+              - /url: /reportes
+          - listitem [ref=f7e86]:
+            - button "Mantenimiento" [expanded] [ref=f7e87]
+            - list [ref=f7e99]:
+              - listitem [ref=f7e100]:
+                - link "Marcas" [ref=f7e101] [cursor=pointer]:
+                  - /url: /mantenimiento/marcas
+              - listitem [ref=f7e106]:
+                - link "Categorías" [ref=f7e107] [cursor=pointer]:
+                  - /url: /mantenimiento/categorias
+              - listitem [ref=f7e112]:
+                - link "Unidades de medida" [ref=f7e113] [cursor=pointer]:
+                  - /url: /mantenimiento/unidades-medida
+              - listitem [ref=f7e118]:
+                - link "Atributos" [ref=f7e119] [cursor=pointer]:
+                  - /url: /mantenimiento/atributos
+              - listitem [ref=f7e124]:
+                - link "Productos Base" [ref=f7e125] [cursor=pointer]:
+                  - /url: /mantenimiento/base-products
+              - listitem [ref=f7e130]:
+                - link "Productos" [ref=f7e131] [cursor=pointer]:
+                  - /url: /mantenimiento/productos
+          - listitem [ref=f7e136]:
+            - link "Administración" [ref=f7e137] [cursor=pointer]:
+              - /url: /administracion
+    - generic [ref=f7e143]:
+      - generic [ref=f7e144]: AS
+      - paragraph [ref=f7e147]:
+        - strong [ref=f7e148]: Admin Seed
+        - generic [ref=f7e149]: admin@seed.com
+      - button "Cerrar sesión" [ref=f7e150] [cursor=pointer]
+  - generic [ref=f7e154]:
+    - generic [ref=f7e155]:
+      - generic [ref=f7e156]:
+        - button "Abrir menú" [ref=f7e157] [cursor=pointer]
+        - img "Logo colegio" [ref=f7e161]
+      - generic [ref=f7e162]:
+        - generic [ref=f7e163]:
+          - searchbox "Buscar..." [ref=f7e164]
+          - button "Buscar" [ref=f7e165] [cursor=pointer]
+        - generic [ref=f7e169]: C
+    - main [ref=f7e172]:
+      - generic [ref=f7e173]:
+        - navigation "Breadcrumb" [ref=f7e175]:
+          - list [ref=f7e176]:
+            - listitem [ref=f7e177]:
+              - link "Caja" [ref=f7e178] [cursor=pointer]:
+                - /url: /caja
+            - listitem [aria-hidden] [ref=f7e179]: /
+            - listitem [ref=f7e180]: Movimientos de caja
+        - generic [ref=f7e181]:
+          - generic [ref=f7e182]:
+            - generic [ref=f7e183]:
+              - paragraph [ref=f7e184]: Auditoría de caja
+              - heading "Movimientos de caja" [level=1] [ref=f7e185]
+              - paragraph [ref=f7e186]: Consulta ingresos y egresos registrados en las sesiones de caja.
+            - button "Actualizar" [ref=f7e187] [cursor=pointer]
+          - generic [ref=f7e189]:
+            - generic [ref=f7e190]:
+              - heading "Filtros" [level=2] [ref=f7e191]
+              - paragraph [ref=f7e192]: Acota el historial por caja, persona, tipo y período.
+            - generic [ref=f7e193]:
+              - group "Caja" [ref=f7e194]:
+                - combobox [ref=f7e196]:
+                  - option "Todas las cajas" [selected]
+                  - option "Caja-01 · Caja Principal"
+                  - option "Caja-02 · Meseria"
+              - group "Tipo" [ref=f7e197]:
+                - combobox [ref=f7e199]:
+                  - option "Todos" [selected]
+                  - option "Ingreso"
+                  - option "Egreso"
+              - group "Registrado por" [ref=f7e200]:
+                - combobox [ref=f7e202]:
+                  - option "Todo el personal" [selected]
+                  - option "Admin Seed"
+                  - option "María Trabajadora"
+              - group "Desde" [ref=f7e203]:
+                - textbox [ref=f7e205]
+              - group "Hasta" [ref=f7e206]:
+                - textbox [ref=f7e208]
+            - generic [ref=f7e209]:
+              - button "Limpiar" [ref=f7e210] [cursor=pointer]
+              - button "Aplicar filtros" [ref=f7e211] [cursor=pointer]
+          - generic [ref=f7e213]:
+            - table [ref=f7e215]:
+              - rowgroup [ref=f7e216]:
+                - row [ref=f7e217]:
+                  - columnheader "Fecha" [ref=f7e218]
+                  - columnheader "Creador" [ref=f7e219]
+                  - columnheader "Caja / sesión" [ref=f7e220]
+                  - columnheader "Tipo" [ref=f7e221]
+                  - columnheader "Monto" [ref=f7e222]
+                  - columnheader "Motivo" [ref=f7e223]
+              - rowgroup [ref=f7e224]:
+                - row [ref=f7e225]:
+                  - cell "13/09/2026, 14:51" [ref=f7e226]
+                  - 'cell "Admin Seed #4" [ref=f7e227]':
+                    - generic [ref=f7e228]: Admin Seed
+                    - text: "#4"
+                  - 'cell "Meseria Caja #2 · Sesión #2" [ref=f7e229]':
+                    - generic [ref=f7e230]: Meseria
+                    - text: "Caja #2 · Sesión #2"
+                  - cell "Ingreso" [ref=f7e231]
+                  - cell "+1.25" [ref=f7e233]
+                  - cell "Playwright SPEC13" [ref=f7e234]
+                - row [ref=f7e235]:
+                  - cell "13/09/2026, 14:02" [ref=f7e236]
+                  - 'cell "Admin Seed #4" [ref=f7e237]':
+                    - generic [ref=f7e238]: Admin Seed
+                    - text: "#4"
+                  - 'cell "Meseria Caja #2 · Sesión #2" [ref=f7e239]':
+                    - generic [ref=f7e240]: Meseria
+                    - text: "Caja #2 · Sesión #2"
+                  - cell "Ingreso" [ref=f7e241]
+                  - cell "+20.00" [ref=f7e243]
+                  - cell "asdfasdfasdf" [ref=f7e244]
+            - generic [ref=f7e246]:
+              - generic [ref=f7e247]:
+                - generic [ref=f7e248]: Mostrar
+                - combobox [ref=f7e249]:
+                  - option "20" [selected]
+                  - option "50"
+                  - option "100"
+                - generic [ref=f7e250]: "Total: 2 items"
+              - generic [ref=f7e251]:
+                - button "Página anterior" [disabled]: «
+                - button "Página 1" [ref=f7e252] [cursor=pointer]
+                - button "Página siguiente" [disabled]: »

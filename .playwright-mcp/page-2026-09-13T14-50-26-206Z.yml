@@ -1,0 +1,163 @@
+- generic [ref=f4e7]:
+  - generic [ref=f4e9]:
+    - generic [ref=f4e11]:
+      - heading "VASQUEZ" [level=3] [ref=f4e13]
+      - navigation "Dashboard" [ref=f4e14]:
+        - list [ref=f4e15]:
+          - listitem [ref=f4e16]:
+            - link "Inicio" [ref=f4e17] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f4e22]:
+            - button "Ventas" [expanded] [ref=f4e23]
+            - list [ref=f4e35]:
+              - listitem [ref=f4e36]:
+                - link "Nueva venta" [ref=f4e37] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f4e42]:
+                - link "Historial" [ref=f4e43] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f4e48]:
+            - button "Caja" [expanded] [ref=f4e49]
+            - list [ref=f4e61]:
+              - listitem [ref=f4e62]:
+                - link "Mi caja" [ref=f4e63] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f4e68]:
+                - link "Sesiones" [ref=f4e69] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f4e74]:
+                - link "Movimientos" [ref=f4e75] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f4e80]:
+            - link "Reportes" [ref=f4e81] [cursor=pointer]:
+              - /url: /reportes
+          - listitem [ref=f4e86]:
+            - button "Mantenimiento" [expanded] [ref=f4e87]
+            - list [ref=f4e99]:
+              - listitem [ref=f4e100]:
+                - link "Marcas" [ref=f4e101] [cursor=pointer]:
+                  - /url: /mantenimiento/marcas
+              - listitem [ref=f4e106]:
+                - link "Categorías" [ref=f4e107] [cursor=pointer]:
+                  - /url: /mantenimiento/categorias
+              - listitem [ref=f4e112]:
+                - link "Unidades de medida" [ref=f4e113] [cursor=pointer]:
+                  - /url: /mantenimiento/unidades-medida
+              - listitem [ref=f4e118]:
+                - link "Atributos" [ref=f4e119] [cursor=pointer]:
+                  - /url: /mantenimiento/atributos
+              - listitem [ref=f4e124]:
+                - link "Productos Base" [ref=f4e125] [cursor=pointer]:
+                  - /url: /mantenimiento/base-products
+              - listitem [ref=f4e130]:
+                - link "Productos" [ref=f4e131] [cursor=pointer]:
+                  - /url: /mantenimiento/productos
+          - listitem [ref=f4e136]:
+            - link "Administración" [ref=f4e137] [cursor=pointer]:
+              - /url: /administracion
+    - generic [ref=f4e143]:
+      - generic [ref=f4e144]: AS
+      - paragraph [ref=f4e147]:
+        - strong [ref=f4e148]: Admin Seed
+        - generic [ref=f4e149]: admin@seed.com
+      - button "Cerrar sesión" [ref=f4e150] [cursor=pointer]
+  - generic [ref=f4e154]:
+    - generic [ref=f4e155]:
+      - generic [ref=f4e156]:
+        - button "Abrir menú" [ref=f4e157] [cursor=pointer]
+        - img "Logo colegio" [ref=f4e161]
+      - generic [ref=f4e162]:
+        - generic [ref=f4e163]:
+          - searchbox "Buscar..." [ref=f4e164]
+          - button "Buscar" [ref=f4e165] [cursor=pointer]
+        - generic [ref=f4e169]: C
+    - main [ref=f4e172]:
+      - generic [ref=f4e173]:
+        - navigation "Breadcrumb" [ref=f4e175]:
+          - list [ref=f4e176]:
+            - listitem [ref=f4e177]:
+              - link "Caja" [ref=f4e178] [cursor=pointer]:
+                - /url: /caja
+            - listitem [aria-hidden] [ref=f4e179]: /
+            - listitem [ref=f4e180]: Sesiones de caja
+        - generic [ref=f4e181]:
+          - generic [ref=f4e182]:
+            - generic [ref=f4e183]:
+              - paragraph [ref=f4e184]: Supervisión
+              - heading "Sesiones de caja" [level=1] [ref=f4e185]
+              - paragraph [ref=f4e186]: Historial global de aperturas, cierres y arqueos.
+            - generic [ref=f4e187]:
+              - button "Anterior" [ref=f4e188] [cursor=pointer]
+              - button "Siguiente" [ref=f4e189] [cursor=pointer]
+          - generic [ref=f4e192]:
+            - generic [ref=f4e193]:
+              - heading "Período consultado" [level=2] [ref=f4e194]
+              - paragraph [ref=f4e195]: 9/2026 · Se consultan todas las cajas.
+            - button "Actualizar" [ref=f4e196] [cursor=pointer]
+          - generic [ref=f4e198]:
+            - generic [ref=f4e199]:
+              - generic [ref=f4e200]:
+                - heading "Cajas operativas" [level=2] [ref=f4e201]
+                - paragraph [ref=f4e202]: Administra cajas y abre una sesión asignada a otra persona.
+              - button "Nueva caja" [ref=f4e203] [cursor=pointer]
+            - table [ref=f4e206]:
+              - rowgroup [ref=f4e207]:
+                - row [ref=f4e208]:
+                  - columnheader "Código" [ref=f4e209]
+                  - columnheader "Caja" [ref=f4e210]
+                  - columnheader "Estado" [ref=f4e211]
+                  - columnheader "Sesión" [ref=f4e212]
+                  - columnheader "Acciones" [ref=f4e213]
+              - rowgroup [ref=f4e214]:
+                - row [ref=f4e215]:
+                  - cell "Caja-01" [ref=f4e216]
+                  - cell "Caja Principal" [ref=f4e217]
+                  - cell "Activa" [ref=f4e218]
+                  - cell "Abierta por María Trabajadora" [ref=f4e220]
+                  - cell [ref=f4e221]:
+                    - button "Editar Caja Principal" [ref=f4e223] [cursor=pointer]
+                - row [ref=f4e227]:
+                  - cell "Caja-02" [ref=f4e228]
+                  - cell "Meseria" [ref=f4e229]
+                  - cell "Activa" [ref=f4e230]
+                  - cell "Abierta por Admin Seed" [ref=f4e232]
+                  - cell [ref=f4e233]:
+                    - button "Editar Meseria" [ref=f4e235] [cursor=pointer]
+          - table [ref=f4e241]:
+            - rowgroup [ref=f4e242]:
+              - row [ref=f4e243]:
+                - columnheader "Sesión" [ref=f4e244]
+                - columnheader "Responsable" [ref=f4e245]
+                - columnheader "Abrió" [ref=f4e246]
+                - columnheader "Cerró" [ref=f4e247]
+                - columnheader "Fechas" [ref=f4e248]
+                - columnheader "Inicial" [ref=f4e249]
+                - columnheader "Esperado" [ref=f4e250]
+                - columnheader "Real" [ref=f4e251]
+                - columnheader "Estado" [ref=f4e252]
+                - columnheader "Detalle" [ref=f4e253]
+            - rowgroup [ref=f4e255]:
+              - row [ref=f4e256]:
+                - 'cell "Caja-02 · #2" [ref=f4e257]'
+                - cell "Admin Seed" [ref=f4e258]
+                - cell "Admin Seed" [ref=f4e259]
+                - cell "Pendiente" [ref=f4e260]
+                - cell [ref=f4e261]:
+                  - paragraph [ref=f4e262]: 09/09/2026, 22:30
+                - cell "300.00" [ref=f4e263]
+                - cell "0.00" [ref=f4e264]
+                - cell "-" [ref=f4e265]
+                - cell "Abierta" [ref=f4e266]
+                - cell [ref=f4e268]
+              - row [ref=f4e269]:
+                - 'cell "Caja-01 · #1" [ref=f4e270]'
+                - cell "María Trabajadora" [ref=f4e271]
+                - cell "Admin Seed" [ref=f4e272]
+                - cell "Pendiente" [ref=f4e273]
+                - cell [ref=f4e274]:
+                  - paragraph [ref=f4e275]: 09/09/2026, 22:19
+                - cell "200.00" [ref=f4e276]
+                - cell "0.00" [ref=f4e277]
+                - cell "-" [ref=f4e278]
+                - cell "Abierta" [ref=f4e279]
+                - cell [ref=f4e281]

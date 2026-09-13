@@ -1,0 +1,73 @@
+- generic [ref=f2e7]:
+  - generic [ref=f2e9]:
+    - generic [ref=f2e11]:
+      - heading "VASQUEZ" [level=3] [ref=f2e216]
+      - navigation "Dashboard" [ref=f2e217]:
+        - list [ref=f2e15]:
+          - listitem [ref=f2e16]:
+            - link "Inicio" [ref=f2e218] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f2e22]:
+            - button "Ventas" [expanded] [ref=f2e219]
+            - list [ref=f2e35]:
+              - listitem [ref=f2e36]:
+                - link "Nueva venta" [ref=f2e220] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f2e42]:
+                - link "Historial" [ref=f2e221] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f2e48]:
+            - button "Caja" [expanded] [ref=f2e222]
+            - list [ref=f2e61]:
+              - listitem [ref=f2e62]:
+                - link "Mi caja" [ref=f2e223] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f2e68]:
+                - link "Sesiones" [ref=f2e224] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f2e74]:
+                - link "Movimientos" [ref=f2e225] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f2e80]:
+            - link "Reportes" [ref=f2e226] [cursor=pointer]:
+              - /url: /reportes
+    - generic [ref=f2e87]:
+      - generic [ref=f2e88]: GR
+      - paragraph [ref=f2e91]:
+        - strong [ref=f2e92]: Gabriel Responsable
+        - generic [ref=f2e93]: responsible@seed.com
+      - button "Cerrar sesión" [ref=f2e227] [cursor=pointer]
+  - generic [ref=f2e98]:
+    - generic [ref=f2e99]:
+      - generic [ref=f2e100]:
+        - button "Abrir menú" [ref=f2e228] [cursor=pointer]
+        - img "Logo colegio" [ref=f2e229]
+      - generic [ref=f2e106]:
+        - generic [ref=f2e107]:
+          - searchbox "Buscar..." [ref=f2e230]
+          - button "Buscar" [ref=f2e231] [cursor=pointer]
+        - generic [ref=f2e113]: C
+    - main [ref=f2e116]:
+      - generic [ref=f2e117]:
+        - navigation "Breadcrumb" [ref=f2e232]:
+          - list [ref=f2e120]:
+            - listitem [ref=f2e121]:
+              - link "Caja" [ref=f2e233] [cursor=pointer]:
+                - /url: /caja
+            - listitem [aria-hidden] [ref=f2e123]: /
+            - listitem [ref=f2e124]: Mi caja
+        - generic [ref=f2e125]:
+          - generic [ref=f2e126]:
+            - generic [ref=f2e127]:
+              - paragraph [ref=f2e128]: Operación diaria
+              - heading "Mi caja" [level=1] [ref=f2e234]
+              - paragraph [ref=f2e130]: Administra únicamente las sesiones bajo tu responsabilidad.
+            - button "Actualizar" [ref=f2e235] [cursor=pointer]
+          - generic [ref=f2e237]:
+            - generic [ref=f2e238]:
+              - heading "No tienes una sesión abierta" [level=2] [ref=f2e239]
+              - paragraph [ref=f2e240]: Elige una caja activa y disponible para iniciar tu turno.
+            - generic [ref=f2e242]:
+              - paragraph [ref=f2e243]: Caja Playwright
+              - paragraph [ref=f2e244]: PW-CAJA-20260913
+              - button "Abrir mi caja" [ref=f2e245] [cursor=pointer]

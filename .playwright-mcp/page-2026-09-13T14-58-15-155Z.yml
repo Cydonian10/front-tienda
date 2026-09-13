@@ -1,0 +1,17 @@
+- generic [ref=f7e256]:
+  - generic [ref=f7e257]:
+    - heading "SUB SISTEMAS" [level=1] [ref=f7e258]
+    - paragraph [ref=f7e259]: Inicia sesión con tu cuenta
+  - generic [ref=f7e260]:
+    - group [ref=f7e261]:
+      - generic [ref=f7e262]:
+        - generic [ref=f7e263]: Email
+        - textbox "Email" [ref=f7e264]:
+          - /placeholder: admin@ferreteria.com
+          - text: admin@seed.com
+      - generic [ref=f7e265]:
+        - generic [ref=f7e266]: Contraseña
+        - textbox "Contraseña" [ref=f7e267]:
+          - /placeholder: ••••••••
+          - text: secret123
+    - button "Iniciar sesión" [ref=f7e268] [cursor=pointer]

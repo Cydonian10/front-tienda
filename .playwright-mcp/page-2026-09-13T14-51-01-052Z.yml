@@ -1,0 +1,106 @@
+- generic [ref=f6e7]:
+  - generic [ref=f6e9]:
+    - generic [ref=f6e11]:
+      - heading "VASQUEZ" [level=3] [ref=f6e13]
+      - navigation "Dashboard" [ref=f6e14]:
+        - list [ref=f6e15]:
+          - listitem [ref=f6e16]:
+            - link "Inicio" [ref=f6e17] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f6e22]:
+            - button "Ventas" [expanded] [ref=f6e23]
+            - list [ref=f6e35]:
+              - listitem [ref=f6e36]:
+                - link "Nueva venta" [ref=f6e37] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f6e42]:
+                - link "Historial" [ref=f6e43] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f6e48]:
+            - button "Caja" [expanded] [ref=f6e49]
+            - list [ref=f6e61]:
+              - listitem [ref=f6e62]:
+                - link "Mi caja" [ref=f6e63] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f6e68]:
+                - link "Sesiones" [ref=f6e69] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f6e74]:
+                - link "Movimientos" [ref=f6e75] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f6e80]:
+            - link "Reportes" [ref=f6e81] [cursor=pointer]:
+              - /url: /reportes
+          - listitem [ref=f6e86]:
+            - button "Mantenimiento" [expanded] [ref=f6e87]
+            - list [ref=f6e99]:
+              - listitem [ref=f6e100]:
+                - link "Marcas" [ref=f6e101] [cursor=pointer]:
+                  - /url: /mantenimiento/marcas
+              - listitem [ref=f6e106]:
+                - link "Categorías" [ref=f6e107] [cursor=pointer]:
+                  - /url: /mantenimiento/categorias
+              - listitem [ref=f6e112]:
+                - link "Unidades de medida" [ref=f6e113] [cursor=pointer]:
+                  - /url: /mantenimiento/unidades-medida
+              - listitem [ref=f6e118]:
+                - link "Atributos" [ref=f6e119] [cursor=pointer]:
+                  - /url: /mantenimiento/atributos
+              - listitem [ref=f6e124]:
+                - link "Productos Base" [ref=f6e125] [cursor=pointer]:
+                  - /url: /mantenimiento/base-products
+              - listitem [ref=f6e130]:
+                - link "Productos" [ref=f6e131] [cursor=pointer]:
+                  - /url: /mantenimiento/productos
+          - listitem [ref=f6e136]:
+            - link "Administración" [ref=f6e137] [cursor=pointer]:
+              - /url: /administracion
+    - generic [ref=f6e143]:
+      - generic [ref=f6e144]: AS
+      - paragraph [ref=f6e147]:
+        - strong [ref=f6e148]: Admin Seed
+        - generic [ref=f6e149]: admin@seed.com
+      - button "Cerrar sesión" [ref=f6e150] [cursor=pointer]
+  - generic [ref=f6e154]:
+    - generic [ref=f6e155]:
+      - generic [ref=f6e156]:
+        - button "Abrir menú" [ref=f6e157] [cursor=pointer]
+        - img "Logo colegio" [ref=f6e161]
+      - generic [ref=f6e162]:
+        - generic [ref=f6e163]:
+          - searchbox "Buscar..." [ref=f6e164]
+          - button "Buscar" [ref=f6e165] [cursor=pointer]
+        - generic [ref=f6e169]: C
+    - main [ref=f6e172]:
+      - generic [ref=f6e173]:
+        - navigation "Breadcrumb" [ref=f6e175]:
+          - list [ref=f6e176]:
+            - listitem [ref=f6e177]:
+              - link "Caja" [ref=f6e178] [cursor=pointer]:
+                - /url: /caja
+            - listitem [aria-hidden] [ref=f6e179]: /
+            - listitem [ref=f6e180]: Mi caja
+        - generic [ref=f6e181]:
+          - generic [ref=f6e182]:
+            - generic [ref=f6e183]:
+              - paragraph [ref=f6e184]: Operación diaria
+              - heading "Mi caja" [level=1] [ref=f6e185]
+              - paragraph [ref=f6e186]: Administra únicamente las sesiones bajo tu responsabilidad.
+            - button "Actualizar" [ref=f6e187] [cursor=pointer]
+          - article [ref=f6e189]:
+            - generic [ref=f6e190]:
+              - generic [ref=f6e191]:
+                - generic [ref=f6e192]:
+                  - heading "Meseria" [level=2] [ref=f6e193]
+                  - paragraph [ref=f6e194]: "Caja-02 · Sesión #2"
+                - generic [ref=f6e195]: Abierta
+              - generic [ref=f6e196]:
+                - paragraph [ref=f6e197]:
+                  - generic [ref=f6e198]: Apertura
+                  - text: "300.00"
+                - paragraph [ref=f6e199]:
+                  - generic [ref=f6e200]: Abierta
+                  - text: 09/09/2026, 22:30
+              - generic [ref=f6e201]:
+                - button "Movimiento" [ref=f6e202] [cursor=pointer]
+                - button "Cerrar sesión" [ref=f6e203] [cursor=pointer]

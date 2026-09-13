@@ -1,0 +1,95 @@
+- generic [ref=f1e4]:
+  - generic [ref=f1e7]:
+    - generic [ref=f1e9]:
+      - generic [ref=f1e11]:
+        - heading [level=3] [ref=f1e142]: VASQUEZ
+        - navigation [ref=f1e143]:
+          - list [ref=f1e15]:
+            - listitem [ref=f1e16]:
+              - link [ref=f1e144] [cursor=pointer]:
+                - /url: /inicio
+                - generic [ref=f1e21]: Inicio
+            - listitem [ref=f1e22]:
+              - button [expanded] [ref=f1e145]:
+                - generic [ref=f1e24]: Ventas
+              - list [ref=f1e35]:
+                - listitem [ref=f1e36]:
+                  - link [ref=f1e146] [cursor=pointer]:
+                    - /url: /ventas/nueva
+                    - generic [ref=f1e41]: Nueva venta
+                - listitem [ref=f1e42]:
+                  - link [ref=f1e147] [cursor=pointer]:
+                    - /url: /ventas/historial
+                    - generic [ref=f1e47]: Historial
+            - listitem [ref=f1e48]:
+              - button [expanded] [ref=f1e148]:
+                - generic [ref=f1e50]: Caja
+              - list [ref=f1e61]:
+                - listitem [ref=f1e62]:
+                  - link [ref=f1e149] [cursor=pointer]:
+                    - /url: /caja/mi-caja
+                    - generic [ref=f1e67]: Mi caja
+                - listitem [ref=f1e68]:
+                  - link [ref=f1e150] [cursor=pointer]:
+                    - /url: /caja/sesiones
+                    - generic [ref=f1e73]: Sesiones
+                - listitem [ref=f1e74]:
+                  - link [ref=f1e151] [cursor=pointer]:
+                    - /url: /caja/movimientos
+                    - generic [ref=f1e79]: Movimientos
+            - listitem [ref=f1e80]:
+              - link [ref=f1e152] [cursor=pointer]:
+                - /url: /reportes
+                - generic [ref=f1e85]: Reportes
+      - generic [ref=f1e87]:
+        - generic [ref=f1e88]: GR
+        - paragraph [ref=f1e91]:
+          - strong [ref=f1e92]: Gabriel Responsable
+          - generic [ref=f1e93]: responsible@seed.com
+        - button [ref=f1e153] [cursor=pointer]
+    - generic [ref=f1e98]:
+      - generic [ref=f1e99]:
+        - button [ref=f1e154] [cursor=pointer]
+        - generic [ref=f1e106]:
+          - generic [ref=f1e107]:
+            - searchbox [ref=f1e156]
+            - button [ref=f1e157] [cursor=pointer]
+          - generic [ref=f1e113]: C
+      - main [ref=f1e116]:
+        - generic [ref=f1e117]:
+          - navigation [ref=f1e158]:
+            - list [ref=f1e120]:
+              - listitem [ref=f1e121]:
+                - link [ref=f1e159] [cursor=pointer]:
+                  - /url: /caja
+                  - text: Caja
+              - listitem [aria-hidden] [ref=f1e123]: /
+              - listitem [ref=f1e124]: Mi caja
+          - generic [ref=f1e125]:
+            - generic [ref=f1e126]:
+              - generic [ref=f1e127]:
+                - paragraph [ref=f1e128]: Operación diaria
+                - heading [level=1] [ref=f1e160]: Mi caja
+                - paragraph [ref=f1e130]: Administra únicamente las sesiones bajo tu responsabilidad.
+              - button [ref=f1e161] [cursor=pointer]: Actualizar
+            - generic [ref=f1e133]:
+              - generic [ref=f1e134]:
+                - heading [level=2] [ref=f1e162]: No tienes una sesión abierta
+                - paragraph [ref=f1e136]: Elige una caja activa y disponible para iniciar tu turno.
+              - generic [ref=f1e138]:
+                - paragraph [ref=f1e139]: Caja Playwright
+                - paragraph [ref=f1e140]: PW-CAJA-20260913
+                - button [ref=f1e163] [cursor=pointer]: Abrir mi caja
+  - dialog [ref=f1e167]:
+    - generic [ref=f1e170]:
+      - generic [ref=f1e171]:
+        - heading "Abrir caja" [level=2] [ref=f1e172]
+        - paragraph [ref=f1e173]: PW-CAJA-20260913 · Caja Playwright
+      - generic [ref=f1e174]:
+        - group "Monto inicial" [ref=f1e175]:
+          - spinbutton [active] [ref=f1e177]: "0"
+        - group "Responsable" [ref=f1e178]:
+          - textbox [ref=f1e180]: Gabriel Responsable
+        - generic [ref=f1e181]:
+          - button "Cancelar" [ref=f1e182] [cursor=pointer]
+          - button "Abrir caja" [ref=f1e183] [cursor=pointer]

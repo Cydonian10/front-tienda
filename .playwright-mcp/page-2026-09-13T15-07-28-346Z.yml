@@ -1,0 +1,150 @@
+- generic [ref=f4e7]:
+  - generic [ref=f4e9]:
+    - generic [ref=f4e11]:
+      - heading "VASQUEZ" [level=3] [ref=f4e13]
+      - navigation "Dashboard" [ref=f4e14]:
+        - list [ref=f4e15]:
+          - listitem [ref=f4e16]:
+            - link "Inicio" [ref=f4e17] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f4e22]:
+            - button "Ventas" [expanded] [ref=f4e23]
+            - list [ref=f4e35]:
+              - listitem [ref=f4e36]:
+                - link "Nueva venta" [ref=f4e37] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f4e42]:
+                - link "Historial" [ref=f4e43] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f4e48]:
+            - button "Caja" [expanded] [ref=f4e49]
+            - list [ref=f4e61]:
+              - listitem [ref=f4e62]:
+                - link "Mi caja" [ref=f4e63] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f4e68]:
+                - link "Sesiones" [ref=f4e69] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f4e74]:
+                - link "Movimientos" [ref=f4e75] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f4e80]:
+            - link "Reportes" [ref=f4e81] [cursor=pointer]:
+              - /url: /reportes
+    - generic [ref=f4e87]:
+      - generic [ref=f4e88]: GR
+      - paragraph [ref=f4e91]:
+        - strong [ref=f4e92]: Gabriel Responsable
+        - generic [ref=f4e93]: responsible@seed.com
+      - button "Cerrar sesión" [ref=f4e94] [cursor=pointer]
+  - generic [ref=f4e98]:
+    - generic [ref=f4e99]:
+      - generic [ref=f4e100]:
+        - button "Abrir menú" [ref=f4e101] [cursor=pointer]
+        - img "Logo colegio" [ref=f4e105]
+      - generic [ref=f4e106]:
+        - generic [ref=f4e107]:
+          - searchbox "Buscar..." [ref=f4e108]
+          - button "Buscar" [ref=f4e109] [cursor=pointer]
+        - generic [ref=f4e113]: C
+    - main [ref=f4e116]:
+      - generic [ref=f4e117]:
+        - navigation "Breadcrumb" [ref=f4e119]:
+          - list [ref=f4e120]:
+            - listitem [ref=f4e121]:
+              - link "Caja" [ref=f4e122] [cursor=pointer]:
+                - /url: /caja
+            - listitem [aria-hidden] [ref=f4e123]: /
+            - listitem [ref=f4e124]: Movimientos de caja
+        - generic [ref=f4e125]:
+          - generic [ref=f4e126]:
+            - generic [ref=f4e127]:
+              - paragraph [ref=f4e128]: Auditoría de caja
+              - heading "Movimientos de caja" [level=1] [ref=f4e129]
+              - paragraph [ref=f4e130]: Consulta ingresos y egresos registrados en las sesiones de caja.
+            - button "Actualizar" [ref=f4e131] [cursor=pointer]
+          - generic [ref=f4e133]:
+            - generic [ref=f4e134]:
+              - heading "Filtros" [level=2] [ref=f4e135]
+              - paragraph [ref=f4e136]: Acota el historial por caja, persona, tipo y período.
+            - generic [ref=f4e137]:
+              - group "Caja" [ref=f4e138]:
+                - combobox [ref=f4e140]:
+                  - option "Todas las cajas" [selected]
+                  - option "Caja-01 · Caja Principal"
+                  - option "Caja-02 · Meseria"
+                  - option "PW-CAJA-20260913 · Caja Playwright"
+              - group "Tipo" [ref=f4e141]:
+                - combobox [ref=f4e143]:
+                  - option "Todos" [selected]
+                  - option "Ingreso"
+                  - option "Egreso"
+              - group "Registrado por" [ref=f4e144]:
+                - combobox [ref=f4e146]:
+                  - option "Todo el personal" [selected]
+                  - option "Admin Seed"
+                  - option "María Trabajadora"
+                  - option "Gabriel Responsable"
+              - group "Desde" [ref=f4e147]:
+                - textbox [ref=f4e149]
+              - group "Hasta" [ref=f4e150]:
+                - textbox [ref=f4e152]
+            - generic [ref=f4e153]:
+              - button "Limpiar" [ref=f4e154] [cursor=pointer]
+              - button "Aplicar filtros" [ref=f4e155] [cursor=pointer]
+          - generic [ref=f4e157]:
+            - table [ref=f4e159]:
+              - rowgroup [ref=f4e160]:
+                - row [ref=f4e161]:
+                  - columnheader "Fecha" [ref=f4e162]
+                  - columnheader "Creador" [ref=f4e163]
+                  - columnheader "Caja / sesión" [ref=f4e164]
+                  - columnheader "Tipo" [ref=f4e165]
+                  - columnheader "Monto" [ref=f4e166]
+                  - columnheader "Motivo" [ref=f4e167]
+              - rowgroup [ref=f4e168]:
+                - row [ref=f4e169]:
+                  - cell "13/09/2026, 15:04" [ref=f4e170]
+                  - 'cell "Gabriel Responsable #7" [ref=f4e171]':
+                    - generic [ref=f4e172]: Gabriel Responsable
+                    - text: "#7"
+                  - 'cell "Caja Playwright Caja #3 · Sesión #3" [ref=f4e173]':
+                    - generic [ref=f4e174]: Caja Playwright
+                    - text: "Caja #3 · Sesión #3"
+                  - cell "Ingreso" [ref=f4e175]
+                  - cell "+10.50" [ref=f4e177]
+                  - cell "Playwright responsible flow" [ref=f4e178]
+                - row [ref=f4e179]:
+                  - cell "13/09/2026, 14:51" [ref=f4e180]
+                  - 'cell "Admin Seed #4" [ref=f4e181]':
+                    - generic [ref=f4e182]: Admin Seed
+                    - text: "#4"
+                  - 'cell "Meseria Caja #2 · Sesión #2" [ref=f4e183]':
+                    - generic [ref=f4e184]: Meseria
+                    - text: "Caja #2 · Sesión #2"
+                  - cell "Ingreso" [ref=f4e185]
+                  - cell "+1.25" [ref=f4e187]
+                  - cell "Playwright SPEC13" [ref=f4e188]
+                - row [ref=f4e189]:
+                  - cell "13/09/2026, 14:02" [ref=f4e190]
+                  - 'cell "Admin Seed #4" [ref=f4e191]':
+                    - generic [ref=f4e192]: Admin Seed
+                    - text: "#4"
+                  - 'cell "Meseria Caja #2 · Sesión #2" [ref=f4e193]':
+                    - generic [ref=f4e194]: Meseria
+                    - text: "Caja #2 · Sesión #2"
+                  - cell "Ingreso" [ref=f4e195]
+                  - cell "+20.00" [ref=f4e197]
+                  - cell "asdfasdfasdf" [ref=f4e198]
+            - generic [ref=f4e200]:
+              - generic [ref=f4e201]:
+                - generic [ref=f4e202]: Mostrar
+                - combobox [ref=f4e203]:
+                  - option "20" [selected]
+                  - option "50"
+                  - option "100"
+                - generic [ref=f4e204]: "Total: 3 items"
+              - generic [ref=f4e205]:
+                - button "Página anterior" [disabled]: «
+                - button "Página 1" [ref=f4e206] [cursor=pointer]
+                - button "Página siguiente" [disabled]: »

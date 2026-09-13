@@ -1,6 +1,6 @@
 # SPEC 14 — Reportes de resumen, ventas y vendedores
 
-> **Status:** Borrador
+> **Status:** Aprobado
 > **Depends on:** SPEC 10 (rol responsable y permisos operativos), SPEC 11 (navegación y rutas por rol), SPEC 12 (historial de ventas y resumen por período)
 > **Date:** 2026-09-12
 > **Objective:** Ofrecer reportes agregados de ventas efectivas, evolución diaria y rendimiento de vendedores para responsables y administradores.
@@ -46,7 +46,12 @@ export interface ReportsOverviewDto {
   cancelledCount: number;
   topSeller: { sellerId: number; sellerName: string; paidAmount: number } | null;
   topProduct: { productId: number; productName: string; quantityBase: number } | null;
-  paymentMethods: Array<{ paymentMethodId: number; name: string; paidAmount: number; percentage: number }>;
+  paymentMethods: Array<{
+    paymentMethodId: number;
+    name: string;
+    paidAmount: number;
+    percentage: number;
+  }>;
 }
 
 export interface SalesByDayDto {
@@ -132,11 +137,11 @@ Archivos principales:
 
 ## Risks
 
-| Riesgo | Mitigación |
-| --- | --- |
-| Consultas agregadas lentas en períodos extensos. | Restringir el rango validado y agregar índices solo si la medición lo justifica. |
-| Los distintos endpoints discrepan en los límites de fecha. | Reutilizar una misma utilidad de rango y pruebas con límites diarios. |
-| Un producto o persona fue renombrado después de vender. | Documentar que los reportes usan los nombres actualmente relacionados hasta que exista un requisito de instantáneas de reporte. |
+| Riesgo                                                     | Mitigación                                                                                                                      |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Consultas agregadas lentas en períodos extensos.           | Restringir el rango validado y agregar índices solo si la medición lo justifica.                                                |
+| Los distintos endpoints discrepan en los límites de fecha. | Reutilizar una misma utilidad de rango y pruebas con límites diarios.                                                           |
+| Un producto o persona fue renombrado después de vender.    | Documentar que los reportes usan los nombres actualmente relacionados hasta que exista un requisito de instantáneas de reporte. |
 
 ## What is **not** in this spec
 

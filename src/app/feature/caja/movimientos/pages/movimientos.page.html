@@ -1,0 +1,168 @@
+<ng-breadcrumbs />
+
+<div class="mt-4 space-y-4">
+  <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-semibold tracking-wide text-primary">Auditoría de caja</p>
+      <h1 class="text-xl font-semibold">Movimientos de caja</h1>
+      <p class="mt-1 text-sm text-base-content/60">
+        Consulta ingresos y egresos registrados en las sesiones de caja.
+      </p>
+    </div>
+    <button type="button" class="btn" [disabled]="isLoading()" (click)="load()">
+      Actualizar
+    </button>
+  </header>
+
+  <section class="card card-border border-base-300 bg-base-100">
+    <div class="card-body gap-4 p-4 sm:p-5">
+      <div>
+        <h2 class="card-title">Filtros</h2>
+        <p class="text-sm text-base-content/60">Usa identificadores para acotar el registro auditado.</p>
+      </div>
+
+      <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">ID de sesión</legend>
+          <input
+            type="number"
+            min="1"
+            class="input w-full"
+            [value]="filters().cashOpeningId"
+            (input)="updateFilter('cashOpeningId', $event)"
+          />
+        </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">ID de caja</legend>
+          <input
+            type="number"
+            min="1"
+            class="input w-full"
+            [value]="filters().cashRegisterId"
+            (input)="updateFilter('cashRegisterId', $event)"
+          />
+        </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Tipo</legend>
+          <select class="select w-full" [value]="filters().type" (change)="updateFilter('type', $event)">
+            <option value="">Todos</option>
+            <option value="income">Ingreso</option>
+            <option value="expense">Egreso</option>
+          </select>
+        </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">ID de creador</legend>
+          <input
+            type="number"
+            min="1"
+            class="input w-full"
+            [value]="filters().createdById"
+            (input)="updateFilter('createdById', $event)"
+          />
+        </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Desde</legend>
+          <input
+            type="date"
+            class="input w-full"
+            [value]="filters().startDate"
+            (change)="updateFilter('startDate', $event)"
+          />
+        </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Hasta</legend>
+          <input
+            type="date"
+            class="input w-full"
+            [value]="filters().endDate"
+            (change)="updateFilter('endDate', $event)"
+          />
+        </fieldset>
+      </div>
+
+      <div class="card-actions justify-end">
+        <button type="button" class="btn btn-soft" [disabled]="isLoading()" (click)="clearFilters()">
+          Limpiar
+        </button>
+        <button type="button" class="btn" [disabled]="isLoading()" (click)="applyFilters()">
+          Aplicar filtros
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (isLoading()) {
+    <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
+      <span class="loading loading-spinner loading-sm"></span><span>Cargando movimientos...</span>
+    </div>
+  } @else if (error(); as message) {
+    <div role="alert" class="alert alert-error sm:alert-horizontal">
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-sm" (click)="load()">Reintentar</button>
+    </div>
+  } @else if (movements(); as result) {
+    <section class="card card-border border-base-300 bg-base-100">
+      <div class="card-body gap-4 p-4 sm:p-5">
+        @if (result.data.length === 0) {
+          <div role="status" class="alert alert-info">
+            <span>No hay movimientos para los filtros seleccionados.</span>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Creador</th>
+                  <th>Caja / sesión</th>
+                  <th>Tipo</th>
+                  <th class="text-right">Monto</th>
+                  <th>Motivo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (movement of result.data; track movement.id) {
+                  <tr>
+                    <td class="whitespace-nowrap">{{ movement.createdAt | businessDate }}</td>
+                    <td>
+                      <span class="block font-medium">{{ movement.createdByName }}</span>
+                      <span class="text-xs text-base-content/60">#{{ movement.createdById }}</span>
+                    </td>
+                    <td>
+                      <span class="block font-medium">{{ movement.cashRegisterName }}</span>
+                      <span class="text-xs text-base-content/60">
+                        Caja #{{ movement.cashRegisterId }} · Sesión #{{ movement.cashOpeningId }}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        class="badge badge-outline"
+                        [class.badge-success]="movement.type === 'income'"
+                        [class.badge-error]="movement.type === 'expense'"
+                      >
+                        {{ typeLabel(movement.type) }}
+                      </span>
+                    </td>
+                    <td class="text-right font-medium whitespace-nowrap">
+                      {{ movement.type === 'income' ? '+' : '-' }}{{ movement.amount | number: '1.2-2' }}
+                    </td>
+                    <td class="min-w-52">{{ movement.reason }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <ng-pagination
+            [page]="page()"
+            [pageSize]="pageSize()"
+            [lastPage]="result.lastPage"
+            [total]="result.total"
+            [pageSizes]="[20, 50, 100]"
+            (pageChange)="changePage($event)"
+            (pageSizeChange)="changePageSize($event)"
+          />
+        }
+      </div>
+    </section>
+  }
+</div>

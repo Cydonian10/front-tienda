@@ -3,44 +3,47 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { CashRegisterOpeningsService } from '../../../../core/api/cash-register-openings.service';
-import {
-  CashRegister,
-  CashRegisterOpening,
-  CashResponsible,
-  CreateCashRegisterOpening,
-} from '../../../../core/models/cash-register.model';
 
-export interface CashRegisterOpeningDialogData {
-  register: CashRegister;
-  isAdmin: boolean;
-  currentPerson: CashResponsible;
-  responsibles: CashResponsible[];
-}
+import { CashMovementsService } from '../../../../core/api/cash-movements.service';
+import {
+  CashMovement,
+  CashMovementType,
+  CreateCashMovement,
+} from '../../../../core/models/cash-movement.model';
+import { CashRegisterOpening } from '../../../../core/models/cash-register.model';
+
 @Component({
-  selector: 'cash-register-opening-dialog',
+  selector: 'cash-movement-dialog',
   imports: [ReactiveFormsModule],
-  templateUrl: './cash-register-opening-dialog.html',
+  templateUrl: './cash-movement-dialog.html',
 })
-export class CashRegisterOpeningDialog {
-  private readonly dialogRef = inject(DialogRef<CashRegisterOpening | undefined>);
-  protected readonly data = inject<CashRegisterOpeningDialogData>(DIALOG_DATA);
-  private readonly service = inject(CashRegisterOpeningsService);
+export class CashMovementDialog {
+  private readonly dialogRef = inject(DialogRef<CashMovement | undefined>);
+  protected readonly opening = inject<CashRegisterOpening>(DIALOG_DATA);
+  private readonly service = inject(CashMovementsService);
   private readonly formBuilder = inject(FormBuilder);
   protected readonly isSubmitting = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly isConflict = signal(false);
   protected readonly form = this.formBuilder.nonNullable.group({
-    openingAmount: [0, [Validators.required, Validators.min(0)]],
-    responsibleId: [this.data.currentPerson.id, this.data.isAdmin ? Validators.required : []],
+    type: this.formBuilder.nonNullable.control<CashMovementType>('income'),
+    amount: [0, [Validators.required, Validators.min(0.01)]],
+    reason: ['', [Validators.required, Validators.maxLength(255)]],
   });
+
   protected async submit(): Promise<void> {
     if (this.form.invalid) return;
     const value = this.form.getRawValue();
-    const dto: CreateCashRegisterOpening = {
-      cashRegisterId: this.data.register.id,
-      openingAmount: value.openingAmount,
-      ...(this.data.isAdmin ? { responsibleId: value.responsibleId } : {}),
+    const reason = value.reason.trim();
+    if (!reason) {
+      this.form.controls.reason.setErrors({ required: true });
+      return;
+    }
+    const dto: CreateCashMovement = {
+      cashOpeningId: this.opening.id,
+      type: value.type,
+      amount: value.amount,
+      reason,
     };
     this.isSubmitting.set(true);
     this.error.set(null);
@@ -54,20 +57,23 @@ export class CashRegisterOpeningDialog {
       this.isSubmitting.set(false);
     }
   }
+
   protected close(): void {
     this.dialogRef.close();
   }
+
   private message(error: unknown): string {
     const body =
       error instanceof HttpErrorResponse ? (error.error as { message?: string | string[] }) : null;
     return Array.isArray(body?.message)
       ? body.message.join(', ')
-      : (body?.message ?? 'Error inesperado');
+      : (body?.message ?? 'No se pudo registrar el movimiento');
   }
 }
-export function openCashRegisterOpeningDialog(
+
+export function openCashMovementDialog(
   dialog: Dialog,
-  data: CashRegisterOpeningDialogData,
-): DialogRef<CashRegisterOpening | undefined, CashRegisterOpeningDialog> {
-  return dialog.open(CashRegisterOpeningDialog, { data, width: '28rem', disableClose: true });
+  opening: CashRegisterOpening,
+): DialogRef<CashMovement | undefined, CashMovementDialog> {
+  return dialog.open(CashMovementDialog, { data: opening, width: '28rem', disableClose: true });
 }

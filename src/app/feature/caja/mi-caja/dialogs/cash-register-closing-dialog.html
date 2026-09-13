@@ -1,0 +1,111 @@
+<div class="card w-full bg-base-100 shadow-xl">
+  <div class="card-body gap-4">
+    @if (closedOpening(); as opening) {
+      <div>
+        <h2 class="card-title">Cierre registrado</h2>
+        <p class="text-sm text-base-content/60">Arqueo de {{ opening.cashRegister.name }}</p>
+      </div>
+      <div class="overflow-x-auto rounded-box border border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Método</th>
+              <th class="text-right">Esperado</th>
+              <th class="text-right">Real</th>
+              <th class="text-right">Diferencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (detail of opening.closingDetails; track detail.paymentMethod.id) {
+              <tr>
+                <td>{{ detail.paymentMethod.name }}</td>
+                <td class="text-right">{{ detail.expectedAmount | number: '1.2-2' }}</td>
+                <td class="text-right">{{ detail.realAmount | number: '1.2-2' }}</td>
+                <td
+                  class="text-right"
+                  [class.text-success]="detail.difference >= 0"
+                  [class.text-error]="detail.difference < 0"
+                >
+                  {{ detail.difference | number: '1.2-2' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="grid grid-cols-3 gap-3 rounded-box bg-base-200 p-4 text-right text-sm">
+        <p>
+          <span class="block text-base-content/60">Esperado</span
+          >{{ opening.expectedAmount | number: '1.2-2' }}
+        </p>
+        <p>
+          <span class="block text-base-content/60">Real</span
+          >{{ opening.realAmount | number: '1.2-2' }}
+        </p>
+        <p>
+          <span class="block text-base-content/60">Diferencia</span
+          >{{ opening.difference | number: '1.2-2' }}
+        </p>
+      </div>
+      <div class="card-actions justify-end">
+        <button type="button" class="btn btn-primary" (click)="finish()">Terminar</button>
+      </div>
+    } @else {
+      <div>
+        <h2 class="card-title">Cerrar sesión</h2>
+        <p class="text-sm text-base-content/60">
+          Ingresa el importe real contado de cada método de pago activo.
+        </p>
+      </div>
+      <form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+        <div formArrayName="details" class="space-y-3">
+          @for (method of data.paymentMethods; track method.id; let index = $index) {
+            <fieldset class="fieldset" [formGroupName]="index">
+              <legend class="fieldset-legend">{{ method.name }}</legend>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                class="input w-full"
+                formControlName="realAmount"
+                [class.input-error]="
+                  details.at(index).get('realAmount')?.touched &&
+                  details.at(index).get('realAmount')?.invalid
+                "
+              />
+              @if (
+                details.at(index).get('realAmount')?.touched &&
+                details.at(index).get('realAmount')?.invalid
+              ) {
+                <p class="fieldset-label text-error">
+                  El importe real debe ser mayor o igual a cero.
+                </p>
+              }
+            </fieldset>
+          }
+        </div>
+        @if (error(); as message) {
+          <div
+            role="alert"
+            class="alert"
+            [class.alert-warning]="isConflict()"
+            [class.alert-error]="!isConflict()"
+          >
+            <span>{{ message }}</span>
+          </div>
+        }
+        <div class="card-actions justify-end">
+          <button type="button" class="btn btn-soft" [disabled]="isSubmitting()" (click)="close()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting()">
+            @if (isSubmitting()) {
+              <span class="loading loading-spinner loading-sm"></span>
+            }
+            Confirmar cierre
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

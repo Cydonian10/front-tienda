@@ -1,0 +1,61 @@
+<div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+  <table class="table table-zebra table-sm">
+    <thead>
+      <tr>
+        <th>Sesión</th>
+        <th>Responsable</th>
+        <th>Abrió</th>
+        <th>Cerró</th>
+        <th>Fechas</th>
+        <th class="text-right">Inicial</th>
+        <th class="text-right">Esperado</th>
+        <th class="text-right">Real</th>
+        <th>Estado</th>
+        <th><span class="sr-only">Detalle</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (opening of openings(); track opening.id) {
+        <tr>
+          <td>{{ opening.cashRegister.code }} · #{{ opening.id }}</td>
+          <td>{{ opening.responsible.firstName }} {{ opening.responsible.lastName }}</td>
+          <td>{{ opening.openedBy.firstName }} {{ opening.openedBy.lastName }}</td>
+          <td>
+            @if (opening.closedBy; as closedBy) {
+              {{ closedBy.firstName }} {{ closedBy.lastName }}
+            } @else {
+              <span class="text-base-content/60">Pendiente</span>
+            }
+          </td>
+          <td class="text-xs">
+            <p>{{ opening.openedAt | businessDate }}</p>
+            @if (opening.closedAt) {
+              <p>{{ opening.closedAt | businessDate }}</p>
+            }
+          </td>
+          <td class="text-right">{{ opening.openingAmount | number: '1.2-2' }}</td>
+          <td class="text-right">{{ opening.expectedAmount | number: '1.2-2' }}</td>
+          <td class="text-right">
+            {{ opening.realAmount === null ? '-' : (opening.realAmount | number: '1.2-2') }}
+          </td>
+          <td>
+            <span
+              class="badge"
+              [class.badge-success]="opening.status === 'open'"
+              [class.badge-ghost]="opening.status === 'closed'"
+            >
+              {{ opening.status === 'open' ? 'Abierta' : 'Cerrada' }}
+            </span>
+          </td>
+          <td class="text-right">
+            @if (opening.status === 'closed') {
+              <button type="button" class="btn btn-xs" (click)="detailRequested.emit(opening)">
+                Arqueo
+              </button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,6 +1,6 @@
 # SPEC 12 — Historial de ventas y resumen por período
 
-> **Status:** Borrador
+> **Status:** Implementado
 > **Depends on:** SPEC 08 (página de ventas y cobro), SPEC 09 (ventas por unidad de medida), SPEC 10 (rol responsable y permisos operativos), SPEC 11 (navegación y rutas por rol), API `ApiTienda` SPEC 17 (ventas pendientes, pago y cancelación)
 > **Date:** 2026-09-12
 > **Objective:** Separar el punto de venta del historial y mostrar ventas y métricas de períodos calculadas por el API en horario `America/Lima`.
@@ -100,20 +100,20 @@ Archivos principales:
 
 ## Acceptance criteria
 
-- [ ] `/ventas/nueva` conserva la creación, edición, cobro y cancelación de ventas existentes.
-- [ ] El POS ya no muestra filtros ni tabla de historial general.
-- [ ] Un trabajador ve un panel de sus ventas recientes en el POS y no puede navegar al historial general.
-- [ ] Un responsable y un administrador pueden abrir `/ventas/historial`.
-- [ ] `GET /reports/sales-summary` rechaza a trabajador con `403`.
-- [ ] El resumen usa exclusivamente ventas `PAID` para importe, conteo y ticket promedio.
-- [ ] El resumen muestra conteo e importe de cancelaciones por separado.
-- [ ] Con cero ventas pagadas, el ticket promedio es exactamente `0`.
-- [ ] Los accesos rápidos construyen rangos correctos de Hoy, Esta semana y Este mes en `America/Lima`.
-- [ ] La navegación diaria no permite seleccionar una fecha futura.
-- [ ] Cambiar rango, filtro o página no obliga a calcular KPI desde las filas paginadas.
-- [ ] Tabla y resumen muestran estados de carga, vacío y error independientes.
-- [ ] La tabla conserva filtros de estado, caja, vendedor y fechas autorizados.
-- [ ] Las pruebas pasan y los flujos descritos se validan manualmente con MCP de Playwright sin errores de consola.
+- [x] `/ventas/nueva` conserva la creación, edición, cobro y cancelación de ventas existentes.
+- [x] El POS ya no muestra filtros ni tabla de historial general.
+- [x] Un trabajador ve un panel de sus ventas recientes en el POS y no puede navegar al historial general.
+- [x] Un responsable y un administrador pueden abrir `/ventas/historial`.
+- [x] `GET /reports/sales-summary` rechaza a trabajador con `403`.
+- [x] El resumen usa exclusivamente ventas `PAID` para importe, conteo y ticket promedio.
+- [x] El resumen muestra conteo e importe de cancelaciones por separado.
+- [x] Con cero ventas pagadas, el ticket promedio es exactamente `0`.
+- [x] Los accesos rápidos construyen rangos correctos de Hoy, Esta semana y Este mes en `America/Lima`.
+- [x] La navegación diaria no permite seleccionar una fecha futura.
+- [x] Cambiar rango, filtro o página no obliga a calcular KPI desde las filas paginadas.
+- [x] Tabla y resumen muestran estados de carga, vacío y error independientes.
+- [x] La tabla conserva filtros de estado, caja, vendedor y fechas autorizados.
+- [x] Las pruebas pasan y los flujos descritos se validan manualmente con MCP de Playwright sin errores de consola.
 
 ## Decisions
 
@@ -128,12 +128,12 @@ Archivos principales:
 
 ## Risks
 
-| Riesgo | Mitigación |
-| --- | --- |
-| La zona horaria del servidor cambia el límite operativo. | Construir y probar rangos explícitamente para `America/Lima`. |
-| La tabla y el resumen no usan el mismo rango. | Derivar ambas solicitudes desde un único estado de período de la página. |
-| Un trabajador manipula la URL del historial. | Aplicar `roleGuard` en Angular y `@Roles` en el controlador de reportes. |
-| Un rango personalizado es inválido. | Validar `from <= to` antes de consultar y devolver un error de API claro. |
+| Riesgo                                                   | Mitigación                                                                |
+| -------------------------------------------------------- | ------------------------------------------------------------------------- |
+| La zona horaria del servidor cambia el límite operativo. | Construir y probar rangos explícitamente para `America/Lima`.             |
+| La tabla y el resumen no usan el mismo rango.            | Derivar ambas solicitudes desde un único estado de período de la página.  |
+| Un trabajador manipula la URL del historial.             | Aplicar `roleGuard` en Angular y `@Roles` en el controlador de reportes.  |
+| Un rango personalizado es inválido.                      | Validar `from <= to` antes de consultar y devolver un error de API claro. |
 
 ## What is **not** in this spec
 

@@ -12,7 +12,7 @@ import { SalesService } from '../../../../core/api/sales.service';
 import { Product } from '../../../../core/models/product.model';
 import { Sale } from '../../../../core/models/sale.model';
 import { AuthStore } from '../../../../core/store/auth.store';
-import VentasPage from './ventas.page';
+import VentasPage from './venta.page';
 
 describe('VentasPage', () => {
   const product: Product = {
@@ -80,7 +80,7 @@ describe('VentasPage', () => {
         { provide: SalesService, useValue: salesService },
         { provide: AuthStore, useValue: authStore },
         { provide: Dialog, useValue: { open: vi.fn() } },
-        { provide: Router, useValue: { events: of() } },
+        { provide: Router, useValue: { events: of(), getCurrentNavigation: vi.fn(() => null) } },
         { provide: ActivatedRoute, useValue: { snapshot: { pathFromRoot: [] } } },
       ],
     }).compileComponents();
@@ -156,15 +156,12 @@ describe('VentasPage', () => {
     ]);
   });
 
-  it('enables seller filtering and paid cancellation controls for responsible', async () => {
+  it('only loads the compact recent-sales panel for a worker', async () => {
     authStore.user.mockReturnValue({ roles: ['RESPONSABLE'] });
     const fixture = TestBed.createComponent(VentasPage);
     fixture.detectChanges();
     await fixture.whenStable();
-    const page = fixture.componentInstance as any;
-
-    expect(page.canManageSales()).toBe(true);
-    expect(page.canCancelPaid()).toBe(true);
-    expect(page.canCancelAnyPending()).toBe(false);
+    expect(salesService.findAll).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).not.toContain('Tus ventas recientes');
   });
 });

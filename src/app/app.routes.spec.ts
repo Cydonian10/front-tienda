@@ -72,4 +72,16 @@ describe('role-aware routes', () => {
     expect(administracionRoute.canActivate).toContain(roleGuard);
     expect(administracionRoute.data?.['roles']).toEqual([ROLE_NAMES.ADMINISTRATOR]);
   });
+
+  it('loads distinct components for the POS and sales history routes', async () => {
+    const nuevaVentaRoute = findRoute(ventasRoutes, 'nueva');
+    const historialVentasRoute = findRoute(ventasRoutes, 'historial');
+    if (!nuevaVentaRoute.loadComponent || !historialVentasRoute.loadComponent) {
+      throw new Error('Sales routes must lazy load their pages');
+    }
+
+    await expect(nuevaVentaRoute.loadComponent()).resolves.not.toBe(
+      await historialVentasRoute.loadComponent(),
+    );
+  });
 });

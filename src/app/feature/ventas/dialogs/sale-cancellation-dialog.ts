@@ -12,8 +12,8 @@ import {
 } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 
-import { SalesService } from '../../../../core/api/sales.service';
-import { Sale } from '../../../../core/models/sale.model';
+import { SalesService } from '../../../core/api/sales.service';
+import { Sale } from '../../../core/models/sale.model';
 
 export interface SaleCancellationDialogData {
   sale: Sale;

@@ -13,6 +13,9 @@ export interface SalesHistoryFilters {
 @Component({
   selector: 'sales-filters',
   templateUrl: './sales-filters.html',
+  host: {
+    class: 'block',
+  },
 })
 export class SalesFilters {
   readonly filters = input.required<SalesHistoryFilters>();

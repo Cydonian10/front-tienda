@@ -4,9 +4,9 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormField, FormRoot, form, requiredError, validate } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 
-import { SalesService } from '../../../../core/api/sales.service';
-import { PaymentMethod } from '../../../../core/models/payment-method.model';
-import { Sale } from '../../../../core/models/sale.model';
+import { SalesService } from '../../../core/api/sales.service';
+import { PaymentMethod } from '../../../core/models/payment-method.model';
+import { Sale } from '../../../core/models/sale.model';
 
 export interface SalePaymentDialogData {
   sale: Sale;

@@ -1,7 +1,7 @@
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
 
@@ -19,30 +19,22 @@ import { PaginatedResult } from '../../../../core/models/pagination.model';
 import { Person } from '../../../../core/models/people.model';
 import { Product, ProductUnit } from '../../../../core/models/product.model';
 import { ROLE_NAMES } from '../../../../core/models/role.model';
-import { Sale, SaleCartLine, SaleFilter } from '../../../../core/models/sale.model';
+import { Sale, SaleCartLine } from '../../../../core/models/sale.model';
 import { AuthStore } from '../../../../core/store/auth.store';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
-import PaginationNg from '../../../../shared/pagination/pagination.ng';
 import { SaleCart } from '../components/sale-cart/sale-cart';
-import { SalesFilters, SalesHistoryFilters } from '../components/sales-filters/sales-filters';
-import { SalesHistoryTable } from '../components/sales-history-table/sales-history-table';
 import { SalesProductPicker } from '../components/sales-product-picker/sales-product-picker';
-import { openSaleCancellationDialog } from '../dialogs/sale-cancellation-dialog';
-import { openSaleDetailDialog } from '../dialogs/sale-detail-dialog';
-import { openSalePaymentDialog } from '../dialogs/sale-payment-dialog';
+import { openSalePaymentDialog } from '../../dialogs/sale-payment-dialog';
 
 @Component({
   selector: 'ventas-page',
   imports: [
     BreadcrumbsNg,
-    PaginationNg,
     RouterLink,
     SaleCart,
-    SalesFilters,
-    SalesHistoryTable,
     SalesProductPicker,
   ],
-  templateUrl: './ventas.page.html',
+  templateUrl: './venta.page.html',
 })
 export default class VentasPage {
   private readonly dialog = inject(Dialog);
@@ -52,6 +44,7 @@ export default class VentasPage {
   private readonly productsService = inject(ProductsService);
   private readonly salesService = inject(SalesService);
   private readonly authStore = inject(AuthStore);
+  private readonly router = inject(Router);
 
   protected readonly registers = signal<CashRegister[]>([]);
   protected readonly products = signal<PaginatedResult<Product> | null>(null);
@@ -65,30 +58,17 @@ export default class VentasPage {
   protected readonly productSearch = signal('');
   protected readonly productPage = signal(1);
   protected readonly customerPage = signal(1);
-  protected readonly historyPage = signal(1);
-  protected readonly historyPageSize = signal(20);
-  protected readonly history = signal<PaginatedResult<Sale> | null>(null);
-  protected readonly historyFilters = signal<SalesHistoryFilters>(this.defaultHistoryFilters());
+  protected readonly recentSales = signal<PaginatedResult<Sale> | null>(null);
   protected readonly isLoading = signal(true);
   protected readonly isLoadingProducts = signal(false);
-  protected readonly isLoadingHistory = signal(false);
+  protected readonly isLoadingRecentSales = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly catalogError = signal<string | null>(null);
-  protected readonly historyError = signal<string | null>(null);
-  protected readonly canManageSales = computed(
-    () =>
-      this.authStore.user()?.roles.some(
-        (role) =>
-          role === ROLE_NAMES.ADMINISTRATOR || role === ROLE_NAMES.RESPONSIBLE,
-      ) ?? false,
+  protected readonly recentSalesError = signal<string | null>(null);
+  protected readonly isWorker = computed(
+    () => this.authStore.user()?.roles.includes(ROLE_NAMES.WORKER) ?? false,
   );
-  protected readonly canCancelPaid = computed(() => this.canManageSales());
-  protected readonly canCancelAnyPending = computed(
-    () =>
-      this.authStore.user()?.roles.includes(ROLE_NAMES.ADMINISTRATOR) ?? false,
-  );
-  protected readonly currentPersonId = computed(() => this.authStore.person()?.id ?? null);
   protected readonly ownRegisters = computed(() => {
     const personId = this.authStore.person()?.id;
     if (!personId) return [];
@@ -119,7 +99,10 @@ export default class VentasPage {
   );
 
   constructor() {
-    void this.loadInitialData();
+    const state = this.router.getCurrentNavigation()?.extras.state as
+      | { sale?: Sale; collect?: boolean }
+      | undefined;
+    void this.loadInitialData(state?.sale, state?.collect ?? false);
   }
 
   protected async reload(): Promise<void> {
@@ -252,7 +235,7 @@ export default class VentasPage {
         : await firstValueFrom(this.salesService.create({ ...dto, cashOpeningId: opening.id }));
       this.editingSale.set(sale);
       toast.success(current ? 'Venta pendiente actualizada' : 'Venta pendiente guardada');
-      await this.loadHistory();
+      await this.loadRecentSales();
       return sale;
     } catch (error) {
       toast.error(this.message(error));
@@ -260,14 +243,6 @@ export default class VentasPage {
     } finally {
       this.isSaving.set(false);
     }
-  }
-
-  protected async editSale(sale: Sale): Promise<void> {
-    await this.loadPendingSale(sale);
-  }
-
-  protected async paySale(sale: Sale): Promise<void> {
-    if (await this.loadPendingSale(sale)) await this.payCurrentSale();
   }
 
   protected async payCurrentSale(): Promise<void> {
@@ -285,51 +260,11 @@ export default class VentasPage {
       if (!paidSale) return;
       toast.success('Venta cobrada correctamente');
       this.resetCart();
-      void this.loadHistory();
+      void this.loadRecentSales();
     });
   }
 
-  protected showDetail(sale: Sale): void {
-    openSaleDetailDialog(this.dialog, sale);
-  }
-
-  protected cancelSale(sale: Sale): void {
-    const ref = openSaleCancellationDialog(this.dialog, sale);
-    ref.closed.subscribe((cancelledSale) => {
-      if (!cancelledSale) return;
-      if (this.editingSale()?.id === cancelledSale.id) this.resetCart();
-      toast.success('Venta cancelada correctamente');
-      void this.loadHistory();
-    });
-  }
-
-  protected updateHistoryFilters(patch: Partial<SalesHistoryFilters>): void {
-    this.historyFilters.update((filters) => ({ ...filters, ...patch }));
-  }
-
-  protected applyHistoryFilters(): void {
-    this.historyPage.set(1);
-    void this.loadHistory();
-  }
-
-  protected clearHistoryFilters(): void {
-    this.historyFilters.set(this.defaultHistoryFilters());
-    this.historyPage.set(1);
-    void this.loadHistory();
-  }
-
-  protected changeHistoryPage(page: number): void {
-    this.historyPage.set(page);
-    void this.loadHistory();
-  }
-
-  protected changeHistoryPageSize(pageSize: number): void {
-    this.historyPageSize.set(pageSize);
-    this.historyPage.set(1);
-    void this.loadHistory();
-  }
-
-  private async loadInitialData(): Promise<void> {
+  private async loadInitialData(saleToRestore?: Sale, collect = false): Promise<void> {
     if (!this.authStore.person()) {
       this.isLoading.set(false);
       this.error.set('No se pudo identificar la persona de la sesión');
@@ -346,7 +281,10 @@ export default class VentasPage {
       this.registers.set(registers);
       this.paymentMethods.set(paymentMethods);
       this.selectInitialOpening(registers);
-      await Promise.all([this.loadProducts(), this.loadCustomers(), this.loadHistory()]);
+      await Promise.all([this.loadProducts(), this.loadCustomers(), this.loadRecentSales()]);
+      if (saleToRestore && (await this.loadPendingSale(saleToRestore)) && collect) {
+        await this.payCurrentSale();
+      }
     } catch (error) {
       this.error.set(this.message(error));
     } finally {
@@ -386,15 +324,19 @@ export default class VentasPage {
     }
   }
 
-  private async loadHistory(): Promise<void> {
-    this.isLoadingHistory.set(true);
-    this.historyError.set(null);
+  protected async loadRecentSales(): Promise<void> {
+    if (!this.isWorker()) return;
+    this.isLoadingRecentSales.set(true);
+    this.recentSalesError.set(null);
     try {
-      this.history.set(await firstValueFrom(this.salesService.findAll(this.saleFilter())));
+      this.recentSales.set(
+        await firstValueFrom(this.salesService.findAll({ page: 1, limit: 5 })),
+      );
     } catch (error) {
-      this.historyError.set(this.message(error));
+      this.recentSales.set(null);
+      this.recentSalesError.set(this.message(error));
     } finally {
-      this.isLoadingHistory.set(false);
+      this.isLoadingRecentSales.set(false);
     }
   }
 
@@ -445,21 +387,6 @@ export default class VentasPage {
     this.editingSale.set(null);
   }
 
-  private saleFilter(): SaleFilter {
-    const filters = this.historyFilters();
-    return {
-      page: this.historyPage(),
-      limit: this.historyPageSize(),
-      status: filters.status || undefined,
-      cashOpeningId: this.positiveInteger(filters.cashOpeningId),
-      sellerId: this.canManageSales()
-        ? this.positiveInteger(filters.sellerId)
-        : undefined,
-      startDate: filters.startDate ? this.startOfDay(filters.startDate) : undefined,
-      endDate: filters.endDate ? this.endOfDay(filters.endDate) : undefined,
-    };
-  }
-
   private selectInitialOpening(registers: CashRegister[]): void {
     const personId = this.authStore.person()?.id;
     const currentOpeningId = this.selectedOpeningId();
@@ -473,31 +400,6 @@ export default class VentasPage {
       (register) => register.openOpening?.responsible.id === personId,
     )?.openOpening;
     this.selectedOpeningId.set(opening?.id ?? firstOpening?.id ?? null);
-  }
-
-  private defaultHistoryFilters(): SalesHistoryFilters {
-    const today = this.localDate(new Date());
-    return { status: '', cashOpeningId: '', sellerId: '', startDate: today, endDate: today };
-  }
-
-  private positiveInteger(value: string): number | undefined {
-    const number = Number(value);
-    return Number.isInteger(number) && number > 0 ? number : undefined;
-  }
-
-  private startOfDay(value: string): string {
-    return new Date(`${value}T00:00:00`).toISOString();
-  }
-
-  private endOfDay(value: string): string {
-    return new Date(`${value}T23:59:59.999`).toISOString();
-  }
-
-  private localDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   }
 
   private message(error: unknown): string {

@@ -5,6 +5,9 @@ import { Sale, SaleStatus } from '../../../../../core/models/sale.model';
 @Component({
   selector: 'sales-history-table',
   templateUrl: './sales-history-table.html',
+  host: {
+    class: 'block',
+  },
 })
 export class SalesHistoryTable {
   readonly sales = input.required<Sale[]>();

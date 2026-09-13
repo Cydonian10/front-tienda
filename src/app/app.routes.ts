@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { ROLE_NAMES } from './core/models/role.model';
 import { Sidebar } from './layout/sidebar/sidebar';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'inicio', pathMatch: 'full' },
   {
     path: 'auth',
     loadChildren: () => import('./feature/auth/login.routes'),
@@ -15,22 +17,42 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'dashboard',
-        data: { breadcrumb: 'Dashboard' },
+        path: 'inicio',
+        canActivate: [roleGuard],
+        data: {
+          breadcrumb: 'Inicio',
+          roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER],
+        },
         loadComponent: () => import('./feature/dashboard/pages/dashboard.page'),
-        title: 'Dashboard',
+        title: 'Inicio',
       },
       {
         path: 'mantenimiento',
-        data: { breadcrumb: 'Mantenimiento' },
+        canActivate: [roleGuard],
+        data: { breadcrumb: 'Mantenimiento', roles: [ROLE_NAMES.ADMINISTRATOR] },
         loadChildren: () => import('./feature/mantenimiento/mantenimiento.routes'),
       },
       {
-        path: 'operaciones',
-        data: { breadcrumb: 'Operaciones' },
-        loadChildren: () => import('./feature/operaciones/operaciones.routes'),
+        path: 'ventas',
+        data: { breadcrumb: 'Ventas' },
+        loadChildren: () => import('./feature/ventas/ventas.routes'),
+      },
+      {
+        path: 'caja',
+        data: { breadcrumb: 'Caja' },
+        loadChildren: () => import('./feature/caja/caja.routes'),
+      },
+      {
+        path: 'reportes',
+        data: { breadcrumb: 'Reportes' },
+        loadChildren: () => import('./feature/reportes/reportes.routes'),
+      },
+      {
+        path: 'administracion',
+        data: { breadcrumb: 'Administración' },
+        loadChildren: () => import('./feature/administracion/administracion.routes'),
       },
     ],
   },
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', redirectTo: 'inicio' },
 ];

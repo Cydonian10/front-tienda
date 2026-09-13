@@ -1,54 +1,163 @@
-import { Service, signal } from '@angular/core';
+import { Service, computed, inject, signal } from '@angular/core';
 
 import { IconName } from '../../shared/icon/icon';
 import { MenuItem } from '../models/menu.model';
+import { OperationalRole, ROLE_NAMES } from '../models/role.model';
+import { AuthStore } from '../store/auth.store';
 
 const initialMenu: MenuItem[] = [
-  { id: 'inicio', label: 'Inicio', icon: 'home', route: '/dashboard' },
+  {
+    id: 'inicio',
+    label: 'Inicio',
+    icon: 'home',
+    route: '/inicio',
+    roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER],
+  },
+  {
+    id: 'ventas',
+    label: 'Ventas',
+    icon: 'clipboard-check',
+    expanded: true,
+    roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER],
+    children: [
+      {
+        id: 'nueva-venta',
+        label: 'Nueva venta',
+        icon: 'clipboard-check',
+        route: '/ventas/nueva',
+        roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER],
+      },
+      {
+        id: 'historial-ventas',
+        label: 'Historial',
+        icon: 'table',
+        route: '/ventas/historial',
+        roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE],
+      },
+    ],
+  },
+  {
+    id: 'caja',
+    label: 'Caja',
+    icon: 'table',
+    expanded: true,
+    roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER],
+    children: [
+      {
+        id: 'mi-caja',
+        label: 'Mi caja',
+        icon: 'table',
+        route: '/caja/mi-caja',
+        roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER],
+      },
+      {
+        id: 'sesiones-caja',
+        label: 'Sesiones',
+        icon: 'queue-list',
+        route: '/caja/sesiones',
+        roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE],
+      },
+      {
+        id: 'movimientos-caja',
+        label: 'Movimientos',
+        icon: 'clipboard-check',
+        route: '/caja/movimientos',
+        roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE],
+      },
+    ],
+  },
+  {
+    id: 'reportes',
+    label: 'Reportes',
+    icon: 'grid',
+    route: '/reportes',
+    roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE],
+  },
   {
     id: 'mantenimiento',
     label: 'Mantenimiento',
     icon: 'folder',
     expanded: true,
+    roles: [ROLE_NAMES.ADMINISTRATOR],
     children: [
-      { id: 'marcas', label: 'Marcas', icon: 'grid', route: '/mantenimiento/marcas' },
-      { id: 'categorias', label: 'Categorías', icon: 'folder', route: '/mantenimiento/categorias' },
+      {
+        id: 'marcas',
+        label: 'Marcas',
+        icon: 'grid',
+        route: '/mantenimiento/marcas',
+        roles: [ROLE_NAMES.ADMINISTRATOR],
+      },
+      {
+        id: 'categorias',
+        label: 'Categorías',
+        icon: 'folder',
+        route: '/mantenimiento/categorias',
+        roles: [ROLE_NAMES.ADMINISTRATOR],
+      },
       {
         id: 'unidades-medida',
         label: 'Unidades de medida',
         icon: 'queue-list',
         route: '/mantenimiento/unidades-medida',
+        roles: [ROLE_NAMES.ADMINISTRATOR],
       },
-      { id: 'atributos', label: 'Atributos', icon: 'grid', route: '/mantenimiento/atributos' },
+      {
+        id: 'atributos',
+        label: 'Atributos',
+        icon: 'grid',
+        route: '/mantenimiento/atributos',
+        roles: [ROLE_NAMES.ADMINISTRATOR],
+      },
       {
         id: 'base-products',
         label: 'Productos Base',
         icon: 'folder',
         route: '/mantenimiento/base-products',
+        roles: [ROLE_NAMES.ADMINISTRATOR],
       },
-      { id: 'productos', label: 'Productos', icon: 'swatch', route: '/mantenimiento/productos' },
+      {
+        id: 'productos',
+        label: 'Productos',
+        icon: 'swatch',
+        route: '/mantenimiento/productos',
+        roles: [ROLE_NAMES.ADMINISTRATOR],
+      },
     ],
   },
   {
-    id: 'operaciones',
-    label: 'Operaciones',
-    icon: 'clipboard-check',
-    expanded: true,
-    children: [
-      { id: 'cajas', label: 'Cajas', icon: 'table', route: '/operaciones/cajas' },
-      { id: 'ventas', label: 'Ventas', icon: 'clipboard-check', route: '/operaciones/ventas' },
-    ],
+    id: 'administracion',
+    label: 'Administración',
+    icon: 'folder',
+    route: '/administracion',
+    roles: [ROLE_NAMES.ADMINISTRATOR],
   },
-  { id: 'mensajes', label: 'Mensajes', icon: 'mail', route: '/mensajes' },
 ];
 
 @Service()
 export class DashboardService {
+  private readonly authStore = inject(AuthStore);
   private readonly menuSignal = signal<MenuItem[]>(initialMenu);
-  readonly menu = this.menuSignal.asReadonly();
+  readonly menu = computed(() =>
+    this.filterByRoles(this.menuSignal(), this.authStore.user()?.roles ?? []),
+  );
 
   toggleGroup(id: string): void {
     this.menuSignal.update((items) => this.toggle(items, id));
+  }
+
+  private filterByRoles(items: MenuItem[], userRoles: OperationalRole[]): MenuItem[] {
+    return items.flatMap((item) => {
+      if (item.roles && !item.roles.some((role) => userRoles.includes(role))) {
+        return [];
+      }
+
+      const children = item.children ? this.filterByRoles(item.children, userRoles) : undefined;
+      if (item.children && !children?.length && !item.route) {
+        return [];
+      }
+
+      return [{ ...item, ...(children ? { children } : {}) }];
+    });
   }
 
   private toggle(items: MenuItem[], id: string): MenuItem[] {

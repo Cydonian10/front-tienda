@@ -17,7 +17,8 @@ import {
 import { PaymentMethod } from '../../../../core/models/payment-method.model';
 import { PaginatedResult } from '../../../../core/models/pagination.model';
 import { Person } from '../../../../core/models/people.model';
-import { Product } from '../../../../core/models/product.model';
+import { Product, ProductUnit } from '../../../../core/models/product.model';
+import { ROLE_NAMES } from '../../../../core/models/role.model';
 import { Sale, SaleCartLine, SaleFilter } from '../../../../core/models/sale.model';
 import { AuthStore } from '../../../../core/store/auth.store';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
@@ -75,8 +76,17 @@ export default class VentasPage {
   protected readonly error = signal<string | null>(null);
   protected readonly catalogError = signal<string | null>(null);
   protected readonly historyError = signal<string | null>(null);
-  protected readonly canManage = computed(
-    () => this.authStore.user()?.roles.includes('ADMINISTRADOR') ?? false,
+  protected readonly canManageSales = computed(
+    () =>
+      this.authStore.user()?.roles.some(
+        (role) =>
+          role === ROLE_NAMES.ADMINISTRATOR || role === ROLE_NAMES.RESPONSIBLE,
+      ) ?? false,
+  );
+  protected readonly canCancelPaid = computed(() => this.canManageSales());
+  protected readonly canCancelAnyPending = computed(
+    () =>
+      this.authStore.user()?.roles.includes(ROLE_NAMES.ADMINISTRATOR) ?? false,
   );
   protected readonly currentPersonId = computed(() => this.authStore.person()?.id ?? null);
   protected readonly ownRegisters = computed(() => {
@@ -91,9 +101,14 @@ export default class VentasPage {
     return selected?.openOpening ?? null;
   });
   protected readonly subtotal = computed(() =>
-    this.cartLines().reduce((total, line) => total + line.product.price * line.quantity, 0),
+    this.round2(
+      this.cartLines().reduce(
+        (total, line) => total + this.lineSubtotal(line),
+        0,
+      ),
+    ),
   );
-  protected readonly total = computed(() => this.subtotal() - this.discount());
+  protected readonly total = computed(() => this.round2(this.subtotal() - this.discount()));
   protected readonly canSubmitSale = computed(
     () =>
       this.selectedOpening() !== null &&
@@ -116,28 +131,75 @@ export default class VentasPage {
     this.selectedOpeningId.set(Number.isInteger(value) && value > 0 ? value : null);
   }
 
-  protected addProduct(product: Product): void {
+  protected addProduct({ product, unit }: { product: Product; unit: ProductUnit }): void {
     this.cartLines.update((lines) => {
-      const existing = lines.find((line) => line.product.id === product.id);
-      if (!existing) return [...lines, { product, quantity: 1 }];
+      const existing = lines.find(
+        (line) => line.product.id === product.id && line.unit.unitId === unit.unitId,
+      );
+      if (!existing) return [...lines, { product, unit, quantity: 1 }];
       return lines.map((line) =>
-        line.product.id === product.id ? { ...line, quantity: line.quantity + 1 } : line,
+        line.product.id === product.id && line.unit.unitId === unit.unitId
+          ? { ...line, quantity: this.round2(line.quantity + 1) }
+          : line,
       );
     });
   }
 
-  protected updateQuantity({ productId, quantity }: { productId: number; quantity: number }): void {
-    if (!Number.isInteger(quantity) || quantity < 1) {
-      toast.error('La cantidad debe ser un entero positivo');
+  protected updateQuantity({
+    productId,
+    unitId,
+    quantity,
+  }: {
+    productId: number;
+    unitId: number;
+    quantity: number;
+  }): void {
+    if (!this.isValidQuantity(quantity)) {
+      toast.error('La cantidad debe ser positiva y tener máximo dos decimales');
       return;
     }
     this.cartLines.update((lines) =>
-      lines.map((line) => (line.product.id === productId ? { ...line, quantity } : line)),
+      lines.map((line) =>
+        line.product.id === productId && line.unit.unitId === unitId ? { ...line, quantity } : line,
+      ),
     );
   }
 
-  protected removeLine(productId: number): void {
-    this.cartLines.update((lines) => lines.filter((line) => line.product.id !== productId));
+  protected updateUnit({
+    productId,
+    currentUnitId,
+    unitId,
+  }: {
+    productId: number;
+    currentUnitId: number;
+    unitId: number;
+  }): void {
+    if (currentUnitId === unitId) return;
+    this.cartLines.update((lines) => {
+      const currentLine = lines.find(
+        (line) => line.product.id === productId && line.unit.unitId === currentUnitId,
+      );
+      const unit = currentLine?.product.units.find((item) => item.unitId === unitId);
+      if (!currentLine || !unit) return lines;
+
+      const targetLine = lines.find(
+        (line) => line.product.id === productId && line.unit.unitId === unitId,
+      );
+      if (!targetLine) {
+        return lines.map((line) =>
+          line === currentLine ? { ...line, unit } : line,
+        );
+      }
+      return lines
+        .filter((line) => line !== currentLine && line !== targetLine)
+        .concat({ ...targetLine, quantity: this.round2(targetLine.quantity + currentLine.quantity) });
+    });
+  }
+
+  protected removeLine({ productId, unitId }: { productId: number; unitId: number }): void {
+    this.cartLines.update((lines) =>
+      lines.filter((line) => line.product.id !== productId || line.unit.unitId !== unitId),
+    );
   }
 
   protected updateDiscount(discount: number): void {
@@ -180,6 +242,7 @@ export default class VentasPage {
         discount: this.discount(),
         details: this.cartLines().map((line) => ({
           productId: line.product.id,
+          unitId: line.unit.unitId,
           quantity: line.quantity,
         })),
       };
@@ -344,12 +407,16 @@ export default class VentasPage {
         Promise.all(productIds.map((id) => firstValueFrom(this.productsService.findOne(id)))),
         firstValueFrom(this.peopleService.findOne(sale.customerId)),
       ]);
-      const quantities = sale.details.reduce((items, detail) => {
-        items.set(detail.productId, (items.get(detail.productId) ?? 0) + detail.quantity);
-        return items;
-      }, new Map<number, number>());
+      const productsById = new Map(products.map((product) => [product.id, product]));
       this.cartLines.set(
-        products.map((product) => ({ product, quantity: quantities.get(product.id) ?? 0 })),
+        sale.details.map((detail) => {
+          const product = productsById.get(detail.productId);
+          const unit = product?.units.find((item) => item.unitId === detail.unitId);
+          if (!product || !unit) {
+            throw new Error(`La presentación de ${detail.productName} ya no está disponible`);
+          }
+          return { product, unit, quantity: detail.quantity };
+        }),
       );
       this.customerId.set(customer.id);
       this.customers.update((result) =>
@@ -385,7 +452,9 @@ export default class VentasPage {
       limit: this.historyPageSize(),
       status: filters.status || undefined,
       cashOpeningId: this.positiveInteger(filters.cashOpeningId),
-      sellerId: this.canManage() ? this.positiveInteger(filters.sellerId) : undefined,
+      sellerId: this.canManageSales()
+        ? this.positiveInteger(filters.sellerId)
+        : undefined,
       startDate: filters.startDate ? this.startOfDay(filters.startDate) : undefined,
       endDate: filters.endDate ? this.endOfDay(filters.endDate) : undefined,
     };
@@ -437,5 +506,25 @@ export default class VentasPage {
     return Array.isArray(body?.message)
       ? body.message.join(', ')
       : (body?.message ?? 'Error inesperado');
+  }
+
+  private presentationPrice(line: SaleCartLine): number {
+    return this.round2(line.product.price * line.unit.factor);
+  }
+
+  private lineSubtotal(line: SaleCartLine): number {
+    return this.round2(this.presentationPrice(line) * line.quantity);
+  }
+
+  private isValidQuantity(quantity: number): boolean {
+    return (
+      Number.isFinite(quantity) &&
+      quantity > 0 &&
+      Number(quantity.toFixed(2)) === quantity
+    );
+  }
+
+  private round2(value: number): number {
+    return Math.round(value * 100) / 100;
   }
 }

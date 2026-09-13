@@ -40,7 +40,11 @@ describe('SalesService', () => {
 
   it('sends creation, update, payment, and cancellation payloads', async () => {
     const create = firstValueFrom(
-      service.create({ cashOpeningId: 4, customerId: 3, details: [{ productId: 1, quantity: 2 }] }),
+      service.create({
+        cashOpeningId: 4,
+        customerId: 3,
+        details: [{ productId: 1, unitId: 1, quantity: 2 }],
+      }),
     );
     const createRequest = httpTesting.expectOne(`${environment.apiUrl}/sales`);
     expect(createRequest.request.method).toBe('POST');

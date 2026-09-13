@@ -21,8 +21,17 @@ export class SaleCart {
   readonly canSubmit = input(false);
   readonly customerChanged = output<number | null>();
   readonly customerPageChanged = output<number>();
-  readonly quantityChanged = output<{ productId: number; quantity: number }>();
-  readonly lineRemoved = output<number>();
+  readonly quantityChanged = output<{
+    productId: number;
+    unitId: number;
+    quantity: number;
+  }>();
+  readonly unitChanged = output<{
+    productId: number;
+    currentUnitId: number;
+    unitId: number;
+  }>();
+  readonly lineRemoved = output<{ productId: number; unitId: number }>();
   readonly discountChanged = output<number>();
   readonly saveRequested = output<void>();
   readonly payRequested = output<void>();
@@ -36,11 +45,36 @@ export class SaleCart {
     this.customerChanged.emit(Number.isInteger(value) && value > 0 ? value : null);
   }
 
-  protected onQuantity(productId: number, event: Event): void {
+  protected onQuantity(productId: number, unitId: number, event: Event): void {
     this.quantityChanged.emit({
       productId,
+      unitId,
       quantity: Number((event.target as HTMLInputElement).value),
     });
+  }
+
+  protected onUnit(line: SaleCartLine, event: Event): void {
+    this.unitChanged.emit({
+      productId: line.product.id,
+      currentUnitId: line.unit.unitId,
+      unitId: Number((event.target as HTMLSelectElement).value),
+    });
+  }
+
+  protected presentationPrice(line: SaleCartLine): number {
+    return this.round2(line.product.price * line.unit.factor);
+  }
+
+  protected availability(line: SaleCartLine): number {
+    return line.product.stock / line.unit.factor;
+  }
+
+  protected lineSubtotal(line: SaleCartLine): number {
+    return this.round2(this.presentationPrice(line) * line.quantity);
+  }
+
+  protected formatQuantity(value: number, decimals = 2): string {
+    return Number(value.toFixed(decimals)).toString();
   }
 
   protected onDiscount(event: Event): void {
@@ -54,5 +88,9 @@ export class SaleCart {
   protected nextCustomerPage(): void {
     const lastPage = this.customers()?.lastPage ?? 0;
     if (this.customerPage() < lastPage) this.customerPageChanged.emit(this.customerPage() + 1);
+  }
+
+  private round2(value: number): number {
+    return Math.round(value * 100) / 100;
   }
 }

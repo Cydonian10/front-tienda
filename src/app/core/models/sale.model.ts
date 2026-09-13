@@ -1,5 +1,5 @@
 import { PaginationQuery } from './pagination.model';
-import { Product } from './product.model';
+import { Product, ProductUnit } from './product.model';
 
 export type SaleStatus = 'PENDING' | 'PAID' | 'CANCELLED';
 export type SalePaymentStatus = 'PAID' | 'CANCELLED';
@@ -8,6 +8,10 @@ export interface SaleDetail {
   id: number;
   productId: number;
   productName: string;
+  unitId: number;
+  unitName: string;
+  unitValue: string;
+  unitFactor: number;
   quantity: number;
   unitPrice: number;
   subtotal: number;
@@ -41,6 +45,7 @@ export interface Sale {
 
 export interface CreateSaleDetail {
   productId: number;
+  unitId: number;
   quantity: number;
 }
 
@@ -76,5 +81,6 @@ export interface SaleFilter extends PaginationQuery {
 
 export interface SaleCartLine {
   product: Product;
+  unit: ProductUnit;
   quantity: number;
 }

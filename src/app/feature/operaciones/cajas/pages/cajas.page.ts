@@ -11,6 +11,7 @@ import {
   CashRegisterOpening,
   CashResponsible,
 } from '../../../../core/models/cash-register.model';
+import { ROLE_NAMES } from '../../../../core/models/role.model';
 import { AuthStore } from '../../../../core/store/auth.store';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
 import { CashOpeningsHistoryTable } from '../components/cash-openings-history-table/cash-openings-history-table';
@@ -40,7 +41,7 @@ export default class CajasPage {
   protected readonly currentYear = signal(this.today.getFullYear());
   protected readonly currentMonth = signal(this.today.getMonth() + 1);
   protected readonly canManage = computed(
-    () => this.authStore.user()?.roles.includes('ADMINISTRADOR') ?? false,
+    () => this.authStore.user()?.roles.includes(ROLE_NAMES.ADMINISTRATOR) ?? false,
   );
   constructor() {
     void this.loadRegisters();

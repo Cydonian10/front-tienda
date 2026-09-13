@@ -30,9 +30,10 @@
     <div class="overflow-x-auto">
       <table class="table table-sm">
         <thead>
-          <tr>
-            <th>Producto</th>
-            <th class="text-right">Precio</th>
+            <tr>
+              <th>Producto</th>
+              <th>Presentación</th>
+              <th class="text-right">Precio</th>
             <th class="text-right">Cantidad</th>
             <th class="text-right">Subtotal</th>
           </tr>
@@ -41,6 +42,7 @@
           @for (detail of data.sale.details; track detail.id) {
             <tr>
               <td>{{ detail.productName }}</td>
+              <td>{{ detail.unitName }} x{{ detail.unitFactor }} ({{ detail.unitValue }})</td>
               <td class="text-right">{{ detail.unitPrice }}</td>
               <td class="text-right">{{ detail.quantity }}</td>
               <td class="text-right">{{ detail.subtotal }}</td>

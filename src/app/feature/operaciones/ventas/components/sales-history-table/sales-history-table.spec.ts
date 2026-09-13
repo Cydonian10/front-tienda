@@ -24,6 +24,19 @@ const pendingSale: Sale = {
   details: [],
 };
 
+const paidSale: Sale = {
+  ...pendingSale,
+  id: 2,
+  status: 'PAID',
+  paidAt: '2026-09-11T10:05:00.000Z',
+  payment: {
+    paymentMethodId: 1,
+    paymentMethodName: 'Efectivo',
+    amount: 10,
+    status: 'PAID',
+  },
+};
+
 describe('SalesHistoryTable', () => {
   beforeEach(async () =>
     TestBed.configureTestingModule({ imports: [SalesHistoryTable] }).compileComponents(),
@@ -56,5 +69,19 @@ describe('SalesHistoryTable', () => {
     fixture.detectChanges();
 
     expect(fixture.debugElement.queryAll(By.css('tbody button'))).toHaveLength(3);
+  });
+
+  it('only shows paid-sale cancellation to responsible or administrator', () => {
+    const fixture = TestBed.createComponent(SalesHistoryTable);
+    fixture.componentRef.setInput('sales', [paidSale]);
+    fixture.componentRef.setInput('currentPersonId', paidSale.sellerId);
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.queryAll(By.css('tbody button'))).toHaveLength(1);
+
+    fixture.componentRef.setInput('canCancelPaid', true);
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.queryAll(By.css('tbody button'))).toHaveLength(2);
   });
 });

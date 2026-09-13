@@ -14,6 +14,14 @@ export interface ProductAttributeItem {
   order: number;
 }
 
+export interface ProductUnit {
+  unitId: number;
+  unitName: string;
+  unitValue: string;
+  factor: number;
+  isMain: boolean;
+}
+
 export interface CreateProduct {
   stock: number;
   price: number;
@@ -34,6 +42,8 @@ export interface Product {
   baseProductId: number;
   baseProductName: string;
   productAttributes: ProductAttribute[];
+  stockLabel: string | null;
+  units: ProductUnit[];
 }
 
 export interface ProductFilter extends PaginationQuery {

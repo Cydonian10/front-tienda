@@ -21,10 +21,7 @@ describe('ReportsService', () => {
 
   it('requests the sales summary range and unwraps the response', async () => {
     const request = firstValueFrom(
-      service.findSalesSummary(
-        '2026-09-12T00:00:00.000-05:00',
-        '2026-09-12T23:59:59.999-05:00',
-      ),
+      service.findSalesSummary('2026-09-12T00:00:00.000-05:00', '2026-09-12T23:59:59.999-05:00'),
     );
     const httpRequest = httpTesting.expectOne(
       (request) =>
@@ -52,5 +49,80 @@ describe('ReportsService', () => {
       averageTicket: 75,
       cancelledAmount: 25,
     });
+  });
+
+  it('requests and unwraps overview, daily sales and seller reports', async () => {
+    const range = {
+      from: '2026-09-12T00:00:00.000-05:00',
+      to: '2026-09-12T23:59:59.999-05:00',
+    };
+    const overview = firstValueFrom(service.findOverview(range));
+    const dailySales = firstValueFrom(service.findSalesByDay(range));
+    const sellers = firstValueFrom(service.findSellers(range));
+
+    httpTesting
+      .expectOne(
+        (request) =>
+          request.url === `${environment.apiUrl}/reports/overview` &&
+          request.params.get('from') === range.from &&
+          request.params.get('to') === range.to,
+      )
+      .flush({
+        data: {
+          paidAmount: 150,
+          paidCount: 2,
+          averageTicket: 75,
+          cancelledAmount: 0,
+          cancelledCount: 0,
+          topSeller: null,
+          topProduct: null,
+          paymentMethods: [],
+        },
+        message: 'OK',
+      });
+    httpTesting
+      .expectOne(
+        (request) =>
+          request.url === `${environment.apiUrl}/reports/sales-by-day` &&
+          request.params.get('from') === range.from &&
+          request.params.get('to') === range.to,
+      )
+      .flush({
+        data: [
+          {
+            date: '2026-09-12',
+            paidAmount: 150,
+            paidCount: 2,
+            cancelledAmount: 0,
+            cancelledCount: 0,
+          },
+        ],
+        message: 'OK',
+      });
+    httpTesting
+      .expectOne(
+        (request) =>
+          request.url === `${environment.apiUrl}/reports/sellers` &&
+          request.params.get('from') === range.from &&
+          request.params.get('to') === range.to,
+      )
+      .flush({
+        data: [
+          {
+            sellerId: 1,
+            sellerName: 'Ana Pérez',
+            paidAmount: 150,
+            paidCount: 2,
+            averageTicket: 75,
+            cancelledAmount: 0,
+            cancelledCount: 0,
+          },
+        ],
+        message: 'OK',
+      });
+
+    await expect(overview).resolves.toMatchObject({ paidAmount: 150 });
+    await expect(dailySales).resolves.toHaveLength(1);
+    await expect(sellers).resolves.toHaveLength(1);
   });
 });

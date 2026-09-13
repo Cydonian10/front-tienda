@@ -40,7 +40,10 @@ describe('role-aware routes', () => {
     const miCajaRoute = findRoute(cajaRoutes, 'mi-caja');
     const sesionesRoute = findRoute(cajaRoutes, 'sesiones');
     const movimientosRoute = findRoute(cajaRoutes, 'movimientos');
-    const reportesRoute = findRoute(reportesRoutes, '');
+    const reportesRootRoute = findRoute(reportesRoutes, '');
+    const resumenReportesRoute = findRoute(reportesRoutes, 'resumen');
+    const ventasReportesRoute = findRoute(reportesRoutes, 'ventas');
+    const vendedoresReportesRoute = findRoute(reportesRoutes, 'vendedores');
     const administracionRoute = findRoute(administracionRoutes, '');
 
     expect(inicioRoute.canActivate).toContain(roleGuard);
@@ -68,7 +71,11 @@ describe('role-aware routes', () => {
       ROLE_NAMES.ADMINISTRATOR,
       ROLE_NAMES.RESPONSIBLE,
     ]);
-    expect(reportesRoute.canActivate).toContain(roleGuard);
+    expect(reportesRootRoute.redirectTo).toBe('resumen');
+    for (const route of [resumenReportesRoute, ventasReportesRoute, vendedoresReportesRoute]) {
+      expect(route.canActivate).toContain(roleGuard);
+      expect(route.data?.['roles']).toEqual([ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE]);
+    }
     expect(administracionRoute.canActivate).toContain(roleGuard);
     expect(administracionRoute.data?.['roles']).toEqual([ROLE_NAMES.ADMINISTRATOR]);
   });

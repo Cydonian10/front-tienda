@@ -1,0 +1,121 @@
+<ng-breadcrumbs />
+
+<div class="mt-4 space-y-4">
+  <header>
+    <p class="text-sm font-semibold tracking-wide text-primary">Lectura ejecutiva</p>
+    <h1 class="text-xl font-semibold">Resumen de reportes</h1>
+    <p class="mt-1 text-sm text-base-content/60">
+      Ventas efectivas, anulaciones y composición de cobros del período.
+    </p>
+  </header>
+
+  <report-period-filter
+    [period]="period()"
+    [disabled]="isLoading()"
+    (periodChanged)="updatePeriod($event)"
+    (rangeApplied)="applyPeriod($event)"
+  />
+
+  @if (isLoading()) {
+    <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
+      <span class="loading loading-spinner loading-sm"></span><span>Cargando resumen...</span>
+    </div>
+  } @else if (error(); as message) {
+    <div role="alert" class="alert alert-error sm:alert-horizontal">
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-sm" (click)="retry()">Reintentar</button>
+    </div>
+  } @else if (overview(); as value) {
+    <section class="card card-border border-base-300 bg-base-100">
+      <div class="card-body gap-4 p-4 sm:p-5">
+        <div class="stats stats-vertical w-full border border-base-300 lg:stats-horizontal">
+          <div class="stat">
+            <div class="stat-title">Ventas cobradas</div>
+            <div class="stat-value text-2xl">{{ value.paidAmount | number: '1.2-2' }}</div>
+            <div class="stat-desc">{{ value.paidCount }} transacciones</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Ticket promedio</div>
+            <div class="stat-value text-2xl">{{ value.averageTicket | number: '1.2-2' }}</div>
+            <div class="stat-desc">Solo ventas pagadas</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Cancelaciones</div>
+            <div class="stat-value text-2xl">{{ value.cancelledCount }}</div>
+            <div class="stat-desc">{{ value.cancelledAmount | number: '1.2-2' }} anulados</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    @if (isEmpty()) {
+      <div role="status" class="alert alert-info">
+        <span>No hay ventas cobradas ni canceladas en este período.</span>
+      </div>
+    } @else {
+      <div class="grid gap-4 lg:grid-cols-2">
+        <section class="card card-border border-base-300 bg-base-100">
+          <div class="card-body gap-3 p-4 sm:p-5">
+            <h2 class="card-title">Mejor vendedor</h2>
+            @if (value.topSeller; as seller) {
+              <p class="text-lg font-semibold">{{ seller.sellerName }}</p>
+              <p class="text-sm text-base-content/60">
+                {{ seller.paidAmount | number: '1.2-2' }} cobrados
+              </p>
+            } @else {
+              <p class="text-sm text-base-content/60">Sin ventas cobradas en el período.</p>
+            }
+          </div>
+        </section>
+        <section class="card card-border border-base-300 bg-base-100">
+          <div class="card-body gap-3 p-4 sm:p-5">
+            <h2 class="card-title">Producto principal</h2>
+            @if (value.topProduct; as product) {
+              <p class="text-lg font-semibold">{{ product.productName }}</p>
+              <p class="text-sm text-base-content/60">
+                {{ product.quantityBase }} unidades vendidas
+              </p>
+            } @else {
+              <p class="text-sm text-base-content/60">Sin productos cobrados en el período.</p>
+            }
+          </div>
+        </section>
+      </div>
+
+      <section class="card card-border border-base-300 bg-base-100">
+        <div class="card-body gap-4 p-4 sm:p-5">
+          <div>
+            <h2 class="card-title">Métodos de pago</h2>
+            <p class="text-sm text-base-content/60">Distribución sobre las ventas cobradas.</p>
+          </div>
+          @if (value.paymentMethods.length === 0) {
+            <div role="status" class="alert alert-info">
+              <span>Sin pagos cobrados en este período.</span>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Método</th>
+                    <th class="text-right">Importe</th>
+                    <th class="text-right">Participación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (method of value.paymentMethods; track method.paymentMethodId) {
+                    <tr>
+                      <td>{{ method.name }}</td>
+                      <td class="text-right">{{ method.paidAmount | number: '1.2-2' }}</td>
+                      <td class="text-right">{{ method.percentage | number: '1.0-2' }}%</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

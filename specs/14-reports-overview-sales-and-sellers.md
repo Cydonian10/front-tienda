@@ -1,6 +1,6 @@
 # SPEC 14 — Reportes de resumen, ventas y vendedores
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 10 (rol responsable y permisos operativos), SPEC 11 (navegación y rutas por rol), SPEC 12 (historial de ventas y resumen por período)
 > **Date:** 2026-09-12
 > **Objective:** Ofrecer reportes agregados de ventas efectivas, evolución diaria y rendimiento de vendedores para responsables y administradores.

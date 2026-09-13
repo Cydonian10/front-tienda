@@ -111,7 +111,7 @@
 
   <sales-filters
     [filters]="historyFilters()"
-    [canFilterSeller]="canManage()"
+    [canFilterSeller]="canManageSales()"
     (filtersChanged)="updateHistoryFilters($event)"
     (applyRequested)="applyHistoryFilters()"
     (clearRequested)="clearHistoryFilters()"
@@ -134,7 +134,8 @@
         <sales-history-table
           [sales]="result.data"
           [currentPersonId]="currentPersonId()"
-          [canManage]="canManage()"
+          [canCancelPaid]="canCancelPaid()"
+          [canCancelAnyPending]="canCancelAnyPending()"
           (editRequested)="editSale($event)"
           (payRequested)="paySale($event)"
           (detailRequested)="showDetail($event)"

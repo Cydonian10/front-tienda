@@ -1,0 +1,2 @@
+[     264ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/home/gabriel/Documentos/Proyectos/Tienda/FrontTienda/.angular/cache/22.1.3/FrontTienda/vite/deps/core-Ud4ZOIWX.js?v=ba086026:9110
+[     436ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/sales?page=1&limit=20&startDate=2026-09-12T05:00:00.000Z&endDate=2026-09-13T04:59:59.999Z:0

@@ -155,4 +155,16 @@ describe('VentasPage', () => {
       { product, unit: product.units[1], quantity: 2 },
     ]);
   });
+
+  it('enables seller filtering and paid cancellation controls for responsible', async () => {
+    authStore.user.mockReturnValue({ roles: ['RESPONSABLE'] });
+    const fixture = TestBed.createComponent(VentasPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const page = fixture.componentInstance as any;
+
+    expect(page.canManageSales()).toBe(true);
+    expect(page.canCancelPaid()).toBe(true);
+    expect(page.canCancelAnyPending()).toBe(false);
+  });
 });

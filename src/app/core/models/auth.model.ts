@@ -1,4 +1,5 @@
 import { Person } from './people.model';
+import { RoleName } from './role.model';
 
 export interface LoginRequest {
   email: string;
@@ -9,7 +10,7 @@ export interface AuthUser {
   id: number;
   email: string;
   personId: number;
-  roles: string[];
+  roles: RoleName[];
 }
 
 export interface LoginResponse {
@@ -21,7 +22,7 @@ export interface JwtUser {
   sub: number;
   personId: number;
   email: string;
-  roles: string[];
+  roles: RoleName[];
 }
 
 export interface RestoredSession {

@@ -18,6 +18,7 @@ import { PaymentMethod } from '../../../../core/models/payment-method.model';
 import { PaginatedResult } from '../../../../core/models/pagination.model';
 import { Person } from '../../../../core/models/people.model';
 import { Product, ProductUnit } from '../../../../core/models/product.model';
+import { ROLE_NAMES } from '../../../../core/models/role.model';
 import { Sale, SaleCartLine, SaleFilter } from '../../../../core/models/sale.model';
 import { AuthStore } from '../../../../core/store/auth.store';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
@@ -75,8 +76,17 @@ export default class VentasPage {
   protected readonly error = signal<string | null>(null);
   protected readonly catalogError = signal<string | null>(null);
   protected readonly historyError = signal<string | null>(null);
-  protected readonly canManage = computed(
-    () => this.authStore.user()?.roles.includes('ADMINISTRADOR') ?? false,
+  protected readonly canManageSales = computed(
+    () =>
+      this.authStore.user()?.roles.some(
+        (role) =>
+          role === ROLE_NAMES.ADMINISTRATOR || role === ROLE_NAMES.RESPONSIBLE,
+      ) ?? false,
+  );
+  protected readonly canCancelPaid = computed(() => this.canManageSales());
+  protected readonly canCancelAnyPending = computed(
+    () =>
+      this.authStore.user()?.roles.includes(ROLE_NAMES.ADMINISTRATOR) ?? false,
   );
   protected readonly currentPersonId = computed(() => this.authStore.person()?.id ?? null);
   protected readonly ownRegisters = computed(() => {
@@ -442,7 +452,9 @@ export default class VentasPage {
       limit: this.historyPageSize(),
       status: filters.status || undefined,
       cashOpeningId: this.positiveInteger(filters.cashOpeningId),
-      sellerId: this.canManage() ? this.positiveInteger(filters.sellerId) : undefined,
+      sellerId: this.canManageSales()
+        ? this.positiveInteger(filters.sellerId)
+        : undefined,
       startDate: filters.startDate ? this.startOfDay(filters.startDate) : undefined,
       endDate: filters.endDate ? this.endOfDay(filters.endDate) : undefined,
     };

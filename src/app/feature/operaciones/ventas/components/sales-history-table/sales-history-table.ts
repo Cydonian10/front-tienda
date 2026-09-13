@@ -9,7 +9,8 @@ import { Sale, SaleStatus } from '../../../../../core/models/sale.model';
 export class SalesHistoryTable {
   readonly sales = input.required<Sale[]>();
   readonly currentPersonId = input<number | null>(null);
-  readonly canManage = input(false);
+  readonly canCancelPaid = input(false);
+  readonly canCancelAnyPending = input(false);
   readonly editRequested = output<Sale>();
   readonly payRequested = output<Sale>();
   readonly detailRequested = output<Sale>();
@@ -20,8 +21,8 @@ export class SalesHistoryTable {
   }
 
   protected canCancel(sale: Sale): boolean {
-    return (
-      sale.status !== 'CANCELLED' && (this.canManage() || sale.sellerId === this.currentPersonId())
-    );
+    if (sale.status === 'CANCELLED') return false;
+    if (sale.status === 'PAID') return this.canCancelPaid();
+    return this.canCancelAnyPending() || sale.sellerId === this.currentPersonId();
   }
 }

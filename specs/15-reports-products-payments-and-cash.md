@@ -1,6 +1,6 @@
 # SPEC 15 — Reportes de productos, pagos y cajas
 
-> **Status:** Borrador
+> **Status:** Aprobado
 > **Depends on:** SPEC 13 (mi caja, sesiones y movimientos), SPEC 14 (reportes de resumen, ventas y vendedores)
 > **Date:** 2026-09-12
 > **Objective:** Completar los reportes operativos con rankings de productos, distribución de pagos y estado consolidado de sesiones de caja.
@@ -133,11 +133,11 @@ Archivos principales:
 
 ## Risks
 
-| Riesgo | Mitigación |
-| --- | --- |
-| Cambios de factor de unidad alteran la lectura de ventas antiguas. | Usar la instantánea `unitFactor` persistida en `SaleDetail`. |
-| Una sesión abierta se interpreta como cierre final. | Devolverla en una colección distinta y excluirla de los totales cerrados. |
-| La consulta de detalles de cierre crece con el rango. | Paginar o limitar la tabla de sesiones si las mediciones de producción lo requieren. |
+| Riesgo                                                             | Mitigación                                                                           |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| Cambios de factor de unidad alteran la lectura de ventas antiguas. | Usar la instantánea `unitFactor` persistida en `SaleDetail`.                         |
+| Una sesión abierta se interpreta como cierre final.                | Devolverla en una colección distinta y excluirla de los totales cerrados.            |
+| La consulta de detalles de cierre crece con el rango.              | Paginar o limitar la tabla de sesiones si las mediciones de producción lo requieren. |
 
 ## What is **not** in this spec
 

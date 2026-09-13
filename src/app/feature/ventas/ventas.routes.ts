@@ -11,7 +11,7 @@ const ventasRoutes: Routes = [
       breadcrumb: 'Nueva venta',
       roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER],
     },
-    loadComponent: () => import('../operaciones/ventas/pages/ventas.page'),
+    loadComponent: () => import('./pos/pages/venta.page'),
     title: 'Nueva venta',
   },
   {
@@ -21,7 +21,7 @@ const ventasRoutes: Routes = [
       breadcrumb: 'Historial de ventas',
       roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE],
     },
-    loadComponent: () => import('../operaciones/ventas/pages/ventas.page'),
+    loadComponent: () => import('./historial/pages/historial-ventas.page'),
     title: 'Historial de ventas',
   },
 ];

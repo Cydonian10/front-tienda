@@ -1,0 +1,27 @@
+@if (summary(); as value) {
+  <section class="card card-border border-base-300 bg-base-100">
+    <div class="card-body gap-4 p-4 sm:p-5">
+      <div>
+        <h2 class="card-title">Resumen del período</h2>
+        <p class="text-sm text-base-content/60">Ventas efectivas y anulaciones calculadas por el servidor.</p>
+      </div>
+      <div class="stats stats-vertical w-full border border-base-300 lg:stats-horizontal">
+        <div class="stat">
+          <div class="stat-title">Ventas cobradas</div>
+          <div class="stat-value text-2xl">{{ value.paidAmount }}</div>
+          <div class="stat-desc">{{ value.paidCount }} operaciones</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Ticket promedio</div>
+          <div class="stat-value text-2xl">{{ value.averageTicket }}</div>
+          <div class="stat-desc">Solo ventas pagadas</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Cancelaciones</div>
+          <div class="stat-value text-2xl">{{ value.cancelledCount }}</div>
+          <div class="stat-desc">Importe: {{ value.cancelledAmount }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+}

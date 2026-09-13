@@ -109,47 +109,53 @@
     }
   }
 
-  <sales-filters
-    [filters]="historyFilters()"
-    [canFilterSeller]="canManageSales()"
-    (filtersChanged)="updateHistoryFilters($event)"
-    (applyRequested)="applyHistoryFilters()"
-    (clearRequested)="clearHistoryFilters()"
-  />
-
-  @if (historyError(); as message) {
-    <div role="alert" class="alert alert-error">
-      <span>{{ message }}</span>
-    </div>
-  }
-
-  @if (isLoadingHistory()) {
-    <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
-      <span class="loading loading-spinner loading-sm"></span>
-      <span>Cargando historial...</span>
-    </div>
-  } @else if (history(); as result) {
+  @if (isWorker()) {
     <section class="card card-border border-base-300 bg-base-100">
       <div class="card-body gap-4 p-4 sm:p-5">
-        <sales-history-table
-          [sales]="result.data"
-          [currentPersonId]="currentPersonId()"
-          [canCancelPaid]="canCancelPaid()"
-          [canCancelAnyPending]="canCancelAnyPending()"
-          (editRequested)="editSale($event)"
-          (payRequested)="paySale($event)"
-          (detailRequested)="showDetail($event)"
-          (cancelRequested)="cancelSale($event)"
-        />
-        <ng-pagination
-          [page]="historyPage()"
-          [pageSize]="historyPageSize()"
-          [lastPage]="result.lastPage"
-          [total]="result.total"
-          [pageSizes]="[20, 50, 100]"
-          (pageChange)="changeHistoryPage($event)"
-          (pageSizeChange)="changeHistoryPageSize($event)"
-        />
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h2 class="card-title">Tus ventas recientes</h2>
+            <p class="text-sm text-base-content/60">Solo muestra las ventas asociadas a tu usuario.</p>
+          </div>
+          <button type="button" class="btn btn-sm" [disabled]="isLoadingRecentSales()" (click)="loadRecentSales()">
+            Actualizar
+          </button>
+        </div>
+
+        @if (recentSalesError(); as message) {
+          <div role="alert" class="alert alert-error">
+            <span>{{ message }}</span>
+          </div>
+        } @else if (isLoadingRecentSales()) {
+          <div class="flex items-center gap-3 py-4 text-sm text-base-content/60">
+            <span class="loading loading-spinner loading-sm"></span>
+            <span>Cargando ventas recientes...</span>
+          </div>
+        } @else if (recentSales(); as result) {
+          @if (result.data.length === 0) {
+            <p class="rounded-box border border-dashed border-base-300 p-4 text-sm text-base-content/60">
+              Aún no registras ventas.
+            </p>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="table table-sm">
+                <thead>
+                  <tr><th>Venta</th><th>Fecha</th><th class="text-right">Total</th><th>Estado</th></tr>
+                </thead>
+                <tbody>
+                  @for (sale of result.data; track sale.id) {
+                    <tr>
+                      <td>#{{ sale.id }}</td>
+                      <td>{{ sale.saleDate }}</td>
+                      <td class="text-right">{{ sale.totalAmount }}</td>
+                      <td><span class="badge badge-outline">{{ sale.status }}</span></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
       </div>
     </section>
   }

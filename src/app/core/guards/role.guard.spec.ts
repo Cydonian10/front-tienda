@@ -50,6 +50,7 @@ describe('roleGuard', () => {
 
     expect(activate([ROLE_NAMES.WORKER])).toBe(true);
     expect(activate([ROLE_NAMES.RESPONSIBLE])).toEqual(['/inicio']);
+    expect(activate([ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE])).toEqual(['/inicio']);
   });
 
   it('allows a responsible user on shared operational routes but not administrator routes', () => {

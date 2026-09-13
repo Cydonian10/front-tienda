@@ -1,7 +1,7 @@
 import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
 import { Component, inject } from '@angular/core';
 
-import { Sale } from '../../../../core/models/sale.model';
+import { Sale } from '../../../core/models/sale.model';
 
 export interface SaleDetailDialogData {
   sale: Sale;

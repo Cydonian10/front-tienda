@@ -1,0 +1,68 @@
+<ng-breadcrumbs />
+
+<div class="mt-4 space-y-4">
+  <header>
+    <p class="text-sm font-semibold tracking-wide text-primary">Movimiento de mercadería</p>
+    <h1 class="text-xl font-semibold">Productos</h1>
+    <p class="mt-1 text-sm text-base-content/60">
+      Ranking por unidades principales equivalentes y facturación cobrada.
+    </p>
+  </header>
+
+  <report-period-filter
+    [period]="period()"
+    [disabled]="isLoading()"
+    (periodChanged)="updatePeriod($event)"
+    (rangeApplied)="applyPeriod($event)"
+  />
+
+  @if (isLoading()) {
+    <div class="flex items-center gap-3 rounded-box border border-base-300 p-6">
+      <span class="loading loading-spinner loading-sm"></span><span>Cargando productos...</span>
+    </div>
+  } @else if (error(); as message) {
+    <div role="alert" class="alert alert-error sm:alert-horizontal">
+      <span>{{ message }}</span
+      ><button type="button" class="btn btn-sm" (click)="retry()">Reintentar</button>
+    </div>
+  } @else if (products(); as rows) {
+    <section class="card card-border border-base-300 bg-base-100">
+      <div class="card-body gap-4 p-4 sm:p-5">
+        <div>
+          <h2 class="card-title">Ranking de productos</h2>
+          <p class="text-sm text-base-content/60">
+            Ordenado por cantidad equivalente; la facturación resuelve empates.
+          </p>
+        </div>
+        @if (rows.length === 0) {
+          <div role="status" class="alert alert-info">
+            <span>No hay productos cobrados en este período.</span>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th class="text-right">Unidades principales</th>
+                  <th class="text-right">Facturación</th>
+                  <th class="text-right">Ventas</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (product of rows; track product.productId) {
+                  <tr>
+                    <td class="font-medium">{{ product.productName }}</td>
+                    <td class="text-right">{{ product.quantityBase | number: '1.0-2' }}</td>
+                    <td class="text-right">{{ product.paidAmount | number: '1.2-2' }}</td>
+                    <td class="text-right">{{ product.paidCount }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>

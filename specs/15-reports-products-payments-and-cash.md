@@ -1,6 +1,6 @@
 # SPEC 15 — Reportes de productos, pagos y cajas
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 13 (mi caja, sesiones y movimientos), SPEC 14 (reportes de resumen, ventas y vendedores)
 > **Date:** 2026-09-12
 > **Objective:** Completar los reportes operativos con rankings de productos, distribución de pagos y estado consolidado de sesiones de caja.

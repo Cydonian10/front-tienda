@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { AuthUser } from '../models/auth.model';
 import { ROLE_NAMES } from '../models/role.model';
 import { AuthStore } from '../store/auth.store';
-import { DashboardService } from './dashboard.service';
+import { DashboardService, selectDashboardRole } from './dashboard.service';
 
 describe('DashboardService', () => {
   const user = signal<AuthUser | null>(null);
@@ -67,5 +67,19 @@ describe('DashboardService', () => {
       'nueva-venta',
       'historial-ventas',
     ]);
+  });
+
+  it('selects the highest dashboard privilege deterministically', () => {
+    expect(selectDashboardRole([ROLE_NAMES.WORKER])).toBe(ROLE_NAMES.WORKER);
+    expect(selectDashboardRole([ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER])).toBe(
+      ROLE_NAMES.RESPONSIBLE,
+    );
+    expect(
+      selectDashboardRole([
+        ROLE_NAMES.WORKER,
+        ROLE_NAMES.RESPONSIBLE,
+        ROLE_NAMES.ADMINISTRATOR,
+      ]),
+    ).toBe(ROLE_NAMES.ADMINISTRATOR);
   });
 });

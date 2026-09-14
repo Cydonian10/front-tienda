@@ -23,7 +23,7 @@ export const routes: Routes = [
           breadcrumb: 'Inicio',
           roles: [ROLE_NAMES.ADMINISTRATOR, ROLE_NAMES.RESPONSIBLE, ROLE_NAMES.WORKER],
         },
-        loadComponent: () => import('./feature/dashboard/pages/dashboard.page'),
+        loadComponent: () => import('./feature/inicio/pages/inicio.page'),
         title: 'Inicio',
       },
       {

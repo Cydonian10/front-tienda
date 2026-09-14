@@ -1,6 +1,6 @@
 # SPEC 16 — Inicio operativo por rol
 
-> **Status:** Borrador
+> **Status:** Implementado
 > **Depends on:** SPEC 10 (rol responsable y permisos operativos), SPEC 11 (navegación y rutas por rol), SPEC 12 (historial de ventas y resumen por período), SPEC 13 (mi caja, sesiones y movimientos), SPEC 14 (reportes de resumen, ventas y vendedores), SPEC 15 (reportes de productos, pagos y cajas)
 > **Date:** 2026-09-12
 > **Objective:** Convertir Inicio en un dashboard operativo que priorice la caja propia para trabajador y los indicadores generales para responsable y administrador.
@@ -87,11 +87,11 @@ Archivos principales:
 
 ## Risks
 
-| Riesgo | Mitigación |
-| --- | --- |
-| Varias solicitudes hacen lenta la carga inicial. | Cargar bloques en paralelo y mostrar estados independientes. |
-| Un usuario multirol recibe un dashboard ambiguo. | Aplicar prioridad explícita de rol y cubrirla con pruebas. |
-| Un enlace expone una ruta no autorizada. | Reutilizar el mapa de permisos de SPEC 11 y validar con navegador. |
+| Riesgo                                           | Mitigación                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| Varias solicitudes hacen lenta la carga inicial. | Cargar bloques en paralelo y mostrar estados independientes.       |
+| Un usuario multirol recibe un dashboard ambiguo. | Aplicar prioridad explícita de rol y cubrirla con pruebas.         |
+| Un enlace expone una ruta no autorizada.         | Reutilizar el mapa de permisos de SPEC 11 y validar con navegador. |
 
 ## What is **not** in this spec
 

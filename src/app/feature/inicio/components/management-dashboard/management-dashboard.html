@@ -1,0 +1,151 @@
+<div class="mt-4 space-y-4">
+  <header>
+    <p class="text-sm font-semibold tracking-wide text-primary">Inicio operativo</p>
+    <h1 class="text-2xl font-semibold">Vista general</h1>
+    <p class="mt-1 text-sm text-base-content/60">Indicadores de {{ data().weekLabel }} en America/Lima.</p>
+  </header>
+
+  <section class="card card-border border-base-300 bg-base-100">
+    <div class="card-body gap-4 p-4 sm:p-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold tracking-wide text-primary">Semana operativa</p>
+          <h2 class="card-title mt-1">Indicadores de caja y ventas</h2>
+        </div>
+        <span class="badge badge-outline">{{ roleLabel(data().role) }}</span>
+      </div>
+
+      @if (data().summary.isLoading) {
+        <div role="status" class="flex items-center gap-3 rounded-box border border-base-300 p-4 text-sm">
+          <span class="loading loading-spinner loading-sm"></span>
+          <span>Cargando indicadores...</span>
+        </div>
+      } @else if (data().summary.error; as message) {
+        <div role="alert" class="alert alert-error alert-vertical sm:alert-horizontal">
+          <span>{{ message }}</span>
+          <button type="button" class="btn btn-sm" (click)="summaryRetryRequested.emit()">
+            Reintentar indicadores
+          </button>
+        </div>
+      } @else if (data().summary.data; as summary) {
+        <div class="stats stats-vertical w-full border border-base-300 lg:stats-horizontal">
+          <div class="stat">
+            <div class="stat-title">Ventas cobradas</div>
+            <div class="stat-value text-2xl">{{ summary.paidAmount | number: '1.2-2' }}</div>
+            <div class="stat-desc">{{ summary.paidCount }} transacciones</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Ticket promedio</div>
+            <div class="stat-value text-2xl">{{ summary.averageTicket | number: '1.2-2' }}</div>
+            <div class="stat-desc">Solo ventas pagadas</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Cancelaciones</div>
+            <div class="stat-value text-2xl">{{ summary.cancelledCount }}</div>
+            <div class="stat-desc">{{ summary.cancelledAmount | number: '1.2-2' }} anulados</div>
+          </div>
+        </div>
+        @if (summary.paidCount === 0 && summary.cancelledCount === 0) {
+          <div role="status" class="alert alert-info">
+            <span>No hay ventas cobradas ni canceladas en esta semana.</span>
+          </div>
+        }
+      }
+    </div>
+  </section>
+
+  <section class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.65fr)]">
+    <article class="card card-border border-base-300 bg-base-100">
+      <div class="card-body gap-4 p-4 sm:p-5">
+        <div>
+          <p class="text-sm font-semibold tracking-wide text-primary">Rendimiento</p>
+          <h2 class="card-title mt-1">Referentes de la semana</h2>
+        </div>
+
+        @if (data().overview.isLoading) {
+          <div role="status" class="flex items-center gap-3 rounded-box border border-base-300 p-4 text-sm">
+            <span class="loading loading-spinner loading-sm"></span>
+            <span>Cargando rendimiento...</span>
+          </div>
+        } @else if (data().overview.error; as message) {
+          <div role="alert" class="alert alert-error alert-vertical sm:alert-horizontal">
+            <span>{{ message }}</span>
+            <button type="button" class="btn btn-sm" (click)="overviewRetryRequested.emit()">
+              Reintentar rendimiento
+            </button>
+          </div>
+        } @else if (data().overview.data; as overview) {
+          @if (overview.paidCount === 0 && overview.cancelledCount === 0) {
+            <div role="status" class="alert alert-info">
+              <span>Sin actividad comercial durante esta semana.</span>
+            </div>
+          } @else {
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="rounded-box bg-base-200 p-4">
+                <p class="text-sm text-base-content/60">Mejor vendedor</p>
+                <p class="mt-1 font-semibold">{{ overview.topSeller?.sellerName ?? 'Sin ventas cobradas' }}</p>
+                @if (overview.topSeller; as seller) {
+                  <p class="mt-1 text-sm text-base-content/60">
+                    {{ seller.paidAmount | number: '1.2-2' }} cobrados
+                  </p>
+                }
+              </div>
+              <div class="rounded-box bg-base-200 p-4">
+                <p class="text-sm text-base-content/60">Producto principal</p>
+                <p class="mt-1 font-semibold">{{ overview.topProduct?.productName ?? 'Sin productos cobrados' }}</p>
+                @if (overview.topProduct; as product) {
+                  <p class="mt-1 text-sm text-base-content/60">
+                    {{ product.quantityBase | number: '1.0-2' }} unidades equivalentes
+                  </p>
+                }
+              </div>
+            </div>
+
+            <div>
+              <h3 class="font-semibold">Métodos de pago</h3>
+              @if (overview.paymentMethods.length === 0) {
+                <p class="mt-2 text-sm text-base-content/60">Sin pagos cobrados en esta semana.</p>
+              } @else {
+                <div class="mt-2 overflow-x-auto">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Método</th>
+                        <th class="text-right">Importe</th>
+                        <th class="text-right">Participación</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (method of overview.paymentMethods; track method.paymentMethodId) {
+                        <tr>
+                          <td>{{ method.name }}</td>
+                          <td class="text-right">{{ method.paidAmount | number: '1.2-2' }}</td>
+                          <td class="text-right">{{ method.percentage | number: '1.0-2' }}%</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </article>
+
+    <article class="card card-border border-base-300 bg-base-100">
+      <div class="card-body gap-4 p-4 sm:p-5">
+        <div>
+          <p class="text-sm font-semibold tracking-wide text-primary">Accesos</p>
+          <h2 class="card-title mt-1">Supervisión</h2>
+          <p class="text-sm text-base-content/60">Solo rutas autorizadas para tu rol.</p>
+        </div>
+        <div class="flex flex-col gap-2">
+          @for (link of data().links; track link.id) {
+            <a [routerLink]="link.route" class="btn btn-soft justify-start">{{ link.label }}</a>
+          }
+        </div>
+      </div>
+    </article>
+  </section>
+</div>

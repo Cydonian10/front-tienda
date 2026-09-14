@@ -5,6 +5,24 @@ import { MenuItem } from '../models/menu.model';
 import { OperationalRole, ROLE_NAMES } from '../models/role.model';
 import { AuthStore } from '../store/auth.store';
 
+export type DashboardRole = OperationalRole;
+
+export interface DashboardNavigationLink {
+  id: string;
+  label: string;
+  route: string;
+}
+
+const DASHBOARD_ROLE_PRIORITY: readonly DashboardRole[] = [
+  ROLE_NAMES.ADMINISTRATOR,
+  ROLE_NAMES.RESPONSIBLE,
+  ROLE_NAMES.WORKER,
+];
+
+export function selectDashboardRole(roles: readonly OperationalRole[]): DashboardRole | null {
+  return DASHBOARD_ROLE_PRIORITY.find((role) => roles.includes(role)) ?? null;
+}
+
 const initialMenu: MenuItem[] = [
   {
     id: 'inicio',
@@ -137,12 +155,25 @@ const initialMenu: MenuItem[] = [
 export class DashboardService {
   private readonly authStore = inject(AuthStore);
   private readonly menuSignal = signal<MenuItem[]>(initialMenu);
+  readonly dashboardRole = computed(() => selectDashboardRole(this.authStore.user()?.roles ?? []));
   readonly menu = computed(() =>
     this.filterByRoles(this.menuSignal(), this.authStore.user()?.roles ?? []),
   );
 
   toggleGroup(id: string): void {
     this.menuSignal.update((items) => this.toggle(items, id));
+  }
+
+  authorizedRoutes(ids: readonly string[]): DashboardNavigationLink[] {
+    const routes = new Map(
+      this.flattenMenu(this.menu()).flatMap((item) =>
+        item.route ? [[item.id, { id: item.id, label: item.label, route: item.route }] as const] : [],
+      ),
+    );
+    return ids.flatMap((id) => {
+      const route = routes.get(id);
+      return route ? [route] : [];
+    });
   }
 
   private filterByRoles(items: MenuItem[], userRoles: OperationalRole[]): MenuItem[] {
@@ -170,5 +201,9 @@ export class DashboardService {
       }
       return item;
     });
+  }
+
+  private flattenMenu(items: MenuItem[]): MenuItem[] {
+    return items.flatMap((item) => [item, ...(item.children ? this.flattenMenu(item.children) : [])]);
   }
 }

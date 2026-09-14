@@ -1,0 +1,20 @@
+<ng-breadcrumbs />
+
+@if (isWorker()) {
+  <worker-dashboard
+    [data]="workerData()"
+    (sessionsRetryRequested)="retrySessions()"
+    (salesRetryRequested)="retrySales()"
+    (movementsRetryRequested)="retryMovements()"
+  />
+} @else if (managementData(); as data) {
+  <management-dashboard
+    [data]="data"
+    (summaryRetryRequested)="retrySummary()"
+    (overviewRetryRequested)="retryOverview()"
+  />
+} @else {
+  <div role="alert" class="alert alert-error mt-4">
+    <span>El usuario no tiene un rol operativo válido.</span>
+  </div>
+}

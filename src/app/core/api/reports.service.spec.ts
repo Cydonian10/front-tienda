@@ -125,4 +125,53 @@ describe('ReportsService', () => {
     await expect(dailySales).resolves.toHaveLength(1);
     await expect(sellers).resolves.toHaveLength(1);
   });
+
+  it('requests and unwraps product, payment and cash reports', async () => {
+    const range = {
+      from: '2026-09-12T00:00:00.000-05:00',
+      to: '2026-09-12T23:59:59.999-05:00',
+    };
+    const products = firstValueFrom(service.findProducts(range));
+    const paymentMethods = firstValueFrom(service.findPaymentMethods(range));
+    const cashRegisters = firstValueFrom(service.findCashRegisters(range));
+
+    httpTesting
+      .expectOne(
+        (request) =>
+          request.url === `${environment.apiUrl}/reports/products` &&
+          request.params.get('from') === range.from &&
+          request.params.get('to') === range.to,
+      )
+      .flush({
+        data: [
+          { productId: 1, productName: 'Arroz', quantityBase: 12, paidAmount: 60, paidCount: 1 },
+        ],
+        message: 'OK',
+      });
+    httpTesting
+      .expectOne(
+        (request) =>
+          request.url === `${environment.apiUrl}/reports/payment-methods` &&
+          request.params.get('from') === range.from &&
+          request.params.get('to') === range.to,
+      )
+      .flush({
+        data: [
+          { paymentMethodId: 1, name: 'Efectivo', paidAmount: 60, paidCount: 1, percentage: 100 },
+        ],
+        message: 'OK',
+      });
+    httpTesting
+      .expectOne(
+        (request) =>
+          request.url === `${environment.apiUrl}/reports/cash-registers` &&
+          request.params.get('from') === range.from &&
+          request.params.get('to') === range.to,
+      )
+      .flush({ data: { closedSessions: [], openSessions: [] }, message: 'OK' });
+
+    await expect(products).resolves.toHaveLength(1);
+    await expect(paymentMethods).resolves.toMatchObject([{ percentage: 100 }]);
+    await expect(cashRegisters).resolves.toEqual({ closedSessions: [], openSessions: [] });
+  });
 });

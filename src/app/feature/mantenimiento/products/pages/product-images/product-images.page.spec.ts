@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ImagesService } from '../../../../../core/api/images.service';
 import ProductImagesPage from './product-images.page';
+import { environment } from '../../../../../../environments/environment';
 
 describe('ProductImagesPage', () => {
   const imagesService = {
@@ -67,7 +68,7 @@ describe('ProductImagesPage', () => {
     expect(page.uploads()).toHaveLength(2);
     expect(page.uploads()[1]).toMatchObject({
       id: -1,
-      previewUrl: 'http://localhost:3000/uploads/main.webp',
+      previewUrl: `${environment.apiUrl}/uploads/main.webp`,
       status: 'success',
       image: images[1],
     });

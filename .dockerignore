@@ -1,0 +1,7 @@
+node_modules
+coverage
+.angular
+.git
+.vscode
+.playwright-mcp
+*.log

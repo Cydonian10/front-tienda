@@ -11,6 +11,7 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptor/auth.interceptor';
 import { AuthService } from './core/api/auth.service';
 import { AuthStore } from './core/store/auth.store';
+import { RealtimeService } from './core/realtime/realtime.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,6 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(async () => {
       const authService = inject(AuthService);
       const authStore = inject(AuthStore);
+      const realtimeService = inject(RealtimeService);
       const restore = authService.restoreSession();
       const minTime = new Promise((resolve) => setTimeout(resolve, 200));
       try {
@@ -28,6 +30,7 @@ export const appConfig: ApplicationConfig = {
           authStore.setToken(session.accessToken);
           authStore.setUser(session.user);
           authStore.setPerson(session.person);
+          realtimeService.connect(session.accessToken);
         } else {
           authStore.logout();
         }

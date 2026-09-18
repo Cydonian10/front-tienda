@@ -4,10 +4,12 @@ import { TOKEN_KEY } from '../constants';
 import { LocalStorageService } from '../services/local-storage.service';
 import { AuthUser } from '../models/auth.model';
 import { Person } from '../models/people.model';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
   private readonly localStorageService = inject(LocalStorageService);
+  private readonly realtimeService = inject(RealtimeService);
 
   private readonly tokenSignal = signal<string | null>(null);
   private readonly userSignal = signal<AuthUser | null>(null);
@@ -32,6 +34,7 @@ export class AuthStore {
   }
 
   logout(): void {
+    this.realtimeService.disconnect();
     this.localStorageService.remove(TOKEN_KEY);
     this.tokenSignal.set(null);
     this.userSignal.set(null);

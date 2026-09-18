@@ -46,6 +46,7 @@ export interface DefaultProduct {
   id: number;
   name: string;
   stock: number;
+  lowStockThreshold: number | null;
   price: number;
   baseProductId: number;
   baseProductName: string;

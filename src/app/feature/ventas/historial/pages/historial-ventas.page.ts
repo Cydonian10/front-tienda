@@ -1,6 +1,6 @@
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { DateTime } from 'luxon';
 import { firstValueFrom } from 'rxjs';
@@ -15,6 +15,8 @@ import { ROLE_NAMES } from '../../../../core/models/role.model';
 import { Sale, SaleFilter } from '../../../../core/models/sale.model';
 import { Person } from '../../../../core/models/people.model';
 import { AuthStore } from '../../../../core/store/auth.store';
+import { RealtimeService } from '../../../../core/realtime/realtime.service';
+import type { RealtimeEvent } from '../../../../core/realtime/realtime-event.model';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
 import PaginationNg from '../../../../shared/pagination/pagination.ng';
 import { openSaleCancellationDialog } from '../../dialogs/sale-cancellation-dialog';
@@ -39,6 +41,8 @@ export default class HistorialVentasPage {
   private readonly peopleService = inject(PeopleService);
   private readonly salesService = inject(SalesService);
   private readonly authStore = inject(AuthStore);
+  private readonly realtimeService = inject(RealtimeService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly filters = signal<SalesHistoryFilters>(this.defaultFilters());
   protected readonly periodPreset = signal<PeriodPreset>('today');
@@ -83,6 +87,9 @@ export default class HistorialVentasPage {
   constructor() {
     void this.loadPeriod();
     void this.loadSellers();
+    this.destroyRef.onDestroy(
+      this.realtimeService.onEvent((event) => this.handleRealtimeEvent(event)),
+    );
   }
 
   protected setPeriod(preset: Exclude<PeriodPreset, 'custom'>): void {
@@ -224,6 +231,16 @@ export default class HistorialVentasPage {
       this.summaryError.set(this.message(error));
     } finally {
       this.isLoadingSummary.set(false);
+    }
+  }
+
+  private handleRealtimeEvent(event: RealtimeEvent): void {
+    const range = this.periodRange();
+    if (!range) return;
+    if (event.name === 'sale.created') {
+      void this.loadTable(range);
+    } else if (event.name === 'sale.paid' || event.name === 'sale.cancelled') {
+      void this.loadPeriod();
     }
   }
 

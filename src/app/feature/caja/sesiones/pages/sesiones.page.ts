@@ -1,6 +1,6 @@
 import { Dialog } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
 
@@ -14,6 +14,8 @@ import {
 } from '../../../../core/models/cash-register.model';
 import { ROLE_NAMES } from '../../../../core/models/role.model';
 import { AuthStore } from '../../../../core/store/auth.store';
+import { RealtimeService } from '../../../../core/realtime/realtime.service';
+import type { RealtimeEvent } from '../../../../core/realtime/realtime-event.model';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
 import { CashRegistersTable } from '../components/cash-registers-table/cash-registers-table';
 import { CashSessionsTable } from '../components/cash-sessions-table/cash-sessions-table';
@@ -32,6 +34,8 @@ export default class SesionesPage {
   private readonly registersService = inject(CashRegistersService);
   private readonly peopleService = inject(PeopleService);
   private readonly authStore = inject(AuthStore);
+  private readonly realtimeService = inject(RealtimeService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly today = new Date();
 
   protected readonly registers = signal<CashRegister[]>([]);
@@ -48,6 +52,9 @@ export default class SesionesPage {
 
   constructor() {
     void this.load();
+    this.destroyRef.onDestroy(
+      this.realtimeService.onEvent((event) => this.handleRealtimeEvent(event)),
+    );
   }
 
   protected async load(): Promise<void> {
@@ -144,6 +151,18 @@ export default class SesionesPage {
       );
     } catch (error) {
       this.actionError.set(this.message(error));
+    }
+  }
+
+  private handleRealtimeEvent(event: RealtimeEvent): void {
+    if (
+      event.name === 'sale.paid' ||
+      event.name === 'sale.cancelled' ||
+      event.name === 'cash.opened' ||
+      event.name === 'cash.closed' ||
+      event.name === 'cash.movement.created'
+    ) {
+      void this.load();
     }
   }
 

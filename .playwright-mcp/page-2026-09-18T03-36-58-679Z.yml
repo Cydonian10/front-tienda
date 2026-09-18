@@ -1,0 +1,128 @@
+- generic [ref=f1e20]:
+  - generic [ref=f1e22]:
+    - generic [ref=f1e24]:
+      - heading "VASQUEZ" [level=3] [ref=f1e26]
+      - navigation "Dashboard" [ref=f1e27]:
+        - list [ref=f1e28]:
+          - listitem [ref=f1e29]:
+            - link "Inicio" [ref=f1e30] [cursor=pointer]:
+              - /url: /inicio
+          - listitem [ref=f1e35]:
+            - button "Ventas" [expanded] [ref=f1e36]
+            - list [ref=f1e48]:
+              - listitem [ref=f1e49]:
+                - link "Nueva venta" [ref=f1e50] [cursor=pointer]:
+                  - /url: /ventas/nueva
+              - listitem [ref=f1e55]:
+                - link "Historial" [ref=f1e56] [cursor=pointer]:
+                  - /url: /ventas/historial
+          - listitem [ref=f1e61]:
+            - button "Caja" [expanded] [ref=f1e62]
+            - list [ref=f1e74]:
+              - listitem [ref=f1e75]:
+                - link "Mi caja" [ref=f1e76] [cursor=pointer]:
+                  - /url: /caja/mi-caja
+              - listitem [ref=f1e81]:
+                - link "Sesiones" [ref=f1e82] [cursor=pointer]:
+                  - /url: /caja/sesiones
+              - listitem [ref=f1e87]:
+                - link "Movimientos" [ref=f1e88] [cursor=pointer]:
+                  - /url: /caja/movimientos
+          - listitem [ref=f1e93]:
+            - link "Reportes" [ref=f1e94] [cursor=pointer]:
+              - /url: /reportes
+          - listitem [ref=f1e99]:
+            - button "Mantenimiento" [expanded] [ref=f1e100]
+            - list [ref=f1e112]:
+              - listitem [ref=f1e113]:
+                - link "Marcas" [ref=f1e114] [cursor=pointer]:
+                  - /url: /mantenimiento/marcas
+              - listitem [ref=f1e119]:
+                - link "Categorías" [ref=f1e120] [cursor=pointer]:
+                  - /url: /mantenimiento/categorias
+              - listitem [ref=f1e125]:
+                - link "Unidades de medida" [ref=f1e126] [cursor=pointer]:
+                  - /url: /mantenimiento/unidades-medida
+              - listitem [ref=f1e131]:
+                - link "Atributos" [ref=f1e132] [cursor=pointer]:
+                  - /url: /mantenimiento/atributos
+              - listitem [ref=f1e137]:
+                - link "Productos Base" [ref=f1e138] [cursor=pointer]:
+                  - /url: /mantenimiento/base-products
+              - listitem [ref=f1e143]:
+                - link "Productos" [ref=f1e144] [cursor=pointer]:
+                  - /url: /mantenimiento/productos
+          - listitem [ref=f1e149]:
+            - link "Administración" [ref=f1e150] [cursor=pointer]:
+              - /url: /administracion
+    - generic [ref=f1e156]:
+      - generic [ref=f1e157]: AS
+      - paragraph [ref=f1e160]:
+        - strong [ref=f1e161]: Admin Seed
+        - generic [ref=f1e162]: admin@seed.com
+      - button "Cerrar sesión" [ref=f1e163] [cursor=pointer]
+  - generic [ref=f1e167]:
+    - generic [ref=f1e168]:
+      - generic [ref=f1e169]:
+        - button "Abrir menú" [ref=f1e170] [cursor=pointer]
+        - img "Logo colegio" [ref=f1e174]
+      - generic [ref=f1e175]:
+        - status [ref=f1e176]: En tiempo real
+        - generic [ref=f1e177]:
+          - searchbox "Buscar..." [ref=f1e178]
+          - button "Buscar" [ref=f1e179] [cursor=pointer]
+        - generic [ref=f1e183]: C
+    - main [ref=f1e186]:
+      - generic [ref=f1e187]:
+        - navigation "Breadcrumb" [ref=f1e189]:
+          - list [ref=f1e190]:
+            - listitem [ref=f1e191]: Inicio
+        - generic [ref=f1e193]:
+          - generic [ref=f1e194]:
+            - paragraph [ref=f1e195]: Inicio operativo
+            - heading "Vista general" [level=1] [ref=f1e196]
+            - paragraph [ref=f1e197]: Indicadores de 2026-09-14 al 2026-09-20 en America/Lima.
+          - generic [ref=f1e199]:
+            - generic [ref=f1e200]:
+              - generic [ref=f1e201]:
+                - paragraph [ref=f1e202]: Semana operativa
+                - heading "Indicadores de caja y ventas" [level=2] [ref=f1e203]
+              - generic [ref=f1e204]: Administrador
+            - generic [ref=f1e205]:
+              - generic [ref=f1e206]:
+                - generic [ref=f1e207]: Ventas cobradas
+                - generic [ref=f1e208]: "0.00"
+                - generic [ref=f1e209]: 0 transacciones
+              - generic [ref=f1e210]:
+                - generic [ref=f1e211]: Ticket promedio
+                - generic [ref=f1e212]: "0.00"
+                - generic [ref=f1e213]: Solo ventas pagadas
+              - generic [ref=f1e214]:
+                - generic [ref=f1e215]: Cancelaciones
+                - generic [ref=f1e216]: "0"
+                - generic [ref=f1e217]: 0.00 anulados
+            - status [ref=f1e218]:
+              - generic [ref=f1e219]: No hay ventas cobradas ni canceladas en esta semana.
+          - generic [ref=f1e220]:
+            - article [ref=f1e221]:
+              - generic [ref=f1e222]:
+                - generic [ref=f1e223]:
+                  - paragraph [ref=f1e224]: Rendimiento
+                  - heading "Referentes de la semana" [level=2] [ref=f1e225]
+                - status [ref=f1e226]:
+                  - generic [ref=f1e227]: Sin actividad comercial durante esta semana.
+            - article [ref=f1e228]:
+              - generic [ref=f1e229]:
+                - generic [ref=f1e230]:
+                  - paragraph [ref=f1e231]: Accesos
+                  - heading "Supervisión" [level=2] [ref=f1e232]
+                  - paragraph [ref=f1e233]: Solo rutas autorizadas para tu rol.
+                - generic [ref=f1e234]:
+                  - link "Historial" [ref=f1e235] [cursor=pointer]:
+                    - /url: /ventas/historial
+                  - link "Sesiones" [ref=f1e236] [cursor=pointer]:
+                    - /url: /caja/sesiones
+                  - link "Movimientos" [ref=f1e237] [cursor=pointer]:
+                    - /url: /caja/movimientos
+                  - link "Reportes" [ref=f1e238] [cursor=pointer]:
+                    - /url: /reportes

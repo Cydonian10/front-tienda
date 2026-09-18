@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { CashMovementsService } from '../../../core/api/cash-movements.service';
@@ -12,6 +12,8 @@ import { ReportsOverview, SalesSummary } from '../../../core/models/report.model
 import { ROLE_NAMES } from '../../../core/models/role.model';
 import { Sale } from '../../../core/models/sale.model';
 import { AuthStore } from '../../../core/store/auth.store';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
+import type { RealtimeEvent } from '../../../core/realtime/realtime-event.model';
 import BreadcrumbsNg from '../../../shared/breadcrumbs/breadcrumbs.ng';
 import {
   currentReportPeriod,
@@ -37,6 +39,8 @@ export default class InicioPage {
   private readonly dashboardService = inject(DashboardService);
   private readonly reportsService = inject(ReportsService);
   private readonly salesService = inject(SalesService);
+  private readonly realtimeService = inject(RealtimeService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly dashboardRole = this.dashboardService.dashboardRole;
   protected readonly isWorker = computed(() => this.dashboardRole() === ROLE_NAMES.WORKER);
@@ -110,6 +114,9 @@ export default class InicioPage {
     } else if (this.managementData()) {
       void this.loadManagementData();
     }
+    this.destroyRef.onDestroy(
+      this.realtimeService.onEvent((event) => this.handleRealtimeEvent(event)),
+    );
   }
 
   protected async retrySessions(): Promise<void> {
@@ -158,7 +165,9 @@ export default class InicioPage {
       this.ownSessions.set([]);
       this.recentMovements.set([]);
       this.sessionsError.set(this.message(error));
-      this.movementsError.set('No se pudieron identificar las sesiones propias para cargar movimientos.');
+      this.movementsError.set(
+        'No se pudieron identificar las sesiones propias para cargar movimientos.',
+      );
       this.isLoadingMovements.set(false);
     } finally {
       this.isLoadingSessions.set(false);
@@ -268,6 +277,22 @@ export default class InicioPage {
       this.overviewError.set(this.message(error));
     } finally {
       this.isLoadingOverview.set(false);
+    }
+  }
+
+  private handleRealtimeEvent(event: RealtimeEvent): void {
+    if (this.isWorker()) {
+      if (['sale.created', 'sale.paid', 'sale.cancelled'].includes(event.name)) {
+        void this.loadRecentSales();
+      } else if (['cash.opened', 'cash.closed'].includes(event.name)) {
+        void this.loadWorkerSessions();
+      } else if (event.name === 'cash.movement.created') {
+        void this.loadRecentMovements(this.ownSessions());
+      }
+      return;
+    }
+    if (event.name === 'sale.paid' || event.name === 'sale.cancelled') {
+      void this.loadManagementData();
     }
   }
 

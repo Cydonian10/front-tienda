@@ -1,7 +1,7 @@
 import { Dialog } from '@angular/cdk/dialog';
 import { DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
 
@@ -14,6 +14,8 @@ import {
   CashResponsible,
 } from '../../../../core/models/cash-register.model';
 import { AuthStore } from '../../../../core/store/auth.store';
+import { RealtimeService } from '../../../../core/realtime/realtime.service';
+import type { RealtimeEvent } from '../../../../core/realtime/realtime-event.model';
 import BreadcrumbsNg from '../../../../shared/breadcrumbs/breadcrumbs.ng';
 import { BusinessDatePipe } from '../../../../shared/pipes/business-date.pipe';
 import { openCashRegisterOpeningDialog } from '../../dialogs/cash-register-opening-dialog';
@@ -31,6 +33,8 @@ export default class MiCajaPage {
   private readonly registersService = inject(CashRegistersService);
   private readonly paymentMethodsService = inject(PaymentMethodsService);
   private readonly authStore = inject(AuthStore);
+  private readonly realtimeService = inject(RealtimeService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly registers = signal<CashRegister[]>([]);
   protected readonly openings = signal<CashRegisterOpening[]>([]);
@@ -43,6 +47,9 @@ export default class MiCajaPage {
 
   constructor() {
     void this.load();
+    this.destroyRef.onDestroy(
+      this.realtimeService.onEvent((event) => this.handleRealtimeEvent(event)),
+    );
   }
 
   protected async load(): Promise<void> {
@@ -117,6 +124,12 @@ export default class MiCajaPage {
       });
     } catch (error) {
       this.actionError.set(this.message(error));
+    }
+  }
+
+  private handleRealtimeEvent(event: RealtimeEvent): void {
+    if (event.name === 'cash.opened' || event.name === 'cash.closed') {
+      void this.load();
     }
   }
 

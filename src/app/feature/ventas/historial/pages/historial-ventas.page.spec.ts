@@ -9,6 +9,7 @@ import { ReportsService } from '../../../../core/api/reports.service';
 import { PeopleService } from '../../../../core/api/people.service';
 import { SalesService } from '../../../../core/api/sales.service';
 import { AuthStore } from '../../../../core/store/auth.store';
+import { RealtimeService } from '../../../../core/realtime/realtime.service';
 import HistorialVentasPage from './historial-ventas.page';
 
 describe('HistorialVentasPage', () => {
@@ -19,9 +20,11 @@ describe('HistorialVentasPage', () => {
     person: vi.fn(() => ({ id: 2, firstName: 'Ana', lastName: 'Pérez' })),
     user: vi.fn(() => ({ roles: ['RESPONSABLE'] })),
   };
+  const realtimeService = { onEvent: vi.fn() };
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    realtimeService.onEvent.mockImplementation(() => vi.fn());
     salesService.findAll.mockReturnValue(
       of({ data: [{ id: 999, totalAmount: 1 }], total: 1, page: 1, limit: 20, lastPage: 1 }),
     );
@@ -46,6 +49,7 @@ describe('HistorialVentasPage', () => {
         { provide: PeopleService, useValue: peopleService },
         { provide: SalesService, useValue: salesService },
         { provide: AuthStore, useValue: authStore },
+        { provide: RealtimeService, useValue: realtimeService },
         { provide: Dialog, useValue: { open: vi.fn() } },
         { provide: Router, useValue: { events: of(), navigate: vi.fn() } },
         { provide: ActivatedRoute, useValue: { snapshot: { pathFromRoot: [] } } },
@@ -137,5 +141,24 @@ describe('HistorialVentasPage', () => {
     await fixture.whenStable();
 
     expect(salesService.findAll).toHaveBeenCalledTimes(callsBeforeRetry + 1);
+  });
+
+  it('refreshes the table and summary from HTTP after a paid sale event', async () => {
+    const listener = vi.fn();
+    realtimeService.onEvent.mockImplementation((callback: typeof listener) => {
+      listener.mockImplementation(callback);
+      return vi.fn();
+    });
+    const fixture = TestBed.createComponent(HistorialVentasPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const salesCalls = salesService.findAll.mock.calls.length;
+    const summaryCalls = reportsService.findSalesSummary.mock.calls.length;
+
+    listener({ name: 'sale.paid', occurredAt: '', entityId: 1 });
+    await fixture.whenStable();
+
+    expect(salesService.findAll).toHaveBeenCalledTimes(salesCalls + 1);
+    expect(reportsService.findSalesSummary).toHaveBeenCalledTimes(summaryCalls + 1);
   });
 });

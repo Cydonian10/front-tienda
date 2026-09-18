@@ -24,6 +24,7 @@ export interface ProductUnit {
 
 export interface CreateProduct {
   stock: number;
+  lowStockThreshold?: number | null;
   price: number;
   baseProductId: number;
   productAttributes: ProductAttributeItem[];
@@ -31,6 +32,7 @@ export interface CreateProduct {
 
 export interface UpdateProduct {
   stock?: number;
+  lowStockThreshold?: number | null;
   price?: number;
   productAttributes?: ProductAttributeItem[];
 }
@@ -38,6 +40,7 @@ export interface UpdateProduct {
 export interface Product {
   id: number;
   stock: number;
+  lowStockThreshold: number | null;
   price: number;
   baseProductId: number;
   baseProductName: string;

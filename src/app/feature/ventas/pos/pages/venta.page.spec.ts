@@ -18,6 +18,7 @@ describe('VentasPage', () => {
   const product: Product = {
     id: 1,
     stock: 30,
+    lowStockThreshold: null,
     price: 10,
     baseProductId: 1,
     baseProductName: 'Tornillo',

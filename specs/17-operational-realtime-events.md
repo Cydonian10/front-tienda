@@ -1,6 +1,6 @@
 # SPEC 17 — Eventos operativos en tiempo real
 
-> **Status:** Borrador
+> **Status:** Aprobado
 > **Depends on:** SPEC 10 (rol responsable y permisos operativos), SPEC 11 (navegación y rutas por rol), SPEC 12 (historial de ventas y resumen por período), SPEC 13 (mi caja, sesiones y movimientos), SPEC 14 (reportes de resumen, ventas y vendedores), SPEC 15 (reportes de productos, pagos y cajas), SPEC 16 (inicio operativo por rol), API `ApiTienda` SPEC 16 (cajas, sesiones y cierres), API `ApiTienda` SPEC 17 (ventas pendientes, pago y cancelación)
 > **Date:** 2026-09-12
 > **Objective:** Notificar eventos operativos autenticados por Socket.IO y refrescar mediante HTTP las vistas autorizadas sin duplicar el estado de negocio en el socket.
@@ -75,15 +75,15 @@ export interface StockLowEvent extends RealtimeEvent {
 
 Destinos de emisión:
 
-| Evento | Salas destinatarias |
-| --- | --- |
-| `sale.created` | `user:<sellerPersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>` |
-| `sale.paid` | `user:<sellerPersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>` |
-| `sale.cancelled` | `user:<sellerPersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>` |
-| `cash.opened` | `user:<responsiblePersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>` |
-| `cash.closed` | `user:<responsiblePersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>` |
-| `cash.movement.created` | `user:<createdByPersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>` |
-| `stock.low` | `role:RESPONSABLE`, `role:ADMINISTRADOR`, más la sala de usuario y caja de la venta que cruzó el umbral |
+| Evento                  | Salas destinatarias                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| `sale.created`          | `user:<sellerPersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>`              |
+| `sale.paid`             | `user:<sellerPersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>`              |
+| `sale.cancelled`        | `user:<sellerPersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>`              |
+| `cash.opened`           | `user:<responsiblePersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>`         |
+| `cash.closed`           | `user:<responsiblePersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>`         |
+| `cash.movement.created` | `user:<createdByPersonId>`, `role:RESPONSABLE`, `role:ADMINISTRADOR`, `cash:<cashRegisterId>`           |
+| `stock.low`             | `role:RESPONSABLE`, `role:ADMINISTRADOR`, más la sala de usuario y caja de la venta que cruzó el umbral |
 
 Convenciones:
 
@@ -161,13 +161,13 @@ Archivos principales:
 
 ## Risks
 
-| Riesgo | Mitigación |
-| --- | --- |
-| Un socket conserva permisos después de un cambio de rol. | El JWT es la instantánea de permisos; desconectar al cerrar sesión y requerir autenticación renovada para cambios de rol. |
-| Se emite un evento de una transacción que luego revierte. | Emitir únicamente después del commit exitoso de la operación transaccional. |
-| La reconexión pierde señales intermedias. | Cada señal refresca desde REST y la aplicación continúa funcional sin socket. |
-| Un umbral bajo dispara alertas repetidas. | Emitir solo en el cruce desde encima del umbral. |
-| Una suscripción de caja filtra eventos a un trabajador ajeno. | Autorizar cada suscripción contra la sesión activa y probar aislamiento. |
+| Riesgo                                                        | Mitigación                                                                                                                |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Un socket conserva permisos después de un cambio de rol.      | El JWT es la instantánea de permisos; desconectar al cerrar sesión y requerir autenticación renovada para cambios de rol. |
+| Se emite un evento de una transacción que luego revierte.     | Emitir únicamente después del commit exitoso de la operación transaccional.                                               |
+| La reconexión pierde señales intermedias.                     | Cada señal refresca desde REST y la aplicación continúa funcional sin socket.                                             |
+| Un umbral bajo dispara alertas repetidas.                     | Emitir solo en el cruce desde encima del umbral.                                                                          |
+| Una suscripción de caja filtra eventos a un trabajador ajeno. | Autorizar cada suscripción contra la sesión activa y probar aislamiento.                                                  |
 
 ## What is **not** in this spec
 

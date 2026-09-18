@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core/api/auth.service';
 import { PeopleService } from '../../../core/api/people.service';
 import { AuthStore } from '../../../core/store/auth.store';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
 
 @Component({
   selector: 'login-page',
@@ -18,6 +19,7 @@ export default class LoginPage {
   private readonly authService = inject(AuthService);
   private readonly peopleService = inject(PeopleService);
   private readonly authStore = inject(AuthStore);
+  private readonly realtimeService = inject(RealtimeService);
   private readonly router = inject(Router);
 
   protected readonly isLoading = signal(false);
@@ -40,6 +42,7 @@ export default class LoginPage {
       this.authStore.setUser(result.user);
       const person = await firstValueFrom(this.peopleService.findOne(result.user.personId));
       this.authStore.setPerson(person);
+      this.realtimeService.connect(result.accessToken);
       await this.router.navigate(['/dashboard']);
     } catch (err) {
       this.error.set(this.getErrorMessage(err));

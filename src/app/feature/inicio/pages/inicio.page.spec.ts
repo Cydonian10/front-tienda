@@ -11,6 +11,7 @@ import { SalesService } from '../../../core/api/sales.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { ROLE_NAMES } from '../../../core/models/role.model';
 import { AuthStore } from '../../../core/store/auth.store';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
 import InicioPage from './inicio.page';
 
 describe('InicioPage', () => {
@@ -21,6 +22,7 @@ describe('InicioPage', () => {
   const cashMovementsService = { findAll: vi.fn() };
   const reportsService = { findSalesSummary: vi.fn(), findOverview: vi.fn() };
   const salesService = { findAll: vi.fn() };
+  const realtimeService = { onEvent: vi.fn() };
   const authStore = {
     person: vi.fn(() => ({ id: 2, firstName: 'Ana', lastName: 'Pérez' })),
   };
@@ -56,12 +58,15 @@ describe('InicioPage', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    realtimeService.onEvent.mockImplementation(() => vi.fn());
     dashboardRole.set(ROLE_NAMES.WORKER);
     cashRegistersService.findAll.mockReturnValue(of([]));
     cashMovementsService.findAll.mockReturnValue(
       of({ data: [], total: 0, page: 1, limit: 5, lastPage: 0 }),
     );
-    salesService.findAll.mockReturnValue(of({ data: [], total: 0, page: 1, limit: 5, lastPage: 0 }));
+    salesService.findAll.mockReturnValue(
+      of({ data: [], total: 0, page: 1, limit: 5, lastPage: 0 }),
+    );
     reportsService.findSalesSummary.mockReturnValue(of(emptySummary));
     reportsService.findOverview.mockReturnValue(of(emptyOverview));
 
@@ -74,6 +79,7 @@ describe('InicioPage', () => {
         { provide: SalesService, useValue: salesService },
         { provide: DashboardService, useValue: dashboardService },
         { provide: AuthStore, useValue: authStore },
+        { provide: RealtimeService, useValue: realtimeService },
         { provide: Router, useValue: { events: of() } },
         { provide: ActivatedRoute, useValue: { snapshot: { pathFromRoot: [] } } },
       ],
@@ -115,13 +121,38 @@ describe('InicioPage', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('No hay ventas cobradas ni canceladas en esta semana.');
-    expect(fixture.nativeElement.textContent).toContain('Sin actividad comercial durante esta semana.');
+    expect(fixture.nativeElement.textContent).toContain(
+      'No hay ventas cobradas ni canceladas en esta semana.',
+    );
+    expect(fixture.nativeElement.textContent).toContain(
+      'Sin actividad comercial durante esta semana.',
+    );
+  });
+
+  it('refreshes only the worker sales block after a sale event', async () => {
+    const listener = vi.fn();
+    realtimeService.onEvent.mockImplementation((callback: typeof listener) => {
+      listener.mockImplementation(callback);
+      return vi.fn();
+    });
+    const fixture = TestBed.createComponent(InicioPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const salesCalls = salesService.findAll.mock.calls.length;
+    const movementCalls = cashMovementsService.findAll.mock.calls.length;
+
+    listener({ name: 'sale.paid', occurredAt: '', entityId: 1 });
+    await fixture.whenStable();
+
+    expect(salesService.findAll).toHaveBeenCalledTimes(salesCalls + 1);
+    expect(cashMovementsService.findAll).toHaveBeenCalledTimes(movementCalls);
   });
 
   it('keeps a successful overview visible when the weekly summary fails and retries only it', async () => {
     dashboardRole.set(ROLE_NAMES.RESPONSIBLE);
-    reportsService.findSalesSummary.mockReturnValue(throwError(() => new Error('Resumen no disponible')));
+    reportsService.findSalesSummary.mockReturnValue(
+      throwError(() => new Error('Resumen no disponible')),
+    );
     reportsService.findOverview.mockReturnValue(
       of({
         ...emptyOverview,

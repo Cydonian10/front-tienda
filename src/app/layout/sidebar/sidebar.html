@@ -145,6 +145,18 @@
       <div class="navbar-center"></div>
 
       <div class="navbar-end gap-2">
+        <span
+          class="badge badge-sm badge-soft"
+          [class.badge-success]="connectionState() === 'connected'"
+          [class.badge-warning]="
+            connectionState() === 'connecting' || connectionState() === 'reconnecting'
+          "
+          [class.badge-ghost]="connectionState() === 'disconnected'"
+          role="status"
+          aria-live="polite"
+        >
+          {{ connectionStatusLabel() }}
+        </span>
         <div #searchContainer class="flex items-center gap-2">
           <input
             #searchInput

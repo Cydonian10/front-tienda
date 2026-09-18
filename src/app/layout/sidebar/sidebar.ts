@@ -11,6 +11,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthStore } from '../../core/store/auth.store';
+import { RealtimeService } from '../../core/realtime/realtime.service';
 import { Icon } from '../../shared/icon/icon';
 
 @Component({
@@ -26,12 +27,25 @@ export class Sidebar {
   private readonly router = inject(Router);
   private readonly authStore = inject(AuthStore);
   private readonly dashboardService = inject(DashboardService);
+  private readonly realtimeService = inject(RealtimeService);
 
   protected readonly menu = this.dashboardService.menu;
   protected readonly toggleGroup = (id: string) => this.dashboardService.toggleGroup(id);
 
   protected readonly person = this.authStore.person;
   protected readonly user = this.authStore.user;
+  protected readonly connectionState = this.realtimeService.connectionState;
+  protected readonly connectionStatusLabel = computed(() => {
+    switch (this.connectionState()) {
+      case 'connected':
+        return 'En tiempo real';
+      case 'connecting':
+      case 'reconnecting':
+        return 'Reconectando';
+      default:
+        return 'Sin conexión';
+    }
+  });
 
   protected readonly fullName = computed(() => {
     const person = this.authStore.person();

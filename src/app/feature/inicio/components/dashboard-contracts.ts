@@ -1,7 +1,7 @@
 import { CashMovement } from '../../../core/models/cash-movement.model';
 import { DashboardNavigationLink } from '../../../core/services/dashboard.service';
 import { ROLE_NAMES } from '../../../core/models/role.model';
-import { ReportsOverview, SalesSummary } from '../../../core/models/report.model';
+import { ReportsOverview, SalesByDay, SalesSummary } from '../../../core/models/report.model';
 import { Sale } from '../../../core/models/sale.model';
 
 export interface WorkerDashboardSession {
@@ -35,5 +35,6 @@ export interface ManagementDashboardData {
   weekLabel: string;
   summary: DashboardBlock<SalesSummary | null>;
   overview: DashboardBlock<ReportsOverview | null>;
+  salesTrend: DashboardBlock<SalesByDay[] | null>;
   links: DashboardNavigationLink[];
 }

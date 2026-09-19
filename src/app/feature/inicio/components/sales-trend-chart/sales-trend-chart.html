@@ -1,0 +1,46 @@
+<div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h2 class="card-title">Ritmo de ventas</h2>
+      <p class="mt-1 text-sm text-base-content/60">
+        Facturación cobrada frente a anulaciones.
+      </p>
+    </div>
+    <div role="tablist" class="tabs tabs-box tabs-sm self-start" aria-label="Período de tendencia">
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.tab-active]="isSelected('day')"
+        [attr.aria-selected]="isSelected('day')"
+        (click)="selectPeriod('day')"
+      >
+        Días
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.tab-active]="isSelected('week')"
+        [attr.aria-selected]="isSelected('week')"
+        (click)="selectPeriod('week')"
+      >
+        Semanas
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.tab-active]="isSelected('month')"
+        [attr.aria-selected]="isSelected('month')"
+        (click)="selectPeriod('month')"
+      >
+        Meses
+      </button>
+    </div>
+  </div>
+
+  <div class="h-72 w-full sm:h-80">
+    <canvas #canvas aria-label="Gráfico de tendencia de ventas" role="img"></canvas>
+  </div>
+</div>

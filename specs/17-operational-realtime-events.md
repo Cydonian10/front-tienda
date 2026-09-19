@@ -178,3 +178,4 @@ Archivos principales:
 - Exportación o nuevos reportes.
 
 Cada uno de esos cambios, si llega, debe definirse en su propia spec.
+1

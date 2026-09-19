@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { DateTime } from 'luxon';
 import { firstValueFrom } from 'rxjs';
 
 import { CashMovementsService } from '../../../core/api/cash-movements.service';
@@ -8,7 +9,7 @@ import { ReportsService } from '../../../core/api/reports.service';
 import { SalesService } from '../../../core/api/sales.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { CashMovement } from '../../../core/models/cash-movement.model';
-import { ReportsOverview, SalesSummary } from '../../../core/models/report.model';
+import { ReportsOverview, SalesByDay, SalesSummary } from '../../../core/models/report.model';
 import { ROLE_NAMES } from '../../../core/models/role.model';
 import { Sale } from '../../../core/models/sale.model';
 import { AuthStore } from '../../../core/store/auth.store';
@@ -54,12 +55,16 @@ export default class InicioPage {
   protected readonly salesError = signal<string | null>(null);
   protected readonly movementsError = signal<string | null>(null);
   protected readonly weeklyPeriod = toAppliedReportPeriod(currentReportPeriod())!;
+  private readonly salesTrendRange = this.createSalesTrendRange();
   protected readonly summary = signal<SalesSummary | null>(null);
   protected readonly overview = signal<ReportsOverview | null>(null);
+  protected readonly salesTrend = signal<SalesByDay[] | null>(null);
   protected readonly isLoadingSummary = signal(true);
   protected readonly isLoadingOverview = signal(true);
+  protected readonly isLoadingSalesTrend = signal(true);
   protected readonly summaryError = signal<string | null>(null);
   protected readonly overviewError = signal<string | null>(null);
+  protected readonly salesTrendError = signal<string | null>(null);
 
   protected readonly workerData = computed<WorkerDashboardData>(() => {
     const person = this.authStore.person();
@@ -99,6 +104,11 @@ export default class InicioPage {
         isLoading: this.isLoadingOverview(),
         error: this.overviewError(),
       },
+      salesTrend: {
+        data: this.salesTrend(),
+        isLoading: this.isLoadingSalesTrend(),
+        error: this.salesTrendError(),
+      },
       links: this.dashboardService.authorizedRoutes([
         'historial-ventas',
         'sesiones-caja',
@@ -137,6 +147,10 @@ export default class InicioPage {
 
   protected async retryOverview(): Promise<void> {
     await this.loadOverview();
+  }
+
+  protected async retrySalesTrend(): Promise<void> {
+    await this.loadSalesTrend();
   }
 
   private async loadWorkerData(): Promise<void> {
@@ -240,7 +254,7 @@ export default class InicioPage {
   }
 
   private async loadManagementData(): Promise<void> {
-    await Promise.all([this.loadSummary(), this.loadOverview()]);
+    await Promise.all([this.loadSummary(), this.loadOverview(), this.loadSalesTrend()]);
   }
 
   private async loadSummary(): Promise<void> {
@@ -278,6 +292,27 @@ export default class InicioPage {
     } finally {
       this.isLoadingOverview.set(false);
     }
+  }
+
+  private async loadSalesTrend(): Promise<void> {
+    this.isLoadingSalesTrend.set(true);
+    this.salesTrendError.set(null);
+    try {
+      this.salesTrend.set(await firstValueFrom(this.reportsService.findSalesByDay(this.salesTrendRange)));
+    } catch (error) {
+      this.salesTrend.set(null);
+      this.salesTrendError.set(this.message(error));
+    } finally {
+      this.isLoadingSalesTrend.set(false);
+    }
+  }
+
+  private createSalesTrendRange(): { from: string; to: string } {
+    const now = DateTime.now().setZone('America/Lima');
+    return {
+      from: now.startOf('month').minus({ months: 11 }).startOf('day').toISO()!,
+      to: now.endOf('day').toISO()!,
+    };
   }
 
   private handleRealtimeEvent(event: RealtimeEvent): void {

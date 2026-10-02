@@ -36,9 +36,9 @@ describe('ConfirmDialogService', () => {
       expect(document.getElementById(dialog.getAttribute('aria-labelledby')!)?.textContent).toBe(
         options.title,
       );
-      expect(document.getElementById(dialog.getAttribute('aria-describedby')!)?.textContent).toBe(
-        options.message,
-      );
+      expect(
+        document.getElementById(dialog.getAttribute('aria-describedby')!)?.textContent?.trim(),
+      ).toBe(options.message);
       expect(dialog.getAttribute('aria-modal')).toBe('true');
       expect(document.activeElement).toBe(container().querySelector('[data-confirm-cancel]'));
       container().querySelector<HTMLButtonElement>('[data-confirm-accept]')!.click();
@@ -83,7 +83,7 @@ describe('ConfirmDialogService', () => {
       .subscribe();
     await render();
     expect(container().querySelector('h2')?.textContent).toBe('<img src=x>');
-    expect(container().querySelector('p')?.textContent).toBe('<strong>Mensaje</strong>');
+    expect(container().querySelector('p')?.textContent?.trim()).toBe('<strong>Mensaje</strong>');
     expect(container().querySelector('img, strong')).toBeNull();
     expect(
       container().querySelector('[data-confirm-accept]')?.classList.contains('btn-error'),

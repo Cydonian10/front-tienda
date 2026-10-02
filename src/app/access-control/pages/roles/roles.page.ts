@@ -3,9 +3,10 @@ import { SearchSelect } from '../../../shared/components/search-select/search-se
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ToastService } from '../../../shared/services/toast.service';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
+import { Tooltip } from '../../../shared/directives/tooltip/tooltip';
 
 @Component({
-  imports: [SearchSelect, ReactiveFormsModule],
+  imports: [SearchSelect, ReactiveFormsModule, Tooltip],
   selector: 'app-roles',
   template: `
     <h1>Roles Page</h1>
@@ -16,7 +17,7 @@ import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.se
       [formControl]="idProductForm"
     />
 
-    <button class="btn btn-primary" (click)="confirmarGuardar()">Guardar</button>
+    <button appTooltip="Guardar los cambios de productos" class="btn btn-primary">Guardar</button>
   `,
   host: { class: 'block' },
 })

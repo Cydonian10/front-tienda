@@ -9,6 +9,8 @@ export const ICONS = {
   'chevron-down': [{ type: 'path', d: 'm6 9 6 6 6-6' }],
   'chevron-right': [{ type: 'path', d: 'm9 6 6 6-6 6' }],
   check: [{ type: 'path', d: 'm5 12 4 4L19 6' }],
+  upload: [{ type: 'path', d: 'M12 16V3m-5 5 5-5 5 5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4' }],
+  file: [{ type: 'path', d: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Zm0 0v6h6M8 13h8m-8 4h6' }],
   settings: [
     {
       type: 'path',

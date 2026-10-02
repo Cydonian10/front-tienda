@@ -1,0 +1,90 @@
+<section [attr.aria-labelledby]="id + '-label'" (focusout)="onBlur($event)">
+  <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <h3 [id]="id + '-label'" class="min-w-0 [overflow-wrap:anywhere] text-sm font-semibold text-base-content">{{ label() }}</h3>
+    <span class="text-xs text-base-content">{{ multiple() ? 'Selección múltiple' : 'Un archivo' }}</span>
+  </div>
+
+  <div
+    class="rounded-box border-2 border-dashed p-6 text-center motion-safe:transition-colors sm:p-8"
+    [class.border-base-300]="!dragging()"
+    [class.bg-base-100]="!dragging()"
+    [class.border-primary]="dragging()"
+    [class.bg-primary/10]="dragging()"
+    [class.opacity-50]="isDisabled()"
+    (dragenter)="onDragEnter($event)"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <app-icon name="upload" [size]="32" class="mb-4 text-primary" />
+    <p class="text-base font-semibold text-base-content">
+      @if (dragging()) {
+        Suelta los archivos aquí
+      } @else {
+        <span class="sm:hidden">Selecciona tus archivos</span>
+        <span class="hidden sm:inline">Arrastra tus archivos aquí</span>
+      }
+    </p>
+    <p class="mt-1 text-sm text-base-content">Desde tu dispositivo, sin complicaciones</p>
+    <input
+      #picker
+      type="file"
+      hidden
+      [accept]="accept()"
+      [multiple]="multiple()"
+      [disabled]="isDisabled()"
+      (change)="onInput($event)"
+    />
+    <button
+      #choose
+      type="button"
+      class="btn btn-primary mt-5 min-h-11 w-full sm:w-auto"
+      [disabled]="isDisabled()"
+      [attr.aria-describedby]="id + '-rules'"
+      (click)="picker.click()"
+    >
+      {{ multiple() ? 'Seleccionar archivos' : 'Seleccionar archivo' }}
+    </button>
+    <p [id]="id + '-rules'" class="mt-4 [overflow-wrap:anywhere] text-xs leading-relaxed text-base-content">{{ rules() }}</p>
+  </div>
+
+  <div aria-live="polite" aria-atomic="true" class="sr-only">
+    {{ files().length }} archivos seleccionados. {{ errors().length ? 'Hay archivos que no se pudieron agregar.' : '' }}
+  </div>
+  <div role="alert">
+    @if (errors().length) {
+      <ul class="mt-3 space-y-1 text-sm text-error">
+        @for (error of errors(); track $index) {
+          <li class="[overflow-wrap:anywhere]">{{ error.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  @if (files().length) {
+    <div class="mt-5 flex flex-wrap items-center justify-between gap-2 text-xs text-base-content">
+      <span class="font-medium">Archivos seleccionados ({{ files().length }})</span>
+      <span>{{ formatSize(totalSize()) }} en total · Pendientes de envío</span>
+    </div>
+    <ul class="mt-2 divide-y divide-base-300" aria-label="Archivos seleccionados">
+      @for (file of files(); track $index; let index = $index) {
+        <li class="flex items-center gap-3 py-3">
+          <app-icon name="file" [size]="22" class="shrink-0 text-base-content" />
+          <div class="min-w-0 flex-1">
+            <p class="[overflow-wrap:anywhere] text-sm font-medium text-base-content">{{ file.name }}</p>
+            <p class="mt-0.5 text-xs text-base-content">{{ formatSize(file.size) }}</p>
+          </div>
+          <button
+            type="button"
+            class="btn btn-ghost btn-square min-h-11 min-w-11 shrink-0"
+            [disabled]="isDisabled()"
+            [attr.aria-label]="'Quitar ' + file.name"
+            (click)="remove(index)"
+          >
+            <app-icon name="close" [size]="18" />
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>

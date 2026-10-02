@@ -1,0 +1,120 @@
+<button
+  #trigger
+  type="button"
+  class="btn w-full justify-between gap-2 overflow-hidden font-normal"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  [disabled]="isDisabled()"
+  [attr.aria-label]="placeholder()"
+  [attr.aria-expanded]="opened()"
+  [attr.aria-controls]="opened() ? id + '-listbox' : null"
+  aria-haspopup="listbox"
+  (click)="toggle()"
+>
+  <span
+    class="truncate text-left"
+    [class]="displayValue() ? 'truncate text-left' : 'truncate text-left text-base-content/60'"
+  >
+    {{ displayValue() || placeholder() }}
+  </span>
+  <svg
+    class="size-4 shrink-0"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    aria-hidden="true"
+  >
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+</button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="opened()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayWidth]="overlayWidth()"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  (backdropClick)="close()"
+  (detach)="close()"
+  (attach)="focusSearch()"
+>
+  <div
+    class="rounded-box border border-base-300 bg-base-200 p-1 shadow-lg"
+    (keydown)="onKeydown($event)"
+  >
+    <input
+      #search
+      type="search"
+      role="combobox"
+      class="input input-sm mb-1 w-full"
+      [placeholder]="searchPlaceholder()"
+      [attr.aria-label]="searchPlaceholder()"
+      [attr.aria-controls]="id + '-listbox'"
+      [attr.aria-expanded]="true"
+      aria-autocomplete="list"
+      [attr.aria-activedescendant]="activeIndex() >= 0 ? id + '-option-' + activeIndex() : null"
+      [value]="query()"
+      (input)="onSearch(search.value)"
+    />
+    <div
+      [id]="id + '-listbox'"
+      role="listbox"
+      [attr.aria-multiselectable]="multiple() ? true : null"
+      class="overflow-y-auto overscroll-contain"
+      [style.max-height.px]="maxListHeight"
+    >
+      @for (option of filteredOptions(); track option.value; let index = $index) {
+        <button
+          type="button"
+          role="option"
+          class="flex h-10 w-full items-center gap-2 rounded-field px-3 text-left text-sm hover:bg-base-300 focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
+          [class.bg-base-300]="index === activeIndex()"
+          [id]="id + '-option-' + index"
+          [attr.aria-selected]="selected().includes(option.value)"
+          [disabled]="option.disabled"
+          (mouseenter)="activeIndex.set(index)"
+          (click)="choose(option)"
+        >
+          @if (multiple()) {
+            <span
+              class="grid size-4 shrink-0 place-items-center rounded border border-base-content/50"
+              [class.bg-primary]="selected().includes(option.value)"
+              [class.text-primary-content]="selected().includes(option.value)"
+              aria-hidden="true"
+            >
+              @if (selected().includes(option.value)) {
+                <svg
+                  class="size-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <path d="m5 12 4 4L19 6" />
+                </svg>
+              }
+            </span>
+          }
+          <span class="min-w-0 flex-1 truncate">{{ option.label }}</span>
+          @if (!multiple() && selected().includes(option.value)) {
+            <svg
+              class="size-4 shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path d="m5 12 4 4L19 6" />
+            </svg>
+          }
+        </button>
+      } @empty {
+        <p class="px-3 py-2 text-sm text-base-content/60">Sin resultados</p>
+      }
+    </div>
+  </div>
+</ng-template>

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '@angular/cdk/overlay-prebuilt.css';
 
 @plugin "daisyui" {
   themes: ferreteria --default;

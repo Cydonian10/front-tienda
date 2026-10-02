@@ -1,6 +1,7 @@
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
 import { Component, ElementRef, ViewChild, computed, forwardRef, input, output, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Icon } from '../icon/icon';
 
 export interface SearchSelectOption {
   value: string | number;
@@ -12,7 +13,7 @@ let nextId = 0;
 
 @Component({
   selector: 'app-search-select',
-  imports: [CdkConnectedOverlay, CdkOverlayOrigin],
+  imports: [CdkConnectedOverlay, CdkOverlayOrigin, Icon],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

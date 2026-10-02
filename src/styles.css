@@ -2,7 +2,9 @@
 @import '@angular/cdk/overlay-prebuilt.css';
 
 @plugin "daisyui" {
-  themes: ferreteria --default;
+  themes:
+    light,
+    ferreteria --default;
 }
 
 @plugin "daisyui/theme" {
@@ -10,9 +12,9 @@
   default: true;
   prefersdark: true;
   color-scheme: dark;
-  --color-base-100: oklch(15% 0.014 250);
-  --color-base-200: oklch(18% 0.018 250);
-  --color-base-300: oklch(23% 0.02 250);
+  --color-base-100: oklch(24% 0.025 250);
+  --color-base-200: oklch(28% 0.025 250);
+  --color-base-300: oklch(35% 0.028 250);
   --color-base-content: oklch(92% 0.014 250);
   --color-primary: oklch(68% 0.13 176);
   --color-primary-content: oklch(16% 0.02 176);
@@ -20,7 +22,7 @@
   --color-secondary-content: oklch(16% 0.02 220);
   --color-accent: oklch(78% 0.14 82);
   --color-accent-content: oklch(20% 0.03 82);
-  --color-neutral: oklch(28% 0.016 250);
+  --color-neutral: oklch(38% 0.025 250);
   --color-neutral-content: oklch(90% 0.012 250);
   --color-info: oklch(68% 0.12 230);
   --color-info-content: oklch(18% 0.03 230);
@@ -40,12 +42,30 @@
   --noise: 0;
 }
 
+/* Administrative surfaces are distinct from page components and status colors. */
+.admin-shell {
+  --admin-canvas: var(--color-base-200);
+  --admin-nav-surface: oklch(25.629% 0.02921 253.069);
+  --admin-nav-raised: oklch(36% 0.04 250);
+  --admin-nav-border: oklch(43% 0.03 250);
+  --admin-nav-content: oklch(95% 0.01 250);
+  --admin-nav-accent: oklch(79% 0.11 179);
+  --admin-nav-accent-content: oklch(25% 0.03 190);
+}
+
+:root[data-theme='light'] .admin-shell {
+  --admin-canvas: oklch(96% 0.012 250);
+  --admin-nav-surface: oklch(37% 0.053 250);
+  --admin-nav-raised: oklch(42% 0.049 250);
+  --admin-nav-border: oklch(49% 0.04 250);
+}
+
 * {
   box-sizing: border-box;
 }
 
 html {
-  background: oklch(12% 0.012 250);
+  background: var(--color-base-100);
 }
 
 body {
@@ -54,12 +74,13 @@ body {
 }
 
 ::selection {
-  background: oklch(68% 0.13 176 / 0.35);
-  color: oklch(98% 0 0);
+  background: color-mix(in oklab, var(--color-primary) 35%, transparent);
+  color: var(--color-base-content);
 }
 
 * {
-  scrollbar-color: oklch(37% 0.02 250) oklch(15% 0.014 250);
+  scrollbar-color: color-mix(in oklab, var(--color-base-content) 35%, var(--color-base-100))
+    var(--color-base-100);
   scrollbar-width: thin;
 }
 :host {
@@ -69,7 +90,7 @@ body {
 
 .app-shell {
   min-height: 100dvh;
-  background: oklch(12% 0.012 250);
+  background: var(--color-base-100);
   color: var(--color-base-content);
 }
 

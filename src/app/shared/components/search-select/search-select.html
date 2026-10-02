@@ -17,16 +17,7 @@
   >
     {{ displayValue() || placeholder() }}
   </span>
-  <svg
-    class="size-4 shrink-0"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    aria-hidden="true"
-  >
-    <path d="m6 9 6 6 6-6" />
-  </svg>
+  <app-icon name="chevron-down" [size]="16" />
 </button>
 
 <ng-template
@@ -86,30 +77,13 @@
               aria-hidden="true"
             >
               @if (selected().includes(option.value)) {
-                <svg
-                  class="size-3"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="3"
-                >
-                  <path d="m5 12 4 4L19 6" />
-                </svg>
+                <app-icon name="check" [size]="12" />
               }
             </span>
           }
           <span class="min-w-0 flex-1 truncate">{{ option.label }}</span>
           @if (!multiple() && selected().includes(option.value)) {
-            <svg
-              class="size-4 shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <path d="m5 12 4 4L19 6" />
-            </svg>
+            <app-icon name="check" [size]="16" />
           }
         </button>
       } @empty {

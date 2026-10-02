@@ -1,0 +1,57 @@
+<!-- Persistent live regions announce new messages without moving keyboard focus. -->
+<div class="sr-only" aria-live="polite" aria-relevant="additions">
+  @for (notification of politeNotifications(); track notification.id) {
+    <p>{{ notification.title }}. {{ notification.message }}</p>
+  }
+</div>
+<div class="sr-only" aria-live="assertive" aria-relevant="additions">
+  @for (notification of urgentNotifications(); track notification.id) {
+    <p>{{ notification.title }}. {{ notification.message }}</p>
+  }
+</div>
+
+@if (toast.notifications().length) {
+  <section class="toast toast-top toast-end toast-stack" aria-label="Notificaciones">
+    @for (notification of toast.notifications(); track notification.id) {
+      <article
+        class="alert alert-horizontal toast-notification pointer-events-auto border-base-300 bg-base-300 text-base-content"
+        role="group"
+        [attr.data-toast-id]="notification.id"
+        [attr.aria-labelledby]="'toast-title-' + notification.id"
+        [attr.aria-describedby]="'toast-message-' + notification.id"
+        (pointerenter)="toast.pause(notification.id, 'pointer')"
+        (pointerleave)="toast.resume(notification.id, 'pointer')"
+        (focusin)="onFocusIn(notification.id, $event)"
+        (focusout)="onFocusOut(notification.id, $event)"
+        (keydown.escape)="$event.stopPropagation(); dismiss(notification.id)"
+      >
+        <span
+          class="toast-icon grid size-9 shrink-0 place-items-center rounded-field"
+          [class]="iconClasses[notification.type]"
+          aria-hidden="true"
+        >
+          <app-icon [name]="notification.type" />
+        </span>
+        <div class="min-w-0">
+          <h2 [id]="'toast-title-' + notification.id" class="text-sm leading-5 font-semibold">
+            {{ notification.title }}
+          </h2>
+          <p
+            [id]="'toast-message-' + notification.id"
+            class="mt-1 text-sm leading-relaxed text-base-content/80"
+          >
+            {{ notification.message }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="btn btn-ghost btn-square size-11 min-h-11 self-start rounded-field text-base-content/70 hover:text-base-content"
+          [attr.aria-label]="'Cerrar notificación: ' + notification.title"
+          (click)="dismiss(notification.id)"
+        >
+          <app-icon name="close" [size]="16" />
+        </button>
+      </article>
+    }
+  </section>
+}

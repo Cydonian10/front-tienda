@@ -1,8 +1,10 @@
 import { Component, ElementRef, input, output, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ThemeToggle } from '../../shared/components/theme-toggle/theme-toggle';
+import { Icon } from '../../shared/components/icon/icon';
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, ThemeToggle, Icon],
   selector: 'app-admin-header',
   template: `
     <header
@@ -21,7 +23,7 @@ import { RouterLink } from '@angular/router';
           (keydown.enter)="$event.preventDefault(); menuToggleRequested.emit()"
           (keydown.space)="$event.preventDefault(); menuToggleRequested.emit()"
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h11" /></svg>
+          <app-icon name="menu" [size]="18.4" />
         </label>
         <a
           routerLink="/admin/roles"
@@ -29,7 +31,8 @@ import { RouterLink } from '@angular/router';
           >Panel operativo</a
         >
       </div>
-      <div class="navbar-end w-auto shrink-0 gap-3">
+      <div class="navbar-end w-auto shrink-0 gap-1 sm:gap-3">
+        <app-theme-toggle />
         <span class="hidden text-right sm:block">
           <span class="block text-xs font-semibold text-base-content">{{ userName() }}</span>
           <span class="mt-0.5 block text-xs text-base-content/70">Sesión activa</span>

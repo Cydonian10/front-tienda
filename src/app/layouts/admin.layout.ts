@@ -4,14 +4,14 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter } from 'rxjs';
 import { AdminHeader } from './components/admin-header';
 import { AdminFooterPage } from './components/admin-footer';
+import { Icon } from '../shared/components/icon/icon';
 
 @Component({
-  imports: [RouterOutlet, AdminHeader, AdminFooterPage, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, AdminHeader, AdminFooterPage, RouterLink, RouterLinkActive, Icon],
   selector: 'app-admin',
   template: `
     <div
-      class="drawer min-h-dvh bg-base-100 text-base-content lg:drawer-open"
-      data-theme="ferreteria"
+      class="admin-shell drawer min-h-dvh bg-base-100 text-base-content lg:drawer-open"
       (keydown.escape)="closeNavigation()"
     >
       <input
@@ -40,7 +40,7 @@ import { AdminFooterPage } from './components/admin-footer';
         <main
           id="admin-content"
           tabindex="-1"
-          class="min-w-0 flex-1 bg-base-200/50 px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8"
+          class="admin-workspace min-w-0 flex-1 px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8"
           aria-labelledby="admin-section-title"
         >
           <div class="mx-auto w-full max-w-7xl">
@@ -69,7 +69,7 @@ import { AdminFooterPage } from './components/admin-footer';
           (click)="$event.preventDefault(); closeNavigation()"
         ></label>
         <aside
-          class="flex min-h-dvh w-66 max-w-[85vw] flex-col border-r border-base-300 bg-base-100"
+          class="admin-sidebar flex min-h-dvh w-66 max-w-[85vw] flex-col border-r border-base-300 bg-base-100 text-base-content"
         >
           <div class="flex min-h-19 items-center gap-2 border-b border-base-300 px-5">
             <a
@@ -78,15 +78,10 @@ import { AdminFooterPage } from './components/admin-footer';
               (click)="closeNavigation()"
             >
               <span
-                class="grid size-10 shrink-0 place-items-center rounded-field border border-base-300 bg-base-200 text-base-content"
+                class="grid size-10 shrink-0 place-items-center rounded-field border border-base-300 bg-base-200 text-primary"
                 aria-hidden="true"
               >
-                <svg viewBox="0 0 24 24" class="size-5">
-                  <path
-                    d="m12 3 2 2.5 3.2-.2.8 3.1 2.7 1.7-1.7 2.7.2 3.2-3.1.8-1.7 2.7-2.7-1.7-3.2.2-.8-3.1-2.7-1.7 1.7-2.7-.2-3.2 3.1-.8L12 3Z"
-                  />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
+                <app-icon name="settings" />
               </span>
               <span class="min-w-0">
                 <strong class="block text-sm font-bold tracking-wide">FERRETERÍA</strong>
@@ -99,7 +94,7 @@ import { AdminFooterPage } from './components/admin-footer';
               aria-label="Cerrar navegación"
               (click)="closeNavigation()"
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+              <app-icon name="close" [size]="18.4" />
             </button>
           </div>
 
@@ -114,9 +109,7 @@ import { AdminFooterPage } from './components/admin-footer';
                     <summary
                       class="flex min-h-12 items-center gap-3 rounded-field bg-base-200 px-3 text-sm font-semibold text-base-content"
                     >
-                      <svg viewBox="0 0 24 24" class="size-5 shrink-0" aria-hidden="true">
-                        <path [attr.d]="group.icon" />
-                      </svg>
+                      <app-icon [name]="group.icon" />
                       <span class="flex-1">{{ group.label }}</span>
                     </summary>
                     <ul class="mt-2 gap-1">
@@ -129,17 +122,9 @@ import { AdminFooterPage } from './components/admin-footer';
                             class="flex min-h-12 items-center gap-3 rounded-field px-3 text-sm font-medium"
                             (click)="closeNavigation()"
                           >
-                            <svg viewBox="0 0 24 24" class="size-5 shrink-0" aria-hidden="true">
-                              <path [attr.d]="item.icon" />
-                            </svg>
+                            <app-icon [name]="item.icon" />
                             <span class="flex-1">{{ item.label }}</span>
-                            <svg
-                              viewBox="0 0 24 24"
-                              class="navigation-arrow size-4 shrink-0"
-                              aria-hidden="true"
-                            >
-                              <path d="m9 6 6 6-6 6" />
-                            </svg>
+                            <app-icon name="chevron-right" [size]="16" class="navigation-arrow" />
                           </a>
                         </li>
                       }
@@ -161,6 +146,20 @@ import { AdminFooterPage } from './components/admin-footer';
     </div>
   `,
   styles: `
+    .admin-workspace {
+      background: var(--admin-canvas);
+    }
+
+    .admin-sidebar {
+      color-scheme: dark;
+      --color-base-100: var(--admin-nav-surface);
+      --color-base-200: var(--admin-nav-raised);
+      --color-base-300: var(--admin-nav-border);
+      --color-base-content: var(--admin-nav-content);
+      --color-primary: var(--admin-nav-accent);
+      --color-primary-content: var(--admin-nav-accent-content);
+    }
+
     a:focus-visible,
     summary:focus-visible {
       outline: 2px solid var(--color-primary);
@@ -168,7 +167,7 @@ import { AdminFooterPage } from './components/admin-footer';
     }
 
     .admin-menu a {
-      color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
+      color: color-mix(in oklab, var(--color-base-content) 88%, transparent);
     }
 
     .admin-menu a:hover {
@@ -177,9 +176,13 @@ import { AdminFooterPage } from './components/admin-footer';
     }
 
     .admin-menu a.menu-active {
-      background: color-mix(in oklab, var(--color-primary) 12%, var(--color-base-100));
-      color: var(--color-primary);
+      background: var(--color-primary);
+      color: var(--color-primary-content);
       font-weight: 600;
+    }
+
+    .admin-menu details[open] > summary {
+      background: transparent;
     }
 
     .navigation-arrow {
@@ -201,17 +204,17 @@ export class AdminLayout {
   readonly navigationGroups = [
     {
       label: 'Accesos',
-      icon: 'M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3ZM12 10v4M12 7v.01',
+      icon: 'shield',
       items: [
         {
           label: 'Roles',
           url: '/admin/roles',
-          icon: 'M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3ZM9 12l2 2 4-4',
+          icon: 'shield-check',
         },
         {
           label: 'Usuarios',
           url: '/admin/usuarios',
-          icon: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+          icon: 'users',
         },
       ],
     },

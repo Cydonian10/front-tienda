@@ -20,7 +20,7 @@ export class AuthProfileService {
     if (this.lastRequestedToken && this.lastRequestedToken !== accessToken) this.clear();
     this.lastRequestedToken = accessToken;
 
-    const perfil = await this.queryClient.fetchQuery(authPerfilQueryOptions(this.authApi));
+    const perfil = await this.queryClient.query(authPerfilQueryOptions(this.authApi));
     // Do not restore a profile if the account changed while the request was in flight.
     if (this.session.get()?.accessToken !== accessToken) {
       throw new Error('La sesión cambió durante la carga del perfil');

@@ -1,7 +1,7 @@
 import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ThemeToggle } from './theme-toggle';
-import { ThemeService } from '../../services/theme.service';
+import { ThemeService } from '../../services/theme/theme.service';
 
 describe('ThemeToggle', () => {
   beforeEach(() => {

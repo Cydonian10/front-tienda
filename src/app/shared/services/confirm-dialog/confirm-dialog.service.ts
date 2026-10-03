@@ -2,7 +2,10 @@ import { isPlatformBrowser } from '@angular/common';
 import { Dialog } from '@angular/cdk/dialog';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { Observable, map, of } from 'rxjs';
-import { ConfirmDialog, ConfirmDialogOptions } from '../components/confirm-dialog/confirm-dialog';
+import {
+  ConfirmDialog,
+  ConfirmDialogOptions,
+} from '../../components/confirm-dialog/confirm-dialog';
 
 let nextId = 0;
 

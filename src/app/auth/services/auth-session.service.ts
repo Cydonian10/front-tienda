@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { LoginResponseDto } from '../../api/interfaces/access-control/auth.interface';
-import { LocalStorageService } from '../../shared/services/local-storage.service';
+import { LocalStorageService } from '../../shared/services/local-storage/local-storage.service';
 
 interface StoredSession {
   accessToken: string;

@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { ThemeService } from '../../services/theme.service';
+import { ThemeService } from '../../services/theme/theme.service';
 import { Icon } from '../icon/icon';
 
 @Component({

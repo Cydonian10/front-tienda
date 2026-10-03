@@ -1,8 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { SearchSelect } from '../../../shared/components/search-select/search-select';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { ToastService } from '../../../shared/services/toast.service';
-import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
+import { ToastService } from '../../../shared/services/toast/toast.service';
+import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
 import { Tooltip } from '../../../shared/directives/tooltip/tooltip';
 
 @Component({

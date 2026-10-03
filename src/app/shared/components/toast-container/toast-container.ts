@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, ElementRef, computed, inject } from '@angular/core';
-import { ToastService, ToastType } from '../../services/toast.service';
+import { ToastService, ToastType } from '../../services/toast/toast.service';
 import { Icon } from '../icon/icon';
 
 @Component({

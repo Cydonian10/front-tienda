@@ -6,7 +6,7 @@ import { Icon } from '../../../shared/components/icon/icon';
 import { ThemeToggle } from '../../../shared/components/theme-toggle/theme-toggle';
 import { email, form, FormField, minLength, required, submit } from '@angular/forms/signals';
 import { authLoginAction } from '../../actions/auth-login.action';
-import { ToastService } from '../../../shared/services/toast.service';
+import { ToastService } from '../../../shared/services/toast/toast.service';
 import { FieldErrors } from '../../../shared/components/field-errors/field-errors';
 
 @Component({

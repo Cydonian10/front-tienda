@@ -221,6 +221,11 @@
   font-size: 0.94rem;
 }
 
+.login-input input:focus-visible {
+  /* The wrapper carries the focus ring; avoid a second outline inside the field. */
+  outline: none;
+}
+
 .login-input input::placeholder {
   color: var(--login-placeholder);
   opacity: 1;
@@ -347,7 +352,7 @@
   text-align: center;
 }
 
-.login-shell :is(button, input):focus-visible {
+.login-shell button:focus-visible {
   outline: 2px solid var(--login-amber-strong);
   outline-offset: 3px;
 }

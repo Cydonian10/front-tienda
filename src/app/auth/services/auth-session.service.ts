@@ -1,6 +1,6 @@
-import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { LoginResponseDto } from '../../api/interfaces/access-control/auth.interface';
+import { LocalStorageService } from '../../shared/services/local-storage.service';
 
 interface StoredSession {
   accessToken: string;
@@ -12,8 +12,7 @@ const STORAGE_KEY = 'front-tienda-auth';
 
 @Injectable({ providedIn: 'root' })
 export class AuthSessionService {
-  private readonly document = inject(DOCUMENT);
-  private fallbackSession: StoredSession | null = null;
+  private readonly storage = inject(LocalStorageService);
 
   set(response: LoginResponseDto): void {
     const session: StoredSession = {
@@ -22,31 +21,11 @@ export class AuthSessionService {
       expiresAt: Date.now() + response.expiresIn * 1000,
     };
 
-    this.fallbackSession = session;
-    try {
-      this.document.defaultView?.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    } catch {
-      // If storage is blocked, the session is kept only in memory.
-    }
+    this.storage.set(STORAGE_KEY, session);
   }
 
   get(): StoredSession | null {
-    let session = this.fallbackSession;
-    let saved: string | null | undefined;
-    try {
-      saved = this.document.defaultView?.localStorage.getItem(STORAGE_KEY);
-    } catch {
-      // Use the in-memory session if storage is unavailable.
-    }
-
-    if (saved !== undefined) {
-      try {
-        session = saved ? (JSON.parse(saved) as StoredSession) : null;
-      } catch {
-        this.clear();
-        return null;
-      }
-    }
+    const session = this.storage.get<StoredSession>(STORAGE_KEY);
 
     if (
       !session ||
@@ -66,11 +45,6 @@ export class AuthSessionService {
   }
 
   clear(): void {
-    this.fallbackSession = null;
-    try {
-      this.document.defaultView?.localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // The in-memory session is already cleared.
-    }
+    this.storage.remove(STORAGE_KEY);
   }
 }

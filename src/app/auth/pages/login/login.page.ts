@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
+
 import { Icon } from '../../../shared/components/icon/icon';
 import { ThemeToggle } from '../../../shared/components/theme-toggle/theme-toggle';
-import { ReactiveFormsModule } from '@angular/forms';
 import { email, form, FormField, minLength, required, submit } from '@angular/forms/signals';
 import { authLoginAction } from '../../actions/auth-login.action';
 import { ToastService } from '../../../shared/services/toast.service';
 import { FieldErrors } from '../../../shared/components/field-errors/field-errors';
-import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   imports: [Icon, ThemeToggle, ReactiveFormsModule, FormField, FieldErrors],

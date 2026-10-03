@@ -41,9 +41,9 @@ colors:
   acceso-tinta-sobre-ambar: 'oklch(18% 0.026 70)'
 typography:
   body:
-    fontFamily: "ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'"
+    fontFamily: 'Montserrat, ui-sans-serif, system-ui, sans-serif'
     fontSize: '0.875rem'
-    fontWeight: 400
+    fontWeight: 500
     lineHeight: 1.5
   headline:
     fontSize: 'clamp(1.35rem, 2vw, 1.875rem)'
@@ -70,13 +70,13 @@ typography:
   caption:
     fontSize: '0.75rem'
   acceso-hero:
-    fontFamily: "'Barlow', ui-sans-serif, system-ui, sans-serif"
+    fontFamily: 'Montserrat, ui-sans-serif, system-ui, sans-serif'
     fontSize: 'clamp(3rem, 4.5vw, 4.25rem)'
-    fontWeight: 600
+    fontWeight: 700
     lineHeight: 1.16
     letterSpacing: '-0.04em'
   acceso-heading:
-    fontFamily: "'Barlow', ui-sans-serif, system-ui, sans-serif"
+    fontFamily: 'Montserrat, ui-sans-serif, system-ui, sans-serif'
     fontSize: 'clamp(2rem, 2.3vw, 2.55rem)'
     fontWeight: 700
     lineHeight: 1.1
@@ -151,15 +151,15 @@ El sistema de Ferretería Atlas traduce la disciplina de un taller bien ordenado
 
 Los componentes se sienten robustos y contenidos. La jerarquía depende de contraste, ritmo, tipografía y estados explícitos antes que de efectos. El panel administrativo activo y los patrones implementados del dashboard comparten este vocabulario, aunque algunas composiciones del dashboard todavía no estén conectadas a una ruta.
 
-El acceso extiende este sistema con un sublenguaje local, no con una identidad sustituta: contrapone una fotografía oscura del taller y un lienzo mineral claro, y traslada el ámbar de señal a marca, foco y acción. Esta puerta de entrada no modifica la pizarra ni el turquesa del panel administrativo.
+El acceso extiende este sistema con un sublenguaje local, no con una identidad sustituta: contrapone una fotografía oscura del taller y un lienzo mineral claro o pizarra oscura según el tema, y traslada el ámbar de señal a marca, foco y acción. Esta puerta de entrada no modifica la pizarra ni el turquesa del panel administrativo.
 
 **Key Characteristics:**
 
 - Superficies frías y compactas organizadas por capas tonales.
 - Turquesa herramienta reservado para acciones, foco, selección y datos destacados.
-- Tipografía del sistema, números tabulares y microetiquetas técnicas para lectura rápida.
+- Montserrat autoalojada, números tabulares y microetiquetas técnicas para lectura rápida.
 - Estados semánticos visibles y controles con áreas táctiles de al menos (2.75rem).
-- Acceso editorial dividido, con fotografía de oficio, superficie mineral y ámbar confinado a su ámbito.
+- Acceso editorial dividido, con fotografía de oficio, superficie adaptada al tema y ámbar confinado a su ámbito.
 
 ## Colors
 
@@ -191,7 +191,7 @@ La paleta combina una base de pizarra azulada con acentos funcionales de taller 
 - **Lienzo administrativo claro:** fondo frío del área de trabajo cuando el tema global es `light`.
 - **Navegación pizarra:** superficie local oscura y constante de la barra lateral; tiene variantes algo más luminosas en el tema claro.
 - **Navegación selección:** turquesa local más luminoso para la ruta actual, con texto oscuro propio.
-- **Lienzo mineral de acceso:** superficie clara y cálida del formulario de autenticación.
+- **Lienzo mineral de acceso:** superficie clara y cálida del formulario de autenticación; en modo oscuro adopta pizarra profunda con tinta clara.
 - **Tinta, texto secundario y borde de acceso:** escala azul-pizarra local que mantiene jerarquía y contraste sobre el lienzo mineral.
 
 Los roles **información**, **éxito**, **advertencia** y **peligro**, junto con sus tintas de contraste, son semánticos. No deben sustituirse por el primario; se usan en actividad, validación, toasts, confirmaciones y metas.
@@ -204,25 +204,25 @@ Los roles **información**, **éxito**, **advertencia** y **peligro**, junto con
 
 ## Typography
 
-**Display Font:** sans del sistema con `system-ui` y fallbacks nativos en el panel; Barlow autoalojada en pesos 600 y 700 solo para la marca y los titulares del acceso.
-**Body Font:** la misma familia sans para una interfaz rápida, consistente y sin dependencia de fuentes externas.
+**Display Font:** Montserrat autoalojada en pesos variables 300–700; 700 para los titulares y la marca del acceso.
+**Body Font:** Montserrat 500 con `system-ui` como respaldo, sin dependencia de servicios externos; 300 e italic disponibles para énfasis puntuales.
 
-**Character:** neutral, compacta y precisa. El panel mantiene su voz sistémica; Barlow aporta al acceso una señal industrial más explícita sin extenderse a cuerpo, etiquetas ni controles.
+**Character:** geométrica, contenida y precisa. Una sola familia conecta el acceso y el panel sin perder la jerarquía operativa.
 
 ### Hierarchy
 
 - **Title** (600, `1.5rem` a `1.875rem`, 1.25): títulos de sección del panel, con tracking ligeramente cerrado.
 - **Metric** (620, escala fluida, 1): cifras KPI y totales; usa cifras tabulares y tracking cerrado.
-- **Body** (400, `0.875rem`, 1.5): instrucciones, descripciones y contenido de formularios.
+- **Body** (500, `0.875rem`, 1.5): instrucciones, descripciones y contenido de formularios.
 - **Label** (600, `0.875rem`): navegación, botones y controles; la selección puede subir de peso para reforzar estado.
 - **Overline** (720, `0.67rem`, `0.1em`, mayúsculas): agrupaciones de navegación y contexto corto.
 - **Caption** (`0.75rem`): metadatos, sesión, estado y notas auxiliares.
-- **Access Hero** (600, escala fluida, 1.16): promesa de marca sobre la fotografía del taller.
+- **Access Hero** (700, escala fluida, 1.16): promesa de marca sobre la fotografía del taller.
 - **Access Heading** (700, escala fluida, 1.1): bienvenida y titulares principales del formulario de acceso.
 
 **The Numeric Discipline Rule.** Métricas, importes y celdas numéricas usan cifras tabulares; los números importantes no dependen solo del color.
 
-**The Auth Type Boundary Rule.** Barlow 600/700 se reserva para marca y titulares de acceso; el contenido funcional conserva la sans del sistema.
+**The Auth Type Boundary Rule.** Montserrat mantiene una familia común; tamaño, peso y espaciado distinguen los titulares de acceso del contenido funcional.
 
 ## Layout
 
@@ -248,7 +248,7 @@ Los campos y enlaces operativos usan esquinas moderadamente curvas; los contened
 
 El lenguaje evita tanto los rectángulos totalmente duros como las cápsulas indiscriminadas: la forma circular se reserva para identidades, estados y datos puntuales.
 
-El acceso conserva radios moderados en sus controles (0.65rem): suficientemente suaves para el lienzo claro, pero sin convertir campos o botones en cápsulas.
+El acceso conserva radios moderados en sus controles (0.65rem): suficientemente suaves para el lienzo mineral en ambos temas, pero sin convertir campos o botones en cápsulas.
 
 ## Components
 
@@ -279,10 +279,11 @@ Los componentes son robustos y contenidos: acciones inequívocas, estados visibl
 
 ### Authentication
 
-- **Composition:** pantalla dividida sin tarjeta flotante; fotografía de taller oscura frente a lienzo mineral claro.
+- **Composition:** pantalla dividida sin tarjeta flotante; fotografía de taller oscura frente a lienzo mineral claro o pizarra oscura según el tema.
 - **Fields:** altura de (3.55rem), borde fino, fondo integrado al lienzo, radio moderado y foco ámbar visible.
 - **Buttons:** altura de (3.5rem), radio compartido con los campos; la acción principal usa ámbar fuerte y la alternativa conserva fondo transparente y borde.
-- **Brand:** Barlow 600/700 autoalojada en `public/fonts/barlow-600.ttf` y `public/fonts/barlow-700.ttf`, marca geométrica y fotografía `public/images/imagen-login-ferreteria.png`; el cuerpo y los controles mantienen la sans del sistema.
+- **Brand:** Montserrat normal e italic autoalojada en `public/fonts/montserrat-*.woff2`, marca geométrica y fotografía `public/images/imagen-login-ferreteria.png`; cuerpo y controles usan la misma familia.
+- **Theme:** el formulario respeta el tema global `light`/`ferreteria`, con lienzo mineral claro o pizarra oscura y un control para alternar entre ambos; el ámbar mantiene su papel local.
 - **Responsive:** cabecera fotográfica compacta y formulario apilado en móvil; la promesa de marca se conserva y el contenido auxiliar de la fotografía se retira.
 - **Capability state:** recuperación, acceso principal y Google pueden presentarse como opciones visuales deshabilitadas, sin sugerir que ya están conectadas.
 
@@ -312,7 +313,7 @@ Los componentes son robustos y contenidos: acciones inequívocas, estados visibl
 - **Do** conservar foco visible, áreas táctiles mínimas, estados semánticos y restauración de foco en overlays.
 - **Do** usar cifras tabulares en métricas, importes y tablas.
 - **Do** tratar el acceso como una extensión local: fotografía oscura, lienzo mineral y ámbar de señal, sin alterar el panel administrativo.
-- **Do** reservar Barlow 600/700 para la marca y los titulares del acceso.
+- **Do** usar Montserrat como familia compartida, con pesos 300, 500 y 700 e italic cuando aporte jerarquía.
 
 ### Don't:
 

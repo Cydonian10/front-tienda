@@ -1,8 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { Icon } from '../../../shared/components/icon/icon';
+import { ThemeToggle } from '../../../shared/components/theme-toggle/theme-toggle';
 
 @Component({
-  imports: [Icon],
+  imports: [Icon, ThemeToggle],
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrl: './login.page.css',

@@ -1,4 +1,4 @@
-<main class="login-shell" data-theme="light">
+<main class="login-shell">
   <section class="brand-panel" aria-labelledby="brand-message">
     <div class="brand-panel__shade" aria-hidden="true"></div>
 
@@ -20,12 +20,15 @@
 
     <footer class="brand-footer">
       <span>VASQUEZ FERRETERIA</span>
-      <span>Hechos para ofrecer la mejor calidad.</span>
+      <span class="font-light italic">Hechos para ofrecer la mejor calidad.</span>
     </footer>
   </section>
 
   <section class="access-panel" aria-labelledby="login-title">
-    <p class="access-label">ACCESO EMPRESARIAL <span aria-hidden="true"></span></p>
+    <header class="access-header">
+      <p class="access-label">ACCESO EMPRESARIAL <span aria-hidden="true"></span></p>
+      <app-theme-toggle />
+    </header>
 
     <div class="login-content">
       <header class="login-heading">

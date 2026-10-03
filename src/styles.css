@@ -1,10 +1,83 @@
 @import 'tailwindcss';
 @import '@angular/cdk/overlay-prebuilt.css';
 
+@font-face {
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/montserrat-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/montserrat-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Montserrat;
+  font-style: italic;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/montserrat-latin-italic.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Montserrat;
+  font-style: italic;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/montserrat-latin-ext-italic.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@theme {
+  --font-sans: Montserrat, ui-sans-serif, system-ui, sans-serif;
+}
+
 @plugin "daisyui" {
   themes:
     light,
     ferreteria --default;
+}
+
+@plugin "daisyui/theme" {
+  name: 'light';
+  color-scheme: light;
+  --color-base-100: oklch(98% 0.006 250);
+  --color-base-200: oklch(96% 0.012 250);
+  --color-base-300: oklch(90% 0.02 250);
+  --color-base-content: oklch(24% 0.03 250);
+  --color-primary: oklch(45% 0.11 176);
+  --color-primary-content: oklch(98% 0.006 176);
+  --color-secondary: oklch(43% 0.1 220);
+  --color-secondary-content: oklch(98% 0.006 220);
+  --color-accent: oklch(59% 0.14 75);
+  --color-accent-content: oklch(18% 0.026 70);
+  --color-neutral: oklch(38% 0.025 250);
+  --color-neutral-content: oklch(98% 0.006 250);
+  --color-info: oklch(45% 0.12 230);
+  --color-info-content: oklch(98% 0.006 230);
+  --color-success: oklch(43% 0.12 160);
+  --color-success-content: oklch(98% 0.006 160);
+  --color-warning: oklch(60% 0.13 82);
+  --color-warning-content: oklch(18% 0.03 82);
+  --color-error: oklch(50% 0.17 25);
+  --color-error-content: oklch(98% 0.006 25);
+  --radius-selector: 0.375rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.875rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
 
 @plugin "daisyui/theme" {
@@ -42,6 +115,35 @@
   --noise: 0;
 }
 
+/* The login shares the document theme but keeps its own amber workshop palette. */
+.login-shell {
+  --login-amber: oklch(78% 0.14 82);
+  --login-amber-strong: oklch(72% 0.14 78);
+  --login-ink: oklch(94% 0.012 250);
+  --login-muted: oklch(78% 0.016 250);
+  --login-canvas: oklch(21% 0.025 250);
+  --login-line: oklch(43% 0.025 250);
+  --login-hover: oklch(28% 0.025 250);
+  --login-placeholder: oklch(74% 0.016 250);
+  --login-footer: oklch(77% 0.016 250);
+  --login-amber-hover: oklch(77% 0.14 78);
+  --color-primary: var(--login-amber-strong);
+  --color-primary-content: oklch(18% 0.026 70);
+}
+
+:root[data-theme='light'] .login-shell {
+  --login-amber: oklch(67% 0.145 78);
+  --login-amber-strong: oklch(59% 0.14 75);
+  --login-ink: oklch(24% 0.03 244);
+  --login-muted: oklch(42% 0.025 240);
+  --login-canvas: oklch(94% 0.006 80);
+  --login-line: oklch(76% 0.01 240);
+  --login-hover: oklch(91% 0.008 80);
+  --login-placeholder: oklch(46% 0.02 240);
+  --login-footer: oklch(43% 0.02 240);
+  --login-amber-hover: oklch(55% 0.14 75);
+}
+
 /* Administrative surfaces are distinct from page components and status colors. */
 .admin-shell {
   --admin-canvas: var(--color-base-200);
@@ -71,6 +173,20 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
+
+.login-shell app-theme-toggle .btn {
+  color: var(--login-ink);
+}
+
+.login-shell app-theme-toggle .btn:hover {
+  background: var(--login-hover);
+}
+
+.login-shell app-theme-toggle .btn:focus-visible {
+  outline-color: var(--login-amber-strong);
 }
 
 body:has(app-login) .tsqd-parent-container {

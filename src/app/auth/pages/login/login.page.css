@@ -1,33 +1,9 @@
-@font-face {
-  font-family: 'Barlow';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('/fonts/barlow-600.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Barlow';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts/barlow-700.ttf') format('truetype');
-}
-
 :host {
   display: block;
   min-height: 100dvh;
 }
 
 .login-shell {
-  --login-amber: oklch(67% 0.145 78);
-  --login-amber-strong: oklch(59% 0.14 75);
-  --login-ink: oklch(24% 0.03 244);
-  --login-muted: oklch(49% 0.025 240);
-  --login-canvas: oklch(94% 0.006 80);
-  --login-line: oklch(76% 0.01 240);
-  --color-primary: var(--login-amber-strong);
-  --color-primary-content: oklch(18% 0.026 70);
   display: grid;
   min-height: 100dvh;
   grid-template-columns: minmax(30rem, 47%) minmax(32rem, 1fr);
@@ -92,9 +68,8 @@
 
 .brand-name strong {
   color: oklch(96% 0.01 80);
-  font-family: 'Barlow', ui-sans-serif, system-ui, sans-serif;
   font-size: 1.08rem;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.05;
 }
@@ -102,7 +77,7 @@
 .brand-name small {
   color: var(--login-amber);
   font-size: 0.61rem;
-  font-weight: 760;
+  font-weight: 700;
   letter-spacing: 0.22em;
 }
 
@@ -117,9 +92,8 @@
   max-width: 100%;
   margin: 0;
   color: oklch(94% 0.008 80);
-  font-family: 'Barlow', ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(3rem, 4.5vw, 4.25rem);
-  font-weight: 640;
+  font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1.16;
 }
@@ -156,15 +130,22 @@
   background: var(--login-canvas);
 }
 
+.access-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
 .access-label {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.65rem;
   margin: 0;
-  color: oklch(39% 0.025 240);
+  color: var(--login-muted);
   font-size: 0.72rem;
-  font-weight: 720;
+  font-weight: 700;
 }
 
 .access-label span {
@@ -188,9 +169,8 @@
 .login-heading h2 {
   margin: 0;
   color: var(--login-ink);
-  font-family: 'Barlow', ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(2rem, 2.3vw, 2.55rem);
-  font-weight: 720;
+  font-weight: 700;
   letter-spacing: -0.038em;
   line-height: 1.1;
 }
@@ -214,7 +194,7 @@
 .login-field__label {
   color: var(--login-ink);
   font-size: 0.81rem;
-  font-weight: 720;
+  font-weight: 700;
 }
 
 .login-input {
@@ -242,7 +222,7 @@
 }
 
 .login-input input::placeholder {
-  color: oklch(55% 0.02 240);
+  color: var(--login-placeholder);
   opacity: 1;
 }
 
@@ -273,7 +253,7 @@
   color: var(--login-amber-strong);
   cursor: pointer;
   font-size: 0.8rem;
-  font-weight: 720;
+  font-weight: 700;
   text-underline-offset: 0.22rem;
 }
 
@@ -288,19 +268,19 @@
   border: 0;
   border-radius: 0.65rem;
   background: var(--login-amber-strong);
-  color: oklch(18% 0.026 70);
+  color: var(--color-primary-content);
   font-size: 0.9rem;
-  font-weight: 760;
+  font-weight: 700;
   box-shadow: none;
 }
 
 .login-submit:hover {
-  background: oklch(55% 0.14 75);
+  background: var(--login-amber-hover);
 }
 
 .login-divider {
   margin: -0.15rem 0;
-  color: oklch(56% 0.02 240);
+  color: var(--login-footer);
   font-size: 0.76rem;
 }
 
@@ -318,13 +298,13 @@
   background: transparent;
   color: var(--login-ink);
   font-size: 0.9rem;
-  font-weight: 680;
+  font-weight: 700;
   box-shadow: none;
 }
 
 .google-button:hover {
-  border-color: oklch(62% 0.014 240);
-  background: oklch(91% 0.008 80);
+  border-color: var(--login-muted);
+  background: var(--login-hover);
 }
 
 .google-icon {
@@ -362,7 +342,7 @@
 
 .access-footer {
   justify-self: center;
-  color: oklch(56% 0.02 240);
+  color: var(--login-footer);
   font-size: 0.7rem;
   text-align: center;
 }
@@ -419,8 +399,8 @@
     padding: 1.5rem 1.25rem 1rem;
   }
 
-  .access-label {
-    justify-content: flex-start;
+  .access-header {
+    justify-content: space-between;
     margin-bottom: 2.25rem;
   }
 

@@ -35,4 +35,11 @@ describe('LoginPage', () => {
     expect(toggle.getAttribute('aria-label')).toBe('Ocultar contraseña');
     expect(toggle.getAttribute('aria-pressed')).toBe('true');
   });
+
+  it('inherits the application theme and provides a theme toggle', () => {
+    const { element } = setup();
+
+    expect(element.querySelector('.login-shell')?.hasAttribute('data-theme')).toBe(false);
+    expect(element.querySelector('app-theme-toggle button[aria-label]')).toBeTruthy();
+  });
 });

@@ -8,6 +8,8 @@ import { email, form, FormField, minLength, required, submit } from '@angular/fo
 import { authLoginAction } from '../../actions/auth-login.action';
 import { ToastService } from '../../../shared/services/toast/toast.service';
 import { FieldErrors } from '../../../shared/components/field-errors/field-errors';
+import { AuthProfileService } from '../../services/auth-profile.service';
+import { AuthSessionService } from '../../services/auth-session.service';
 
 @Component({
   imports: [Icon, ThemeToggle, ReactiveFormsModule, FormField, FieldErrors],
@@ -22,6 +24,8 @@ export default class LoginPage {
   readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly profile = inject(AuthProfileService);
+  private readonly session = inject(AuthSessionService);
 
   readonly loginModel = signal({
     email: 'admin@example.com',
@@ -53,6 +57,15 @@ export default class LoginPage {
       });
 
       if (success) {
+        try {
+          await this.profile.load();
+        } catch {
+          this.session.clear();
+          this.profile.clear();
+          this.toastService.error('No se pudo cargar tu perfil. Intenta de nuevo.');
+          return;
+        }
+
         this.toastService.success('Inicio de sesión exitoso');
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         await this.router.navigateByUrl(

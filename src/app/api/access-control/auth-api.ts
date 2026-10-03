@@ -19,7 +19,7 @@ export class AuthApi {
   }
 
   perfil() {
-    const url = `${this.apirUrl.apiUrl}/auth/profile `;
+    const url = `${this.apirUrl.apiUrl}/auth/profile`;
     return firstValueFrom(this.http.get<AuthPerfil>(url));
   }
 }

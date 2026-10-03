@@ -6,6 +6,7 @@ import { AdminHeader } from './components/admin-header';
 import { AdminFooterPage } from './components/admin-footer';
 import { Icon } from '../shared/components/icon/icon';
 import { AuthSessionService } from '../auth/services/auth-session.service';
+import { AuthProfileService } from '../auth/services/auth-profile.service';
 import { QueryClient } from '@tanstack/angular-query-experimental';
 
 @Component({
@@ -201,6 +202,7 @@ import { QueryClient } from '@tanstack/angular-query-experimental';
 export class AdminLayout {
   private readonly router = inject(Router);
   private readonly session = inject(AuthSessionService);
+  private readonly profile = inject(AuthProfileService);
   private readonly queryClient = inject(QueryClient);
   private readonly header = viewChild(AdminHeader);
   private readonly currentPath = signal(this.router.url);
@@ -254,6 +256,7 @@ export class AdminLayout {
 
   logout(): void {
     this.session.clear();
+    this.profile.clear();
     this.queryClient.clear();
     void this.router.navigate(['/auth/login']);
   }

@@ -3,6 +3,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import LoginPage from './login.page';
 import { provideRouter, Router } from '@angular/router';
+import { AuthProfileService } from '../../services/auth-profile.service';
+import { AuthSessionService } from '../../services/auth-session.service';
+import { AuthStore } from '../../../store/auth/auth.store';
 
 describe('LoginPage', () => {
   afterEach(() => TestBed.resetTestingModule());
@@ -82,6 +85,7 @@ describe('LoginPage', () => {
     const { fixture } = setup();
     const page = fixture.componentInstance;
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const load = vi.spyOn(TestBed.inject(AuthProfileService), 'load').mockResolvedValue();
     const mutate = vi.spyOn(page.authLoginAction, 'mutateAsync').mockResolvedValue({
       accessToken: 'test-token',
       tokenType: 'Bearer',
@@ -92,6 +96,31 @@ describe('LoginPage', () => {
     await page.loginSubmit();
 
     expect(mutate).toHaveBeenCalledWith({ email: 'empleado@empresa.com', password: 'password123' });
+    expect(load).toHaveBeenCalledOnce();
     expect(navigate).toHaveBeenCalledWith('/admin');
+  });
+
+  it('does not navigate if the profile cannot be loaded after login', async () => {
+    const { fixture } = setup();
+    const page = fixture.componentInstance;
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    vi.spyOn(page.authLoginAction, 'mutateAsync').mockResolvedValue({
+      accessToken: 'test-token',
+      tokenType: 'Bearer',
+      expiresIn: 60,
+    });
+    const session = TestBed.inject(AuthSessionService);
+    session.set({ accessToken: 'test-token', tokenType: 'Bearer', expiresIn: 60 });
+    TestBed.inject(AuthStore).setProfile({ id: 'old-profile' } as never);
+    vi.spyOn(TestBed.inject(AuthProfileService), 'load').mockRejectedValue(
+      new Error('Network error'),
+    );
+    page.loginModel.set({ email: 'empleado@empresa.com', password: 'password123' });
+
+    await page.loginSubmit();
+
+    expect(navigate).not.toHaveBeenCalled();
+    expect(session.get()).toBeNull();
+    expect(TestBed.inject(AuthStore).authPerfil()).toBeNull();
   });
 });

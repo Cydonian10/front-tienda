@@ -2,13 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import LoginPage from './login.page';
+import { provideRouter, Router } from '@angular/router';
 
 describe('LoginPage', () => {
   afterEach(() => TestBed.resetTestingModule());
 
   function setup() {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideTanStackQuery(new QueryClient())],
+      providers: [provideHttpClient(), provideTanStackQuery(new QueryClient()), provideRouter([])],
     });
     const fixture = TestBed.createComponent(LoginPage);
     fixture.detectChanges();
@@ -51,6 +52,8 @@ describe('LoginPage', () => {
   it('shows only the touched field errors and links them to their input', () => {
     const { fixture, element } = setup();
     const page = fixture.componentInstance;
+    page.loginModel.set({ email: '', password: '' });
+    fixture.detectChanges();
     const email = element.querySelector('input[type="email"]') as HTMLInputElement;
     const password = element.querySelector('input[type="password"]') as HTMLInputElement;
 
@@ -78,11 +81,17 @@ describe('LoginPage', () => {
   it('reuses the injected login mutation when submitting', async () => {
     const { fixture } = setup();
     const page = fixture.componentInstance;
-    const mutate = vi.spyOn(page.authLoginAction, 'mutateAsync').mockResolvedValue({});
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const mutate = vi.spyOn(page.authLoginAction, 'mutateAsync').mockResolvedValue({
+      accessToken: 'test-token',
+      tokenType: 'Bearer',
+      expiresIn: 60,
+    });
     page.loginModel.set({ email: 'empleado@empresa.com', password: 'password123' });
 
     await page.loginSubmit();
 
     expect(mutate).toHaveBeenCalledWith({ email: 'empleado@empresa.com', password: 'password123' });
+    expect(navigate).toHaveBeenCalledWith('/admin');
   });
 });

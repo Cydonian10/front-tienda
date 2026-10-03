@@ -5,6 +5,8 @@ import { filter } from 'rxjs';
 import { AdminHeader } from './components/admin-header';
 import { AdminFooterPage } from './components/admin-footer';
 import { Icon } from '../shared/components/icon/icon';
+import { AuthSessionService } from '../auth/services/auth-session.service';
+import { QueryClient } from '@tanstack/angular-query-experimental';
 
 @Component({
   imports: [RouterOutlet, AdminHeader, AdminFooterPage, RouterLink, RouterLinkActive, Icon],
@@ -35,6 +37,7 @@ import { Icon } from '../shared/components/icon/icon';
           menuControlId="admin-navigation"
           [menuOpen]="navigationOpen()"
           (menuToggleRequested)="navigationOpen.set(!navigationOpen())"
+          (logoutRequested)="logout()"
         />
 
         <main
@@ -197,6 +200,8 @@ import { Icon } from '../shared/components/icon/icon';
 })
 export class AdminLayout {
   private readonly router = inject(Router);
+  private readonly session = inject(AuthSessionService);
+  private readonly queryClient = inject(QueryClient);
   private readonly header = viewChild(AdminHeader);
   private readonly currentPath = signal(this.router.url);
 
@@ -245,5 +250,11 @@ export class AdminLayout {
 
     this.navigationOpen.set(false);
     this.header()?.focusMenuTrigger();
+  }
+
+  logout(): void {
+    this.session.clear();
+    this.queryClient.clear();
+    void this.router.navigate(['/auth/login']);
   }
 }

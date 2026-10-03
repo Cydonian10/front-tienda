@@ -6,6 +6,7 @@ import { email, form, FormField, minLength, required, submit } from '@angular/fo
 import { authLoginAction } from '../../actions/auth-login.action';
 import { ToastService } from '../../../shared/services/toast.service';
 import { FieldErrors } from '../../../shared/components/field-errors/field-errors';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   imports: [Icon, ThemeToggle, ReactiveFormsModule, FormField, FieldErrors],
@@ -17,7 +18,9 @@ import { FieldErrors } from '../../../shared/components/field-errors/field-error
 export default class LoginPage {
   readonly passwordVisible = signal(false);
   readonly authLoginAction = authLoginAction();
-  readonly toasService = inject(ToastService);
+  readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loginModel = signal({
     email: 'admin@example.com',
@@ -43,13 +46,20 @@ export default class LoginPage {
   });
 
   async loginSubmit() {
-    const success = await submit(this.loginForm, async (form) => {
-      const data = form().value();
-      await this.authLoginAction.mutateAsync(data);
-    });
+    try {
+      const success = await submit(this.loginForm, async (form) => {
+        await this.authLoginAction.mutateAsync(form().value());
+      });
 
-    if (success) {
-      this.toasService.success('Login existoso');
+      if (success) {
+        this.toastService.success('Inicio de sesión exitoso');
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        await this.router.navigateByUrl(
+          returnUrl?.startsWith('/admin/') || returnUrl === '/admin' ? returnUrl : '/admin',
+        );
+      }
+    } catch {
+      this.toastService.error('No se pudo iniciar sesión. Verifica tus credenciales.');
     }
   }
 }

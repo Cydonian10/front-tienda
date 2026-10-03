@@ -47,24 +47,45 @@
       >
         <label class="login-field">
           <span class="login-field__label">Correo electrónico</span>
-          <span class="input login-input">
+          <span
+            class="input login-input"
+            [class.login-input--invalid]="
+              loginForm.email().touched() && loginForm.email().invalid()
+            "
+          >
             <app-icon name="mail" [size]="19" [strokeWidth]="1.55" />
             <input
               type="email"
               [formField]="loginForm.email"
+              [attr.aria-describedby]="
+                loginForm.email().touched() && loginForm.email().invalid()
+                  ? 'login-email-errors'
+                  : null
+              "
               autocomplete="email"
               placeholder="nombre@empresa.com"
             />
           </span>
+          <app-field-errors [field]="loginForm.email()" errorId="login-email-errors" />
         </label>
 
         <label class="login-field">
           <span class="login-field__label">Contraseña</span>
-          <span class="input login-input">
+          <span
+            class="input login-input"
+            [class.login-input--invalid]="
+              loginForm.password().touched() && loginForm.password().invalid()
+            "
+          >
             <app-icon name="lock" [size]="19" [strokeWidth]="1.55" />
             <input
               [type]="passwordVisible() ? 'text' : 'password'"
               [formField]="loginForm.password"
+              [attr.aria-describedby]="
+                loginForm.password().touched() && loginForm.password().invalid()
+                  ? 'login-password-errors'
+                  : null
+              "
               autocomplete="current-password"
               placeholder="Ingresa tu contraseña"
             />
@@ -82,6 +103,7 @@
               />
             </button>
           </span>
+          <app-field-errors [field]="loginForm.password()" errorId="login-password-errors" />
         </label>
 
         <button class="forgot-password" type="button" disabled title="Próximamente">

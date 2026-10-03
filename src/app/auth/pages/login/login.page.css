@@ -214,6 +214,10 @@
   outline-offset: 2px;
 }
 
+.login-input--invalid {
+  border-color: var(--color-error);
+}
+
 .login-input input {
   min-width: 0;
   color: var(--login-ink);

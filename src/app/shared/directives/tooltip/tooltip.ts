@@ -78,6 +78,9 @@ export class Tooltip {
   }
 
   dismiss(): void {
-    if (this.opened()) this.dismissed.set(true);
+    if (!this.opened()) return;
+
+    this.dismissed.set(true);
+    this.focused.set(false);
   }
 }

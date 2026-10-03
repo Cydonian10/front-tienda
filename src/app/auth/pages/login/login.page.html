@@ -1,0 +1,118 @@
+<main class="login-shell" data-theme="light">
+  <section class="brand-panel" aria-labelledby="brand-message">
+    <div class="brand-panel__shade" aria-hidden="true"></div>
+
+    <header class="brand-lockup" aria-label="Ferretería Atlas">
+      <span class="brand-mark" aria-hidden="true">V</span>
+      <span class="brand-name">
+        <strong>VASQUEZ</strong>
+        <small>FERRETERÍA</small>
+      </span>
+    </header>
+
+    <div class="brand-message">
+      <h1 id="brand-message">
+        Todo en orden.<br />
+        <strong>Todo en marcha.</strong>
+      </h1>
+      <p>Accede a las herramientas que mantienen tu negocio en movimiento.</p>
+    </div>
+
+    <footer class="brand-footer">
+      <span>VASQUEZ FERRETERIA</span>
+      <span>Hechos para ofrecer la mejor calidad.</span>
+    </footer>
+  </section>
+
+  <section class="access-panel" aria-labelledby="login-title">
+    <p class="access-label">ACCESO EMPRESARIAL <span aria-hidden="true"></span></p>
+
+    <div class="login-content">
+      <header class="login-heading">
+        <h2 id="login-title">Bienvenido de nuevo</h2>
+        <p>Ingresa tus datos para acceder a tu cuenta.</p>
+      </header>
+
+      <form class="login-form" aria-describedby="login-note" (submit)="$event.preventDefault()">
+        <label class="login-field">
+          <span class="login-field__label">Correo electrónico</span>
+          <span class="input login-input">
+            <app-icon name="mail" [size]="19" [strokeWidth]="1.55" />
+            <input
+              type="email"
+              name="email"
+              autocomplete="email"
+              placeholder="nombre@empresa.com"
+            />
+          </span>
+        </label>
+
+        <label class="login-field">
+          <span class="login-field__label">Contraseña</span>
+          <span class="input login-input">
+            <app-icon name="lock" [size]="19" [strokeWidth]="1.55" />
+            <input
+              [type]="passwordVisible() ? 'text' : 'password'"
+              name="password"
+              autocomplete="current-password"
+              placeholder="Ingresa tu contraseña"
+            />
+            <button
+              class="password-toggle"
+              type="button"
+              [attr.aria-label]="passwordVisible() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="passwordVisible()"
+              (click)="passwordVisible.update((visible) => !visible)"
+            >
+              <app-icon
+                [name]="passwordVisible() ? 'eye-off' : 'eye'"
+                [size]="20"
+                [strokeWidth]="1.55"
+              />
+            </button>
+          </span>
+        </label>
+
+        <button class="forgot-password" type="button" disabled title="Próximamente">
+          ¿Olvidaste tu contraseña?
+        </button>
+
+        <button class="btn btn-primary login-submit" type="submit" disabled title="Próximamente">
+          Iniciar sesión
+        </button>
+
+        <div class="divider login-divider">o continúa con</div>
+
+        <button class="btn btn-outline google-button" type="button" disabled title="Próximamente">
+          <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="#4285f4"
+              d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41Z"
+            />
+            <path
+              fill="#34a853"
+              d="M12 22c2.7 0 4.98-.9 6.63-2.36l-3.24-2.54c-.9.6-2.05.96-3.39.96-2.6 0-4.81-1.76-5.6-4.13H3.05v2.62A10 10 0 0 0 12 22Z"
+            />
+            <path
+              fill="#fbbc05"
+              d="M6.4 13.93A6 6 0 0 1 6.08 12c0-.67.11-1.32.32-1.93V7.45H3.05A10 10 0 0 0 2 12c0 1.64.39 3.2 1.05 4.55l3.35-2.62Z"
+            />
+            <path
+              fill="#ea4335"
+              d="M12 5.94c1.47 0 2.78.5 3.82 1.49l2.88-2.88A9.65 9.65 0 0 0 12 2a10 10 0 0 0-8.95 5.45l3.35 2.62c.79-2.37 3-4.13 5.6-4.13Z"
+            />
+          </svg>
+          Continuar con Google
+        </button>
+
+        <p class="demo-status"><span aria-hidden="true"></span> Acceso de demostración</p>
+
+        <p id="login-note" class="sr-only">
+          Esta pantalla es una demostración visual; el acceso todavía no está conectado.
+        </p>
+      </form>
+    </div>
+
+    <footer class="access-footer">© 2026 Ferretería Atlas. Todos los derechos reservados.</footer>
+  </section>
+</main>

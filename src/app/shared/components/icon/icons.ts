@@ -10,7 +10,12 @@ export const ICONS = {
   'chevron-right': [{ type: 'path', d: 'm9 6 6 6-6 6' }],
   check: [{ type: 'path', d: 'm5 12 4 4L19 6' }],
   upload: [{ type: 'path', d: 'M12 16V3m-5 5 5-5 5 5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4' }],
-  file: [{ type: 'path', d: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Zm0 0v6h6M8 13h8m-8 4h6' }],
+  file: [
+    {
+      type: 'path',
+      d: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Zm0 0v6h6M8 13h8m-8 4h6',
+    },
+  ],
   settings: [
     {
       type: 'path',
@@ -49,6 +54,25 @@ export const ICONS = {
   info: [
     { type: 'circle', cx: 12, cy: 12, r: 9 },
     { type: 'path', d: 'M12 11v6m0-10h.01' },
+  ],
+  mail: [
+    { type: 'path', d: 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z' },
+    { type: 'path', d: 'm3 7 9 6 9-6' },
+  ],
+  lock: [
+    { type: 'path', d: 'M6 10h12a2 2 0 0 1 2 2v8H4v-8a2 2 0 0 1 2-2Z' },
+    { type: 'path', d: 'M8 10V7a4 4 0 0 1 8 0v3' },
+  ],
+  eye: [
+    { type: 'path', d: 'M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z' },
+    { type: 'circle', cx: 12, cy: 12, r: 2.5 },
+  ],
+  'eye-off': [
+    { type: 'path', d: 'm3 3 18 18' },
+    {
+      type: 'path',
+      d: 'M10.6 6.1A8.9 8.9 0 0 1 12 6c6 0 9.5 6 9.5 6a17 17 0 0 1-2.1 2.8M14.1 14.2a3 3 0 0 1-4.3-4.3M6.6 6.7C3.9 8.4 2.5 12 2.5 12s3.5 6 9.5 6c1 0 2-.2 2.9-.5',
+    },
   ],
 } as const satisfies Record<string, readonly IconShape[]>;
 

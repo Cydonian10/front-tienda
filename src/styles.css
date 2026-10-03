@@ -73,6 +73,10 @@ body {
   min-width: 320px;
 }
 
+body:has(app-login) .tsqd-parent-container {
+  display: none;
+}
+
 ::selection {
   background: color-mix(in oklab, var(--color-primary) 35%, transparent);
   color: var(--color-base-content);

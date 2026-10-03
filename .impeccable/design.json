@@ -1,67 +1,751 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-02T17:13:46Z",
-  "title": "Sistema de diseño: panel administrativo",
+  "generatedAt": "2026-10-03T04:23:37Z",
+  "title": "Sistema de diseño: Ferretería Atlas",
   "extensions": {
     "colorMeta": {
-      "ferreteria-base-100": { "role": "neutral", "displayName": "Pizarra oscura · superficie global" },
-      "ferreteria-base-200": { "role": "neutral", "displayName": "Pizarra oscura · lienzo global" },
-      "ferreteria-base-300": { "role": "neutral", "displayName": "Pizarra oscura · borde global" },
-      "ferreteria-base-content": { "role": "neutral", "displayName": "Texto global oscuro" },
-      "ferreteria-neutral": { "role": "neutral", "displayName": "Neutral global de pizarra" },
-      "ferreteria-neutral-content": { "role": "neutral", "displayName": "Texto sobre neutral global" },
-      "ferreteria-primary": { "role": "primary", "displayName": "Turquesa global de ferreteria" },
-      "ferreteria-primary-content": { "role": "neutral", "displayName": "Texto sobre primario global" },
-      "admin-canvas-light": { "role": "neutral", "displayName": "Lienzo administrativo gris frío claro" },
-      "admin-nav-surface": { "role": "neutral", "displayName": "Azul pizarra local · tema oscuro" },
-      "admin-nav-raised": { "role": "neutral", "displayName": "Azul pizarra elevado · tema oscuro" },
-      "admin-nav-border": { "role": "neutral", "displayName": "Borde local · tema oscuro" },
-      "admin-nav-surface-light": { "role": "neutral", "displayName": "Azul pizarra local · tema claro" },
-      "admin-nav-raised-light": { "role": "neutral", "displayName": "Azul pizarra elevado · tema claro" },
-      "admin-nav-border-light": { "role": "neutral", "displayName": "Borde local · tema claro" },
-      "admin-nav-content": { "role": "neutral", "displayName": "Texto claro de navegación" },
-      "admin-nav-accent": { "role": "primary", "displayName": "Turquesa local de selección" },
-      "admin-nav-accent-content": { "role": "neutral", "displayName": "Texto oscuro de selección" }
+      "pizarra-profunda": {
+        "role": "neutral",
+        "displayName": "Pizarra profunda",
+        "tonalRamp": [
+          "oklch(15% 0.025 250)",
+          "oklch(27% 0.025 250)",
+          "oklch(39% 0.025 250)",
+          "oklch(51% 0.025 250)",
+          "oklch(63% 0.025 250)",
+          "oklch(75% 0.025 250)",
+          "oklch(87% 0.025 250)",
+          "oklch(95% 0.025 250)"
+        ]
+      },
+      "pizarra-panel": {
+        "role": "neutral",
+        "displayName": "Pizarra panel",
+        "tonalRamp": [
+          "oklch(15% 0.025 250)",
+          "oklch(27% 0.025 250)",
+          "oklch(39% 0.025 250)",
+          "oklch(51% 0.025 250)",
+          "oklch(63% 0.025 250)",
+          "oklch(75% 0.025 250)",
+          "oklch(87% 0.025 250)",
+          "oklch(95% 0.025 250)"
+        ]
+      },
+      "pizarra-borde": {
+        "role": "neutral",
+        "displayName": "Pizarra borde",
+        "tonalRamp": [
+          "oklch(15% 0.028 250)",
+          "oklch(27% 0.028 250)",
+          "oklch(39% 0.028 250)",
+          "oklch(51% 0.028 250)",
+          "oklch(63% 0.028 250)",
+          "oklch(75% 0.028 250)",
+          "oklch(87% 0.028 250)",
+          "oklch(95% 0.028 250)"
+        ]
+      },
+      "niebla-clara": {
+        "role": "neutral",
+        "displayName": "Niebla clara",
+        "tonalRamp": [
+          "oklch(15% 0.014 250)",
+          "oklch(27% 0.014 250)",
+          "oklch(39% 0.014 250)",
+          "oklch(51% 0.014 250)",
+          "oklch(63% 0.014 250)",
+          "oklch(75% 0.014 250)",
+          "oklch(87% 0.014 250)",
+          "oklch(95% 0.014 250)"
+        ]
+      },
+      "turquesa-herramienta": {
+        "role": "primary",
+        "displayName": "Turquesa herramienta",
+        "tonalRamp": [
+          "oklch(15% 0.13 176)",
+          "oklch(27% 0.13 176)",
+          "oklch(39% 0.13 176)",
+          "oklch(51% 0.13 176)",
+          "oklch(63% 0.13 176)",
+          "oklch(75% 0.13 176)",
+          "oklch(87% 0.13 176)",
+          "oklch(95% 0.13 176)"
+        ]
+      },
+      "tinta-turquesa": {
+        "role": "neutral",
+        "displayName": "Tinta turquesa",
+        "tonalRamp": [
+          "oklch(15% 0.02 176)",
+          "oklch(27% 0.02 176)",
+          "oklch(39% 0.02 176)",
+          "oklch(51% 0.02 176)",
+          "oklch(63% 0.02 176)",
+          "oklch(75% 0.02 176)",
+          "oklch(87% 0.02 176)",
+          "oklch(95% 0.02 176)"
+        ]
+      },
+      "azul-calibre": {
+        "role": "secondary",
+        "displayName": "Azul calibre",
+        "tonalRamp": [
+          "oklch(15% 0.11 220)",
+          "oklch(27% 0.11 220)",
+          "oklch(39% 0.11 220)",
+          "oklch(51% 0.11 220)",
+          "oklch(63% 0.11 220)",
+          "oklch(75% 0.11 220)",
+          "oklch(87% 0.11 220)",
+          "oklch(95% 0.11 220)"
+        ]
+      },
+      "tinta-azul": {
+        "role": "neutral",
+        "displayName": "Tinta azul",
+        "tonalRamp": [
+          "oklch(15% 0.02 220)",
+          "oklch(27% 0.02 220)",
+          "oklch(39% 0.02 220)",
+          "oklch(51% 0.02 220)",
+          "oklch(63% 0.02 220)",
+          "oklch(75% 0.02 220)",
+          "oklch(87% 0.02 220)",
+          "oklch(95% 0.02 220)"
+        ]
+      },
+      "ambar-senal": {
+        "role": "tertiary",
+        "displayName": "Ámbar señal",
+        "tonalRamp": [
+          "oklch(15% 0.14 82)",
+          "oklch(27% 0.14 82)",
+          "oklch(39% 0.14 82)",
+          "oklch(51% 0.14 82)",
+          "oklch(63% 0.14 82)",
+          "oklch(75% 0.14 82)",
+          "oklch(87% 0.14 82)",
+          "oklch(95% 0.14 82)"
+        ]
+      },
+      "tinta-ambar": {
+        "role": "neutral",
+        "displayName": "Tinta ámbar",
+        "tonalRamp": [
+          "oklch(15% 0.03 82)",
+          "oklch(27% 0.03 82)",
+          "oklch(39% 0.03 82)",
+          "oklch(51% 0.03 82)",
+          "oklch(63% 0.03 82)",
+          "oklch(75% 0.03 82)",
+          "oklch(87% 0.03 82)",
+          "oklch(95% 0.03 82)"
+        ]
+      },
+      "pizarra-neutral": {
+        "role": "neutral",
+        "displayName": "Pizarra neutral",
+        "tonalRamp": [
+          "oklch(15% 0.025 250)",
+          "oklch(27% 0.025 250)",
+          "oklch(39% 0.025 250)",
+          "oklch(51% 0.025 250)",
+          "oklch(63% 0.025 250)",
+          "oklch(75% 0.025 250)",
+          "oklch(87% 0.025 250)",
+          "oklch(95% 0.025 250)"
+        ]
+      },
+      "texto-neutral": {
+        "role": "neutral",
+        "displayName": "Texto neutral",
+        "tonalRamp": [
+          "oklch(15% 0.012 250)",
+          "oklch(27% 0.012 250)",
+          "oklch(39% 0.012 250)",
+          "oklch(51% 0.012 250)",
+          "oklch(63% 0.012 250)",
+          "oklch(75% 0.012 250)",
+          "oklch(87% 0.012 250)",
+          "oklch(95% 0.012 250)"
+        ]
+      },
+      "informacion": {
+        "role": "semantic",
+        "displayName": "Información",
+        "tonalRamp": [
+          "oklch(15% 0.12 230)",
+          "oklch(27% 0.12 230)",
+          "oklch(39% 0.12 230)",
+          "oklch(51% 0.12 230)",
+          "oklch(63% 0.12 230)",
+          "oklch(75% 0.12 230)",
+          "oklch(87% 0.12 230)",
+          "oklch(95% 0.12 230)"
+        ]
+      },
+      "informacion-texto": {
+        "role": "neutral",
+        "displayName": "Texto de información",
+        "tonalRamp": [
+          "oklch(15% 0.03 230)",
+          "oklch(27% 0.03 230)",
+          "oklch(39% 0.03 230)",
+          "oklch(51% 0.03 230)",
+          "oklch(63% 0.03 230)",
+          "oklch(75% 0.03 230)",
+          "oklch(87% 0.03 230)",
+          "oklch(95% 0.03 230)"
+        ]
+      },
+      "exito": {
+        "role": "semantic",
+        "displayName": "Éxito",
+        "tonalRamp": [
+          "oklch(15% 0.16 160)",
+          "oklch(27% 0.16 160)",
+          "oklch(39% 0.16 160)",
+          "oklch(51% 0.16 160)",
+          "oklch(63% 0.16 160)",
+          "oklch(75% 0.16 160)",
+          "oklch(87% 0.16 160)",
+          "oklch(95% 0.16 160)"
+        ]
+      },
+      "exito-texto": {
+        "role": "neutral",
+        "displayName": "Texto de éxito",
+        "tonalRamp": [
+          "oklch(15% 0.03 160)",
+          "oklch(27% 0.03 160)",
+          "oklch(39% 0.03 160)",
+          "oklch(51% 0.03 160)",
+          "oklch(63% 0.03 160)",
+          "oklch(75% 0.03 160)",
+          "oklch(87% 0.03 160)",
+          "oklch(95% 0.03 160)"
+        ]
+      },
+      "advertencia": {
+        "role": "semantic",
+        "displayName": "Advertencia",
+        "tonalRamp": [
+          "oklch(15% 0.16 82)",
+          "oklch(27% 0.16 82)",
+          "oklch(39% 0.16 82)",
+          "oklch(51% 0.16 82)",
+          "oklch(63% 0.16 82)",
+          "oklch(75% 0.16 82)",
+          "oklch(87% 0.16 82)",
+          "oklch(95% 0.16 82)"
+        ]
+      },
+      "advertencia-texto": {
+        "role": "neutral",
+        "displayName": "Texto de advertencia",
+        "tonalRamp": [
+          "oklch(15% 0.05 82)",
+          "oklch(27% 0.05 82)",
+          "oklch(39% 0.05 82)",
+          "oklch(51% 0.05 82)",
+          "oklch(63% 0.05 82)",
+          "oklch(75% 0.05 82)",
+          "oklch(87% 0.05 82)",
+          "oklch(95% 0.05 82)"
+        ]
+      },
+      "peligro": {
+        "role": "semantic",
+        "displayName": "Peligro",
+        "tonalRamp": [
+          "oklch(15% 0.18 25)",
+          "oklch(27% 0.18 25)",
+          "oklch(39% 0.18 25)",
+          "oklch(51% 0.18 25)",
+          "oklch(63% 0.18 25)",
+          "oklch(75% 0.18 25)",
+          "oklch(87% 0.18 25)",
+          "oklch(95% 0.18 25)"
+        ]
+      },
+      "peligro-texto": {
+        "role": "neutral",
+        "displayName": "Texto de peligro",
+        "tonalRamp": [
+          "oklch(15% 0.01 25)",
+          "oklch(27% 0.01 25)",
+          "oklch(39% 0.01 25)",
+          "oklch(51% 0.01 25)",
+          "oklch(63% 0.01 25)",
+          "oklch(75% 0.01 25)",
+          "oklch(87% 0.01 25)",
+          "oklch(95% 0.01 25)"
+        ]
+      },
+      "lienzo-administrativo-claro": {
+        "role": "neutral",
+        "displayName": "Lienzo administrativo claro",
+        "tonalRamp": [
+          "oklch(15% 0.012 250)",
+          "oklch(27% 0.012 250)",
+          "oklch(39% 0.012 250)",
+          "oklch(51% 0.012 250)",
+          "oklch(63% 0.012 250)",
+          "oklch(75% 0.012 250)",
+          "oklch(87% 0.012 250)",
+          "oklch(95% 0.012 250)"
+        ]
+      },
+      "navegacion-pizarra": {
+        "role": "neutral",
+        "displayName": "Navegación pizarra",
+        "tonalRamp": [
+          "oklch(15% 0.02921 253.069)",
+          "oklch(27% 0.02921 253.069)",
+          "oklch(39% 0.02921 253.069)",
+          "oklch(51% 0.02921 253.069)",
+          "oklch(63% 0.02921 253.069)",
+          "oklch(75% 0.02921 253.069)",
+          "oklch(87% 0.02921 253.069)",
+          "oklch(95% 0.02921 253.069)"
+        ]
+      },
+      "navegacion-elevada": {
+        "role": "neutral",
+        "displayName": "Navegación elevada",
+        "tonalRamp": [
+          "oklch(15% 0.04 250)",
+          "oklch(27% 0.04 250)",
+          "oklch(39% 0.04 250)",
+          "oklch(51% 0.04 250)",
+          "oklch(63% 0.04 250)",
+          "oklch(75% 0.04 250)",
+          "oklch(87% 0.04 250)",
+          "oklch(95% 0.04 250)"
+        ]
+      },
+      "navegacion-borde": {
+        "role": "neutral",
+        "displayName": "Navegación borde",
+        "tonalRamp": [
+          "oklch(15% 0.03 250)",
+          "oklch(27% 0.03 250)",
+          "oklch(39% 0.03 250)",
+          "oklch(51% 0.03 250)",
+          "oklch(63% 0.03 250)",
+          "oklch(75% 0.03 250)",
+          "oklch(87% 0.03 250)",
+          "oklch(95% 0.03 250)"
+        ]
+      },
+      "navegacion-pizarra-clara": {
+        "role": "neutral",
+        "displayName": "Navegación pizarra clara",
+        "tonalRamp": [
+          "oklch(15% 0.053 250)",
+          "oklch(27% 0.053 250)",
+          "oklch(39% 0.053 250)",
+          "oklch(51% 0.053 250)",
+          "oklch(63% 0.053 250)",
+          "oklch(75% 0.053 250)",
+          "oklch(87% 0.053 250)",
+          "oklch(95% 0.053 250)"
+        ]
+      },
+      "navegacion-elevada-clara": {
+        "role": "neutral",
+        "displayName": "Navegación elevada clara",
+        "tonalRamp": [
+          "oklch(15% 0.049 250)",
+          "oklch(27% 0.049 250)",
+          "oklch(39% 0.049 250)",
+          "oklch(51% 0.049 250)",
+          "oklch(63% 0.049 250)",
+          "oklch(75% 0.049 250)",
+          "oklch(87% 0.049 250)",
+          "oklch(95% 0.049 250)"
+        ]
+      },
+      "navegacion-borde-claro": {
+        "role": "neutral",
+        "displayName": "Navegación borde claro",
+        "tonalRamp": [
+          "oklch(15% 0.04 250)",
+          "oklch(27% 0.04 250)",
+          "oklch(39% 0.04 250)",
+          "oklch(51% 0.04 250)",
+          "oklch(63% 0.04 250)",
+          "oklch(75% 0.04 250)",
+          "oklch(87% 0.04 250)",
+          "oklch(95% 0.04 250)"
+        ]
+      },
+      "navegacion-texto": {
+        "role": "neutral",
+        "displayName": "Navegación texto",
+        "tonalRamp": [
+          "oklch(15% 0.01 250)",
+          "oklch(27% 0.01 250)",
+          "oklch(39% 0.01 250)",
+          "oklch(51% 0.01 250)",
+          "oklch(63% 0.01 250)",
+          "oklch(75% 0.01 250)",
+          "oklch(87% 0.01 250)",
+          "oklch(95% 0.01 250)"
+        ]
+      },
+      "navegacion-seleccion": {
+        "role": "primary",
+        "displayName": "Navegación selección",
+        "tonalRamp": [
+          "oklch(15% 0.11 179)",
+          "oklch(27% 0.11 179)",
+          "oklch(39% 0.11 179)",
+          "oklch(51% 0.11 179)",
+          "oklch(63% 0.11 179)",
+          "oklch(75% 0.11 179)",
+          "oklch(87% 0.11 179)",
+          "oklch(95% 0.11 179)"
+        ]
+      },
+      "navegacion-seleccion-texto": {
+        "role": "neutral",
+        "displayName": "Texto de navegación seleccionada",
+        "tonalRamp": [
+          "oklch(15% 0.03 190)",
+          "oklch(27% 0.03 190)",
+          "oklch(39% 0.03 190)",
+          "oklch(51% 0.03 190)",
+          "oklch(63% 0.03 190)",
+          "oklch(75% 0.03 190)",
+          "oklch(87% 0.03 190)",
+          "oklch(95% 0.03 190)"
+        ]
+      },
+      "acceso-ambar": {
+        "role": "tertiary",
+        "displayName": "Ámbar de acceso",
+        "tonalRamp": [
+          "oklch(15% 0.145 78)",
+          "oklch(27% 0.145 78)",
+          "oklch(39% 0.145 78)",
+          "oklch(51% 0.145 78)",
+          "oklch(63% 0.145 78)",
+          "oklch(75% 0.145 78)",
+          "oklch(87% 0.145 78)",
+          "oklch(95% 0.145 78)"
+        ]
+      },
+      "acceso-ambar-fuerte": {
+        "role": "tertiary",
+        "displayName": "Ámbar de acceso fuerte",
+        "tonalRamp": [
+          "oklch(15% 0.14 75)",
+          "oklch(27% 0.14 75)",
+          "oklch(39% 0.14 75)",
+          "oklch(51% 0.14 75)",
+          "oklch(63% 0.14 75)",
+          "oklch(75% 0.14 75)",
+          "oklch(87% 0.14 75)",
+          "oklch(95% 0.14 75)"
+        ]
+      },
+      "acceso-tinta": {
+        "role": "neutral",
+        "displayName": "Tinta de acceso",
+        "tonalRamp": [
+          "oklch(15% 0.03 244)",
+          "oklch(27% 0.03 244)",
+          "oklch(39% 0.03 244)",
+          "oklch(51% 0.03 244)",
+          "oklch(63% 0.03 244)",
+          "oklch(75% 0.03 244)",
+          "oklch(87% 0.03 244)",
+          "oklch(95% 0.03 244)"
+        ]
+      },
+      "acceso-texto-secundario": {
+        "role": "neutral",
+        "displayName": "Texto secundario de acceso",
+        "tonalRamp": [
+          "oklch(15% 0.025 240)",
+          "oklch(27% 0.025 240)",
+          "oklch(39% 0.025 240)",
+          "oklch(51% 0.025 240)",
+          "oklch(63% 0.025 240)",
+          "oklch(75% 0.025 240)",
+          "oklch(87% 0.025 240)",
+          "oklch(95% 0.025 240)"
+        ]
+      },
+      "acceso-lienzo-mineral": {
+        "role": "neutral",
+        "displayName": "Lienzo mineral de acceso",
+        "tonalRamp": [
+          "oklch(15% 0.006 80)",
+          "oklch(27% 0.006 80)",
+          "oklch(39% 0.006 80)",
+          "oklch(51% 0.006 80)",
+          "oklch(63% 0.006 80)",
+          "oklch(75% 0.006 80)",
+          "oklch(87% 0.006 80)",
+          "oklch(95% 0.006 80)"
+        ]
+      },
+      "acceso-borde": {
+        "role": "neutral",
+        "displayName": "Borde de acceso",
+        "tonalRamp": [
+          "oklch(15% 0.01 240)",
+          "oklch(27% 0.01 240)",
+          "oklch(39% 0.01 240)",
+          "oklch(51% 0.01 240)",
+          "oklch(63% 0.01 240)",
+          "oklch(75% 0.01 240)",
+          "oklch(87% 0.01 240)",
+          "oklch(95% 0.01 240)"
+        ]
+      },
+      "acceso-tinta-sobre-ambar": {
+        "role": "neutral",
+        "displayName": "Tinta sobre ámbar de acceso",
+        "tonalRamp": [
+          "oklch(15% 0.026 70)",
+          "oklch(27% 0.026 70)",
+          "oklch(39% 0.026 70)",
+          "oklch(51% 0.026 70)",
+          "oklch(63% 0.026 70)",
+          "oklch(75% 0.026 70)",
+          "oklch(87% 0.026 70)",
+          "oklch(95% 0.026 70)"
+        ]
+      }
     },
     "typographyMeta": {
-      "body": { "displayName": "Sans del sistema", "purpose": "Pila heredada de Tailwind instalado; sin fuente de marca añadida." },
-      "title": { "displayName": "Título de sección", "purpose": "1.5rem; aumenta a 1.875rem desde sm, con peso 600 y altura de línea 1.25." },
-      "label": { "displayName": "Enlace de navegación", "purpose": "Peso 500 en reposo y 600 para la ruta actual." },
-      "caption": { "displayName": "Metadatos", "purpose": "Sesión, subtítulo de marca y pie." }
+      "body": {
+        "displayName": "Cuerpo compacto",
+        "purpose": "Instrucciones, descripciones y contenido de formularios."
+      },
+      "headline": {
+        "displayName": "Encabezado operativo",
+        "purpose": "Introducciones y titulares fluidos del dashboard."
+      },
+      "title": {
+        "displayName": "Título de sección",
+        "purpose": "Jerarquía principal del panel, con tracking ligeramente cerrado."
+      },
+      "metric": {
+        "displayName": "Métrica operativa",
+        "purpose": "Cifras KPI y totales con números tabulares."
+      },
+      "label": {
+        "displayName": "Etiqueta de control",
+        "purpose": "Navegación, botones y controles."
+      },
+      "overline": {
+        "displayName": "Microetiqueta técnica",
+        "purpose": "Agrupaciones y contexto breve en mayúsculas."
+      },
+      "caption": {
+        "displayName": "Metadatos",
+        "purpose": "Sesión, estado y notas auxiliares."
+      },
+      "acceso-hero": {
+        "displayName": "Titular de marca de acceso",
+        "purpose": "Promesa principal sobre la fotografía del taller; Barlow 600 autoalojada en public/fonts/barlow-600.ttf."
+      },
+      "acceso-heading": {
+        "displayName": "Titular de formulario de acceso",
+        "purpose": "Bienvenida y titulares principales del login; Barlow 700 autoalojada en public/fonts/barlow-700.ttf."
+      }
     },
+    "shadows": [
+      {
+        "name": "toast-ambient",
+        "value": "0 8px 28px color-mix(in oklab, var(--color-base-100) 65%, transparent)",
+        "purpose": "Separar notificaciones flotantes sin elevar tarjetas estáticas."
+      }
+    ],
     "motion": [
-      { "name": "menu-state", "value": "0.2s cubic-bezier(0, 0, .2, 1)", "purpose": "Transición de color, background-color y box-shadow heredada del componente menu de daisyUI instalado; no se añade una animación administrativa." }
+      {
+        "name": "menu-state",
+        "value": "0.2s cubic-bezier(0, 0, .2, 1)",
+        "purpose": "Transición compacta de color y superficie en navegación."
+      },
+      {
+        "name": "toast-arrive",
+        "value": "180ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Entrada vertical breve; se elimina cuando el usuario prefiere movimiento reducido."
+      }
     ],
     "breakpoints": [
-      { "name": "sm", "value": "640px" },
-      { "name": "lg", "value": "1024px" }
+      {
+        "name": "narrow",
+        "value": "420px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "dashboard-stack",
+        "value": "720px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "login-narrow",
+        "value": "390px"
+      },
+      {
+        "name": "login-stack",
+        "value": "720px"
+      }
     ]
   },
   "components": [
     {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal compacta con altura táctil y foco inequívoco.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Guardar cambios</button>",
+      "css": ".ds-btn-primary{display:inline-flex;min-height:2.75rem;align-items:center;justify-content:center;padding:.625rem 1rem;border:1px solid transparent;border-radius:var(--radius-field,.5rem);background:var(--color-primary,oklch(68% .13 176));color:var(--color-primary-content,oklch(16% .02 176));font:600 .875rem/1.2 var(--font-sans,system-ui,sans-serif);cursor:pointer;transition:filter .2s cubic-bezier(0,0,.2,1),transform .2s cubic-bezier(0,0,.2,1)}.ds-btn-primary:hover{filter:brightness(1.06)}.ds-btn-primary:active{transform:translateY(1px)}.ds-btn-primary:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Campo semántico de ancho completo con borde tonal y foco primario.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Nombre del rol</span><input class=\"ds-input\" type=\"text\" placeholder=\"Ej. Encargado de bodega\"></label>",
+      "css": ".ds-field{display:grid;gap:.5rem;width:100%;color:var(--color-base-content,oklch(92% .014 250));font-family:var(--font-sans,system-ui,sans-serif)}.ds-field-label{font-size:.875rem;font-weight:600}.ds-input{width:100%;min-height:2.75rem;padding:.625rem .75rem;border:1px solid var(--color-base-300,oklch(35% .028 250));border-radius:var(--radius-field,.5rem);background:var(--color-base-100,oklch(24% .025 250));color:inherit;font:400 .875rem/1.4 inherit}.ds-input::placeholder{color:color-mix(in oklab,var(--color-base-content) 55%,transparent)}.ds-input:hover{border-color:color-mix(in oklab,var(--color-primary) 45%,var(--color-base-300))}.ds-input:focus-visible{outline:2px solid var(--color-primary);outline-offset:2px}"
+    },
+    {
+      "name": "Tarjeta de dashboard",
+      "kind": "card",
+      "refersTo": "dashboard-card",
+      "description": "Contenedor plano para KPI, totales y resúmenes, separado por tono y borde.",
+      "html": "<article class=\"ds-dashboard-card\"><p>Ventas del día</p><strong>$ 18.450</strong><span>+8,4% frente a ayer</span></article>",
+      "css": ".ds-dashboard-card{display:grid;gap:.75rem;padding:1rem;border:1px solid color-mix(in oklab,var(--color-base-content,oklch(92% .014 250)) 11%,transparent);border-radius:var(--radius-box,.875rem);background:var(--color-base-200,oklch(28% .025 250));color:var(--color-base-content,oklch(92% .014 250));font-family:var(--font-sans,system-ui,sans-serif)}.ds-dashboard-card p{margin:0;color:color-mix(in oklab,var(--color-base-content) 70%,transparent);font-size:.73rem;font-weight:620}.ds-dashboard-card strong{font-size:clamp(1.5rem,2.3vw,2.05rem);font-variant-numeric:tabular-nums;font-weight:620;letter-spacing:-.045em;line-height:1}.ds-dashboard-card span{color:var(--color-success,oklch(68% .16 160));font-size:.72rem}"
+    },
+    {
+      "name": "Selector con búsqueda",
+      "kind": "custom",
+      "refersTo": "input-default",
+      "description": "Disparador de campo con overlay buscable, opciones compactas y selección visible.",
+      "html": "<div class=\"ds-select\"><button class=\"ds-select-trigger\" type=\"button\" aria-expanded=\"true\">Producto<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button><div class=\"ds-select-panel\"><input class=\"ds-select-search\" type=\"search\" aria-label=\"Buscar producto\" placeholder=\"Buscar\"><button class=\"ds-select-option\" type=\"button\" aria-selected=\"true\">Martillo<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m5 12 4 4L19 6\"/></svg></button><button class=\"ds-select-option\" type=\"button\">Taladro</button></div></div>",
+      "css": ".ds-select{width:18rem;color:var(--color-base-content,oklch(92% .014 250));font-family:var(--font-sans,system-ui,sans-serif)}.ds-select svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.ds-select-trigger,.ds-select-search,.ds-select-option{border-radius:var(--radius-field,.5rem);color:inherit;font:400 .875rem/1.3 inherit}.ds-select-trigger{display:flex;width:100%;min-height:2.75rem;align-items:center;justify-content:space-between;gap:.5rem;padding:.625rem .75rem;border:1px solid var(--color-base-300);background:var(--color-base-100)}.ds-select-panel{display:grid;gap:.25rem;margin-top:.35rem;padding:.25rem;border:1px solid var(--color-base-300);border-radius:var(--radius-box,.875rem);background:var(--color-base-200);box-shadow:0 10px 24px color-mix(in oklab,var(--color-base-100) 65%,transparent)}.ds-select-search{min-height:2.25rem;padding:.5rem .625rem;border:1px solid var(--color-base-300);background:var(--color-base-100)}.ds-select-option{display:flex;min-height:2.5rem;align-items:center;justify-content:space-between;padding:.5rem .75rem;border:0;background:transparent;text-align:left}.ds-select-option:hover,.ds-select-option[aria-selected=true]{background:var(--color-base-300)}.ds-select-trigger:focus-visible,.ds-select-search:focus-visible,.ds-select-option:focus-visible{outline:2px solid var(--color-primary);outline-offset:2px}"
+    },
+    {
       "name": "Navegación administrativa",
       "kind": "nav",
       "refersTo": "admin-navigation-current",
-      "description": "Muestra del grupo nativo inicialmente cerrado y la ruta actual al abrirlo. Hereda los tokens locales del shell; los fallbacks reproducen ferreteria. Solo previsualiza la navegación, no sustituye el drawer ni Angular Router.",
-      "html": "<nav class=\"ds-admin-nav\" aria-label=\"Navegación principal\"><details class=\"ds-admin-group\"><summary class=\"ds-admin-summary\"><svg class=\"ds-admin-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3ZM12 10v4M12 7v.01\"/></svg><span class=\"ds-admin-label\">Accesos</span></summary><ul class=\"ds-admin-items\"><li class=\"ds-admin-item\"><a class=\"ds-admin-link\" href=\"/admin/roles\" aria-current=\"page\"><svg class=\"ds-admin-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3ZM9 12l2 2 4-4\"/></svg><span class=\"ds-admin-label\">Roles</span><svg class=\"ds-admin-arrow\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 6 6 6-6 6\"/></svg></a></li><li class=\"ds-admin-item\"><a class=\"ds-admin-link\" href=\"/admin/usuarios\"><svg class=\"ds-admin-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z\"/></svg><span class=\"ds-admin-label\">Usuarios</span></a></li></ul></details></nav>",
-      "css": ".ds-admin-nav{--color-base-100:var(--admin-nav-surface,oklch(32% 0.042 250));--color-base-200:var(--admin-nav-raised,oklch(36% 0.04 250));--color-base-300:var(--admin-nav-border,oklch(43% 0.03 250));--color-base-content:var(--admin-nav-content,oklch(95% 0.01 250));--color-primary:var(--admin-nav-accent,oklch(79% 0.11 179));--color-primary-content:var(--admin-nav-accent-content,oklch(25% 0.03 190));color-scheme:dark;width:16.5rem;max-width:85vw;padding:1.5rem .75rem;background:var(--color-base-100);color:var(--color-base-content);font-family:var(--font-sans,sans-serif);font-size:.875rem}.ds-admin-summary,.ds-admin-link{display:flex;align-items:center;gap:.75rem;min-height:3rem;padding:.375rem .75rem;border-radius:var(--radius-field,.5rem);transition-property:color,background-color,box-shadow;transition-duration:.2s;transition-timing-function:cubic-bezier(0,0,.2,1)}.ds-admin-summary{list-style:none;cursor:pointer;font-weight:600;background:var(--color-base-200)}.ds-admin-summary::-webkit-details-marker{display:none}.ds-admin-summary:after{content:'';width:.375rem;height:.375rem;box-shadow:inset 2px 2px;rotate:-135deg}.ds-admin-group[open]>.ds-admin-summary{background:transparent}.ds-admin-group[open]>.ds-admin-summary:after{rotate:45deg}.ds-admin-summary:hover{background:color-mix(in oklab,var(--color-base-content) 10%,transparent)}.ds-admin-items{position:relative;display:flex;flex-direction:column;gap:.25rem;list-style:none;margin:.5rem 0 0 1rem;padding:0 0 0 .5rem}.ds-admin-items:before{content:'';position:absolute;left:0;top:.75rem;bottom:.75rem;width:1px;background:var(--color-base-content);opacity:.1}.ds-admin-link{font-weight:500;text-decoration:none;color:color-mix(in oklab,var(--color-base-content) 88%,transparent)}.ds-admin-link:hover{background:var(--color-base-200);color:var(--color-base-content)}.ds-admin-link[aria-current=page]{background:var(--color-primary);color:var(--color-primary-content);font-weight:600}.ds-admin-link:focus-visible,.ds-admin-summary:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}.ds-admin-label{flex:1}.ds-admin-icon,.ds-admin-arrow{flex-shrink:0;width:1.25rem;height:1.25rem;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.ds-admin-arrow{width:1rem;height:1rem}"
+      "description": "Grupo colapsable y ruta activa dentro del ámbito cromático aislado del sidebar.",
+      "html": "<nav class=\"ds-admin-nav\" aria-label=\"Navegación principal\"><details open><summary><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z\"/></svg><span>Accesos</span></summary><ul><li><a href=\"#\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m5 12 4 4L19 6\"/></svg><span>Roles</span><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 6 6 6-6 6\"/></svg></a></li><li><a href=\"#\">Usuarios</a></li></ul></details></nav>",
+      "css": ".ds-admin-nav{--color-base-100:var(--admin-nav-surface,oklch(25.629% .02921 253.069));--color-base-200:var(--admin-nav-raised,oklch(36% .04 250));--color-base-300:var(--admin-nav-border,oklch(43% .03 250));--color-base-content:var(--admin-nav-content,oklch(95% .01 250));--color-primary:var(--admin-nav-accent,oklch(79% .11 179));--color-primary-content:var(--admin-nav-accent-content,oklch(25% .03 190));width:16.5rem;max-width:85vw;padding:1.5rem .75rem;background:var(--color-base-100);color:var(--color-base-content);font-family:var(--font-sans,system-ui,sans-serif);color-scheme:dark}.ds-admin-nav svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.ds-admin-nav summary,.ds-admin-nav a{display:flex;min-height:3rem;align-items:center;gap:.75rem;padding:.5rem .75rem;border-radius:var(--radius-field,.5rem);font-size:.875rem}.ds-admin-nav summary{background:var(--color-base-200);font-weight:600;cursor:pointer}.ds-admin-nav details[open]>summary{background:transparent}.ds-admin-nav ul{display:grid;gap:.25rem;margin:.5rem 0 0 1rem;padding:0 0 0 .5rem;border-left:1px solid color-mix(in oklab,var(--color-base-content) 12%,transparent);list-style:none}.ds-admin-nav a{color:color-mix(in oklab,var(--color-base-content) 88%,transparent);font-weight:500;text-decoration:none}.ds-admin-nav a:hover{background:var(--color-base-200);color:var(--color-base-content)}.ds-admin-nav a[aria-current=page]{background:var(--color-primary);color:var(--color-primary-content);font-weight:600}.ds-admin-nav a:focus-visible,.ds-admin-nav summary:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}"
+    },
+    {
+      "name": "Carga de archivos",
+      "kind": "custom",
+      "refersTo": "container-default",
+      "description": "Zona de recepción con borde discontinuo, instrucciones breves y acción primaria.",
+      "html": "<section class=\"ds-upload\" aria-labelledby=\"ds-upload-title\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 16V4m0 0L7 9m5-5 5 5M5 20h14\"/></svg><h3 id=\"ds-upload-title\">Arrastra tus archivos aquí</h3><p>Desde tu dispositivo, sin complicaciones</p><button type=\"button\">Seleccionar archivos</button><small>PDF o imagen · máximo 10 MB</small></section>",
+      "css": ".ds-upload{display:grid;justify-items:center;padding:2rem 1.5rem;border:2px dashed var(--color-base-300,oklch(35% .028 250));border-radius:var(--radius-box,.875rem);background:var(--color-base-100,oklch(24% .025 250));color:var(--color-base-content,oklch(92% .014 250));font-family:var(--font-sans,system-ui,sans-serif);text-align:center}.ds-upload svg{width:2rem;height:2rem;margin-bottom:1rem;fill:none;stroke:var(--color-primary);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.ds-upload h3{margin:0;font-size:1rem}.ds-upload p{margin:.25rem 0 0;font-size:.875rem}.ds-upload button{min-height:2.75rem;margin-top:1.25rem;padding:.625rem 1rem;border:0;border-radius:var(--radius-field,.5rem);background:var(--color-primary);color:var(--color-primary-content);font-weight:600}.ds-upload button:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}.ds-upload small{margin-top:1rem;font-size:.75rem}"
+    },
+    {
+      "name": "Diálogo de confirmación",
+      "kind": "custom",
+      "refersTo": "container-default",
+      "description": "Decisión modal clara con cancelación neutral y confirmación destructiva explícita.",
+      "html": "<section class=\"ds-dialog\" role=\"dialog\" aria-labelledby=\"ds-dialog-title\" aria-describedby=\"ds-dialog-message\"><h2 id=\"ds-dialog-title\">¿Eliminar este producto?</h2><p id=\"ds-dialog-message\">Esta acción no se puede deshacer.</p><div><button class=\"ds-dialog-cancel\" type=\"button\">Cancelar</button><button class=\"ds-dialog-danger\" type=\"button\">Eliminar producto</button></div></section>",
+      "css": ".ds-dialog{width:min(28rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);overflow:auto;padding:1.5rem;border:1px solid var(--color-base-300,oklch(35% .028 250));border-radius:var(--radius-box,.875rem);background:var(--color-base-100,oklch(24% .025 250));color:var(--color-base-content,oklch(92% .014 250));font-family:var(--font-sans,system-ui,sans-serif)}.ds-dialog h2{margin:0;font-size:1.25rem;line-height:1.25}.ds-dialog p{margin:.75rem 0 0;font-size:.875rem;line-height:1.5}.ds-dialog div{display:flex;justify-content:flex-end;gap:.75rem;margin-top:1.5rem}.ds-dialog button{min-height:2.75rem;padding:.625rem 1rem;border:1px solid var(--color-base-300);border-radius:var(--radius-field,.5rem);font-weight:600}.ds-dialog-cancel{background:var(--color-base-200);color:var(--color-base-content)}.ds-dialog-danger{border-color:transparent!important;background:var(--color-error,oklch(65% .18 25));color:var(--color-error-content,oklch(96% .01 25))}.ds-dialog button:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}@media(max-width:639px){.ds-dialog div{flex-direction:column}.ds-dialog button{width:100%}}"
+    },
+    {
+      "name": "Notificación toast",
+      "kind": "custom",
+      "refersTo": "container-default",
+      "description": "Feedback flotante con tono semántico, lectura compacta y cierre táctil.",
+      "html": "<article class=\"ds-toast\" role=\"status\"><span class=\"ds-toast-icon\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\"><path d=\"m5 12 4 4L19 6\"/></svg></span><div><strong>Cambios guardados</strong><p>La información se actualizó correctamente.</p></div><button type=\"button\" aria-label=\"Cerrar notificación\">×</button></article>",
+      "css": ".ds-toast{display:grid;width:min(26rem,100%);grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:.75rem;padding:.875rem .5rem .875rem .875rem;border:1px solid var(--color-base-300,oklch(35% .028 250));border-radius:var(--radius-box,.875rem);background:var(--color-base-300);color:var(--color-base-content,oklch(92% .014 250));box-shadow:0 8px 28px color-mix(in oklab,var(--color-base-100) 65%,transparent);font-family:var(--font-sans,system-ui,sans-serif);animation:ds-toast-arrive 180ms cubic-bezier(.16,1,.3,1)}.ds-toast-icon{display:grid;width:2.25rem;height:2.25rem;place-items:center;border-radius:var(--radius-field,.5rem);background:color-mix(in oklab,var(--color-success) 18%,transparent);color:var(--color-success)}.ds-toast svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:1.8}.ds-toast strong{font-size:.875rem}.ds-toast p{margin:.25rem 0 0;font-size:.875rem;line-height:1.5;color:color-mix(in oklab,var(--color-base-content) 80%,transparent)}.ds-toast button{display:grid;width:2.75rem;height:2.75rem;place-items:center;border:0;border-radius:var(--radius-field,.5rem);background:transparent;color:color-mix(in oklab,var(--color-base-content) 70%,transparent);font-size:1.25rem}.ds-toast button:hover{background:var(--color-base-200);color:var(--color-base-content)}.ds-toast button:focus-visible{outline:2px solid var(--color-primary);outline-offset:2px}@keyframes ds-toast-arrive{from{transform:translateY(-.5rem)}to{transform:translateY(0)}}@media(prefers-reduced-motion:reduce){.ds-toast{animation:none}}"
+    },
+    {
+      "name": "Botón primario de acceso",
+      "kind": "button",
+      "refersTo": "acceso-button-primary",
+      "description": "Acción principal del login, alta y robusta, con ámbar confinado al ámbito de autenticación.",
+      "html": "<button class=\"ds-login-button\" type=\"button\">Iniciar sesión</button>",
+      "css": ".ds-login-button{display:inline-flex;width:min(27rem,100%);height:3.5rem;align-items:center;justify-content:center;padding:.75rem 1rem;border:0;border-radius:.65rem;background:oklch(59% .14 75);color:oklch(18% .026 70);font:700 .9rem/1.2 ui-sans-serif,system-ui,sans-serif;cursor:pointer;transition:background-color .2s cubic-bezier(0,0,.2,1),transform .2s cubic-bezier(0,0,.2,1)}.ds-login-button:hover{background:oklch(55% .14 75)}.ds-login-button:active{transform:translateY(1px)}.ds-login-button:focus-visible{outline:2px solid oklch(59% .14 75);outline-offset:3px}"
+    },
+    {
+      "name": "Campo de acceso",
+      "kind": "input",
+      "refersTo": "acceso-input",
+      "description": "Campo alto sobre lienzo mineral, con borde azul-pizarra y foco ámbar visible.",
+      "html": "<label class=\"ds-login-field\"><span>Correo electrónico</span><span class=\"ds-login-input\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 6h16v12H4zM4 7l8 6 8-6\"/></svg><input type=\"email\" placeholder=\"nombre@empresa.com\"></span></label>",
+      "css": ".ds-login-field{display:grid;width:min(27rem,100%);gap:.55rem;color:oklch(24% .03 244);font-family:ui-sans-serif,system-ui,sans-serif}.ds-login-field>span:first-child{font-size:.81rem;font-weight:700}.ds-login-input{display:flex;height:3.55rem;align-items:center;gap:.85rem;padding:0 .8rem;border:1px solid oklch(76% .01 240);border-radius:.65rem;background:transparent;color:oklch(49% .025 240)}.ds-login-input svg{width:1.2rem;height:1.2rem;flex:none;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}.ds-login-input input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:oklch(24% .03 244);font:400 .94rem/1.4 ui-sans-serif,system-ui,sans-serif}.ds-login-input input::placeholder{color:oklch(55% .02 240);opacity:1}.ds-login-input:hover{border-color:oklch(62% .014 240)}.ds-login-input:focus-within{border-color:oklch(59% .14 75);outline:2px solid oklch(67% .145 78/.46);outline-offset:2px}"
     }
   ],
   "narrative": {
-    "overview": "Registro acotado de la paleta aprobada y construida; no define una nueva identidad comercial ni un sistema completo para todas las páginas.",
+    "northStar": "Taller de precisión",
+    "overview": "El sistema de Ferretería Atlas traduce la disciplina de un taller bien ordenado a una interfaz sobria y operativa: cada superficie tiene una función, cada acento señala una decisión y la densidad se mantiene contenida. La base fría de pizarra aporta estabilidad; el turquesa identifica orientación y acción sin convertir el panel en una experiencia ornamental.\n\nLos componentes se sienten robustos y contenidos. La jerarquía depende de contraste, ritmo, tipografía y estados explícitos antes que de efectos. El panel administrativo activo y los patrones implementados del dashboard comparten este vocabulario, aunque algunas composiciones del dashboard todavía no estén conectadas a una ruta.\n\nEl acceso extiende este sistema con un sublenguaje local, no con una identidad sustituta: contrapone una fotografía oscura del taller y un lienzo mineral claro, y traslada el ámbar de señal a marca, foco y acción. Esta puerta de entrada no modifica la pizarra ni el turquesa del panel administrativo.",
     "keyCharacteristics": [
-      "Barra lateral azul pizarra en ambos temas.",
-      "Ruta seleccionada turquesa con texto oscuro.",
-      "Lienzo gris frío claro y superficies oscuras de pizarra más claras."
+      "Superficies frías y compactas organizadas por capas tonales.",
+      "Turquesa herramienta reservado para acciones, foco, selección y datos destacados.",
+      "Tipografía del sistema, números tabulares y microetiquetas técnicas para lectura rápida.",
+      "Estados semánticos visibles y controles con áreas táctiles de al menos (2.75rem).",
+      "Acceso editorial dividido, con fotografía de oficio, superficie mineral y ámbar confinado a su ámbito."
     ],
-    "rules": [],
+    "rules": [
+      {
+        "name": "The One Tool Color Rule",
+        "body": "El turquesa herramienta guía acciones y orientación; no se usa como relleno decorativo de grandes superficies.",
+        "section": "colors"
+      },
+      {
+        "name": "The Semantic Independence Rule",
+        "body": "Éxito, advertencia y peligro conservan su significado incluso cuando el tema o la navegación cambian.",
+        "section": "colors"
+      },
+      {
+        "name": "The Numeric Discipline Rule",
+        "body": "Métricas, importes y celdas numéricas usan cifras tabulares; los números importantes no dependen solo del color.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tonal Layers Rule",
+        "body": "Una superficie en flujo se separa primero por tono y borde; la sombra solo comunica flotación real.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Scoped Doorway Rule",
+        "body": "El ámbar conduce el acceso; el turquesa sigue perteneciendo al panel administrativo. Ninguno invade el ámbito del otro.",
+        "section": "colors"
+      },
+      {
+        "name": "The Auth Type Boundary Rule",
+        "body": "Barlow 600/700 se reserva para marca y titulares de acceso; el contenido funcional conserva la sans del sistema.",
+        "section": "typography"
+      }
+    ],
     "dos": [
-      "Do: Mantener los colores administrativos dentro de sus ámbitos y los colores de página ligados al tema global.",
-      "Do: Conservar grupos colapsables, ruta actual y controles accesibles del drawer."
+      "Do mantener los colores administrativos dentro de su ámbito y los colores de página ligados al tema global.",
+      "Do usar capas tonales, divisores tenues y jerarquía tipográfica antes de añadir sombras.",
+      "Do conservar foco visible, áreas táctiles mínimas, estados semánticos y restauración de foco en overlays.",
+      "Do usar cifras tabulares en métricas, importes y tablas.",
+      "Do tratar el acceso como una extensión local: fotografía oscura, lienzo mineral y ámbar de señal, sin alterar el panel administrativo.",
+      "Do reservar Barlow 600/700 para la marca y los titulares del acceso."
     ],
     "donts": [
-      "Don't: Modificar el tema incorporado `light` para reproducir el azul pizarra de la barra lateral.",
-      "Don't: Convertir el turquesa local de selección en un reemplazo global de colores primarios o de estado."
+      "Don't modificar el tema incorporado `light` para imitar la barra lateral; la navegación ya tiene tokens locales.",
+      "Don't convertir el turquesa herramienta en sustituto de éxito, advertencia o peligro.",
+      "Don't aplicar sombras a tarjetas estáticas ni usar cápsulas para cualquier contenedor.",
+      "Don't introducir otra fuente o un color decorativo fuera de los compromisos explícitos de identidad de Ferretería Atlas.",
+      "Don't llevar el ámbar del acceso al panel administrativo ni reemplazar allí el turquesa herramienta.",
+      "Don't convertir el login en una tarjeta flotante sobre la fotografía ni presentar recuperación, Google o autenticación como servicios conectados."
     ]
   }
 }

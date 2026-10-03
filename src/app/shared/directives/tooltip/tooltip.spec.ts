@@ -82,6 +82,9 @@ describe('Tooltip', () => {
     button.dispatchEvent(new Event('pointerenter'));
     fixture.detectChanges();
     expect(button.classList.contains('tooltip-open')).toBe(true);
+    button.dispatchEvent(new Event('pointerleave'));
+    fixture.detectChanges();
+    expect(button.classList.contains('tooltip-open')).toBe(false);
     button.click();
     button.blur();
     button.focus();

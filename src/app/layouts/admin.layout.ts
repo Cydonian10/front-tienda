@@ -8,6 +8,8 @@ import { Icon } from '../shared/components/icon/icon';
 import { AuthSessionService } from '../auth/services/auth-session.service';
 import { AuthProfileService } from '../auth/services/auth-profile.service';
 import { QueryClient } from '@tanstack/angular-query-experimental';
+import { ConfirmDialogService } from '../shared/services/confirm-dialog/confirm-dialog.service';
+import { AuthStore } from '../store/auth/auth.store';
 
 @Component({
   imports: [RouterOutlet, AdminHeader, AdminFooterPage, RouterLink, RouterLinkActive, Icon],
@@ -39,6 +41,7 @@ import { QueryClient } from '@tanstack/angular-query-experimental';
           [menuOpen]="navigationOpen()"
           (menuToggleRequested)="navigationOpen.set(!navigationOpen())"
           (logoutRequested)="logout()"
+          [userName]="userName()"
         />
 
         <main
@@ -204,8 +207,17 @@ export class AdminLayout {
   private readonly session = inject(AuthSessionService);
   private readonly profile = inject(AuthProfileService);
   private readonly queryClient = inject(QueryClient);
+  private readonly confirmation = inject(ConfirmDialogService);
   private readonly header = viewChild(AdminHeader);
   private readonly currentPath = signal(this.router.url);
+
+  authStore = inject(AuthStore);
+
+  readonly userName = computed(() => {
+    const store = this.authStore;
+    const fillName = `${store.authPerfil()?.person.firstName} ${store.authPerfil()?.person.lastName}`;
+    return fillName;
+  });
 
   readonly navigationOpen = signal(false);
   readonly navigationGroups = [
@@ -255,9 +267,21 @@ export class AdminLayout {
   }
 
   logout(): void {
-    this.session.clear();
-    this.profile.clear();
-    this.queryClient.clear();
-    void this.router.navigate(['/auth/login']);
+    this.confirmation
+      .confirm({
+        title: '¿Cerrar sesión?',
+        message: 'Tendrás que iniciar sesión nuevamente para volver a ingresar.',
+        confirmText: 'Cerrar sesión',
+        tone: 'danger',
+      })
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+
+        this.session.clear();
+        this.profile.clear();
+        this.queryClient.clear();
+
+        void this.router.navigate(['/auth/login']);
+      });
   }
 }

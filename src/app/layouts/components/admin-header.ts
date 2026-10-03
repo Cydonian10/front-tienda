@@ -1,4 +1,4 @@
-import { Component, ElementRef, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, input, output, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ThemeToggle } from '../../shared/components/theme-toggle/theme-toggle';
 import { Icon } from '../../shared/components/icon/icon';
@@ -61,8 +61,15 @@ export class AdminHeader {
 
   readonly menuControlId = input.required<string>();
   readonly menuOpen = input(false);
-  readonly userName = input('Administrador');
-  readonly userInitials = input('AD');
+  readonly userName = input('Administrador hola');
+  readonly userInitials = computed(() => {
+    const names = this.userName().trim().split(/\s+/).filter(Boolean);
+    if (names.length === 0) return 'AD';
+
+    const first = names[0].charAt(0);
+    const last = names.length > 1 ? names[names.length - 1].charAt(0) : '';
+    return `${first}${last}`.toLocaleUpperCase('es');
+  });
   readonly logoutRequested = output<void>();
   readonly menuToggleRequested = output<void>();
 

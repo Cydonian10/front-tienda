@@ -43,4 +43,5 @@ export interface Permiso {
 
 export interface FilterPermision {
   rolId?: string;
+  systemCode?: string;
 }

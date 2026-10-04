@@ -7,6 +7,7 @@ import {
 } from '../../../shared/components/search-select/search-select';
 import { Icon } from '../../../shared/components/icon/icon';
 import { getPermisosQuery } from '../../actions/permisos/get-permisos-action';
+import { findSystemsQuery } from '../../actions/systems/find-systems-action';
 
 const byLabel = (a: SearchSelectOption, b: SearchSelectOption) =>
   a.label.localeCompare(b.label, 'es');
@@ -18,36 +19,30 @@ const byLabel = (a: SearchSelectOption, b: SearchSelectOption) =>
   host: { class: 'block min-w-0' },
 })
 export default class PermisosPage {
-  readonly permisosQuery = getPermisosQuery();
+  readonly systemsQuery = findSystemsQuery();
+
   readonly systemControl = new FormControl<string | null>({ value: null, disabled: true });
   readonly resourceControl = new FormControl<string | null>({ value: null, disabled: true });
   readonly selectedSystem = toSignal(this.systemControl.valueChanges, { initialValue: null });
   readonly selectedResource = toSignal(this.resourceControl.valueChanges, { initialValue: null });
+  readonly permisosQuery = getPermisosQuery(() => this.selectedSystem());
 
-  readonly systems = computed<SearchSelectOption[]>(() => {
-    const options = new Map<string, string>();
-    for (const permission of this.permisosQuery.data() ?? []) {
-      options.set(permission.systemCode, permission.systemName || permission.systemCode);
-    }
-    return Array.from(options, ([value, label]) => ({ value, label })).sort(byLabel);
-  });
+  readonly systems = computed<SearchSelectOption[]>(() =>
+    (this.systemsQuery.data() ?? [])
+      .map((system) => ({ value: system.code, label: system.name || system.code }))
+      .sort(byLabel),
+  );
 
   readonly resources = computed<SearchSelectOption[]>(() => {
     const codes = new Set(
-      (this.permisosQuery.data() ?? [])
-        .filter(
-          (permission) => !this.selectedSystem() || permission.systemCode === this.selectedSystem(),
-        )
-        .map((permission) => permission.resourceCode),
+      (this.permisosQuery.data() ?? []).map((permission) => permission.resourceCode),
     );
     return Array.from(codes, (value) => ({ value, label: value })).sort(byLabel);
   });
 
   readonly filteredPermissions = computed(() =>
     (this.permisosQuery.data() ?? []).filter(
-      (permission) =>
-        (!this.selectedSystem() || permission.systemCode === this.selectedSystem()) &&
-        (!this.selectedResource() || permission.resourceCode === this.selectedResource()),
+      (permission) => !this.selectedResource() || permission.resourceCode === this.selectedResource(),
     ),
   );
 
@@ -55,14 +50,14 @@ export default class PermisosPage {
 
   constructor() {
     effect(() => {
-      if (this.systems().length && !this.permisosQuery.isError()) {
+      if (this.systems().length && !this.systemsQuery.isError()) {
         this.systemControl.enable({ emitEvent: false });
       } else {
         this.systemControl.disable({ emitEvent: false });
       }
     });
     effect(() => {
-      if (this.resources().length && !this.permisosQuery.isError()) {
+      if (this.selectedSystem() && this.resources().length && !this.permisosQuery.isError()) {
         this.resourceControl.enable({ emitEvent: false });
       } else {
         this.resourceControl.disable({ emitEvent: false });

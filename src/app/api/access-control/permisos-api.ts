@@ -18,6 +18,10 @@ export class PermisosApi {
       params = params.set('rolId', dto.rolId);
     }
 
+    if (dto.systemCode) {
+      params = params.set('systemCode', dto.systemCode);
+    }
+
     return firstValueFrom(this.http.get<Permiso[]>(url, { params }));
   }
 }

@@ -9,6 +9,30 @@ export const ICONS = {
   'chevron-down': [{ type: 'path', d: 'm6 9 6 6 6-6' }],
   'chevron-right': [{ type: 'path', d: 'm9 6 6 6-6 6' }],
   check: [{ type: 'path', d: 'm5 12 4 4L19 6' }],
+  user: [
+    { type: 'circle', cx: 12, cy: 7, r: 4 },
+    { type: 'path', d: 'M5 21v-2a7 7 0 0 1 14 0v2' },
+  ],
+  'at-sign': [
+    { type: 'circle', cx: 12, cy: 12, r: 4 },
+    { type: 'path', d: 'M16 8v6a2 2 0 0 0 4 0v-2a8 8 0 1 0-3 6.24' },
+  ],
+  'id-card': [
+    {
+      type: 'path',
+      d: 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2ZM6 9h5m-5 4h3m6-4h3m-3 4h3',
+    },
+  ],
+  calendar: [
+    {
+      type: 'path',
+      d: 'M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM16 2v4M8 2v4M3 10h18',
+    },
+  ],
+  key: [
+    { type: 'circle', cx: 7.5, cy: 15.5, r: 4.5 },
+    { type: 'path', d: 'm11 12 9-9 2 2-3 3 2 2-3 3-2-2' },
+  ],
   upload: [{ type: 'path', d: 'M12 16V3m-5 5 5-5 5 5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4' }],
   file: [
     {

@@ -59,7 +59,7 @@ import { AuthStore } from '../store/auth/auth.store';
                 {{ currentSection().label }}
               </h1>
               <p class="mt-2 max-w-prose text-sm leading-relaxed text-base-content/70">
-                Control de acceso del panel operativo.
+                {{ currentSection().description }}
               </p>
             </div>
             <router-outlet />
@@ -214,9 +214,12 @@ export class AdminLayout {
   authStore = inject(AuthStore);
 
   readonly userName = computed(() => {
-    const store = this.authStore;
-    const fillName = `${store.authPerfil()?.person.firstName} ${store.authPerfil()?.person.lastName}`;
-    return fillName;
+    const perfil = this.authStore.authPerfil();
+    return (
+      [perfil?.person?.firstName, perfil?.person?.lastName].filter(Boolean).join(' ').trim() ||
+      perfil?.nickName ||
+      'Mi cuenta'
+    );
   });
 
   readonly navigationOpen = signal(false);
@@ -241,11 +244,18 @@ export class AdminLayout {
 
   private readonly navigationItems = this.navigationGroups.flatMap((group) => group.items);
 
-  readonly currentSection = computed(
-    () =>
+  readonly currentSection = computed(() => {
+    if (this.currentPath().split(/[?#]/)[0] === '/admin/perfil') {
+      return {
+        label: 'Perfil de usuario',
+        description: 'Información personal y accesos asignados a tu cuenta.',
+      };
+    }
+    const section =
       this.navigationItems.find((item) => this.currentPath().startsWith(item.url)) ??
-      this.navigationItems[0],
-  );
+      this.navigationItems[0];
+    return { ...section, description: 'Control de acceso del panel operativo.' };
+  });
 
   constructor() {
     this.router.events

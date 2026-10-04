@@ -1,10 +1,10 @@
 import { Component, ElementRef, computed, input, output, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeToggle } from '../../shared/components/theme-toggle/theme-toggle';
 import { Icon } from '../../shared/components/icon/icon';
 
 @Component({
-  imports: [RouterLink, ThemeToggle, Icon],
+  imports: [RouterLink, RouterLinkActive, ThemeToggle, Icon],
   selector: 'app-admin-header',
   template: `
     <header
@@ -33,17 +33,27 @@ import { Icon } from '../../shared/components/icon/icon';
       </div>
       <div class="navbar-end w-auto shrink-0 gap-1 sm:gap-3">
         <app-theme-toggle />
-        <span class="hidden text-right sm:block">
-          <span class="block text-xs font-semibold text-base-content">{{ userName() }}</span>
-          <span class="mt-0.5 block text-xs text-base-content/70">Sesión activa</span>
-        </span>
-        <div class="avatar avatar-placeholder" aria-hidden="true">
-          <div
-            class="w-9 rounded-full border border-base-300 bg-base-200 text-xs font-semibold text-base-content"
-          >
-            {{ userInitials() }}
+        <a
+          routerLink="/admin/perfil"
+          routerLinkActive="bg-base-200"
+          ariaCurrentWhenActive="page"
+          aria-label="Ver mi perfil"
+          class="btn btn-ghost h-auto min-h-11 gap-3 px-2 focus-visible:outline-primary"
+        >
+          <span class="hidden max-w-48 text-right sm:block">
+            <span class="block truncate text-xs font-semibold text-base-content">{{
+              userName()
+            }}</span>
+            <span class="mt-0.5 block text-xs font-medium text-base-content/70">Mi perfil</span>
+          </span>
+          <div class="avatar avatar-placeholder" aria-hidden="true">
+            <div
+              class="w-9 rounded-full border border-base-300 bg-base-200 text-xs font-semibold text-base-content"
+            >
+              {{ userInitials() }}
+            </div>
           </div>
-        </div>
+        </a>
         <button
           type="button"
           class="btn btn-ghost min-h-11 px-3 text-sm"

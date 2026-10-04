@@ -10,7 +10,7 @@ export const routes: Routes = [
     path: 'admin',
     canActivate: [authGuard],
     loadChildren: () =>
-      import('./access-control/access-control').then((module) => module.accessControlRoutes),
+      import('./access-control/access-control.routes').then((module) => module.accessControlRoutes),
   },
   {
     path: '',

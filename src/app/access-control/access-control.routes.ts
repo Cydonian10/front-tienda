@@ -13,11 +13,15 @@ export const accessControlRoutes: Routes = [
       },
       {
         path: 'roles',
-        loadComponent: () => import('./pages/roles/roles.page').then((page) => page.default),
+        loadComponent: () => import('./pages/roles/roles.page'),
       },
       {
         path: 'usuarios',
-        loadComponent: () => import('./pages/usuarios/usuarios.page').then((page) => page.default),
+        loadComponent: () => import('./pages/usuarios/usuarios.page'),
+      },
+      {
+        path: 'perfil',
+        loadComponent: () => import('./pages/perfil/perfil.page'),
       },
     ],
   },

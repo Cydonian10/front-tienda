@@ -22,4 +22,16 @@ describe('AdminHeader', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.userInitials()).toBe('AD');
   });
+
+  it('links the account identity to the profile page', () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    const fixture = TestBed.createComponent(AdminHeader);
+    fixture.componentRef.setInput('menuControlId', 'admin-navigation');
+    fixture.detectChanges();
+    const link = (fixture.nativeElement as HTMLElement).querySelector(
+      'a[aria-label="Ver mi perfil"]',
+    );
+    expect(link?.getAttribute('href')).toBe('/admin/perfil');
+    expect(link?.textContent).toContain('Mi perfil');
+  });
 });

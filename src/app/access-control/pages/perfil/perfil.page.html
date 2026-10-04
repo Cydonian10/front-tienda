@@ -1,0 +1,228 @@
+@if (perfil(); as profile) {
+  <div class="profile-content">
+    <section
+      class="profile-identity rounded-box bg-neutral text-neutral-content"
+      aria-labelledby="profile-name"
+    >
+      <div class="flex min-w-0 items-center gap-5 sm:gap-6">
+        <div class="avatar avatar-placeholder" aria-hidden="true">
+          <div
+            class="w-20 rounded-box bg-primary text-3xl font-semibold text-primary-content sm:w-24"
+          >
+            {{ initials() }}
+          </div>
+        </div>
+        <div class="min-w-0">
+          <h2
+            id="profile-name"
+            class="text-2xl leading-tight font-semibold tracking-tight sm:text-3xl"
+          >
+            {{ fullName() }}
+          </h2>
+          @if (profile.nickName) {
+            <p class="mt-2 text-sm text-neutral-content/80">&#64;{{ profile.nickName }}</p>
+          }
+        </div>
+      </div>
+      <div class="identity-status flex flex-wrap gap-2">
+        <span
+          class="badge badge-soft"
+          [class.badge-success]="profile.active"
+          [class.badge-error]="!profile.active"
+        >
+          <app-icon [name]="profile.active ? 'check' : 'close'" [size]="14" />
+          {{ profile.active ? 'Cuenta activa' : 'Cuenta inactiva' }}
+        </span>
+        <span
+          class="badge badge-soft"
+          [class.badge-success]="profile.emailVerified"
+          [class.badge-warning]="!profile.emailVerified"
+        >
+          <app-icon [name]="profile.emailVerified ? 'shield-check' : 'mail'" [size]="14" />
+          {{ profile.emailVerified ? 'Correo verificado' : 'Correo sin verificar' }}
+        </span>
+      </div>
+    </section>
+
+    <dl class="profile-summary" aria-label="Resumen de la cuenta">
+      <div class="summary-cell rounded-box border border-base-300 bg-base-100">
+        <app-icon name="mail" [size]="22" class="text-base-content/70" />
+        <div class="min-w-0">
+          <dt class="text-xs text-base-content/70">Correo electrónico</dt>
+          <dd class="mt-1 text-sm font-semibold">{{ profile.email || 'No registrado' }}</dd>
+        </div>
+      </div>
+      <div class="summary-cell rounded-box border border-base-300 bg-base-100">
+        <app-icon name="shield-check" [size]="22" class="text-base-content/70" />
+        <div>
+          <dt class="text-xs text-base-content/70">Roles asignados</dt>
+          <dd class="mt-1 text-2xl leading-none font-semibold tabular-nums">
+            {{ profile.roles.length }}
+          </dd>
+        </div>
+      </div>
+      <div class="summary-cell rounded-box border border-base-300 bg-base-100">
+        <app-icon name="key" [size]="22" class="text-base-content/70" />
+        <div>
+          <dt class="text-xs text-base-content/70">Permisos asignados</dt>
+          <dd class="mt-1 text-2xl leading-none font-semibold tabular-nums">
+            {{ profile.permissions.length }}
+          </dd>
+        </div>
+      </div>
+    </dl>
+
+    <div class="profile-columns">
+      <div class="space-y-5">
+        <section class="card card-border bg-base-100" aria-labelledby="account-title">
+          <header class="section-heading">
+            <h2 id="account-title" class="card-title">
+              <app-icon name="at-sign" /> Datos de la cuenta
+            </h2>
+            <p>Identificación y estado de acceso</p>
+          </header>
+          <dl class="profile-data">
+            @for (row of accountRows(); track row.label) {
+              <div class="data-row">
+                <dt><app-icon [name]="row.icon" [size]="16" /> {{ row.label }}</dt>
+                <dd>
+                  @if (row.state) {
+                    <span
+                      class="badge badge-sm badge-soft"
+                      [class.badge-success]="row.state === 'success'"
+                      [class.badge-warning]="row.state === 'warning'"
+                      [class.badge-error]="row.state === 'error'"
+                      >{{ row.value }}</span
+                    >
+                  } @else {
+                    {{ row.value }}
+                  }
+                </dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <section class="card card-border bg-base-100" aria-labelledby="personal-title">
+          <header class="section-heading">
+            <h2 id="personal-title" class="card-title">
+              <app-icon name="user" /> Datos personales
+            </h2>
+            <p>Información asociada a esta persona</p>
+          </header>
+          <dl class="profile-data">
+            @for (row of personalRows(); track row.label) {
+              <div class="data-row">
+                <dt><app-icon [name]="row.icon" [size]="16" /> {{ row.label }}</dt>
+                <dd>
+                  @if (row.state) {
+                    <span
+                      class="badge badge-sm badge-soft"
+                      [class.badge-success]="row.state === 'success'"
+                      [class.badge-error]="row.state === 'error'"
+                      >{{ row.value }}</span
+                    >
+                  } @else {
+                    {{ row.value }}
+                  }
+                </dd>
+              </div>
+            }
+          </dl>
+        </section>
+      </div>
+
+      <div class="space-y-5">
+        <section class="card card-border bg-base-100" aria-labelledby="roles-title">
+          <header class="section-heading">
+            <div class="flex items-center justify-between gap-3">
+              <h2 id="roles-title" class="card-title">
+                <app-icon name="shield-check" /> Roles asignados
+              </h2>
+              <span class="badge badge-ghost badge-sm tabular-nums" aria-label="Total de roles">{{
+                profile.roles.length
+              }}</span>
+            </div>
+            <p>Funciones disponibles para esta cuenta</p>
+          </header>
+          <ul class="profile-roles">
+            @for (role of profile.roles; track role.id) {
+              <li class="role-row">
+                <app-icon name="shield-check" [size]="20" class="mt-0.5 text-base-content/70" />
+                <div class="min-w-0">
+                  <h3 class="text-sm font-semibold">{{ role.name || role.code }}</h3>
+                  <p class="mt-1 text-xs font-medium text-base-content/70">{{ role.code }}</p>
+                  @if (role.description) {
+                    <p class="mt-2 text-xs leading-relaxed text-base-content/70">
+                      {{ role.description }}
+                    </p>
+                  }
+                </div>
+              </li>
+            } @empty {
+              <li class="empty-copy">No tienes roles asignados.</li>
+            }
+          </ul>
+        </section>
+
+        <section class="card card-border bg-base-100" aria-labelledby="permissions-title">
+          <header class="section-heading">
+            <div class="flex items-center justify-between gap-3">
+              <h2 id="permissions-title" class="card-title"><app-icon name="key" /> Permisos</h2>
+              <span
+                class="badge badge-ghost badge-sm tabular-nums"
+                aria-label="Total de permisos"
+                >{{ profile.permissions.length }}</span
+              >
+            </div>
+            <p>Acciones autorizadas, agrupadas por recurso</p>
+          </header>
+          <div class="profile-permissions">
+            @for (group of permissionGroups(); track group.code) {
+              <section class="permission-group" [attr.aria-label]="group.label">
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h3 class="text-sm font-semibold">{{ group.label }}</h3>
+                  <span class="text-xs text-base-content/70"
+                    >{{ group.permissions.length }}
+                    {{ group.permissions.length === 1 ? 'permiso' : 'permisos' }}</span
+                  >
+                </div>
+                <ul class="flex flex-wrap gap-2">
+                  @for (permission of group.permissions; track permission.id) {
+                    <li
+                      class="permission-chip rounded-field border border-base-300 bg-base-200 text-xs"
+                    >
+                      <app-icon name="check" [size]="14" class="text-base-content/70" />
+                      <span>{{ permission.name || permission.code }}</span>
+                      @if (permission.actionCode) {
+                        <span class="permission-action text-base-content/70">{{
+                          permission.actionCode
+                        }}</span>
+                      }
+                    </li>
+                  }
+                </ul>
+              </section>
+            } @empty {
+              <p class="empty-copy">No tienes permisos asignados.</p>
+            }
+          </div>
+        </section>
+      </div>
+    </div>
+    <p class="mt-5 text-xs leading-relaxed text-base-content/70">
+      Los roles y permisos determinan tus accesos en el sistema. Si necesitas un cambio, contacta
+      con tu administrador.
+    </p>
+  </div>
+} @else {
+  <section class="card card-border bg-base-100">
+    <div class="card-body items-start gap-3 p-6">
+      <h2 class="card-title">Tu perfil no está disponible</h2>
+      <p class="text-sm text-base-content/70">
+        Recarga la página para recuperar los datos de tu cuenta.
+      </p>
+      <a href="/admin/perfil" class="btn">Recargar perfil</a>
+    </div>
+  </section>
+}

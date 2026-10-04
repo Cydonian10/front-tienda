@@ -42,7 +42,8 @@ export default class PermisosPage {
 
   readonly filteredPermissions = computed(() =>
     (this.permisosQuery.data() ?? []).filter(
-      (permission) => !this.selectedResource() || permission.resourceCode === this.selectedResource(),
+      (permission) =>
+        !this.selectedResource() || permission.resourceCode === this.selectedResource(),
     ),
   );
 

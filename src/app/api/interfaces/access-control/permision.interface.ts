@@ -39,9 +39,10 @@ export interface Permiso {
   resourceCode: string; //'MENUS';
   actionCode: string; //'ESTADO';
   code: PermissionCode; // 'MENUS_ESTADO';
+  assigned?: boolean;
 }
 
 export interface FilterPermision {
-  rolId?: string;
+  roleId?: string;
   systemCode?: string;
 }

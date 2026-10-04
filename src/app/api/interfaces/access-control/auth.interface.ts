@@ -15,6 +15,8 @@ export interface AuthPerfil {
   nickName: string;
   emailVerified: boolean;
   active: boolean;
+  /** The API grants SUPER_ADMIN access even without explicit permission assignments. */
+  isSuperAdmin?: boolean;
   person: {
     id: string;
     firstName: string;

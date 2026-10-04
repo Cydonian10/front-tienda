@@ -19,15 +19,11 @@ export class RolesApi {
     );
   }
 
-  assign(roleId: string, permissionId: string) {
+  replacePermissions(roleId: string, permissionIds: string[]) {
     return firstValueFrom(
-      this.http.post(`${this.baseUrl}/roles/${roleId}/permissions/${permissionId}`, {}),
-    );
-  }
-
-  remove(roleId: string, permissionId: string) {
-    return firstValueFrom(
-      this.http.delete<void>(`${this.baseUrl}/roles/${roleId}/permissions/${permissionId}`),
+      this.http.put<{ permissionIds: string[] }>(`${this.baseUrl}/roles/${roleId}/permissions`, {
+        permissionIds,
+      }),
     );
   }
 }

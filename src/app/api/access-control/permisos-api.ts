@@ -14,8 +14,8 @@ export class PermisosApi {
 
     let params = new HttpParams();
 
-    if (dto.rolId) {
-      params = params.set('rolId', dto.rolId);
+    if (dto.roleId) {
+      params = params.set('roleId', dto.roleId);
     }
 
     if (dto.systemCode) {

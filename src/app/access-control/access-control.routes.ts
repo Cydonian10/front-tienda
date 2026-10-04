@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { AdminLayout } from '../layouts/admin.layout';
-import { accessChangesGuard } from './pages/roles/access-changes.guard';
 
 export const accessControlRoutes: Routes = [
   {
@@ -15,7 +14,6 @@ export const accessControlRoutes: Routes = [
       {
         path: 'sistemas-roles',
         loadComponent: () => import('./pages/roles/roles.page'),
-        canDeactivate: [accessChangesGuard],
       },
       {
         path: 'roles',

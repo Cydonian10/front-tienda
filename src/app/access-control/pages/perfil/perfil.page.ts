@@ -4,6 +4,7 @@ import { IconName } from '../../../shared/components/icon/icons';
 import { Icon } from '../../../shared/components/icon/icon';
 import { AuthStore } from '../../../store/auth/auth.store';
 
+// Datos que se muestran en cada fila del perfil.
 interface ProfileRow {
   label: string;
   value: string;
@@ -11,6 +12,7 @@ interface ProfileRow {
   state?: 'success' | 'warning' | 'error';
 }
 
+// Nombres legibles para los recursos de los permisos.
 const RESOURCE_LABELS: Readonly<Record<string, string>> = {
   users: 'Usuarios',
   roles: 'Roles',
@@ -28,8 +30,10 @@ const RESOURCE_LABELS: Readonly<Record<string, string>> = {
   host: { class: 'block' },
 })
 export default class PerfilPage {
+  // El perfil viene del estado de autenticación y puede cambiar con el tiempo.
   readonly perfil = inject(AuthStore).authPerfil;
 
+  // Forma el nombre visible; si faltan datos, usa el usuario o el correo.
   readonly fullName = computed(() => {
     const perfil = this.perfil();
     return (
@@ -40,6 +44,7 @@ export default class PerfilPage {
     );
   });
 
+  // Obtiene las iniciales del primer y último nombre para el avatar.
   readonly initials = computed(() => {
     const names = this.fullName().split(/\s+/).filter(Boolean);
     return `${names[0]?.charAt(0) ?? ''}${names.length > 1 ? names.at(-1)!.charAt(0) : ''}`.toLocaleUpperCase(
@@ -47,6 +52,7 @@ export default class PerfilPage {
     );
   });
 
+  // Prepara los datos de la cuenta para mostrarlos en filas.
   readonly accountRows = computed<ProfileRow[]>(() => {
     const perfil = this.perfil();
     if (!perfil) return [];
@@ -69,6 +75,7 @@ export default class PerfilPage {
     ];
   });
 
+  // Prepara los datos personales si el perfil tiene una persona asociada.
   readonly personalRows = computed<ProfileRow[]>(() => {
     const person = this.perfil()?.person;
     if (!person) return [];
@@ -94,6 +101,7 @@ export default class PerfilPage {
     ];
   });
 
+  // Agrupa los permisos por recurso y les asigna un nombre para mostrar.
   readonly permissionGroups = computed(() => {
     const groups = new Map<string, AuthPerfil['permissions']>();
     for (const permission of this.perfil()?.permissions ?? []) {
@@ -112,8 +120,9 @@ export default class PerfilPage {
     }));
   });
 
+  // Valida y muestra la fecha de nacimiento en español, sin cambiar el día por la zona horaria.
   private formatBirthDate(value: string): string {
-    // A birth date is a calendar date, not a local-time timestamp.
+    // La fecha de nacimiento es un día del calendario, no una hora local.
     const match = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(value ?? '');
     if (!match) return 'No registrada';
     const date = new Date(`${match[1]}-${match[2]}-${match[3]}T00:00:00Z`);

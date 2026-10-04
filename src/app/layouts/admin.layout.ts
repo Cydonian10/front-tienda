@@ -238,6 +238,11 @@ export class AdminLayout {
           url: '/admin/usuarios',
           icon: 'users',
         },
+        {
+          label: 'Permisos',
+          url: '/admin/permisos',
+          icon: 'users',
+        },
       ],
     },
   ] as const;

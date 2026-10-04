@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "references": {
+    "api-tinda": {
+      "path": "/home/gabriel/Documentos/Proyectos/Ferreteria/api-tienda",
+      "description": "API de la tienda; consultar cuando se necesite contexto del backend."
+    }
+  }
+}

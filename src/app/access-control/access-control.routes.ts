@@ -23,6 +23,10 @@ export const accessControlRoutes: Routes = [
         path: 'perfil',
         loadComponent: () => import('./pages/perfil/perfil.page'),
       },
+      {
+        path: 'permisos',
+        loadComponent: () => import('./pages/permisos/permiso.page'),
+      },
     ],
   },
 ];

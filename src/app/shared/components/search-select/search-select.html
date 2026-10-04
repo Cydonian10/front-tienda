@@ -5,7 +5,7 @@
   cdkOverlayOrigin
   #origin="cdkOverlayOrigin"
   [disabled]="isDisabled()"
-  [attr.aria-label]="placeholder()"
+  [attr.aria-label]="ariaLabel() || placeholder()"
   [attr.aria-expanded]="opened()"
   [attr.aria-controls]="opened() ? id + '-listbox' : null"
   aria-haspopup="listbox"

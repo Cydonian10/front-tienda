@@ -34,6 +34,7 @@ export interface Permiso {
   id: string;
   name: string;
   systemCode: string;
+  systemName: string;
   systemId: string;
   resourceCode: string; //'MENUS';
   actionCode: string; //'ESTADO';

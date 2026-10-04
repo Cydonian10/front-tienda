@@ -34,6 +34,7 @@ export class SearchSelect<T extends object = SearchSelectOption> implements Cont
   /** Maximum number of rows visible before the options list scrolls. */
   readonly visibleItems = input(5);
   readonly placeholder = input('Seleccionar...');
+  readonly ariaLabel = input('');
   readonly searchPlaceholder = input('Buscar...');
   readonly disabled = input(false);
   readonly selectionChange = output<string | number | (string | number)[] | null>();

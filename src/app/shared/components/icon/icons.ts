@@ -8,6 +8,9 @@ export const ICONS = {
   close: [{ type: 'path', d: 'm6 6 12 12M18 6 6 18' }],
   'chevron-down': [{ type: 'path', d: 'm6 9 6 6 6-6' }],
   'chevron-right': [{ type: 'path', d: 'm9 6 6 6-6 6' }],
+  'chevron-left': [{ type: 'path', d: 'm15 6-6 6 6 6' }],
+  plus: [{ type: 'path', d: 'M12 5v14M5 12h14' }],
+  grid: [{ type: 'path', d: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z' }],
   check: [{ type: 'path', d: 'm5 12 4 4L19 6' }],
   user: [
     { type: 'circle', cx: 12, cy: 7, r: 4 },

@@ -80,7 +80,7 @@ import { AuthStore } from '../store/auth/auth.store';
         >
           <div class="flex min-h-19 items-center gap-2 border-b border-base-300 px-5">
             <a
-              routerLink="/admin/roles"
+              routerLink="/admin/sistemas-roles"
               class="flex min-w-0 flex-1 items-center gap-3 rounded-field"
               (click)="closeNavigation()"
             >
@@ -229,8 +229,8 @@ export class AdminLayout {
       icon: 'shield',
       items: [
         {
-          label: 'Roles',
-          url: '/admin/roles',
+           label: 'Sistemas y roles',
+           url: '/admin/sistemas-roles',
           icon: 'shield-check',
         },
         {

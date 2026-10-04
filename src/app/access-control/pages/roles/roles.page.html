@@ -1,0 +1,434 @@
+<div class="space-y-6">
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-semibold tracking-tight sm:text-2xl">Sistemas y roles</h2>
+      <p class="mt-1 text-sm text-base-content/70">
+        Organiza el acceso de tu equipo a cada sistema.
+      </p>
+    </div>
+    <app-icon name="shield-check" class="text-primary" [size]="28" />
+  </div>
+
+  <div
+    class="flex items-center gap-2 text-xs font-semibold text-base-content/60"
+    aria-label="Etapas de configuración"
+  >
+    <span class="text-primary">Sistema</span><span class="h-px w-6 bg-base-300"></span>
+    <span [class.text-primary]="!selectedRole()">Roles</span
+    ><span class="h-px w-6 bg-base-300"></span>
+    <span [class.text-primary]="!!selectedRole()">Permisos</span>
+  </div>
+
+  @if (systemsQuery.isPending()) {
+    <div class="skeleton h-48 w-full" role="status" aria-label="Cargando sistemas"></div>
+  } @else if (systemsQuery.isError()) {
+    <div class="alert alert-error alert-soft flex-wrap" role="alert">
+      No se pudieron cargar los sistemas.
+      <button class="btn btn-sm" type="button" (click)="systemsQuery.refetch()">Reintentar</button>
+    </div>
+  } @else if (!systems().length) {
+    <div
+      class="rounded-box border border-base-300 bg-base-100 p-8 text-center text-sm text-base-content/70"
+    >
+      No hay sistemas disponibles para tu cuenta.
+    </div>
+  } @else if (selectedRole(); as role) {
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h3 class="text-lg font-semibold">Permisos del rol</h3>
+        <p class="mt-1 text-sm text-base-content/70">
+          Define qué puede hacer {{ role.name }} en {{ selectedSystem()?.name }}.
+        </p>
+      </div>
+      <button type="button" class="btn btn-ghost" (click)="backToRoles()">
+        <app-icon name="chevron-left" [size]="17" /> Volver a roles
+      </button>
+    </div>
+
+    <div
+      class="rounded-box border border-base-300 bg-base-100 p-5 sm:flex sm:items-center sm:gap-6"
+    >
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <strong class="text-base">{{ role.name }}</strong
+          ><span class="badge badge-ghost badge-sm">{{ selectedSystem()?.name }}</span>
+        </div>
+        <p class="mt-1 text-sm text-base-content/70">{{ role.description }}</p>
+      </div>
+      <p class="mt-3 break-all text-xs text-base-content/60 sm:mt-0">
+        Código del rol <strong class="block text-sm text-base-content">{{ role.code }}</strong>
+      </p>
+    </div>
+
+    @if (availablePermissions.isPending() || assignedPermissions.isPending()) {
+      <div class="skeleton h-64 w-full" role="status" aria-label="Cargando permisos"></div>
+    } @else if (availablePermissions.isError() || assignedPermissions.isError()) {
+      <div class="alert alert-error alert-soft flex-wrap" role="alert">
+        No se pudieron cargar los permisos de este rol.
+        <button
+          type="button"
+          class="btn btn-sm"
+          (click)="availablePermissions.refetch(); assignedPermissions.refetch()"
+        >
+          Reintentar
+        </button>
+      </div>
+    } @else {
+      <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_16rem]">
+        <section
+          class="min-w-0 overflow-hidden rounded-box border border-base-300 bg-base-100"
+          aria-label="Permisos disponibles"
+        >
+          <div class="space-y-4 border-b border-base-300 p-4 sm:p-5">
+            <div class="flex flex-wrap gap-3">
+              <input
+                class="input min-w-0 flex-1"
+                type="search"
+                aria-label="Buscar permiso"
+                placeholder="Buscar permiso o acción…"
+                [value]="permissionSearch()"
+                (input)="permissionSearch.set($any($event.target).value)"
+              />
+              <select
+                class="select"
+                aria-label="Filtrar por asignación"
+                [value]="assignmentFilter()"
+                (change)="assignmentFilter.set($any($event.target).value)"
+              >
+                <option value="all">Todos los permisos</option>
+                <option value="assigned">Asignados</option>
+                <option value="unassigned">Sin asignar</option>
+              </select>
+            </div>
+            <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por recurso">
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.btn-primary]="resourceFilter() === 'all'"
+                [class.btn-ghost]="resourceFilter() !== 'all'"
+                (click)="resourceFilter.set('all')"
+              >
+                Todos
+              </button>
+              @for (resource of resources(); track resource) {
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-primary]="resourceFilter() === resource"
+                  [class.btn-ghost]="resourceFilter() !== resource"
+                  (click)="resourceFilter.set(resource)"
+                >
+                  {{ resource }}
+                </button>
+              }
+            </div>
+          </div>
+          <div
+            class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs text-base-content/70 sm:px-5"
+          >
+            <span class="tabular-nums"
+              >{{ visiblePermissions().length }} permisos · {{ selectedSystem()?.name }}</span
+            >
+            @if (canAssign()) {
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm"
+                [disabled]="!visiblePermissions().length || saving()"
+                (click)="toggleVisible()"
+              >
+                Seleccionar / desmarcar visibles
+              </button>
+            }
+          </div>
+          @if (visiblePermissions().length) {
+            <div class="overflow-x-auto">
+              <table class="table table-sm min-w-140">
+                <thead class="bg-base-200/60">
+                  <tr>
+                    <th scope="col">Permiso</th>
+                    <th scope="col">Recurso</th>
+                    <th scope="col">Acción</th>
+                    <th scope="col">Asignar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (permission of visiblePermissions(); track permission.id) {
+                    <tr class="border-base-300">
+                      <td class="font-semibold">{{ permission.name }}</td>
+                      <td>
+                        <span class="badge badge-ghost badge-sm">{{
+                          permission.resourceCode
+                        }}</span>
+                      </td>
+                      <td class="text-xs text-base-content/70">{{ permission.actionCode }}</td>
+                      <td>
+                        <input
+                          type="checkbox"
+                          class="checkbox checkbox-primary checkbox-sm"
+                          [attr.aria-label]="'Asignar ' + permission.name"
+                          [checked]="draftIds().has(permission.id)"
+                          [disabled]="!canAssign() || saving()"
+                          (change)="togglePermission(permission, $any($event.target).checked)"
+                        />
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="p-8 text-center text-sm text-base-content/70">
+              No hay permisos que coincidan con los filtros.
+            </p>
+          }
+        </section>
+        <aside
+          class="h-fit rounded-box border border-base-300 bg-base-100 p-5"
+          aria-label="Resumen de acceso"
+        >
+          <h3 class="font-semibold">Resumen de acceso</h3>
+          <p class="mt-5 text-3xl font-semibold tabular-nums text-primary">
+            {{ draftIds().size }}
+            <span class="text-base text-base-content/60"
+              >/ {{ availablePermissions.data()?.length }}</span
+            >
+          </p>
+          <p class="mt-1 text-xs text-base-content/70">permisos seleccionados</p>
+          <div class="mt-5 space-y-2 border-t border-base-300 pt-4">
+            @for (resource of resourceCounts(); track resource.code) {
+              <div class="flex justify-between gap-3 text-xs">
+                <span class="truncate text-base-content/70">{{ resource.code }}</span
+                ><strong class="tabular-nums"
+                  >{{ resource.selected }} / {{ resource.total }}</strong
+                >
+              </div>
+            }
+          </div>
+          <p class="mt-5 rounded-field bg-base-200 p-3 text-xs text-base-content/70">
+            Los permisos disponibles pertenecen únicamente a {{ selectedSystem()?.name }}.
+          </p>
+        </aside>
+      </div>
+      <div
+        class="sticky bottom-2 z-10 flex flex-wrap items-center gap-3 rounded-box border border-base-300 bg-base-100 p-3 sm:p-4"
+      >
+        <p class="min-w-0 flex-1 text-xs" [class.text-warning]="dirty()">
+          {{ dirty() ? 'Hay cambios sin guardar' : 'Sin cambios pendientes' }}
+        </p>
+        <button type="button" class="btn" [disabled]="!dirty() || saving()" (click)="discard()">
+          Descartar cambios
+        </button>
+        @if (canAssign()) {
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!dirty() || saving()"
+            (click)="save()"
+          >
+            {{ saving() ? 'Guardando…' : 'Guardar permisos' }}
+          </button>
+        }
+      </div>
+    }
+  } @else {
+    <div class="grid gap-5 lg:grid-cols-[minmax(14rem,17rem)_minmax(0,1fr)]">
+      <section
+        class="min-w-0 overflow-hidden rounded-box border border-base-300 bg-base-100"
+        aria-label="Sistemas"
+      >
+        <div class="p-4 sm:p-5">
+          <h3 class="font-semibold">
+            Sistemas <span class="badge badge-ghost badge-sm ml-1">{{ systems().length }}</span>
+          </h3>
+          <input
+            type="search"
+            class="input mt-4 w-full"
+            placeholder="Buscar sistema…"
+            aria-label="Buscar sistema"
+            [value]="systemSearch()"
+            (input)="systemSearch.set($any($event.target).value)"
+          />
+        </div>
+        <div class="max-h-130 space-y-1 overflow-auto px-2 pb-4">
+          @for (system of visibleSystems(); track system.id) {
+            <button
+              type="button"
+              class="flex min-h-15 w-full items-center gap-3 rounded-field p-3 text-left hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-primary"
+              [class.bg-primary/15]="selectedSystem()?.id === system.id"
+              [attr.aria-pressed]="selectedSystem()?.id === system.id"
+              (click)="selectSystem(system.id)"
+            >
+              <span
+                class="grid size-9 shrink-0 place-items-center rounded-field bg-base-200 text-primary"
+                ><app-icon name="grid" [size]="18"
+              /></span>
+              <span class="min-w-0 flex-1"
+                ><strong class="block truncate text-sm">{{ system.name }}</strong
+                ><small class="block truncate text-xs text-base-content/70"
+                  >{{ countRoles(system) }} roles · {{ system.code }}</small
+                ></span
+              >
+              @if (selectedSystem()?.id === system.id) {
+                <app-icon name="chevron-right" [size]="16" class="text-primary" />
+              }
+            </button>
+          } @empty {
+            <p class="p-4 text-sm text-base-content/70">No se encontraron sistemas.</p>
+          }
+        </div>
+        <p class="border-t border-base-300 p-4 text-xs text-base-content/70">
+          Los sistemas se muestran en modo consulta.
+        </p>
+      </section>
+
+      <section
+        class="min-w-0 overflow-hidden rounded-box border border-base-300 bg-base-100"
+        aria-label="Roles del sistema"
+      >
+        <div class="flex flex-wrap items-center gap-3 border-b border-base-300 p-4 sm:p-5">
+          <span class="grid size-11 place-items-center rounded-field bg-primary/10 text-primary"
+            ><app-icon name="shield-check"
+          /></span>
+          <div class="min-w-0 flex-1">
+            <h3 class="text-lg font-semibold">{{ selectedSystem()?.name }}</h3>
+            <p class="mt-1 text-xs text-base-content/70">{{ selectedSystem()?.description }}</p>
+          </div>
+          @if (canCreate()) {
+            <button type="button" class="btn btn-primary" (click)="openCreate()">
+              <app-icon name="plus" [size]="17" /> Nuevo rol
+            </button>
+          }
+        </div>
+        <div class="p-4 sm:p-5">
+          <input
+            class="input w-full sm:max-w-sm"
+            type="search"
+            aria-label="Buscar rol"
+            placeholder="Buscar por nombre o código…"
+            [value]="roleSearch()"
+            (input)="roleSearch.set($any($event.target).value)"
+          />
+        </div>
+        @if (rolesQuery.isPending()) {
+          <div class="skeleton m-5 h-36" role="status" aria-label="Cargando roles"></div>
+        } @else if (rolesQuery.isError()) {
+          <div class="alert alert-error alert-soft m-4 flex-wrap" role="alert">
+            No se pudieron cargar los roles.
+            <button type="button" class="btn btn-sm" (click)="rolesQuery.refetch()">
+              Reintentar
+            </button>
+          </div>
+        } @else if (!visibleRoles().length) {
+          <p class="p-8 text-center text-sm text-base-content/70">
+            {{
+              roleSearch()
+                ? 'No se encontraron roles con esta búsqueda.'
+                : 'Este sistema todavía no tiene roles visibles.'
+            }}
+          </p>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table table-sm min-w-125">
+              <thead class="bg-base-200/60">
+                <tr>
+                  <th scope="col">Rol</th>
+                  <th scope="col">Sistema</th>
+                  <th scope="col">Código</th>
+                  <th scope="col">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (role of visibleRoles(); track role.id) {
+                  <tr class="border-base-300">
+                    <td>
+                      <strong class="block text-sm">{{ role.name }}</strong
+                      ><small class="text-xs text-base-content/70">{{ role.description }}</small>
+                    </td>
+                    <td>{{ selectedSystem()?.name }}</td>
+                    <td class="text-xs break-all">{{ role.code }}</td>
+                    <td>
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-sm text-primary"
+                        (click)="openRole(role.id)"
+                      >
+                        <app-icon name="key" [size]="16" /> Permisos
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        <p class="border-t border-base-300 p-4 text-xs text-base-content/70">
+          Selecciona un rol para configurar sus permisos.
+        </p>
+      </section>
+    </div>
+  }
+</div>
+
+<dialog #createDialog class="modal" (close)="createError.set('')">
+  <div class="modal-box max-w-md">
+    <h3 class="text-lg font-semibold">Nuevo rol</h3>
+    <p class="mt-2 text-sm text-base-content/70">
+      Se creará dentro de {{ selectedSystem()?.name }}. El código se genera automáticamente.
+    </p>
+    <form class="mt-5 space-y-4" (submit)="createRole($event)">
+      <label class="block text-sm font-semibold" for="new-role-name">Nombre del rol</label>
+      <input
+        id="new-role-name"
+        class="input w-full"
+        required
+        maxlength="100"
+        [value]="createName()"
+        (input)="createName.set($any($event.target).value)"
+        placeholder="Ej. Supervisor de inventario"
+      />
+      <label class="block text-sm font-semibold" for="new-role-description">Descripción</label>
+      <textarea
+        id="new-role-description"
+        class="textarea w-full"
+        required
+        [value]="createDescription()"
+        (input)="createDescription.set($any($event.target).value)"
+        placeholder="¿Qué función cumple este rol?"
+      ></textarea>
+      @if (createError()) {
+        <p class="text-sm text-error" role="alert">{{ createError() }}</p>
+      }
+      <div class="modal-action">
+        <button class="btn" type="button" [disabled]="creating()" (click)="createDialog.close()">
+          Cancelar</button
+        ><button class="btn btn-primary" type="submit" [disabled]="creating()">
+          {{ creating() ? 'Creando…' : 'Crear rol' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button [disabled]="creating()">Cerrar</button>
+  </form>
+</dialog>
+
+<dialog
+  #leaveDialog
+  class="modal"
+  (cancel)="$event.preventDefault(); decideLeave('cancel')"
+  (close)="closeLeaveDialog()"
+>
+  <div class="modal-box max-w-md">
+    <h3 class="text-lg font-semibold">Hay cambios sin guardar</h3>
+    <p class="mt-3 text-sm text-base-content/70">
+      Guarda los permisos antes de salir o descarta los cambios.
+    </p>
+    <div class="modal-action flex-wrap">
+      <button type="button" class="btn" (click)="decideLeave('cancel')">Seguir editando</button
+      ><button type="button" class="btn" (click)="decideLeave('discard')">Descartar</button
+      ><button type="button" class="btn btn-primary" (click)="decideLeave('save')">
+        Guardar y salir
+      </button>
+    </div>
+  </div>
+</dialog>

@@ -1,4 +1,13 @@
-import { Component, computed, inject, linkedSignal, OnDestroy, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  linkedSignal,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { Icon } from '../../../shared/components/icon/icon';
 import { TitleHeaderAdmin } from '../../../shared/components/title-header-admin/title-header-admin';
 import { findSystemsQuery } from '../../actions/systems/find-systems-action';
@@ -6,9 +15,10 @@ import { System } from '../../../api/interfaces/access-control/system.interface'
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { HeaderSystemRolPage, StepActiveProps } from './components/header-system-rol';
 
 @Component({
-  imports: [Icon, TitleHeaderAdmin, FormsModule],
+  imports: [Icon, TitleHeaderAdmin, FormsModule, HeaderSystemRolPage],
   selector: 'app-system-roles',
   template: `
     <app-title-header-admin
@@ -16,14 +26,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
       description="Organiza el acceso de tu equipo a cada sistema."
     />
 
-    <div
-      class="flex items-center gap-2 text-xs font-semibold text-base-content/60"
-      aria-label="Etapas de configuración"
-    >
-      <span class="text-primary">Sistema</span><span class="h-px w-6 bg-base-300"></span>
-      <span class="text-primary">Roles</span><span class="h-px w-6 bg-base-300"></span>
-      <span>Permisos</span>
-    </div>
+    <header-system-rol [stepActive]="stepActive()" />
 
     <div class="grid gap-5 lg:grid-cols-[minmax(14rem,17rem)_minmax(0,1fr)]">
       <section
@@ -74,24 +77,89 @@ import { toSignal } from '@angular/core/rxjs-interop';
           Los sistema son solo lectura
         </p>
       </section>
+
+      @if (stepActive() === 'roles') {
+        <section
+          class="min-w-0 overflow-hidden rounded-box border border-base-300 bg-base-100"
+          aria-label="Roles del sistema"
+        >
+          <div class="flex flex-wrap items-center gap-3 border-b border-base-300 p-4 sm:p-5">
+            <span class="grid size-11 place-items-center rounded-field bg-primary/10 text-primary">
+              <app-icon name="shield-check" />
+            </span>
+            <div class="min-w-0 flex-1">
+              <!-- <h3 class="text-lg font-semibold">{{ selectedSystem.name }}</h3>
+              <p class="mt-1 text-xs text-base-content/70">{{ selectedSystem.description }}</p> -->
+            </div>
+            <button type="button" class="btn btn-primary" disabled>
+              <app-icon name="plus" [size]="17" /> Nuevo rol
+            </button>
+          </div>
+
+          <div class="p-4 sm:p-5">
+            <input
+              class="input w-full sm:max-w-sm"
+              type="search"
+              aria-label="Buscar rol"
+              placeholder="Buscar por nombre o código…"
+              disabled
+            />
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="table table-sm min-w-125">
+              <thead class="bg-base-200/60">
+                <tr>
+                  <th scope="col">Rol</th>
+                  <th scope="col">Sistema</th>
+                  <th scope="col">Código</th>
+                  <th scope="col">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- @for (role of roles; track role.id) {
+                  <tr class="border-base-300">
+                    <td>
+                      <strong class="block text-sm">{{ role.name }}</strong>
+                      <small class="text-xs text-base-content/70">{{ role.description }}</small>
+                    </td>
+                    <td>{{ selectedSystem.name }}</td>
+                    <td class="break-all text-xs">{{ role.code }}</td>
+                    <td>
+                      <button type="button" class="btn btn-ghost btn-sm text-primary" disabled>
+                        <app-icon name="key" [size]="16" /> Permisos
+                      </button>
+                    </td>
+                  </tr>
+                } -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- <p class="border-t border-base-300 p-4 text-xs text-base-content/70">
+            Roles de ejemplo del sistema {{ selectedSystem.name }}.
+          </p> -->
+        </section>
+      }
     </div>
   `,
   host: { class: 'block space-y-6' },
 })
-export default class SystemRolesPage implements OnDestroy {
+export default class SystemRolesPage {
   readonly systemQuery = findSystemsQuery();
+  protected stepActive = signal<StepActiveProps>('system');
 
-  // protected selectedSystem = signal<System | null>(null);
   protected searchSystem = signal('');
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  readonly systemId = toSignal(this.route.queryParamMap, {
+  readonly systemCode = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
 
   setSelectedSystem(system: System) {
+    this.stepActive.set('roles');
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { system: system.code },
@@ -101,7 +169,7 @@ export default class SystemRolesPage implements OnDestroy {
 
   readonly selectedSystem = computed(
     () =>
-      this.systemQuery.data()?.find((system) => system.code === this.systemId().get('system')) ??
+      this.systemQuery.data()?.find((system) => system.code === this.systemCode().get('system')) ??
       null,
   );
 
@@ -112,5 +180,9 @@ export default class SystemRolesPage implements OnDestroy {
       ?.filter((system) => system.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()));
   });
 
-  ngOnDestroy(): void {}
+  changesSelectesSystem = effect(() => {
+    if (this.selectedSystem()) {
+      this.stepActive.set('roles');
+    }
+  });
 }

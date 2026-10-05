@@ -1,0 +1,40 @@
+<div role="status" [class.is-static]="!animated()">
+  <span class="sr-only">{{ label() }}</span>
+  <div aria-hidden="true">
+    @switch (variant()) {
+      @case ('text') {
+        <div class="space-y-3 py-1">
+          @for (item of items(); track item; let last = $last) {
+            <div class="skeleton h-4 rounded-field" [class.w-full]="!last" [class.w-2/3]="last"></div>
+          }
+        </div>
+      }
+      @case ('list') {
+        <div class="divide-y divide-base-300">
+          @for (item of items(); track item) {
+            <div class="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+              <div class="skeleton size-11 shrink-0 rounded-field"></div>
+              <div class="min-w-0 flex-1 space-y-2.5">
+                <div class="skeleton h-4 w-3/4 max-w-72 rounded-field"></div>
+                <div class="skeleton h-3 w-1/2 max-w-48 rounded-field"></div>
+              </div>
+              <div class="skeleton hidden h-7 w-20 rounded-field sm:block"></div>
+            </div>
+          }
+        </div>
+      }
+      @case ('cards') {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          @for (item of items(); track item) {
+            <div class="min-w-0 rounded-box border border-base-300 bg-base-100 p-5">
+              <div class="skeleton mb-5 h-32 w-full rounded-field"></div>
+              <div class="skeleton h-5 w-3/4 rounded-field"></div>
+              <div class="skeleton mt-3 h-3 w-full rounded-field"></div>
+              <div class="skeleton mt-2 h-3 w-2/3 rounded-field"></div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

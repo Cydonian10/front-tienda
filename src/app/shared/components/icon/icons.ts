@@ -37,6 +37,11 @@ export const ICONS = {
     { type: 'path', d: 'm11 12 9-9 2 2-3 3 2 2-3 3-2-2' },
   ],
   upload: [{ type: 'path', d: 'M12 16V3m-5 5 5-5 5 5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4' }],
+  inbox: [{ type: 'path', d: 'M4 4h16l2 12v4H2v-4L4 4Zm-2 12h6l2 3h4l2-3h6' }],
+  search: [
+    { type: 'circle', cx: 11, cy: 11, r: 7 },
+    { type: 'path', d: 'm16 16 5 5' },
+  ],
   file: [
     {
       type: 'path',

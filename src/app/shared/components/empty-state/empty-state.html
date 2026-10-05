@@ -1,0 +1,33 @@
+<section
+  class="flex flex-col items-center px-4 text-center text-base-content sm:px-6"
+  [class.py-6]="compact()"
+  [class.py-12]="!compact()"
+  [attr.aria-labelledby]="id + '-title'"
+  [attr.aria-describedby]="resolvedDescription() ? id + '-description' : null"
+>
+  <div class="mb-5 grid size-16 place-items-center rounded-box border border-base-300 bg-base-200">
+    <app-icon
+      [name]="resolvedIcon()"
+      [size]="30"
+      [color]="variant() === 'error' ? 'error' : 'base-content'"
+    />
+  </div>
+  <h3 [id]="id + '-title'" class="max-w-lg [overflow-wrap:anywhere] text-lg font-semibold leading-snug sm:text-xl">
+    {{ resolvedTitle() }}
+  </h3>
+  @if (resolvedDescription()) {
+    <p [id]="id + '-description'" class="mt-2 max-w-md [overflow-wrap:anywhere] text-sm leading-relaxed">
+      {{ resolvedDescription() }}
+    </p>
+  }
+  @if (hasAction()) {
+    <button
+      type="button"
+      class="btn btn-primary mt-6 min-h-11 h-auto w-full max-w-xs whitespace-normal [overflow-wrap:anywhere] py-3 sm:w-auto"
+      [disabled]="actionDisabled()"
+      (click)="onAction()"
+    >
+      {{ actionLabel() }}
+    </button>
+  }
+</section>

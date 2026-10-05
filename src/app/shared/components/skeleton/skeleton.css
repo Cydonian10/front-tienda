@@ -1,0 +1,9 @@
+:host .is-static .skeleton {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host .skeleton {
+    animation: none;
+  }
+}

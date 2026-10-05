@@ -1,11 +1,14 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, linkedSignal, OnDestroy, signal } from '@angular/core';
 import { Icon } from '../../../shared/components/icon/icon';
 import { TitleHeaderAdmin } from '../../../shared/components/title-header-admin/title-header-admin';
 import { findSystemsQuery } from '../../actions/systems/find-systems-action';
 import { System } from '../../../api/interfaces/access-control/system.interface';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-  imports: [Icon, TitleHeaderAdmin],
+  imports: [Icon, TitleHeaderAdmin, FormsModule],
   selector: 'app-system-roles',
   template: `
     <app-title-header-admin
@@ -37,6 +40,8 @@ import { System } from '../../../api/interfaces/access-control/system.interface'
             class="input mt-4 w-full"
             placeholder="Buscar sistema…"
             aria-label="Buscar sistema"
+            [ngModel]="searchSystem()"
+            (ngModelChange)="searchSystem.set($event)"
           />
         </div>
         <div class="max-h-130 space-y-1 overflow-auto px-2 pb-4">
@@ -44,8 +49,8 @@ import { System } from '../../../api/interfaces/access-control/system.interface'
             <button
               type="button"
               class="flex min-h-15 w-full items-center gap-3 rounded-field p-3 text-left"
-              [class.bg-primary/15]="system.id === selectedSystem()?.id"
-              [attr.aria-current]="system.id === selectedSystem()?.id ? 'true' : null"
+              [class.bg-primary/15]="system.code === selectedSystem()?.code"
+              [attr.aria-current]="system.code === selectedSystem()?.code ? 'true' : null"
               (click)="setSelectedSystem(system)"
             >
               <span
@@ -59,7 +64,7 @@ import { System } from '../../../api/interfaces/access-control/system.interface'
                   {{ system.code }}
                 </small>
               </span>
-              @if (system.id === selectedSystem()?.id) {
+              @if (system.code === selectedSystem()?.code) {
                 <app-icon name="chevron-right" [size]="16" class="text-primary" />
               }
             </button>
@@ -73,18 +78,39 @@ import { System } from '../../../api/interfaces/access-control/system.interface'
   `,
   host: { class: 'block space-y-6' },
 })
-export default class SystemRolesPage {
+export default class SystemRolesPage implements OnDestroy {
   readonly systemQuery = findSystemsQuery();
 
-  protected selectedSystem = signal<System | null>(null);
+  // protected selectedSystem = signal<System | null>(null);
   protected searchSystem = signal('');
 
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  readonly systemId = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
+
   setSelectedSystem(system: System) {
-    this.selectedSystem.set(system);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { system: system.code },
+      queryParamsHandling: 'merge',
+    });
   }
+
+  readonly selectedSystem = computed(
+    () =>
+      this.systemQuery.data()?.find((system) => system.code === this.systemId().get('system')) ??
+      null,
+  );
 
   filteredSystem = computed(() => {
     const filter = this.searchSystem();
-    return this.systemQuery.data()?.filter((system) => system.name.includes(filter));
+    return this.systemQuery
+      .data()
+      ?.filter((system) => system.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()));
   });
+
+  ngOnDestroy(): void {}
 }

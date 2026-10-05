@@ -1,7 +1,6 @@
 import {
   Component,
   computed,
-  effect,
   inject,
   linkedSignal,
   OnDestroy,
@@ -147,7 +146,6 @@ import { HeaderSystemRolPage, StepActiveProps } from './components/header-system
 })
 export default class SystemRolesPage {
   readonly systemQuery = findSystemsQuery();
-  protected stepActive = signal<StepActiveProps>('system');
 
   protected searchSystem = signal('');
 
@@ -159,7 +157,6 @@ export default class SystemRolesPage {
   });
 
   setSelectedSystem(system: System) {
-    this.stepActive.set('roles');
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { system: system.code },
@@ -173,16 +170,14 @@ export default class SystemRolesPage {
       null,
   );
 
+  protected readonly stepActive = computed<StepActiveProps>(() =>
+    this.selectedSystem() ? 'roles' : 'system',
+  );
+
   filteredSystem = computed(() => {
     const filter = this.searchSystem();
     return this.systemQuery
       .data()
       ?.filter((system) => system.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()));
-  });
-
-  changesSelectesSystem = effect(() => {
-    if (this.selectedSystem()) {
-      this.stepActive.set('roles');
-    }
   });
 }

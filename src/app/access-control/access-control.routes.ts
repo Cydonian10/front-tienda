@@ -13,12 +13,11 @@ export const accessControlRoutes: Routes = [
       },
       {
         path: 'sistemas-roles',
-        loadComponent: () => import('./pages/roles/roles.page'),
+        loadComponent: () => import('./pages/system-roles/system-roles.page'),
       },
       {
-        path: 'roles',
-        pathMatch: 'full',
-        redirectTo: 'sistemas-roles',
+        path: 'pruebas',
+        loadComponent: () => import('./pages/roles/roles.page'),
       },
       {
         path: 'usuarios',

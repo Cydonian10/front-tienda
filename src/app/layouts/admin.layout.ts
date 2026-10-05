@@ -51,17 +51,6 @@ import { AuthStore } from '../store/auth/auth.store';
           aria-labelledby="admin-section-title"
         >
           <div class="mx-auto w-full max-w-7xl">
-            <div class="mb-6 border-b border-base-300 pb-5 sm:mb-8 sm:pb-6">
-              <h1
-                id="admin-section-title"
-                class="text-2xl leading-tight font-semibold tracking-tight sm:text-3xl"
-              >
-                {{ currentSection().label }}
-              </h1>
-              <p class="mt-2 max-w-prose text-sm leading-relaxed text-base-content/70">
-                {{ currentSection().description }}
-              </p>
-            </div>
             <router-outlet />
           </div>
         </main>
@@ -223,14 +212,15 @@ export class AdminLayout {
   });
 
   readonly navigationOpen = signal(false);
+
   readonly navigationGroups = [
     {
       label: 'Accesos',
       icon: 'shield',
       items: [
         {
-           label: 'Sistemas y roles',
-           url: '/admin/sistemas-roles',
+          label: 'Sistemas y roles',
+          url: '/admin/sistemas-roles',
           icon: 'shield-check',
         },
         {
@@ -243,24 +233,16 @@ export class AdminLayout {
           url: '/admin/permisos',
           icon: 'users',
         },
+        {
+          label: 'prueba',
+          url: '/admin/pruebas',
+          icon: 'users',
+        },
       ],
     },
   ] as const;
 
   private readonly navigationItems = this.navigationGroups.flatMap((group) => group.items);
-
-  readonly currentSection = computed(() => {
-    if (this.currentPath().split(/[?#]/)[0] === '/admin/perfil') {
-      return {
-        label: 'Perfil de usuario',
-        description: 'Información personal y accesos asignados a tu cuenta.',
-      };
-    }
-    const section =
-      this.navigationItems.find((item) => this.currentPath().startsWith(item.url)) ??
-      this.navigationItems[0];
-    return { ...section, description: 'Control de acceso del panel operativo.' };
-  });
 
   constructor() {
     this.router.events

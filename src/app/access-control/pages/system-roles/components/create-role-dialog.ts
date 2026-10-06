@@ -49,7 +49,7 @@ import { FieldErrors } from '../../../../shared/components/field-errors/field-er
           <app-field-errors [field]="createForm.description()" [errorId]="descriptionErrorId" />
         </label>
 
-        @if (error()) {
+        @if (createRole.isError()) {
           <p class="text-sm text-error" role="alert">
             No se pudo crear el rol. Comprueba los datos e inténtalo de nuevo.
           </p>
@@ -61,13 +61,18 @@ import { FieldErrors } from '../../../../shared/components/field-errors/field-er
           type="button"
           class="btn"
           data-dialog-cancel
-          [disabled]="saving()"
+          [disabled]="createRole.isPending()"
           (click)="dialogRef.close()"
         >
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary" [attr.form]="formId" [disabled]="saving()">
-          {{ saving() ? 'Guardando…' : 'Guardar rol' }}
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [attr.form]="formId"
+          [disabled]="createRole.isPending()"
+        >
+          {{ createRole.isPending() ? 'Guardando…' : 'Guardar rol' }}
         </button>
       </div>
     </app-dialog-shell>
@@ -86,6 +91,7 @@ export class CreateRoleDialog {
     name: '',
     description: '',
   });
+
   protected createForm = form(this.model, (path) => {
     validate(path.name, ({ value }) => {
       const name = value().trim();
@@ -101,17 +107,14 @@ export class CreateRoleDialog {
     });
   });
 
-  protected readonly saving = signal(false);
-  protected readonly error = signal(false);
-
-  private readonly createRole = CreateRolMutation();
+  readonly createRole = CreateRolMutation();
 
   async save() {
     await submit(this.createForm, async (field) => {
       const { name, description } = field().value();
-      this.saving.set(true);
+
       this.dialogRef.disableClose = true;
-      this.error.set(false);
+
       try {
         const role = await this.createRole.mutateAsync({
           systemId: this.system.id,
@@ -119,10 +122,7 @@ export class CreateRoleDialog {
           description: description.trim(),
         });
         this.dialogRef.close(role);
-      } catch {
-        this.error.set(true);
       } finally {
-        this.saving.set(false);
         this.dialogRef.disableClose = false;
       }
     });

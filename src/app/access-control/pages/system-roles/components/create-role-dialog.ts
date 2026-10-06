@@ -5,14 +5,15 @@ import { Role } from '../../../../api/interfaces/access-control/role.interface';
 import { System } from '../../../../api/interfaces/access-control/system.interface';
 import { CreateRolMutation } from '../../../actions/roles/create-role-action';
 import { DialogShell } from '../../../../shared/components/dialog-shell/dialog-shell';
-import { form, FormField, submit } from '@angular/forms/signals';
+import { form, FormField, maxLength, submit, validate } from '@angular/forms/signals';
+import { FieldErrors } from '../../../../shared/components/field-errors/field-errors';
 
 @Component({
   selector: 'app-create-role-dialog',
-  imports: [DialogShell, FormsModule, FormField],
+  imports: [DialogShell, FormsModule, FormField, FieldErrors],
   template: `
     <app-dialog-shell title="Nuevo rol" [titleId]="titleId">
-      <form (ngSubmit)="save()" class="space-y-4">
+      <form [id]="formId" (ngSubmit)="save()" class="space-y-4" novalidate>
         <p class="text-sm text-base-content/70">Crear un rol para {{ system.name }}.</p>
 
         <label class="block space-y-2">
@@ -20,9 +21,14 @@ import { form, FormField, submit } from '@angular/forms/signals';
           <input
             type="text"
             class="input w-full"
+            [class.input-error]="createForm.name().touched() && createForm.name().invalid()"
             autocomplete="off"
             [formField]="createForm.name"
+            [attr.aria-describedby]="
+              createForm.name().touched() && createForm.name().invalid() ? nameErrorId : null
+            "
           />
+          <app-field-errors [field]="createForm.name()" [errorId]="nameErrorId" />
         </label>
 
         <label class="block space-y-2">
@@ -31,7 +37,16 @@ import { form, FormField, submit } from '@angular/forms/signals';
             class="textarea w-full"
             rows="3"
             [formField]="createForm.description"
+            [class.textarea-error]="
+              createForm.description().touched() && createForm.description().invalid()
+            "
+            [attr.aria-describedby]="
+              createForm.description().touched() && createForm.description().invalid()
+                ? descriptionErrorId
+                : null
+            "
           ></textarea>
+          <app-field-errors [field]="createForm.description()" [errorId]="descriptionErrorId" />
         </label>
 
         @if (error()) {
@@ -46,12 +61,12 @@ import { form, FormField, submit } from '@angular/forms/signals';
           type="button"
           class="btn"
           data-dialog-cancel
-          [disabled]="save()"
+          [disabled]="saving()"
           (click)="dialogRef.close()"
         >
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        <button type="submit" class="btn btn-primary" [attr.form]="formId" [disabled]="saving()">
           {{ saving() ? 'Guardando…' : 'Guardar rol' }}
         </button>
       </div>
@@ -64,12 +79,27 @@ export class CreateRoleDialog {
   readonly dialogRef = inject<DialogRef<Role>>(DialogRef);
   readonly titleId = `${this.dialogRef.id}-title`;
   readonly formId = `${this.dialogRef.id}-form`;
+  readonly nameErrorId = `${this.dialogRef.id}-name-errors`;
+  readonly descriptionErrorId = `${this.dialogRef.id}-description-errors`;
 
   protected model = signal({
     name: '',
     description: '',
   });
-  protected createForm = form(this.model, (path) => {});
+  protected createForm = form(this.model, (path) => {
+    validate(path.name, ({ value }) => {
+      const name = value().trim();
+      if (!name) return { kind: 'required', message: 'El nombre es obligatorio.' };
+      if (name.length < 2) {
+        return { kind: 'minLength', message: 'El nombre debe tener al menos 2 caracteres.' };
+      }
+      return null;
+    });
+    maxLength(path.name, 100, { message: 'El nombre no puede superar los 100 caracteres.' });
+    maxLength(path.description, 500, {
+      message: 'La descripción no puede superar los 500 caracteres.',
+    });
+  });
 
   protected readonly saving = signal(false);
   protected readonly error = signal(false);
@@ -77,12 +107,15 @@ export class CreateRoleDialog {
   private readonly createRole = CreateRolMutation();
 
   async save() {
-    submit(this.createForm, async (field) => {
+    await submit(this.createForm, async (field) => {
       const { name, description } = field().value();
+      this.saving.set(true);
+      this.dialogRef.disableClose = true;
+      this.error.set(false);
       try {
         const role = await this.createRole.mutateAsync({
           systemId: this.system.id,
-          name,
+          name: name.trim(),
           description: description.trim(),
         });
         this.dialogRef.close(role);

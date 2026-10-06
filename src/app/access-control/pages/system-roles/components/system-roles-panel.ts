@@ -1,7 +1,7 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { System } from '../../../../api/interfaces/access-control/system.interface';
-import { RoleRecord } from '../../../../api/interfaces/access-control/role.interface';
+import { Role } from '../../../../api/interfaces/access-control/role.interface';
 import { Icon } from '../../../../shared/components/icon/icon';
 import { SystemRolesTable } from './system-roles-table';
 
@@ -23,8 +23,9 @@ import { SystemRolesTable } from './system-roles-table';
             {{ system().description }}
           </p>
         </div>
-        <button type="button" class="btn btn-primary">
-          <app-icon name="plus" [size]="17" /> Nuevo rol
+        <button type="button" class="btn btn-primary" (click)="createRole.emit()">
+          <app-icon name="plus" [size]="17" />
+          Nuevo rol
         </button>
       </div>
 
@@ -57,10 +58,11 @@ import { SystemRolesTable } from './system-roles-table';
 })
 export class SystemRolesPanel {
   readonly system = input.required<System>();
-  readonly roles = input<RoleRecord[]>([]);
+  readonly roles = input<Role[]>([]);
   readonly loading = input(false);
   readonly error = input(false);
   readonly retry = output<void>();
+  readonly createRole = output<void>();
 
   protected readonly searchRole = signal('');
   protected readonly filteredRoles = computed(() => {

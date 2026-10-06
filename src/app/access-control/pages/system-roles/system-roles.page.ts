@@ -8,6 +8,9 @@ import { HeaderSystemRolPage, StepActiveProps } from './components/header-system
 import { findRolesQuery } from '../../actions/roles/roles-actions';
 import { SystemSelector } from './components/system-selector';
 import { SystemRolesPanel } from './components/system-roles-panel';
+import { Dialog } from '@angular/cdk/dialog';
+import { Role } from '../../../api/interfaces/access-control/role.interface';
+import { CreateRoleDialog } from './components/create-role-dialog';
 
 @Component({
   imports: [TitleHeaderAdmin, HeaderSystemRolPage, SystemSelector, SystemRolesPanel],
@@ -34,6 +37,7 @@ import { SystemRolesPanel } from './components/system-roles-panel';
           [loading]="rolesQuery.isLoading()"
           [error]="rolesQuery.isError()"
           (retry)="rolesQuery.refetch()"
+          (createRole)="openCreateRoleDialog(system)"
         />
       }
     </div>
@@ -45,6 +49,7 @@ export default class SystemRolesPage {
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly dialog = inject(Dialog);
 
   readonly systemCode = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
@@ -71,4 +76,27 @@ export default class SystemRolesPage {
   // Roles logica
 
   readonly rolesQuery = findRolesQuery(() => this.selectedSystem()?.id);
+
+  openCreateRoleDialog(system: System) {
+    const id = `create-role-${system.id}`;
+    this.dialog
+      .open<Role, System, CreateRoleDialog>(CreateRoleDialog, {
+        id,
+        data: system,
+        width: '32rem',
+        maxWidth: 'calc(100vw - 2rem)',
+        ariaModal: true,
+        ariaLabelledBy: `${id}-title`,
+        autoFocus: '[data-dialog-cancel]',
+        restoreFocus: true,
+        closeOnNavigation: true,
+      })
+      .closed.subscribe((role) => {
+        if (role) this.rolesQuery.refetch();
+      });
+  }
+
+  openUpdateRolesDialog(system: System) {
+    const id = `update-role-${system.id}`;
+  }
 }

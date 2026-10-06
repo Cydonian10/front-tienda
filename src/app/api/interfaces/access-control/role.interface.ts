@@ -7,7 +7,7 @@ export interface SystemRecord {
   order: number;
 }
 
-export interface RoleRecord {
+export interface Role {
   id: string;
   systemId: string;
   code: string;
@@ -18,4 +18,10 @@ export interface RoleRecord {
 
 export interface FilterRolesDto {
   systemId?: string;
+}
+
+export interface CreateRolDto {
+  systemId: string;
+  name: string;
+  description: string;
 }

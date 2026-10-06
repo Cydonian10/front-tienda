@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { RoleRecord } from '../../../../api/interfaces/access-control/role.interface';
+import { Role } from '../../../../api/interfaces/access-control/role.interface';
 import { Icon } from '../../../../shared/components/icon/icon';
 
 @Component({
@@ -64,7 +64,7 @@ import { Icon } from '../../../../shared/components/icon/icon';
   host: { class: 'block' },
 })
 export class SystemRolesTable {
-  readonly roles = input.required<RoleRecord[]>();
+  readonly roles = input.required<Role[]>();
   readonly systemName = input.required<string>();
   readonly hasRoles = input(false);
   readonly loading = input(false);

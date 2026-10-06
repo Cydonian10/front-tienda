@@ -8,6 +8,5 @@ export function CreateRolMutation() {
 
   return injectMutation(() => ({
     mutationFn: (dto: CreateRolDto) => apiRol.create(dto),
-    onSuccess: (data) => {},
   }));
 }

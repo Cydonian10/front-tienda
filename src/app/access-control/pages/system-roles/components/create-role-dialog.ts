@@ -1,42 +1,36 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RolesApi } from '../../../../api/access-control/roles-api';
 import { Role } from '../../../../api/interfaces/access-control/role.interface';
 import { System } from '../../../../api/interfaces/access-control/system.interface';
+import { CreateRolMutation } from '../../../actions/roles/create-role-action';
 import { DialogShell } from '../../../../shared/components/dialog-shell/dialog-shell';
+import { form, FormField, submit } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-create-role-dialog',
-  imports: [DialogShell, FormsModule],
+  imports: [DialogShell, FormsModule, FormField],
   template: `
     <app-dialog-shell title="Nuevo rol" [titleId]="titleId">
-      <form [id]="formId" (ngSubmit)="save()" class="space-y-4">
+      <form (ngSubmit)="save()" class="space-y-4">
         <p class="text-sm text-base-content/70">Crear un rol para {{ system.name }}.</p>
 
         <label class="block space-y-2">
           <span class="text-sm font-semibold">Nombre</span>
           <input
-            name="name"
             type="text"
             class="input w-full"
-            required
-            maxlength="100"
             autocomplete="off"
-            [ngModel]="name()"
-            (ngModelChange)="name.set($event)"
+            [formField]="createForm.name"
           />
         </label>
 
         <label class="block space-y-2">
           <span class="text-sm font-semibold">Descripción</span>
           <textarea
-            name="description"
             class="textarea w-full"
             rows="3"
-            maxlength="500"
-            [ngModel]="description()"
-            (ngModelChange)="description.set($event)"
+            [formField]="createForm.description"
           ></textarea>
         </label>
 
@@ -52,17 +46,12 @@ import { DialogShell } from '../../../../shared/components/dialog-shell/dialog-s
           type="button"
           class="btn"
           data-dialog-cancel
-          [disabled]="saving()"
+          [disabled]="save()"
           (click)="dialogRef.close()"
         >
           Cancelar
         </button>
-        <button
-          type="submit"
-          class="btn btn-primary"
-          [attr.form]="formId"
-          [disabled]="saving() || !name().trim()"
-        >
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
           {{ saving() ? 'Guardando…' : 'Guardar rol' }}
         </button>
       </div>
@@ -76,28 +65,33 @@ export class CreateRoleDialog {
   readonly titleId = `${this.dialogRef.id}-title`;
   readonly formId = `${this.dialogRef.id}-form`;
 
-  protected readonly name = signal('');
-  protected readonly description = signal('');
+  protected model = signal({
+    name: '',
+    description: '',
+  });
+  protected createForm = form(this.model, (path) => {});
+
   protected readonly saving = signal(false);
   protected readonly error = signal(false);
 
-  private readonly rolesApi = inject(RolesApi);
+  private readonly createRole = CreateRolMutation();
 
   async save() {
-    const name = this.name().trim();
-    if (!name || this.saving()) return;
-
-    this.saving.set(true);
-    this.dialogRef.disableClose = true;
-    this.error.set(false);
-    try {
-      const role = await this.rolesApi.create(this.system.id, name, this.description().trim());
-      this.dialogRef.close(role);
-    } catch {
-      this.error.set(true);
-    } finally {
-      this.saving.set(false);
-      this.dialogRef.disableClose = false;
-    }
+    submit(this.createForm, async (field) => {
+      const { name, description } = field().value();
+      try {
+        const role = await this.createRole.mutateAsync({
+          systemId: this.system.id,
+          name,
+          description: description.trim(),
+        });
+        this.dialogRef.close(role);
+      } catch {
+        this.error.set(true);
+      } finally {
+        this.saving.set(false);
+        this.dialogRef.disableClose = false;
+      }
+    });
   }
 }

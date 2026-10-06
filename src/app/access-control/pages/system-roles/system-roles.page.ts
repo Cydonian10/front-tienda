@@ -1,11 +1,12 @@
 import { Component, computed, inject } from '@angular/core';
+import { QueryClient } from '@tanstack/angular-query-experimental';
 import { TitleHeaderAdmin } from '../../../shared/components/title-header-admin/title-header-admin';
 import { findSystemsQuery } from '../../actions/systems/find-systems-action';
 import { System } from '../../../api/interfaces/access-control/system.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HeaderSystemRolPage, StepActiveProps } from './components/header-system-rol';
-import { findRolesQuery } from '../../actions/roles/roles-actions';
+import { findRolesQuery, rolesQueryKey } from '../../actions/roles/roles-actions';
 import { SystemSelector } from './components/system-selector';
 import { SystemRolesPanel } from './components/system-roles-panel';
 import { Dialog } from '@angular/cdk/dialog';
@@ -50,6 +51,7 @@ export default class SystemRolesPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
+  private readonly queryClient = inject(QueryClient);
 
   readonly systemCode = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
@@ -92,7 +94,11 @@ export default class SystemRolesPage {
         closeOnNavigation: true,
       })
       .closed.subscribe((role) => {
-        if (role) this.rolesQuery.refetch();
+        if (role) {
+          this.queryClient.setQueryData<Role[]>([...rolesQueryKey, role.systemId], (roles) =>
+            roles ? [...roles, role] : roles,
+          );
+        }
       });
   }
 

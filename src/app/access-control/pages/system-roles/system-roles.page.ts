@@ -88,8 +88,10 @@ import { findRolesQuery } from '../../actions/roles/roles-actions';
               <app-icon name="shield-check" />
             </span>
             <div class="min-w-0 flex-1">
-              <!-- <h3 class="text-lg font-semibold">{{ selectedSystem.name }}</h3>
-              <p class="mt-1 text-xs text-base-content/70">{{ selectedSystem.description }}</p> -->
+              <h3 class="text-lg font-semibold">{{ selectedSystem()?.name }}</h3>
+              <p class="mt-1 text-xs text-base-content/70">
+                {{ selectedSystem()?.description }}
+              </p>
             </div>
             <button type="button" class="btn btn-primary" disabled>
               <app-icon name="plus" [size]="17" /> Nuevo rol
@@ -117,28 +119,55 @@ import { findRolesQuery } from '../../actions/roles/roles-actions';
                 </tr>
               </thead>
               <tbody>
-                <!-- @for (role of roles; track role.id) {
+                @if (rolesQuery.isLoading()) {
                   <tr class="border-base-300">
-                    <td>
-                      <strong class="block text-sm">{{ role.name }}</strong>
-                      <small class="text-xs text-base-content/70">{{ role.description }}</small>
+                    <td
+                      colspan="4"
+                      class="py-8 text-center text-sm text-base-content/70"
+                      role="status"
+                    >
+                      Cargando roles…
                     </td>
-                    <td>{{ selectedSystem.name }}</td>
-                    <td class="break-all text-xs">{{ role.code }}</td>
-                    <td>
-                      <button type="button" class="btn btn-ghost btn-sm text-primary" disabled>
-                        <app-icon name="key" [size]="16" /> Permisos
+                  </tr>
+                } @else if (rolesQuery.isError()) {
+                  <tr class="border-base-300">
+                    <td colspan="4" class="py-8 text-center" role="alert">
+                      <p class="text-sm text-error">No se pudieron cargar los roles.</p>
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-sm mt-2"
+                        (click)="rolesQuery.refetch()"
+                      >
+                        Reintentar
                       </button>
                     </td>
                   </tr>
-                } -->
+                } @else if (rolesQuery.data()?.length) {
+                  @for (role of rolesQuery.data() ?? []; track role.id) {
+                    <tr class="border-base-300">
+                      <td>
+                        <strong class="block text-sm">{{ role.name }}</strong>
+                        <small class="text-xs text-base-content/70">{{ role.description }}</small>
+                      </td>
+                      <td>{{ selectedSystem()?.name }}</td>
+                      <td class="break-all text-xs">{{ role.code }}</td>
+                      <td>
+                        <button type="button" class="btn btn-ghost btn-sm text-primary" disabled>
+                          <app-icon name="key" [size]="16" /> Permisos
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                } @else {
+                  <tr class="border-base-300">
+                    <td colspan="4" class="py-8 text-center text-sm text-base-content/70">
+                      Este sistema todavía no tiene roles.
+                    </td>
+                  </tr>
+                }
               </tbody>
             </table>
           </div>
-
-          <!-- <p class="border-t border-base-300 p-4 text-xs text-base-content/70">
-            Roles de ejemplo del sistema {{ selectedSystem.name }}.
-          </p> -->
         </section>
       }
     </div>
@@ -184,7 +213,5 @@ export default class SystemRolesPage {
 
   // Roles logica
 
-  readonly rolesQuery = findRolesQuery({
-    systemId: this.selectedSystem()?.id,
-  });
+  readonly rolesQuery = findRolesQuery(() => this.selectedSystem()?.id);
 }

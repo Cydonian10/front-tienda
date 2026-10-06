@@ -1,17 +1,20 @@
 import { inject } from '@angular/core';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { RolesApi } from '../../../api/access-control/roles-api';
-import { FilterRolesDto } from '../../../api/interfaces/access-control/role.interface';
 
 export const rolesQueryKey = ['Roles'] as const;
 
-export function findRolesQuery(filterDto: FilterRolesDto) {
+export function findRolesQuery(systemId: () => string | undefined) {
   const api = inject(RolesApi);
-  return injectQuery(() => ({
-    queryKey: [...rolesQueryKey],
-    queryFn: () => api.findAll(filterDto),
-    enabled: !!filterDto.systemId,
-    staleTime: 30_000,
-    retry: false,
-  }));
+
+  return injectQuery(() => {
+    const id = systemId();
+    return {
+      queryKey: [...rolesQueryKey, id],
+      queryFn: () => api.findAll({ systemId: id }),
+      enabled: !!id,
+      staleTime: 30_000,
+      retry: false,
+    };
+  });
 }

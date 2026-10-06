@@ -15,3 +15,7 @@ export interface RoleRecord {
   description: string;
   permissions: { permissionId: string; active: boolean }[];
 }
+
+export interface FilterRolesDto {
+  systemId?: string;
+}

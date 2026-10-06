@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HeaderSystemRolPage, StepActiveProps } from './components/header-system-rol';
+import { findRolesQuery } from '../../actions/roles/roles-actions';
 
 @Component({
   imports: [Icon, TitleHeaderAdmin, FormsModule, HeaderSystemRolPage],
@@ -179,5 +180,11 @@ export default class SystemRolesPage {
     return this.systemQuery
       .data()
       ?.filter((system) => system.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()));
+  });
+
+  // Roles logica
+
+  readonly rolesQuery = findRolesQuery({
+    systemId: this.selectedSystem()?.id,
   });
 }

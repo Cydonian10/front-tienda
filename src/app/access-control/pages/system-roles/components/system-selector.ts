@@ -27,7 +27,7 @@ import { Icon } from '../../../../shared/components/icon/icon';
           type="button"
           class="flex min-h-15 w-full items-center gap-3 rounded-field p-3 text-left"
           [class.bg-primary/15]="system.code === selectedSystemCode()"
-          [attr.aria-current]="system.code === selectedSystemCode() ? 'true' : null"
+          [attr.aria-pressed]="system.code === selectedSystemCode() ? 'true' : null"
           (click)="systemSelected.emit(system)"
         >
           <span

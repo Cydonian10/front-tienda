@@ -9,16 +9,16 @@ export class PermisosApi {
   private enviroments = inject(ENVIRONMENT);
   private http = inject(HttpClient);
 
-  findPermisos(dto: FilterPermision) {
+  findPermisos(dto?: FilterPermision) {
     const url = `${this.enviroments.apiUrl}/permissions`;
 
     let params = new HttpParams();
 
-    if (dto.roleId) {
+    if (dto?.roleId) {
       params = params.set('roleId', dto.roleId);
     }
 
-    if (dto.systemCode) {
+    if (dto?.systemCode) {
       params = params.set('systemCode', dto.systemCode);
     }
 

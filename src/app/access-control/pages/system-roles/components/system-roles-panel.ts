@@ -47,7 +47,9 @@ import { SystemRolesTable } from './system-roles-table';
           [hasRoles]="roles().length > 0"
           [loading]="loading()"
           [error]="error()"
+          [selectedRoleId]="selectedRoleId()"
           (retry)="retry.emit()"
+          (roleSelected)="roleSelected.emit($event)"
         />
       </div>
     </section>
@@ -63,6 +65,8 @@ export class SystemRolesPanel {
   readonly error = input(false);
   readonly retry = output<void>();
   readonly createRole = output<void>();
+  readonly selectedRoleId = input<string | null>(null);
+  readonly roleSelected = output<Role>();
 
   protected readonly searchRole = signal('');
   protected readonly filteredRoles = computed(() => {

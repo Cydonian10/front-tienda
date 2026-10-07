@@ -11,9 +11,11 @@ export function getPermisosQuery(callbackFilter: () => FilterPermision | undefin
   return injectQuery(() => {
     const filterDto = callbackFilter();
     return {
-      queryKey: [...getPermisosQueryKey, filterDto?.roleId],
+      queryKey: filterDto?.roleId
+        ? [...getPermisosQueryKey, { roleId: filterDto.roleId, systemCode: filterDto.systemCode }]
+        : [...getPermisosQueryKey, filterDto?.systemCode],
       queryFn: () => permisosApi.findPermisos(filterDto),
-      enabled: !!filterDto?.roleId,
+      enabled: !!(filterDto?.roleId || filterDto?.systemCode),
       staleTime: 30_000,
       retry: false,
     };

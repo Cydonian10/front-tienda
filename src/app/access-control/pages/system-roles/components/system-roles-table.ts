@@ -41,7 +41,12 @@ import { Icon } from '../../../../shared/components/icon/icon';
               <td>{{ systemName() }}</td>
               <td class="break-all text-xs">{{ role.code }}</td>
               <td>
-                <button type="button" class="btn btn-ghost btn-sm text-primary" disabled>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm text-primary"
+                  [attr.aria-pressed]="selectedRoleId() === role.id"
+                  (click)="roleSelected.emit(role)"
+                >
                   <app-icon name="key" [size]="16" /> Permisos
                 </button>
               </td>
@@ -70,4 +75,6 @@ export class SystemRolesTable {
   readonly loading = input(false);
   readonly error = input(false);
   readonly retry = output<void>();
+  readonly selectedRoleId = input<string | null>(null);
+  readonly roleSelected = output<Role>();
 }

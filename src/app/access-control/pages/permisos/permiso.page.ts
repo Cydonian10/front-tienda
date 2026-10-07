@@ -25,7 +25,10 @@ export default class PermisosPage {
   readonly resourceControl = new FormControl<string | null>({ value: null, disabled: true });
   readonly selectedSystem = toSignal(this.systemControl.valueChanges, { initialValue: null });
   readonly selectedResource = toSignal(this.resourceControl.valueChanges, { initialValue: null });
-  readonly permisosQuery = getPermisosQuery(() => this.selectedSystem());
+  readonly permisosQuery = getPermisosQuery(() => {
+    const systemCode = this.selectedSystem();
+    return systemCode ? { systemCode } : undefined;
+  });
 
   readonly systems = computed<SearchSelectOption[]>(() =>
     (this.systemsQuery.data() ?? [])

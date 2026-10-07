@@ -24,9 +24,14 @@ import { EmptyState } from '../../../shared/components/empty-state/empty-state';
       description="Organiza el acceso de tu equipo a cada sistema."
     />
 
-    <header-system-rol [stepActive]="stepActive()" />
+    <header-system-rol
+      [stepActive]="stepActive()"
+      [hasSystem]="!!selectedSystem()"
+      [hasRole]="!!selectedRol()"
+      (stepSelected)="goToStep($event)"
+    />
 
-    @if (!pemrisosQuery.data()?.length) {
+    @if (stepActive() !== 'permisos') {
       <div class="grid gap-5 lg:grid-cols-[minmax(14rem,17rem)_minmax(0,1fr)]">
         <system-selector
           [systems]="systemQuery.data() ?? []"
@@ -34,7 +39,7 @@ import { EmptyState } from '../../../shared/components/empty-state/empty-state';
           (systemSelected)="setSelectedSystem($event)"
         />
 
-        @if (selectedSystem(); as system) {
+        @if (stepActive() === 'roles' && selectedSystem(); as system) {
           <system-roles-panel
             [system]="system"
             [roles]="rolesQuery.data() ?? []"
@@ -47,8 +52,8 @@ import { EmptyState } from '../../../shared/components/empty-state/empty-state';
           />
         } @else {
           <app-empty-state
-            title="Todavía no ya sistema seleccionado"
-            description="Los registros aparecerán cuando selecciones un systema"
+            [title]="selectedSystem() ? 'Sistema seleccionado' : 'Todavía no hay un sistema seleccionado'"
+            [description]="selectedSystem() ? 'Selecciona Roles en la cabecera o elige otro sistema.' : 'Selecciona un sistema para ver sus roles.'"
           ></app-empty-state>
         }
       </div>
@@ -58,10 +63,12 @@ import { EmptyState } from '../../../shared/components/empty-state/empty-state';
           <div>
             <h3 class="text-lg font-semibold">Permisos del rol</h3>
             <p class="mt-1 text-sm text-base-content/70">
-              <!-- Vista previa de los permisos de {{ permissionPreview.roleName }}. -->
+              {{ selectedRol()?.name }} · {{ selectedSystem()?.name }}
             </p>
           </div>
-          <!-- <span class="badge badge-ghost">{{ permissionPreview.roleCode }}</span> -->
+          <button type="button" class="btn btn-ghost btn-sm" (click)="clearSelectedRole()">
+            Deseleccionar rol
+          </button>
         </div>
 
         <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_16rem]">
@@ -113,24 +120,48 @@ import { EmptyState } from '../../../shared/components/empty-state/empty-state';
                   </tr>
                 </thead>
                 <tbody>
-                  @for (permission of pemrisosQuery.data() ?? []; track permission.id) {
-                    <tr class="border-base-300">
-                      <td class="font-semibold">{{ permission.name }}</td>
-                      <td>
-                        <span class="badge badge-ghost badge-sm">{{
-                          permission.resourceCode
-                        }}</span>
-                      </td>
-                      <td class="text-xs text-base-content/70">{{ permission.actionCode }}</td>
-                      <td>
-                        <input
-                          type="checkbox"
-                          class="checkbox checkbox-primary checkbox-sm"
-                          [attr.aria-label]="'Asignar ' + permission.name"
-                          [checked]="permission.assigned"
-                        />
+                  @if (pemrisosQuery.isPending()) {
+                    <tr>
+                      <td colspan="4" class="py-8 text-center" role="status">Cargando permisos…</td>
+                    </tr>
+                  } @else if (pemrisosQuery.isError()) {
+                    <tr>
+                      <td colspan="4" class="py-8 text-center" role="alert">
+                        No se pudieron cargar los permisos.
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-sm"
+                          (click)="pemrisosQuery.refetch()"
+                        >
+                          Reintentar
+                        </button>
                       </td>
                     </tr>
+                  } @else if (!pemrisosQuery.data()?.length) {
+                    <tr>
+                      <td colspan="4" class="py-8 text-center">Este rol todavía no tiene permisos.</td>
+                    </tr>
+                  } @else {
+                    @for (permission of pemrisosQuery.data() ?? []; track permission.id) {
+                      <tr class="border-base-300">
+                        <td class="font-semibold">{{ permission.name }}</td>
+                        <td>
+                          <span class="badge badge-ghost badge-sm">{{
+                            permission.resourceCode
+                          }}</span>
+                        </td>
+                        <td class="text-xs text-base-content/70">{{ permission.actionCode }}</td>
+                        <td>
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-primary checkbox-sm"
+                            [attr.aria-label]="'Asignado: ' + permission.name"
+                            [checked]="permission.assigned"
+                            disabled
+                          />
+                        </td>
+                      </tr>
+                    }
                   }
                 </tbody>
               </table>
@@ -180,27 +211,48 @@ export default class SystemRolesPage {
   private readonly dialog = inject(Dialog);
   private readonly queryClient = inject(QueryClient);
 
-  readonly systemCode = toSignal(this.route.queryParamMap, {
+  readonly queryParams = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
 
   setSelectedSystem(system: System) {
+    const deselect = this.selectedSystem()?.code === system.code;
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { system: system.code },
+      queryParams: {
+        system: deselect ? null : system.code,
+        roleCode: null,
+        step: deselect ? 'system' : 'roles',
+      },
       queryParamsHandling: 'merge',
     });
   }
 
   readonly selectedSystem = computed(
     () =>
-      this.systemQuery.data()?.find((system) => system.code === this.systemCode().get('system')) ??
+      this.systemQuery.data()?.find((system) => system.code === this.queryParams().get('system')) ??
       null,
   );
 
-  protected readonly stepActive = computed<StepActiveProps>(() =>
-    this.selectedSystem() ? 'roles' : 'system',
-  );
+  protected readonly stepActive = computed<StepActiveProps>(() => {
+    if (!this.selectedSystem()) return 'system';
+    const requested = this.queryParams().get('step');
+    if (requested === 'system' || requested === 'roles') return requested;
+    if (requested === 'permisos' || (!requested && this.queryParams().has('roleCode'))) {
+      return this.selectedRol() ? 'permisos' : 'roles';
+    }
+    return 'roles';
+  });
+
+  goToStep(step: StepActiveProps) {
+    if (step === 'roles' && !this.selectedSystem()) return;
+    if (step === 'permisos' && !this.selectedRol()) return;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { step },
+      queryParamsHandling: 'merge',
+    });
+  }
 
   // Roles logica
 
@@ -236,9 +288,18 @@ export default class SystemRolesPage {
   // Permisos
 
   setSelectedRol(role: Role) {
+    const deselect = this.selectedRol()?.id === role.id;
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { roleCode: role.code },
+      queryParams: { roleCode: deselect ? null : role.code, step: deselect ? 'roles' : 'permisos' },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  clearSelectedRole() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { roleCode: null, step: 'roles' },
       queryParamsHandling: 'merge',
     });
   }
@@ -250,12 +311,12 @@ export default class SystemRolesPage {
         ?.find(
           (role) =>
             role.systemId === this.selectedSystem()?.id &&
-            role.code === this.systemCode().get('roleCode'),
+            role.code === this.queryParams().get('roleCode'),
         ) ?? undefined,
   );
 
   readonly pemrisosQuery = getPermisosQuery(() => {
     const role = this.selectedRol();
-    return role ? { roleId: role.id } : undefined;
+    return role && this.stepActive() === 'permisos' ? { roleId: role.id } : undefined;
   });
 }

@@ -54,14 +54,14 @@ describe('SystemRolesPage', () => {
           provide: Router,
           useValue: {
             navigate: vi.fn((_commands, options) => {
-              params.next(
-                convertToParamMap({
-                  ...Object.fromEntries(
-                    params.value.keys.map((key) => [key, params.value.get(key)]),
-                  ),
-                  ...options.queryParams,
-                }),
+              const nextParams: Record<string, string> = Object.fromEntries(
+                params.value.keys.map((key) => [key, params.value.get(key)!]),
               );
+              for (const [key, value] of Object.entries(options.queryParams)) {
+                if (value === null) delete nextParams[key];
+                else nextParams[key] = value as string;
+              }
+              params.next(convertToParamMap(nextParams));
               return Promise.resolve(true);
             }),
           },
@@ -83,10 +83,56 @@ describe('SystemRolesPage', () => {
 
     (fixture.nativeElement.querySelector('system-roles-table button') as HTMLButtonElement).click();
     await vi.waitFor(() => expect(findPermisos).toHaveBeenCalledWith({ roleId: role.id }));
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('Este rol todavía no tiene permisos.');
+    });
+    expect(fixture.componentInstance['stepActive']()).toBe('permisos');
+    expect(fixture.nativeElement.querySelector('system-selector')).toBeNull();
+
+    const stepButtons = () =>
+      fixture.nativeElement.querySelectorAll('header-system-rol button') as NodeListOf<HTMLButtonElement>;
+    stepButtons()[1].click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance['stepActive']()).toBe('roles');
+    expect(fixture.nativeElement.querySelector('system-roles-panel')).toBeTruthy();
+    expect(fixture.componentInstance.selectedRol()?.id).toBe(role.id);
+    stepButtons()[2].click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance['stepActive']()).toBe('permisos');
+
+    (fixture.nativeElement.querySelector('section[aria-label="Vista previa de permisos"] button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance['stepActive']()).toBe('roles');
+    expect(fixture.componentInstance.selectedRol()).toBeUndefined();
+    expect(stepButtons()[2].disabled).toBe(true);
+
+    fixture.componentInstance.setSelectedRol(role);
+    fixture.detectChanges();
+    stepButtons()[0].click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance['stepActive']()).toBe('system');
+    expect(fixture.componentInstance.selectedRol()?.id).toBe(role.id);
+    expect(fixture.nativeElement.querySelector('system-roles-panel')).toBeNull();
+
+    fixture.componentInstance.setSelectedSystem(system);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selectedSystem()).toBeNull();
+    expect(fixture.componentInstance.selectedRol()).toBeUndefined();
+    expect(stepButtons()[1].disabled).toBe(true);
+
+    fixture.componentInstance.setSelectedSystem(system);
+    fixture.componentInstance.setSelectedRol(role);
+    fixture.componentInstance.setSelectedSystem(otherSystem);
+    fixture.detectChanges();
+    expect(fixture.componentInstance['stepActive']()).toBe('roles');
+    expect(params.value.has('roleCode')).toBe(false);
+    expect(fixture.componentInstance.selectedRol()).toBeUndefined();
 
     params.next(convertToParamMap({ system: otherSystem.code, roleCode: role.code }));
     fixture.detectChanges();
     expect(fixture.componentInstance.selectedRol()).toBeUndefined();
+    expect(fixture.componentInstance['stepActive']()).toBe('roles');
     expect(findPermisos).toHaveBeenCalledTimes(1);
   });
 });

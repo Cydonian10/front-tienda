@@ -94,6 +94,10 @@ describe('SystemRolesPage', () => {
     expect(
       fixture.componentInstance.selectedPermissions().map((permission) => permission.id),
     ).toEqual(['permission-1']);
+    const actionButtons = fixture.nativeElement.querySelectorAll(
+      'permission-actions button',
+    ) as NodeListOf<HTMLButtonElement>;
+    expect([...actionButtons].every((button) => button.disabled)).toBe(true);
 
     checkboxes[1].click();
     fixture.detectChanges();
@@ -102,6 +106,7 @@ describe('SystemRolesPage', () => {
       'permission-2',
     ]);
     expect(fixture.componentInstance.selectedPermissions()).toHaveLength(2);
+    expect([...actionButtons].every((button) => !button.disabled)).toBe(true);
 
     checkboxes[0].click();
     fixture.detectChanges();
@@ -111,6 +116,11 @@ describe('SystemRolesPage', () => {
     ).toEqual(['permission-2']);
     expect(checkboxes[0].checked).toBe(false);
     expect(checkboxes[1].checked).toBe(true);
+
+    checkboxes[0].click();
+    checkboxes[1].click();
+    fixture.detectChanges();
+    expect([...actionButtons].every((button) => button.disabled)).toBe(true);
   });
 
   it('consulta permisos al seleccionar un rol y no conserva la selección al cambiar de sistema', async () => {

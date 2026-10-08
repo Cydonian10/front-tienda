@@ -85,7 +85,7 @@ import { PermissionActionsPage } from './components/permission-action';
         (deselectRole)="clearSelectedRole()"
         (retry)="pemrisosQuery.refetch()"
       >
-        <permission-actions actions />
+        <permission-actions actions [hasPermissionChanges]="hasPermissionChanges()" />
       </role-permission-preview>
     }
   `,
@@ -231,4 +231,20 @@ export default class SystemRolesPage {
       return next;
     });
   }
+
+  readonly originalPermissionIds = computed(
+    () =>
+      new Set(
+        (this.pemrisosQuery.data() ?? [])
+          .filter((permission) => permission.assigned)
+          .map((permission) => permission.id),
+      ),
+  );
+
+  readonly hasPermissionChanges = computed(() => {
+    const selected = this.selectedPermissionIds();
+    const original = this.originalPermissionIds();
+
+    return selected.size !== original.size || [...selected].some((id) => !original.has(id));
+  });
 }

@@ -15,7 +15,7 @@ import { CreateRoleDialog } from './components/create-role-dialog';
 import { getPermisosQuery, getPermisosQueryKey } from '../../actions/permisos/get-permisos-action';
 import { Permiso } from '../../../api/interfaces/access-control/permision.interface';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
-import { RolePermissionPreview } from './components/role-permission-preview';
+import { RolePermissionPreview } from './components/role-permission-preview/role-permission-preview';
 import { PermissionActionsPage } from './components/permission-action';
 import { ToastService } from '../../../shared/services/toast/toast.service';
 
@@ -84,6 +84,7 @@ import { ToastService } from '../../../shared/services/toast/toast.service';
         [loading]="pemrisosQuery.isPending()"
         [error]="pemrisosQuery.isError()"
         (permissionSelectionChange)="onPermissionSelectionChange($event)"
+        (visiblePermissionsChange)="onVisiblePermissionsChange($event)"
         (deselectRole)="clearSelectedRole()"
         (retry)="pemrisosQuery.refetch()"
       >
@@ -241,6 +242,17 @@ export default class SystemRolesPage {
     });
   }
 
+  onVisiblePermissionsChange(change: { ids: string[]; assigned: boolean }) {
+    this.selectedPermissionIds.update((current) => {
+      const next = new Set(current);
+      for (const id of change.ids) {
+        if (change.assigned) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }
+
   readonly originalPermissionIds = computed(
     () =>
       new Set(
@@ -276,10 +288,11 @@ export default class SystemRolesPage {
       const savedIds = new Set(result.permissionIds);
       this.queryClient.setQueryData<Permiso[]>(
         [...getPermisosQueryKey, { roleId: role.id, systemCode: undefined }],
-        (permissions) => permissions?.map((permission) => ({
-          ...permission,
-          assigned: savedIds.has(permission.id),
-        })),
+        (permissions) =>
+          permissions?.map((permission) => ({
+            ...permission,
+            assigned: savedIds.has(permission.id),
+          })),
       );
       this.toastService.success('Permisos guardados correctamente');
     } catch {

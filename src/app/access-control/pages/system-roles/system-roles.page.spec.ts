@@ -99,6 +99,28 @@ describe('SystemRolesPage', () => {
       'permission-actions button',
     ) as NodeListOf<HTMLButtonElement>;
     expect([...actionButtons].every((button) => button.disabled)).toBe(true);
+    const bulkButton = fixture.nativeElement.querySelector(
+      'role-permission-preview section > div:nth-child(2) button',
+    ) as HTMLButtonElement;
+    expect(bulkButton.textContent).toContain('Seleccionar visibles');
+
+    bulkButton.click();
+    fixture.detectChanges();
+    expect([...fixture.componentInstance.selectedPermissionIds()]).toEqual([
+      'permission-1',
+      'permission-2',
+    ]);
+    expect(bulkButton.textContent).toContain('Desmarcar visibles');
+
+    bulkButton.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selectedPermissionIds().size).toBe(0);
+    expect([...actionButtons].every((button) => !button.disabled)).toBe(true);
+
+    actionButtons[0].click();
+    fixture.detectChanges();
+    expect([...fixture.componentInstance.selectedPermissionIds()]).toEqual(['permission-1']);
+    expect([...actionButtons].every((button) => button.disabled)).toBe(true);
 
     checkboxes[1].click();
     fixture.detectChanges();

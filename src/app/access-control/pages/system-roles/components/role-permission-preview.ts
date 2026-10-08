@@ -27,7 +27,6 @@ import { Permiso } from '../../../../api/interfaces/access-control/permision.int
               type="search"
               aria-label="Buscar permiso"
               placeholder="Buscar permiso o acción…"
-              disabled
             />
             <select class="select" aria-label="Filtrar por asignación" disabled>
               <option>Todos los permisos</option>
@@ -95,7 +94,6 @@ import { Permiso } from '../../../../api/interfaces/access-control/permision.int
                         class="checkbox checkbox-primary checkbox-sm"
                         [attr.aria-label]="'Asignado: ' + permission.name"
                         [checked]="permission.assigned"
-                        disabled
                       />
                     </td>
                   </tr>

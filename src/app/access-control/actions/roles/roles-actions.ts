@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { injectQuery } from '@tanstack/angular-query-experimental';
+import { injectMutation, injectQuery } from '@tanstack/angular-query-experimental';
 import { RolesApi } from '../../../api/access-control/roles-api';
 
 export const rolesQueryKey = ['Roles'] as const;
@@ -17,4 +17,17 @@ export function findRolesQuery(systemId: () => string | undefined) {
       retry: false,
     };
   });
+}
+
+export function handleRoles() {
+  const api = inject(RolesApi);
+
+  const mutationReplacePermission = injectMutation(() => ({
+    mutationFn: (dto: { rolId: string; permissionIds: string[] }) =>
+      api.replacePermissions(dto.rolId, dto.permissionIds),
+  }));
+
+  return {
+    mutationReplacePermission,
+  };
 }

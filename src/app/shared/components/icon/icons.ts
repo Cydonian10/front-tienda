@@ -5,6 +5,7 @@ export type IconShape =
 /** Trusted SVG geometry. Add names here instead of repeating SVGs in templates. */
 export const ICONS = {
   menu: [{ type: 'path', d: 'M4 6h16M4 12h16M4 18h11' }],
+  'more-horizontal': [{ type: 'path', d: 'M5 12h.01M12 12h.01M19 12h.01' }],
   close: [{ type: 'path', d: 'm6 6 12 12M18 6 6 18' }],
   'chevron-down': [{ type: 'path', d: 'm6 9 6 6 6-6' }],
   'chevron-right': [{ type: 'path', d: 'm9 6 6 6-6 6' }],

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { Permiso } from '../../../../api/interfaces/access-control/permision.interface';
-import { RolePermissionPreview } from './role-permission-preview/role-permission-preview';
+import { Permiso } from '../../../../../api/interfaces/access-control/permision.interface';
+import { RolePermissionPreview } from './role-permission-preview';
 
 describe('RolePermissionPreview', () => {
   it('agrupa el resumen por recurso y actualiza los seleccionados', () => {
@@ -59,10 +59,12 @@ describe('RolePermissionPreview', () => {
     search.value = 'crear';
     search.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(fixture.componentInstance.visiblePermissions().map((permission) => permission.id)).toEqual([
-      'create',
-    ]);
-    expect(fixture.nativeElement.querySelector('tbody')!.textContent).not.toContain('Leer usuarios');
+    expect(
+      fixture.componentInstance.visiblePermissions().map((permission) => permission.id),
+    ).toEqual(['create']);
+    expect(fixture.nativeElement.querySelector('tbody')!.textContent).not.toContain(
+      'Leer usuarios',
+    );
 
     fixture.componentInstance.currentResourceCode.set('PERSONAS');
     fixture.detectChanges();
@@ -72,8 +74,8 @@ describe('RolePermissionPreview', () => {
     search.value = 'estado';
     search.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(fixture.componentInstance.visiblePermissions().map((permission) => permission.id)).toEqual([
-      'status',
-    ]);
+    expect(
+      fixture.componentInstance.visiblePermissions().map((permission) => permission.id),
+    ).toEqual(['status']);
   });
 });

@@ -5,7 +5,11 @@ import { Permiso } from '../../../../../api/interfaces/access-control/permision.
   imports: [],
   selector: 'role-permission-preview',
   templateUrl: './role-permission-preview.html',
-  host: { class: 'block space-y-4', 'aria-label': 'Vista previa de permisos' },
+  host: {
+    class:
+      'block space-y-4 pb-[calc(8rem+env(safe-area-inset-bottom))] sm:pb-[calc(5.25rem+env(safe-area-inset-bottom))]',
+    'aria-label': 'Vista previa de permisos',
+  },
 })
 export class RolePermissionPreview {
   readonly roleName = input.required<string>();
@@ -22,9 +26,12 @@ export class RolePermissionPreview {
     const term = this.searchTerm().trim().toLowerCase();
     return this.permissions().filter((permission) => {
       if (!permission.resourceCode.toLowerCase().includes(resourceCode)) return false;
-      return [permission.name, permission.code, permission.actionCode, permission.resourceCode].some(
-        (value) => value.toLowerCase().includes(term),
-      );
+      return [
+        permission.name,
+        permission.code,
+        permission.actionCode,
+        permission.resourceCode,
+      ].some((value) => value.toLowerCase().includes(term));
     });
   });
   readonly allVisibleSelected = computed(() => {

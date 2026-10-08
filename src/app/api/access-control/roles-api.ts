@@ -34,4 +34,8 @@ export class RolesApi {
       }),
     );
   }
+
+  delete(rolId: string) {
+    return firstValueFrom(this.http.delete<void>(`${this.baseUrl}/roles/${rolId}`));
+  }
 }

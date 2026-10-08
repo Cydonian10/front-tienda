@@ -22,6 +22,7 @@ import { RolePermissionPreview } from './components/role-permission-preview/role
 import { PermissionActionsPage } from './components/permission-action/permission-action';
 import { ToastService } from '../../../shared/services/toast/toast.service';
 import { PendingPermissionsGuard } from './guards/pending-permission/pending-permissions.guard';
+import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
 
 @Component({
   imports: [
@@ -43,6 +44,7 @@ export default class SystemRolesPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
+  private readonly confirmation = inject(ConfirmDialogService);
   private readonly toastService = inject(ToastService);
   private readonly queryClient = inject(QueryClient);
   private readonly pendingPermissions = inject(PendingPermissionsGuard);
@@ -104,6 +106,7 @@ export default class SystemRolesPage {
   // LOGICA RELACIONA A LOS * ROLES *
 
   readonly rolesQuery = findRolesQuery(() => this.selectedSystem()?.id);
+  readonly mutationDeleteRole = handleRoles().mutationDeletePermission;
 
   openCreateRoleDialog(system: System) {
     const id = `create-role-${system.id}`;
@@ -130,6 +133,24 @@ export default class SystemRolesPage {
 
   openUpdateRolesDialog(system: System) {
     const id = `update-role-${system.id}`;
+  }
+
+  handleDeleteRol(data: Role) {
+    this.confirmation
+      .confirm({
+        title: '¿Eliminar este rol?',
+        message: 'Esta acción no se puede deshacer.',
+        confirmText: 'Eliminar rol',
+        tone: 'danger',
+      })
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+        this.mutationDeleteRole.mutate(data.id, {
+          onSuccess: () => {
+            this.toastService.success('Rol elminado correctamente');
+          },
+        });
+      });
   }
 
   // LOGICA RELACIONA A LOS * PERMISOS *

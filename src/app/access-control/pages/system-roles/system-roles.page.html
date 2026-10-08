@@ -28,6 +28,7 @@
         (retry)="rolesQuery.refetch()"
         (createRole)="openCreateRoleDialog(system)"
         (roleSelected)="setSelectedRol($event)"
+        (deleteRole)="handleDeleteRol($event)"
       />
     } @else {
       <app-empty-state

@@ -15,11 +15,17 @@ export class RolePermissionPreview {
   readonly loading = input(false);
   readonly error = input(false);
   readonly currentResourceCode = signal<string>('');
+  readonly searchTerm = signal('');
 
   readonly visiblePermissions = computed(() => {
-    return this.permissions().filter((p) =>
-      p.resourceCode.toLocaleLowerCase().includes(this.currentResourceCode().toLocaleLowerCase()),
-    );
+    const resourceCode = this.currentResourceCode().toLowerCase();
+    const term = this.searchTerm().trim().toLowerCase();
+    return this.permissions().filter((permission) => {
+      if (!permission.resourceCode.toLowerCase().includes(resourceCode)) return false;
+      return [permission.name, permission.code, permission.actionCode, permission.resourceCode].some(
+        (value) => value.toLowerCase().includes(term),
+      );
+    });
   });
   readonly allVisibleSelected = computed(() => {
     const visible = this.visiblePermissions();
@@ -51,6 +57,10 @@ export class RolePermissionPreview {
   readonly retry = output<void>();
   readonly permissionSelectionChange = output<{ id: string; assigned: boolean }>();
   readonly visiblePermissionsChange = output<{ ids: string[]; assigned: boolean }>();
+
+  onSearch(event: Event) {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
+  }
 
   toggleVisiblePermissions() {
     if (this.loading() || this.error() || !this.visiblePermissions().length) return;

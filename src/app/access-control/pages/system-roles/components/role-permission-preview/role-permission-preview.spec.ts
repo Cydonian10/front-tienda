@@ -54,5 +54,26 @@ describe('RolePermissionPreview', () => {
     fixture.detectChanges();
     expect(summary()).toMatch(/USUARIOS\s*2\s*\/\s*2/);
     expect(summary()).toMatch(/PERSONAS\s*1\s*\/\s*1/);
+
+    const search = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+    search.value = 'crear';
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.visiblePermissions().map((permission) => permission.id)).toEqual([
+      'create',
+    ]);
+    expect(fixture.nativeElement.querySelector('tbody')!.textContent).not.toContain('Leer usuarios');
+
+    fixture.componentInstance.currentResourceCode.set('PERSONAS');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.visiblePermissions()).toEqual([]);
+    expect(fixture.nativeElement.textContent).toContain('No hay permisos que coincidan');
+
+    search.value = 'estado';
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.visiblePermissions().map((permission) => permission.id)).toEqual([
+      'status',
+    ]);
   });
 });

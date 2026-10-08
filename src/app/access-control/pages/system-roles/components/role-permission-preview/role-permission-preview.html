@@ -20,6 +20,8 @@
           type="search"
           aria-label="Buscar permiso"
           placeholder="Buscar permiso o acción…"
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
         />
       </div>
       <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por recurso">
@@ -85,6 +87,10 @@
           } @else if (!permissions().length) {
             <tr>
               <td colspan="4" class="py-8 text-center">Este rol todavía no tiene permisos.</td>
+            </tr>
+          } @else if (!visiblePermissions().length) {
+            <tr>
+              <td colspan="4" class="py-8 text-center">No hay permisos que coincidan con la búsqueda.</td>
             </tr>
           } @else {
             @for (permission of visiblePermissions(); track permission.id) {

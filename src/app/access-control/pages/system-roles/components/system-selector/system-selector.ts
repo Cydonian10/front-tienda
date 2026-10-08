@@ -1,7 +1,7 @@
 import { Component, input, linkedSignal, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { System } from '../../../../api/interfaces/access-control/system.interface';
-import { Icon } from '../../../../shared/components/icon/icon';
+import { System } from '../../../../../api/interfaces/access-control/system.interface';
+import { Icon } from '../../../../../shared/components/icon/icon';
 
 @Component({
   imports: [FormsModule, Icon],

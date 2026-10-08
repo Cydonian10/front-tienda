@@ -5,20 +5,23 @@ import { findSystemsQuery } from '../../actions/systems/find-systems-action';
 import { System } from '../../../api/interfaces/access-control/system.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { HeaderSystemRolPage, StepActiveProps } from './components/header-system-rol';
+import {
+  HeaderSystemRolPage,
+  StepActiveProps,
+} from './components/header-system-rol/header-system-rol';
 import { findRolesQuery, handleRoles, rolesQueryKey } from '../../actions/roles/roles-actions';
-import { SystemSelector } from './components/system-selector';
-import { SystemRolesPanel } from './components/system-roles-panel';
+import { SystemSelector } from './components/system-selector/system-selector';
+import { SystemRolesPanel } from './components/system-roles-panel/system-roles-panel';
 import { Dialog } from '@angular/cdk/dialog';
 import { Role } from '../../../api/interfaces/access-control/role.interface';
-import { CreateRoleDialog } from './components/create-role-dialog';
+import { CreateRoleDialog } from './components/create-role-dialog/create-role-dialog';
 import { getPermisosQuery, getPermisosQueryKey } from '../../actions/permisos/get-permisos-action';
 import { Permiso } from '../../../api/interfaces/access-control/permision.interface';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { RolePermissionPreview } from './components/role-permission-preview/role-permission-preview';
-import { PermissionActionsPage } from './components/permission-action';
+import { PermissionActionsPage } from './components/permission-action/permission-action';
 import { ToastService } from '../../../shared/services/toast/toast.service';
-import { PendingPermissionsGuard } from './pending-permissions.guard';
+import { PendingPermissionsGuard } from './guards/pending-permission/pending-permissions.guard';
 
 @Component({
   imports: [
@@ -31,74 +34,7 @@ import { PendingPermissionsGuard } from './pending-permissions.guard';
     PermissionActionsPage,
   ],
   selector: 'app-system-roles',
-  template: `
-    <app-title-header-admin
-      title="Sistemas y roles"
-      description="Organiza el acceso de tu equipo a cada sistema."
-    />
-
-    <header-system-rol
-      [stepActive]="stepActive()"
-      [hasSystem]="!!selectedSystem()"
-      [hasRole]="!!selectedRol()"
-      (stepSelected)="goToStep($event)"
-    />
-
-    @if (stepActive() !== 'permisos') {
-      <div class="grid gap-5 lg:grid-cols-[minmax(14rem,17rem)_minmax(0,1fr)]">
-        <system-selector
-          [systems]="systemQuery.data() ?? []"
-          [selectedSystemCode]="selectedSystem()?.code ?? null"
-          (systemSelected)="setSelectedSystem($event)"
-        />
-
-        @if (stepActive() === 'roles' && selectedSystem(); as system) {
-          <system-roles-panel
-            [system]="system"
-            [roles]="rolesQuery.data() ?? []"
-            [loading]="rolesQuery.isLoading()"
-            [error]="rolesQuery.isError()"
-            [selectedRoleId]="selectedRol()?.id ?? null"
-            (retry)="rolesQuery.refetch()"
-            (createRole)="openCreateRoleDialog(system)"
-            (roleSelected)="setSelectedRol($event)"
-          />
-        } @else {
-          <app-empty-state
-            [title]="
-              selectedSystem() ? 'Sistema seleccionado' : 'Todavía no hay un sistema seleccionado'
-            "
-            [description]="
-              selectedSystem()
-                ? 'Selecciona Roles en la cabecera o elige otro sistema.'
-                : 'Selecciona un sistema para ver sus roles.'
-            "
-          ></app-empty-state>
-        }
-      </div>
-    } @else {
-      <role-permission-preview
-        [roleName]="selectedRol()?.name ?? ''"
-        [systemName]="selectedSystem()?.name ?? ''"
-        [permissions]="pemrisosQuery.data() ?? []"
-        [selectedPermissionIds]="selectedPermissionIds()"
-        [loading]="pemrisosQuery.isPending()"
-        [error]="pemrisosQuery.isError()"
-        (permissionSelectionChange)="onPermissionSelectionChange($event)"
-        (visiblePermissionsChange)="onVisiblePermissionsChange($event)"
-        (deselectRole)="clearSelectedRole()"
-        (retry)="pemrisosQuery.refetch()"
-      >
-        <permission-actions
-          actions
-          [hasPermissionChanges]="hasPermissionChanges()"
-          [saving]="mutationReplacePermission.isPending()"
-          (cancel)="cancelPermissionChanges()"
-          (save)="saveReplacePermissions()"
-        />
-      </role-permission-preview>
-    }
-  `,
+  templateUrl: './system-roles.page.html',
   host: { class: 'block space-y-6' },
 })
 export default class SystemRolesPage {

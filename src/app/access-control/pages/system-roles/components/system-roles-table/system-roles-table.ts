@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
-import { Role } from '../../../../api/interfaces/access-control/role.interface';
-import { Icon } from '../../../../shared/components/icon/icon';
+import { Role } from '../../../../../api/interfaces/access-control/role.interface';
+import { Icon } from '../../../../../shared/components/icon/icon';
 
 @Component({
   imports: [Icon],

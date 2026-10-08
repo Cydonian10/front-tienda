@@ -1,12 +1,12 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Role } from '../../../../api/interfaces/access-control/role.interface';
-import { System } from '../../../../api/interfaces/access-control/system.interface';
-import { CreateRolMutation } from '../../../actions/roles/create-role-action';
-import { DialogShell } from '../../../../shared/components/dialog-shell/dialog-shell';
+import { Role } from '../../../../../api/interfaces/access-control/role.interface';
+import { System } from '../../../../../api/interfaces/access-control/system.interface';
+import { CreateRolMutation } from '../../../../actions/roles/create-role-action';
+import { DialogShell } from '../../../../../shared/components/dialog-shell/dialog-shell';
 import { form, FormField, maxLength, submit, validate } from '@angular/forms/signals';
-import { FieldErrors } from '../../../../shared/components/field-errors/field-errors';
+import { FieldErrors } from '../../../../../shared/components/field-errors/field-errors';
 
 @Component({
   selector: 'app-create-role-dialog',

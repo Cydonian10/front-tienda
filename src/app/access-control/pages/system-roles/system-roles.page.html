@@ -1,0 +1,66 @@
+<app-title-header-admin
+  title="Sistemas y roles"
+  description="Organiza el acceso de tu equipo a cada sistema."
+/>
+
+<header-system-rol
+  [stepActive]="stepActive()"
+  [hasSystem]="!!selectedSystem()"
+  [hasRole]="!!selectedRol()"
+  (stepSelected)="goToStep($event)"
+/>
+
+@if (stepActive() !== 'permisos') {
+  <div class="grid gap-5 lg:grid-cols-[minmax(14rem,17rem)_minmax(0,1fr)]">
+    <system-selector
+      [systems]="systemQuery.data() ?? []"
+      [selectedSystemCode]="selectedSystem()?.code ?? null"
+      (systemSelected)="setSelectedSystem($event)"
+    />
+
+    @if (stepActive() === 'roles' && selectedSystem(); as system) {
+      <system-roles-panel
+        [system]="system"
+        [roles]="rolesQuery.data() ?? []"
+        [loading]="rolesQuery.isLoading()"
+        [error]="rolesQuery.isError()"
+        [selectedRoleId]="selectedRol()?.id ?? null"
+        (retry)="rolesQuery.refetch()"
+        (createRole)="openCreateRoleDialog(system)"
+        (roleSelected)="setSelectedRol($event)"
+      />
+    } @else {
+      <app-empty-state
+        [title]="
+          selectedSystem() ? 'Sistema seleccionado' : 'Todavía no hay un sistema seleccionado'
+        "
+        [description]="
+          selectedSystem()
+            ? 'Selecciona Roles en la cabecera o elige otro sistema.'
+            : 'Selecciona un sistema para ver sus roles.'
+        "
+      ></app-empty-state>
+    }
+  </div>
+} @else {
+  <role-permission-preview
+    [roleName]="selectedRol()?.name ?? ''"
+    [systemName]="selectedSystem()?.name ?? ''"
+    [permissions]="pemrisosQuery.data() ?? []"
+    [selectedPermissionIds]="selectedPermissionIds()"
+    [loading]="pemrisosQuery.isPending()"
+    [error]="pemrisosQuery.isError()"
+    (permissionSelectionChange)="onPermissionSelectionChange($event)"
+    (visiblePermissionsChange)="onVisiblePermissionsChange($event)"
+    (deselectRole)="clearSelectedRole()"
+    (retry)="pemrisosQuery.refetch()"
+  >
+    <permission-actions
+      actions
+      [hasPermissionChanges]="hasPermissionChanges()"
+      [saving]="mutationReplacePermission.isPending()"
+      (cancel)="cancelPermissionChanges()"
+      (save)="saveReplacePermissions()"
+    />
+  </role-permission-preview>
+}

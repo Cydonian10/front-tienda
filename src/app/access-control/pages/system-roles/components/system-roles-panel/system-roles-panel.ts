@@ -1,9 +1,9 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { System } from '../../../../api/interfaces/access-control/system.interface';
-import { Role } from '../../../../api/interfaces/access-control/role.interface';
-import { Icon } from '../../../../shared/components/icon/icon';
-import { SystemRolesTable } from './system-roles-table';
+import { System } from '../../../../../api/interfaces/access-control/system.interface';
+import { Role } from '../../../../../api/interfaces/access-control/role.interface';
+import { Icon } from '../../../../../shared/components/icon/icon';
+import { SystemRolesTable } from '../system-roles-table/system-roles-table';
 
 @Component({
   imports: [FormsModule, Icon, SystemRolesTable],

@@ -4,7 +4,7 @@ import {
   PendingPermissionsGuard,
   confirmChangingSelection,
   confirmLeavingPage,
-} from './pending-permissions.guard';
+} from './guards/pending-permissions.guard';
 
 describe('PendingPermissionsGuard', () => {
   afterEach(() => {

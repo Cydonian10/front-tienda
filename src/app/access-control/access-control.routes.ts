@@ -3,7 +3,7 @@ import { AdminLayout } from '../layouts/admin.layout';
 import {
   confirmChangingSelection,
   confirmLeavingPage,
-} from './pages/system-roles/pending-permissions.guard';
+} from './pages/system-roles/guards/pending-permission/pending-permissions.guard';
 
 export const accessControlRoutes: Routes = [
   {

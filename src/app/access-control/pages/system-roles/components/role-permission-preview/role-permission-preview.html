@@ -21,20 +21,14 @@
           aria-label="Buscar permiso"
           placeholder="Buscar permiso o acción…"
         />
-        <select class="select" aria-label="Filtrar por asignación" disabled>
-          <option>Todos los permisos</option>
-          <option>Asignados</option>
-          <option>Sin asignar</option>
-        </select>
       </div>
       <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por recurso">
         <button
           type="button"
-          class="btn btn-sm btn-primary"
           (click)="currentResourceCode.set('')"
-          [class]="{
-            'btn btn-sm btn-primary': currentResourceCode() === '',
-          }"
+          class="btn btn-sm"
+          [class.btn-primary]="currentResourceCode() === ''"
+          [class.btn-ghost]="currentResourceCode() !== ''"
         >
           Todos
         </button>
@@ -42,10 +36,9 @@
           <button
             (click)="currentResourceCode.set(code)"
             type="button"
-            [class]="{
-              'btn btn-sm btn-primary': currentResourceCode() == 'code',
-            }"
-            class="btn btn-sm btn-ghost"
+            class="btn btn-sm"
+            [class.btn-primary]="currentResourceCode() === code"
+            [class.btn-ghost]="currentResourceCode() !== code"
           >
             {{ code }}
           </button>

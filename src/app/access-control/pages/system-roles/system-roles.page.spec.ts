@@ -99,6 +99,9 @@ describe('SystemRolesPage', () => {
       'permission-actions button',
     ) as NodeListOf<HTMLButtonElement>;
     expect([...actionButtons].every((button) => button.disabled)).toBe(true);
+    const cleanUnload = new Event('beforeunload', { cancelable: true }) as BeforeUnloadEvent;
+    fixture.componentInstance.onBeforeUnload(cleanUnload);
+    expect(cleanUnload.defaultPrevented).toBe(false);
     const bulkButton = fixture.nativeElement.querySelector(
       'role-permission-preview section > div:nth-child(2) button',
     ) as HTMLButtonElement;
@@ -116,6 +119,9 @@ describe('SystemRolesPage', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.selectedPermissionIds().size).toBe(0);
     expect([...actionButtons].every((button) => !button.disabled)).toBe(true);
+    const dirtyUnload = new Event('beforeunload', { cancelable: true }) as BeforeUnloadEvent;
+    fixture.componentInstance.onBeforeUnload(dirtyUnload);
+    expect(dirtyUnload.defaultPrevented).toBe(true);
 
     actionButtons[0].click();
     fixture.detectChanges();

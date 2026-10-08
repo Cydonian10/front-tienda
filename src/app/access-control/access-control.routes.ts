@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
 import { AdminLayout } from '../layouts/admin.layout';
+import {
+  confirmChangingSelection,
+  confirmLeavingPage,
+} from './pages/system-roles/pending-permissions.guard';
 
 export const accessControlRoutes: Routes = [
   {
@@ -14,6 +18,9 @@ export const accessControlRoutes: Routes = [
       {
         path: 'sistemas-roles',
         loadComponent: () => import('./pages/system-roles/system-roles.page'),
+        canActivate: [confirmChangingSelection],
+        canDeactivate: [confirmLeavingPage],
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
       },
       {
         path: 'pruebas',

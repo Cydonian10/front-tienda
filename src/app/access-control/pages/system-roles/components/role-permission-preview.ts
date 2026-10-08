@@ -93,7 +93,8 @@ import { Permiso } from '../../../../api/interfaces/access-control/permision.int
                         type="checkbox"
                         class="checkbox checkbox-primary checkbox-sm"
                         [attr.aria-label]="'Asignado: ' + permission.name"
-                        [checked]="permission.assigned"
+                        [checked]="selectedPermissionIds().has(permission.id)"
+                        (change)="onPermissionChange(permission.id, $event)"
                       />
                     </td>
                   </tr>
@@ -110,8 +111,8 @@ import { Permiso } from '../../../../api/interfaces/access-control/permision.int
       >
         <h3 class="font-semibold">Resumen de acceso</h3>
         <p class="mt-5 text-3xl font-semibold tabular-nums text-primary">
-          <!-- {{ permissionPreview.assignedCount }}
-              <span class="text-base text-base-content/60">/ {{ permissionPreview.totalCount }}</span> -->
+          {{ selectedPermissionIds().size }}
+          <span class="text-base text-base-content/60">/ {{ permissions().length }}</span>
         </p>
         <p class="mt-1 text-xs text-base-content/70">permisos seleccionados</p>
         <div class="mt-5 space-y-2 border-t border-base-300 pt-4">
@@ -136,9 +137,18 @@ export class RolePermissionPreview {
   readonly roleName = input.required<string>();
   readonly systemName = input.required<string>();
   readonly permissions = input<Permiso[]>([]);
+  readonly selectedPermissionIds = input.required<ReadonlySet<string>>();
   readonly loading = input(false);
   readonly error = input(false);
 
   readonly deselectRole = output<void>();
   readonly retry = output<void>();
+  readonly permissionSelectionChange = output<{ id: string; assigned: boolean }>();
+
+  onPermissionChange(id: string, event: Event) {
+    this.permissionSelectionChange.emit({
+      id,
+      assigned: (event.target as HTMLInputElement).checked,
+    });
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, linkedSignal } from '@angular/core';
 import { QueryClient } from '@tanstack/angular-query-experimental';
 import { TitleHeaderAdmin } from '../../../shared/components/title-header-admin/title-header-admin';
 import { findSystemsQuery } from '../../actions/systems/find-systems-action';
@@ -78,8 +78,10 @@ import { PermissionActionsPage } from './components/permission-action';
         [roleName]="selectedRol()?.name ?? ''"
         [systemName]="selectedSystem()?.name ?? ''"
         [permissions]="pemrisosQuery.data() ?? []"
+        [selectedPermissionIds]="selectedPermissionIds()"
         [loading]="pemrisosQuery.isPending()"
         [error]="pemrisosQuery.isError()"
+        (permissionSelectionChange)="onPermissionSelectionChange($event)"
         (deselectRole)="clearSelectedRole()"
         (retry)="pemrisosQuery.refetch()"
       >
@@ -140,7 +142,7 @@ export default class SystemRolesPage {
     });
   }
 
-  // Roles logica
+  // LOGICA RELACIONA A LOS * ROLES *
 
   readonly rolesQuery = findRolesQuery(() => this.selectedSystem()?.id);
 
@@ -171,7 +173,7 @@ export default class SystemRolesPage {
     const id = `update-role-${system.id}`;
   }
 
-  // Permisos
+  // LOGICA RELACIONA A LOS * PERMISOS *
 
   setSelectedRol(role: Role) {
     const deselect = this.selectedRol()?.id === role.id;
@@ -205,4 +207,28 @@ export default class SystemRolesPage {
     const role = this.selectedRol();
     return role && this.stepActive() === 'permisos' ? { roleId: role.id } : undefined;
   });
+
+  readonly selectedPermissionIds = linkedSignal(
+    () =>
+      new Set(
+        (this.pemrisosQuery.data() ?? [])
+          .filter((permission) => permission.assigned === true)
+          .map((permission) => permission.id),
+      ),
+  );
+
+  readonly selectedPermissions = computed(() =>
+    (this.pemrisosQuery.data() ?? []).filter((permission) =>
+      this.selectedPermissionIds().has(permission.id),
+    ),
+  );
+
+  onPermissionSelectionChange(change: { id: string; assigned: boolean }) {
+    this.selectedPermissionIds.update((current) => {
+      const next = new Set(current);
+      if (change.assigned) next.add(change.id);
+      else next.delete(change.id);
+      return next;
+    });
+  }
 }

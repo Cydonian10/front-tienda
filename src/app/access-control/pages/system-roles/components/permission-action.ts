@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
   `,
   host: {
     class:
-      'flex flex-wrap items-center gap-3 rounded-box border border-base-300 bg-base-100 p-3 sm:p-4',
+      'flex flex-wrap items-center gap-3 rounded-box border border-base-300 bg-base-100 p-3 sm:p-4  justify-end',
   },
 })
 export class PermissionActionsPage {}

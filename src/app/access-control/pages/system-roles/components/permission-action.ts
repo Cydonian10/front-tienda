@@ -1,11 +1,13 @@
-import { booleanAttribute, Component, input } from '@angular/core';
+import { booleanAttribute, Component, input, output } from '@angular/core';
 
 @Component({
   imports: [],
   selector: 'permission-actions',
   template: `
-    <button type="button" class="btn" [disabled]="!hasPermission()">Descartar cambios</button>
-    <button type="button" class="btn btn-primary" [disabled]="!hasPermission()">
+    <button type="button" class="btn" [disabled]="!hasPermission() || saving()" (click)="cancel.emit()">
+      Descartar cambios
+    </button>
+    <button type="button" class="btn btn-primary" [disabled]="!hasPermission() || saving()" (click)="save.emit()">
       Guardar permisos
     </button>
   `,
@@ -19,4 +21,7 @@ export class PermissionActionsPage {
     alias: 'hasPermissionChanges',
     transform: booleanAttribute,
   });
+  readonly saving = input(false, { transform: booleanAttribute });
+  readonly cancel = output<void>();
+  readonly save = output<void>();
 }

@@ -61,6 +61,7 @@ describe('SystemRolesPage', () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     client.setQueryData([...findSystemsQueryKey], [system]);
     client.setQueryData([...rolesQueryKey, system.id], [role]);
+    const replacePermissions = vi.fn().mockResolvedValue({ permissionIds: ['permission-2'] });
 
     TestBed.configureTestingModule({
       providers: [
@@ -72,7 +73,7 @@ describe('SystemRolesPage', () => {
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: Dialog, useValue: {} },
         { provide: SystemApi, useValue: { findAllSystems: vi.fn() } },
-        { provide: RolesApi, useValue: { findAll: vi.fn() } },
+        { provide: RolesApi, useValue: { findAll: vi.fn(), replacePermissions } },
         {
           provide: PermisosApi,
           useValue: { findPermisos: vi.fn().mockResolvedValue(permissions) },
@@ -108,6 +109,15 @@ describe('SystemRolesPage', () => {
     expect(fixture.componentInstance.selectedPermissions()).toHaveLength(2);
     expect([...actionButtons].every((button) => !button.disabled)).toBe(true);
 
+    actionButtons[0].click();
+    fixture.detectChanges();
+    expect([...fixture.componentInstance.selectedPermissionIds()]).toEqual(['permission-1']);
+    expect(checkboxes[1].checked).toBe(false);
+    expect([...actionButtons].every((button) => button.disabled)).toBe(true);
+
+    checkboxes[1].click();
+    fixture.detectChanges();
+
     checkboxes[0].click();
     fixture.detectChanges();
     expect([...fixture.componentInstance.selectedPermissionIds()]).toEqual(['permission-2']);
@@ -121,6 +131,17 @@ describe('SystemRolesPage', () => {
     checkboxes[1].click();
     fixture.detectChanges();
     expect([...actionButtons].every((button) => button.disabled)).toBe(true);
+
+    checkboxes[0].click();
+    checkboxes[1].click();
+    fixture.detectChanges();
+    actionButtons[1].click();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(replacePermissions).toHaveBeenCalledWith(role.id, ['permission-2']);
+      expect([...actionButtons].every((button) => button.disabled)).toBe(true);
+      expect(fixture.componentInstance.originalPermissionIds().has('permission-2')).toBe(true);
+    });
   });
 
   it('consulta permisos al seleccionar un rol y no conserva la selección al cambiar de sistema', async () => {

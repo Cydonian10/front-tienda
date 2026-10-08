@@ -6,16 +6,18 @@ import { System } from '../../../api/interfaces/access-control/system.interface'
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HeaderSystemRolPage, StepActiveProps } from './components/header-system-rol';
-import { findRolesQuery, rolesQueryKey } from '../../actions/roles/roles-actions';
+import { findRolesQuery, handleRoles, rolesQueryKey } from '../../actions/roles/roles-actions';
 import { SystemSelector } from './components/system-selector';
 import { SystemRolesPanel } from './components/system-roles-panel';
 import { Dialog } from '@angular/cdk/dialog';
 import { Role } from '../../../api/interfaces/access-control/role.interface';
 import { CreateRoleDialog } from './components/create-role-dialog';
-import { getPermisosQuery } from '../../actions/permisos/get-permisos-action';
+import { getPermisosQuery, getPermisosQueryKey } from '../../actions/permisos/get-permisos-action';
+import { Permiso } from '../../../api/interfaces/access-control/permision.interface';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { RolePermissionPreview } from './components/role-permission-preview';
 import { PermissionActionsPage } from './components/permission-action';
+import { ToastService } from '../../../shared/services/toast/toast.service';
 
 @Component({
   imports: [
@@ -85,7 +87,13 @@ import { PermissionActionsPage } from './components/permission-action';
         (deselectRole)="clearSelectedRole()"
         (retry)="pemrisosQuery.refetch()"
       >
-        <permission-actions actions [hasPermissionChanges]="hasPermissionChanges()" />
+        <permission-actions
+          actions
+          [hasPermissionChanges]="hasPermissionChanges()"
+          [saving]="mutationReplacePermission.isPending()"
+          (cancel)="cancelPermissionChanges()"
+          (save)="saveReplacePermissions()"
+        />
       </role-permission-preview>
     }
   `,
@@ -97,6 +105,7 @@ export default class SystemRolesPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
+  private readonly toastService = inject(ToastService);
   private readonly queryClient = inject(QueryClient);
 
   readonly queryParams = toSignal(this.route.queryParamMap, {
@@ -247,4 +256,34 @@ export default class SystemRolesPage {
 
     return selected.size !== original.size || [...selected].some((id) => !original.has(id));
   });
+
+  readonly mutationReplacePermission = handleRoles().mutationReplacePermission;
+
+  cancelPermissionChanges() {
+    this.selectedPermissionIds.set(new Set(this.originalPermissionIds()));
+  }
+
+  async saveReplacePermissions() {
+    const role = this.selectedRol();
+    if (!role || !this.hasPermissionChanges() || this.mutationReplacePermission.isPending()) return;
+
+    const permissionIds = [...this.selectedPermissionIds()];
+    try {
+      const result = await this.mutationReplacePermission.mutateAsync({
+        rolId: role.id,
+        permissionIds,
+      });
+      const savedIds = new Set(result.permissionIds);
+      this.queryClient.setQueryData<Permiso[]>(
+        [...getPermisosQueryKey, { roleId: role.id, systemCode: undefined }],
+        (permissions) => permissions?.map((permission) => ({
+          ...permission,
+          assigned: savedIds.has(permission.id),
+        })),
+      );
+      this.toastService.success('Permisos guardados correctamente');
+    } catch {
+      this.toastService.error('No se pudieron guardar los permisos');
+    }
+  }
 }

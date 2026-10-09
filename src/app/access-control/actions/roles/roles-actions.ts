@@ -27,12 +27,12 @@ export function handleRoles() {
       api.replacePermissions(dto.rolId, dto.permissionIds),
   }));
 
-  const mutationDeletePermission = injectMutation(() => ({
+  const mutationDeleteRole = injectMutation(() => ({
     mutationFn: (rolId: string) => api.delete(rolId),
   }));
 
   return {
     mutationReplacePermission,
-    mutationDeletePermission,
+    mutationDeleteRole,
   };
 }

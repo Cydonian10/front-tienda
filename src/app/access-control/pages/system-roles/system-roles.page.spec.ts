@@ -2,17 +2,118 @@ import { TestBed } from '@angular/core/testing';
 import { Dialog } from '@angular/cdk/dialog';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { PermisosApi } from '../../../api/access-control/permisos-api';
 import { Permiso } from '../../../api/interfaces/access-control/permision.interface';
 import { RolesApi } from '../../../api/access-control/roles-api';
 import { SystemApi } from '../../../api/access-control/system-api';
 import { findSystemsQueryKey } from '../../actions/systems/find-systems-action';
 import { rolesQueryKey } from '../../actions/roles/roles-actions';
+import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
 import SystemRolesPage from './system-roles.page';
 
 describe('SystemRolesPage', () => {
   afterEach(() => TestBed.resetTestingModule());
+
+  it('elimina del caché solo el rol confirmado y conserva los demás', async () => {
+    const system = {
+      id: 'system-1', code: 'VENTAS', name: 'Ventas', description: '', active: true, order: 1,
+    };
+    const role = {
+      id: 'role-1', systemId: system.id, code: 'ADMIN', name: 'Administrador',
+      description: '', permissions: [],
+    };
+    const otherRole = { ...role, id: 'role-2', code: 'LECTOR', name: 'Lector' };
+    const otherSystemRole = { ...role, id: 'role-3', systemId: 'system-2' };
+    const params = new BehaviorSubject(convertToParamMap({ system: system.code, step: 'roles' }));
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    client.setQueryData([...findSystemsQueryKey], [system]);
+    client.setQueryData([...rolesQueryKey, system.id], [role, otherRole]);
+    client.setQueryData([...rolesQueryKey, otherSystemRole.systemId], [otherSystemRole]);
+    const confirm = vi.fn().mockReturnValueOnce(of(false)).mockReturnValueOnce(of(true));
+    const removeRole = vi.fn().mockResolvedValue(undefined);
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideTanStackQuery(client),
+        {
+          provide: ActivatedRoute,
+          useValue: { queryParamMap: params, snapshot: { queryParamMap: params.value } },
+        },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: Dialog, useValue: {} },
+        { provide: ConfirmDialogService, useValue: { confirm } },
+        { provide: SystemApi, useValue: { findAllSystems: vi.fn() } },
+        { provide: RolesApi, useValue: { findAll: vi.fn(), delete: removeRole } },
+        { provide: PermisosApi, useValue: { findPermisos: vi.fn() } },
+      ],
+    });
+
+    const fixture = TestBed.createComponent(SystemRolesPage);
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector(
+      'button[aria-label="Más acciones para Administrador"]',
+    ) as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+    const deleteButton = [...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')]
+      .find((button) => button.textContent?.includes('Eliminar'))!;
+    deleteButton.click();
+    fixture.detectChanges();
+    expect(confirm).toHaveBeenCalled();
+
+    expect(removeRole).not.toHaveBeenCalled();
+    expect(client.getQueryData([...rolesQueryKey, system.id])).toEqual([role, otherRole]);
+
+    fixture.componentInstance.handleDeleteRol(role);
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(removeRole).toHaveBeenCalledWith(role.id);
+      expect(client.getQueryData([...rolesQueryKey, system.id])).toEqual([otherRole]);
+    });
+    expect(client.getQueryData([...rolesQueryKey, otherSystemRole.systemId])).toEqual([
+      otherSystemRole,
+    ]);
+    fixture.destroy();
+  });
+
+  it('conserva el caché si falla la eliminación', async () => {
+    const system = {
+      id: 'system-1', code: 'VENTAS', name: 'Ventas', description: '', active: true, order: 1,
+    };
+    const role = {
+      id: 'role-1', systemId: system.id, code: 'ADMIN', name: 'Administrador',
+      description: '', permissions: [],
+    };
+    const params = new BehaviorSubject(convertToParamMap({ system: system.code }));
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    client.setQueryData([...findSystemsQueryKey], [system]);
+    client.setQueryData([...rolesQueryKey, system.id], [role]);
+    TestBed.configureTestingModule({
+      providers: [
+        provideTanStackQuery(client),
+        {
+          provide: ActivatedRoute,
+          useValue: { queryParamMap: params, snapshot: { queryParamMap: params.value } },
+        },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: Dialog, useValue: {} },
+        { provide: ConfirmDialogService, useValue: { confirm: () => of(true) } },
+        { provide: SystemApi, useValue: { findAllSystems: vi.fn() } },
+        { provide: RolesApi, useValue: { findAll: vi.fn(), delete: vi.fn().mockRejectedValue(new Error('Error')) } },
+        { provide: PermisosApi, useValue: { findPermisos: vi.fn() } },
+      ],
+    });
+    const fixture = TestBed.createComponent(SystemRolesPage);
+    fixture.detectChanges();
+    fixture.componentInstance.handleDeleteRol(role);
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(fixture.componentInstance.mutationDeleteRole.isError()).toBe(true);
+    });
+    expect(client.getQueryData([...rolesQueryKey, system.id])).toEqual([role]);
+    fixture.destroy();
+  });
 
   it('mantiene los permisos seleccionados en el padre al cambiar los checkboxes', async () => {
     const system = {

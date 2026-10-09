@@ -106,7 +106,7 @@ export default class SystemRolesPage {
   // LOGICA RELACIONA A LOS * ROLES *
 
   readonly rolesQuery = findRolesQuery(() => this.selectedSystem()?.id);
-  readonly mutationDeleteRole = handleRoles().mutationDeletePermission;
+  readonly mutationDeleteRole = handleRoles().mutationDeleteRole;
 
   openCreateRoleDialog(system: System) {
     const id = `create-role-${system.id}`;
@@ -135,20 +135,25 @@ export default class SystemRolesPage {
     const id = `update-role-${system.id}`;
   }
 
-  handleDeleteRol(data: Role) {
+  handleDeleteRol(role: Role) {
     this.confirmation
       .confirm({
         title: '¿Eliminar este rol?',
-        message: 'Esta acción no se puede deshacer.',
+        message: `Se eliminará el rol «${role.name}». Esta acción no se puede deshacer.`,
         confirmText: 'Eliminar rol',
         tone: 'danger',
       })
       .subscribe((confirmed) => {
-        if (!confirmed) return;
-        this.mutationDeleteRole.mutate(data.id, {
+        if (!confirmed || this.mutationDeleteRole.isPending()) return;
+        this.mutationDeleteRole.mutate(role.id, {
           onSuccess: () => {
-            this.toastService.success('Rol elminado correctamente');
+            this.queryClient.setQueryData<Role[]>([...rolesQueryKey, role.systemId], (roles) =>
+              roles?.filter((item) => item.id !== role.id),
+            );
+            if (this.selectedRol()?.id === role.id) this.clearSelectedRole();
+            this.toastService.success('Rol eliminado correctamente');
           },
+          onError: () => this.toastService.error('No se pudo eliminar el rol'),
         });
       });
   }

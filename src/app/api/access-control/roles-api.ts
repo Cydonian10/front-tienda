@@ -2,7 +2,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ENVIRONMENT } from '../config/env-dev';
-import { CreateRolDto, FilterRolesDto, Role } from '../interfaces/access-control/role.interface';
+import {
+  CreateRolDto,
+  FilterRolesDto,
+  Role,
+  UpdateRolDto,
+} from '../interfaces/access-control/role.interface';
 
 @Service()
 export class RolesApi {
@@ -21,6 +26,16 @@ export class RolesApi {
   create({ systemId, name, description }: CreateRolDto) {
     return firstValueFrom(
       this.http.post<Role>(`${this.baseUrl}/systems/${systemId}/roles`, {
+        name,
+        description,
+      }),
+    );
+  }
+
+  upate(dto: UpdateRolDto) {
+    const { description, name, rolId } = dto;
+    return firstValueFrom(
+      this.http.patch<Role>(`${this.baseUrl}/roles/${dto.rolId}`, {
         name,
         description,
       }),

@@ -23,6 +23,7 @@ import { PermissionActionsPage } from './components/permission-action/permission
 import { ToastService } from '../../../shared/services/toast/toast.service';
 import { PendingPermissionsGuard } from './guards/pending-permission/pending-permissions.guard';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
+import { UpdateRoleDialog } from './components/update-role-dialog/update-role.dialog';
 
 @Component({
   imports: [
@@ -131,8 +132,26 @@ export default class SystemRolesPage {
       });
   }
 
-  openUpdateRolesDialog(system: System) {
-    const id = `update-role-${system.id}`;
+  openUpdateRolesDialog(role: Role) {
+    const id = `update-role-${role.id}`;
+
+    this.dialog
+      .open<Role, Role, UpdateRoleDialog>(UpdateRoleDialog, {
+        id,
+        data: role,
+        width: '32rem',
+        maxWidth: 'calc(100vw - 2rem)',
+        ariaModal: true,
+        ariaLabelledBy: `${id}-title`,
+        autoFocus: '[data-dialog-cancel]',
+        restoreFocus: true,
+        closeOnNavigation: true,
+      })
+      .closed.subscribe((role) => {
+        if (role) {
+          console.log(role);
+        }
+      });
   }
 
   handleDeleteRol(role: Role) {

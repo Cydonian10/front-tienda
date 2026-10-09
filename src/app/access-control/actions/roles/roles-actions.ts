@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { injectMutation, injectQuery } from '@tanstack/angular-query-experimental';
 import { RolesApi } from '../../../api/access-control/roles-api';
+import { UpdateRolDto } from '../../../api/interfaces/access-control/role.interface';
 
 export const rolesQueryKey = ['Roles'] as const;
 
@@ -31,8 +32,13 @@ export function handleRoles() {
     mutationFn: (rolId: string) => api.delete(rolId),
   }));
 
+  const mutationUpdate = injectMutation(() => ({
+    mutationFn: (dto: UpdateRolDto) => api.upate(dto),
+  }));
+
   return {
     mutationReplacePermission,
     mutationDeleteRole,
+    mutationUpdate,
   };
 }

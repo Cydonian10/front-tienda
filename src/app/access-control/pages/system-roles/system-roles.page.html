@@ -29,6 +29,7 @@
         (createRole)="openCreateRoleDialog(system)"
         (roleSelected)="setSelectedRol($event)"
         (deleteRole)="handleDeleteRol($event)"
+        (editRole)="openUpdateRolesDialog($event)"
       />
     } @else {
       <app-empty-state

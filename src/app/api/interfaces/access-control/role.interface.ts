@@ -25,3 +25,9 @@ export interface CreateRolDto {
   name: string;
   description: string;
 }
+
+export interface UpdateRolDto {
+  rolId: string;
+  name: string;
+  description: string;
+}

@@ -147,10 +147,12 @@ export default class SystemRolesPage {
         restoreFocus: true,
         closeOnNavigation: true,
       })
-      .closed.subscribe((role) => {
-        if (role) {
-          console.log(role);
-        }
+      .closed.subscribe((updatedRole) => {
+        if (!updatedRole) return;
+
+        this.queryClient.setQueryData<Role[]>([...rolesQueryKey, updatedRole.systemId], (roles) =>
+          roles?.map((role) => (role.id === updatedRole.id ? updatedRole : role)),
+        );
       });
   }
 

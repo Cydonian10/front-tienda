@@ -153,6 +153,9 @@ export default class SystemRolesPage {
         this.queryClient.setQueryData<Role[]>([...rolesQueryKey, updatedRole.systemId], (roles) =>
           roles?.map((role) => (role.id === updatedRole.id ? updatedRole : role)),
         );
+        this.toastService.success('Rol actulizado correctamente', {
+          duration: 1000,
+        });
       });
   }
 

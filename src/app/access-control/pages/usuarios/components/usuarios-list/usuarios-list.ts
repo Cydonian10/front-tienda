@@ -15,10 +15,12 @@ import { Usuario } from '../../../../../api/interfaces/access-control/usuario.in
 export class UsuariosList {
   readonly users = input.required<Usuario[]>();
   readonly filteredUsers = input.required<Usuario[]>();
+  readonly selectedId = input<string | null>(null);
   readonly search = input('');
   readonly status = input('all');
   readonly searchChange = output<string>();
   readonly statusChange = output<string>();
+  readonly selectUser = output<string>();
   protected readonly fullName = (user: Usuario) =>
     `${user.person.firstName} ${user.person.lastName}`;
   protected readonly initials = (user: Usuario) =>

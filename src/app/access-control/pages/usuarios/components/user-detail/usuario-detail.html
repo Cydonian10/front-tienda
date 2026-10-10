@@ -18,24 +18,23 @@
       [class.badge-error]="!user().active"
       >{{ user().active ? 'Activo' : 'Inactivo' }}</span
     >
-    <button type="button" class="btn btn-sm" (click)="edit.emit()">Editar</button>
   </header>
 
   <dl class="grid gap-4 border-b border-base-300 p-4 text-sm sm:grid-cols-2 sm:p-6 xl:grid-cols-4">
     <div>
-      <dt class="text-xs text-base-content/60">NOMBRE COMPLETO</dt>
-      <dd class="mt-1 font-semibold">{{ fullName(user()) }}</dd>
+      <dt class="text-xs text-base-content/70">USUARIO</dt>
+      <dd class="mt-1 font-semibold wrap-break-word">{{ user().nickName }}</dd>
     </div>
     <div>
-      <dt class="text-xs text-base-content/60">DOCUMENTO</dt>
+      <dt class="text-xs text-base-content/70">DOCUMENTO</dt>
       <dd class="mt-1 font-semibold tabular-nums">{{ user().person.identityDocument }}</dd>
     </div>
     <div>
-      <dt class="text-xs text-base-content/60">NACIMIENTO</dt>
+      <dt class="text-xs text-base-content/70">NACIMIENTO</dt>
       <dd class="mt-1 font-semibold tabular-nums">{{ user().person.dateOfBirth }}</dd>
     </div>
     <div>
-      <dt class="text-xs text-base-content/60">CORREO</dt>
+      <dt class="text-xs text-base-content/70">CORREO</dt>
       <dd class="mt-1 font-semibold">
         {{ user().emailVerified ? 'Verificado' : 'Pendiente' }}
       </dd>
@@ -43,94 +42,34 @@
   </dl>
 
   <div class="p-4 sm:p-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h3 class="font-semibold">
-          Roles asignados
-          <span class="badge badge-ghost badge-sm ml-1 tabular-nums">{{
-            user().roles.length
-          }}</span>
-        </h3>
-        <p class="mt-1 text-sm text-base-content/70">
-          Define el acceso de {{ user().person.firstName }} en cada sistema.
-        </p>
-      </div>
-      <button type="button" class="btn btn-primary btn-sm" (click)="assign.emit()">
-        <app-icon name="plus" [size]="17" /> Asignar rol
-      </button>
-    </div>
-
-    <label class="mt-5 flex items-center gap-3 text-sm">
-      <span>Sistema</span>
-      <select
-        class="select max-w-55"
-        aria-label="Filtrar roles por sistema"
-        [ngModel]="systemFilter()"
-        (ngModelChange)="systemFilter.set($event)"
-      >
-        <option value="all">Todos los sistemas</option>
-        @for (system of systems(); track system.id) {
-          <option [value]="system.id">{{ system.name }}</option>
-        }
-      </select>
-    </label>
-
+    <h3 class="font-semibold">
+      Roles asignados
+      <span class="badge badge-ghost badge-sm ml-1 tabular-nums">{{ user().roles.length }}</span>
+    </h3>
     <ul class="mt-5 space-y-2">
-      @for (item of visibleAssignments(); track item.assignment.id) {
-        <li
-          class="flex items-start gap-3 rounded-box border border-base-300 bg-base-200/40 p-3 sm:p-4"
-        >
+      @for (role of user().roles; track role.id) {
+        <li class="flex items-start gap-3 rounded-box border border-base-300 bg-base-200/40 p-3 sm:p-4">
           <span
             class="grid size-10 shrink-0 place-items-center rounded-field border border-base-300 text-base-content/70"
             aria-hidden="true"
             ><app-icon name="shield-check" [size]="19"
           /></span>
           <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-2">
-              <strong class="text-sm">{{ item.role.name }}</strong
-              ><span
-                class="badge badge-soft badge-sm"
-                [class.badge-success]="state(item.assignment) === 'Vigente'"
-                [class.badge-warning]="state(item.assignment) === 'Pendiente'"
-                >{{ state(item.assignment) }}</span
-              >
-            </div>
-            <p class="mt-1 wrap-break-word text-xs text-base-content/70">
-              {{ item.system.name }} · {{ item.role.code }}
-            </p>
-            <p class="mt-2 text-xs text-base-content/60 tabular-nums">
-              Desde {{ item.assignment.validFrom }} ·
-              {{
-                item.assignment.validUntil
-                  ? 'Hasta ' + item.assignment.validUntil
-                  : 'Sin fecha de fin'
-              }}
-            </p>
+            <strong class="text-sm wrap-break-word">{{ role.name }}</strong>
+            @if (role.inicio || role.fin) {
+              <p class="mt-2 text-xs text-base-content/70 tabular-nums">
+                @if (role.inicio) { Desde {{ role.inicio }} }
+                @if (role.inicio && role.fin) { · }
+                @if (role.fin) { Hasta {{ role.fin }} }
+              </p>
+            }
           </div>
-          <button
-            type="button"
-            class="btn btn-ghost btn-square btn-sm shrink-0"
-            [attr.aria-label]="'Quitar rol ' + item.role.name"
-            (click)="remove.emit(item.assignment.id)"
-          >
-            <app-icon name="close" [size]="16" />
-          </button>
         </li>
       } @empty {
-        <li
-          class="rounded-box border border-dashed border-base-300 p-6 text-center text-sm text-base-content/70"
-        >
-          {{
-            user().roles.length
-              ? 'No hay roles en este sistema.'
-              : 'Este usuario aún no tiene roles asignados.'
-          }}
+        <li class="rounded-box border border-dashed border-base-300 p-6 text-center text-sm text-base-content/70">
+          Este usuario aún no tiene roles asignados.
         </li>
       }
     </ul>
   </div>
-  <p class="border-t border-base-300 px-4 py-4 text-xs text-base-content/70 sm:px-6">
-    <app-icon name="info" [size]="15" class="mr-1 inline-block align-middle" /> Datos de ejemplo.
-    Los cambios se reinician al recargar la página.
-  </p>
 </section>

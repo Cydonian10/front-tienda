@@ -29,7 +29,16 @@
 </div>
 <div class="max-h-150 space-y-1 overflow-y-auto p-2">
   @for (user of filteredUsers(); track user.id) {
-    <div class="flex min-h-20 w-full items-center gap-3 rounded-field px-3 py-2">
+    <button
+      type="button"
+      class="flex min-h-20 w-full items-center gap-3 rounded-field px-3 py-2 text-left transition-colors hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      [class.bg-primary/10]="selectedId() === user.id"
+      [class.ring-1]="selectedId() === user.id"
+      [class.ring-primary/30]="selectedId() === user.id"
+      [attr.aria-pressed]="selectedId() === user.id"
+      [attr.aria-label]="'Ver detalle de ' + fullName(user)"
+      (click)="selectUser.emit(user.id)"
+    >
       <span
         class="grid size-10 shrink-0 place-items-center rounded-field bg-primary/15 text-xs font-bold text-primary"
         aria-hidden="true"
@@ -51,7 +60,8 @@
           </span>
         </span>
       </span>
-    </div>
+      <app-icon name="chevron-right" [size]="16" class="shrink-0 text-base-content/50" />
+    </button>
   } @empty {
     <p class="px-4 py-10 text-center text-sm text-base-content/70">
       No hay usuarios con estos filtros.

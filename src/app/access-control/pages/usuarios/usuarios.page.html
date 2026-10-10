@@ -18,14 +18,29 @@
     <button class="btn btn-sm" type="button" (click)="findUserQuery.refetch()">Reintentar</button>
   </div>
 } @else {
-  <div class="max-w-2xl">
+  <div class="grid items-start gap-5 lg:grid-cols-[minmax(17rem,24rem)_minmax(0,1fr)]">
     <app-usuarios-list
       [users]="findUserQuery.data() ?? []"
       [filteredUsers]="filteredUsers()"
+      [selectedId]="selectedId()"
       [search]="search()"
       [status]="status()"
       (searchChange)="search.set($event)"
       (statusChange)="status.set($event)"
+      (selectUser)="selectUser($event)"
     />
+    @if (selectedUser(); as user) {
+      <app-usuario-detail [user]="user" />
+    } @else {
+      <section
+        class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center text-sm text-base-content/70"
+      >
+        @if (selectedId()) {
+          El usuario indicado en la URL no está disponible. Selecciona otro de la lista.
+        } @else {
+          Selecciona un usuario para ver sus datos y roles.
+        }
+      </section>
+    }
   </div>
 }

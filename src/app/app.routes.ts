@@ -4,13 +4,12 @@ import { authGuard } from './auth/guards/auth.guard';
 export const routes: Routes = [
   {
     path: 'auth',
-    loadChildren: () => import('./auth/auth.routes').then((module) => module.authRoutes),
+    loadChildren: () => import('./auth/auth.routes'),
   },
   {
     path: 'admin',
-    canActivate: [authGuard],
-    loadChildren: () =>
-      import('./access-control/access-control.routes').then((module) => module.accessControlRoutes),
+    canActivateChild: [authGuard],
+    loadChildren: () => import('./access-control/access-control.routes'),
   },
   {
     path: '',

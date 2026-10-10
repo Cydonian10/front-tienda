@@ -1,10 +1,10 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateChildFn, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthSessionService } from '../services/auth-session.service';
 import { AuthProfileService } from '../services/auth-profile.service';
 
-export const authGuard: CanActivateFn = async (_, state) => {
+export const authGuard: CanActivateChildFn = async (_, state) => {
   const session = inject(AuthSessionService);
   const profile = inject(AuthProfileService);
   const router = inject(Router);
@@ -17,7 +17,7 @@ export const authGuard: CanActivateFn = async (_, state) => {
   }
 
   try {
-    await profile.load();
+    await profile.load(true);
     return true;
   } catch (error) {
     profile.clear();

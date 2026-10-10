@@ -41,7 +41,7 @@ describe('authGuard', () => {
     expect(
       await TestBed.runInInjectionContext(() => authGuard({} as never, { url: '/admin' } as never)),
     ).toBe(true);
-    expect(TestBed.inject(AuthProfileService).load).toHaveBeenCalledOnce();
+    expect(TestBed.inject(AuthProfileService).load).toHaveBeenCalledExactlyOnceWith(true);
   });
 
   it('clears a rejected session and redirects when the profile returns 401', async () => {

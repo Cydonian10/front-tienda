@@ -50,6 +50,21 @@ describe('AuthProfileService', () => {
     controller.expectNone('http://localhost:3000/api/auth/profile');
   });
 
+  it('checks the server again on guarded navigation even with a cached profile', async () => {
+    const session = TestBed.inject(AuthSessionService);
+    session.set({ accessToken: 'revoked', tokenType: 'Bearer', expiresIn: 60 });
+    const profile = TestBed.inject(AuthProfileService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    const first = profile.load(true);
+    controller.expectOne('http://localhost:3000/api/auth/profile').flush(perfil);
+    await first;
+
+    const second = profile.load(true);
+    controller.expectOne('http://localhost:3000/api/auth/profile').flush('', { status: 401, statusText: 'Unauthorized' });
+    await expect(second).rejects.toMatchObject({ status: 401 });
+  });
+
   it('clears the profile and cached query without leaving a stale identity', async () => {
     TestBed.inject(AuthSessionService).set({
       accessToken: 'secret',

@@ -5,6 +5,12 @@ export interface Usuario {
   emailVerified: boolean;
   active: boolean;
   person: Person;
+  roles: {
+    id: string;
+    name: string;
+    inicio: string | null;
+    fin: string | null;
+  }[];
 }
 
 export interface Person {

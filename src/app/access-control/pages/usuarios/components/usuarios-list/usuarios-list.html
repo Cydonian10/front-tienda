@@ -35,10 +35,21 @@
         aria-hidden="true"
         >{{ initials(user) }}</span
       >
-      <span class="min-w-0 flex-1">
-        <strong class="block truncate text-sm">{{ fullName(user) }}</strong>
-        <span class="block truncate text-xs text-base-content/70">{{ user.email }}</span>
-        <span class="mt-1 block text-xs text-base-content/70">{{ user.active ? 'Activo' : 'Inactivo' }}</span>
+      <span class="flex min-w-0 flex-1 flex-col gap-1">
+        <strong class="truncate text-sm font-semibold leading-tight">{{ fullName(user) }}</strong>
+        <span class="truncate text-xs leading-tight text-base-content/70">{{ user.email }}</span>
+        <span class="mt-1 flex flex-wrap items-center gap-2">
+          <span
+            class="badge badge-xs"
+            [class.badge-success]="user.active"
+            [class.badge-error]="!user.active"
+          >
+            {{ user.active ? 'Activo' : 'Inactivo' }}
+          </span>
+          <span class="text-xs text-base-content/60">
+            {{ user.roles.length }} {{ user.roles.length === 1 ? 'rol' : 'roles' }}
+          </span>
+        </span>
       </span>
     </div>
   } @empty {

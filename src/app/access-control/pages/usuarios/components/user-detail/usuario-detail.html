@@ -18,6 +18,7 @@
       [class.badge-error]="!user().active"
       >{{ user().active ? 'Activo' : 'Inactivo' }}</span
     >
+    <button type="button" class="btn btn-sm" (click)="edit.emit()">Editar</button>
   </header>
 
   <dl class="grid gap-4 border-b border-base-300 p-4 text-sm sm:grid-cols-2 sm:p-6 xl:grid-cols-4">

@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { Usuario } from '../../../../../api/interfaces/access-control/usuario.interface';
 import { Icon } from '../../../../../shared/components/icon/icon';
 
@@ -10,6 +10,7 @@ import { Icon } from '../../../../../shared/components/icon/icon';
 })
 export class UsuarioDetail {
   readonly user = input.required<Usuario>();
+  readonly edit = output<void>();
 
   protected readonly fullName = (user: Usuario) =>
     `${user.person.firstName} ${user.person.lastName}`;

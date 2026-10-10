@@ -1,4 +1,4 @@
-import { DialogRef } from '@angular/cdk/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { TestBed } from '@angular/core/testing';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { UsuariosApi } from '../../../../../api/access-control/usuarios-api';
@@ -58,6 +58,60 @@ describe('UsuarioFormDialog', () => {
     });
     expect(client.getQueryData([...useUsuariosQueryKey])).toEqual([user]);
     expect(findUsuarios).not.toHaveBeenCalled();
+    fixture.destroy();
+  });
+
+  it('edita el usuario sin enviar contraseña vacía y conserva sus roles en el caché', async () => {
+    const user: Usuario = {
+      id: 'user-1', email: 'ana@example.com', nickName: 'ana', emailVerified: true,
+      active: true, person: {
+        id: 'person-1', firstName: 'Ana', lastName: 'Rojas', identityDocument: '12345678',
+        dateOfBirth: '1990-01-31', active: true,
+      }, roles: [{ id: 'role-1', name: 'Administrador', inicio: null, fin: null }],
+    };
+    const updated = {
+      ...user,
+      person: { ...user.person, firstName: 'Anita' },
+      roles: [], // El PATCH de la API no carga las relaciones de roles.
+    };
+    const update = vi.fn().mockResolvedValue(updated);
+    const close = vi.fn();
+    const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    client.setQueryData([...useUsuariosQueryKey], [user]);
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideTanStackQuery(client),
+        { provide: UsuariosApi, useValue: { update, findUsuarios: vi.fn() } },
+        { provide: DialogRef, useValue: { id: 'edit-user-user-1', close, disableClose: false } },
+        { provide: DIALOG_DATA, useValue: user },
+      ],
+    });
+    const fixture = TestBed.createComponent(UsuarioFormDialog);
+    fixture.detectChanges();
+    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+    const name = form.querySelector<HTMLInputElement>('[autocomplete="given-name"]')!;
+    expect(name.value).toBe('Ana');
+    name.value = 'Anita';
+    name.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    await vi.waitFor(() => {
+      expect(update).toHaveBeenCalledWith(
+        {
+          nickName: 'ana', email: 'ana@example.com',
+          person: {
+            firstName: 'Anita', lastName: 'Rojas',
+            identityDocument: '12345678', dateOfBirth: '1990-01-31',
+          },
+        },
+        'user-1',
+      );
+      expect(close).toHaveBeenCalledWith('user-1');
+    });
+    expect(client.getQueryData<Usuario[]>([...useUsuariosQueryKey]))
+      .toEqual([{ ...updated, roles: user.roles }]);
     fixture.destroy();
   });
 });

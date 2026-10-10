@@ -1,4 +1,4 @@
-<app-dialog-shell title="Nuevo usuario" [titleId]="titleId">
+<app-dialog-shell [title]="user ? 'Editar usuario' : 'Nuevo usuario'" [titleId]="titleId">
   <form [id]="formId" (submit)="$event.preventDefault(); save()" class="space-y-4" novalidate>
     <div class="grid gap-4 sm:grid-cols-2">
       <label class="block space-y-2 text-sm font-semibold">
@@ -51,25 +51,33 @@
       <app-field-errors [field]="userForm.nickName()" errorId="nickname-errors" />
     </label>
     <label class="block space-y-2 text-sm font-semibold">
-      Contraseña
+      {{ user ? 'Nueva contraseña (opcional)' : 'Contraseña' }}
       <input class="input w-full" type="password" autocomplete="new-password"
         [formField]="userForm.password"
         [class.input-error]="userForm.password().touched() && userForm.password().invalid()"
         [attr.aria-describedby]="userForm.password().touched() && userForm.password().invalid() ? 'password-errors' : null" />
       <app-field-errors [field]="userForm.password()" errorId="password-errors" />
+      @if (user) {
+        <span class="block text-xs font-normal text-base-content/70">Déjala vacía para conservar la contraseña actual.</span>
+      }
     </label>
     @if (addUsuarioMutation.isError()) {
       <div class="alert alert-error alert-soft" role="alert">
         No se pudo crear el usuario. Revisa los datos e inténtalo de nuevo.
       </div>
     }
+    @if (updateUsuarioMutation.isError()) {
+      <div class="alert alert-error alert-soft" role="alert">
+        No se pudieron guardar los cambios. Revisa los datos e inténtalo de nuevo.
+      </div>
+    }
   </form>
   <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
     <button type="button" class="btn" data-dialog-cancel
-      [disabled]="addUsuarioMutation.isPending()" (click)="dialogRef.close()">Cancelar</button>
+      [disabled]="addUsuarioMutation.isPending() || updateUsuarioMutation.isPending()" (click)="dialogRef.close()">Cancelar</button>
     <button type="submit" class="btn btn-primary" [attr.form]="formId"
-      [disabled]="addUsuarioMutation.isPending()">
-      {{ addUsuarioMutation.isPending() ? 'Creando…' : 'Crear usuario' }}
+      [disabled]="addUsuarioMutation.isPending() || updateUsuarioMutation.isPending()">
+      {{ user ? (updateUsuarioMutation.isPending() ? 'Guardando…' : 'Guardar cambios') : (addUsuarioMutation.isPending() ? 'Creando…' : 'Crear usuario') }}
     </button>
   </div>
 </app-dialog-shell>

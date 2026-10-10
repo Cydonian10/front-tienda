@@ -7,6 +7,7 @@ import { UsuariosList } from './components/usuarios-list/usuarios-list';
 import { UsuarioDetail } from './components/user-detail/usuario-detail';
 import { UsuarioFormDialog } from './components/usuario-form-dialog/usuario-form-dialog';
 import { useUsuariosApi } from '../../actions/usuarios/use-usuarios-api';
+import { Usuario } from '../../../api/interfaces/access-control/usuario.interface';
 
 @Component({
   imports: [Icon, UsuariosList, UsuarioDetail],
@@ -54,6 +55,21 @@ export default class UsuariosPage {
         this.status.set('all');
         this.selectUser(id);
       });
+  }
+
+  protected openEditUser(user: Usuario): void {
+    const id = `edit-user-${user.id}`;
+    this.dialog.open<string, Usuario, UsuarioFormDialog>(UsuarioFormDialog, {
+      id,
+      data: user,
+      width: '36rem',
+      maxWidth: 'calc(100vw - 2rem)',
+      ariaModal: true,
+      ariaLabelledBy: `${id}-title`,
+      autoFocus: '[data-dialog-cancel]',
+      restoreFocus: true,
+      closeOnNavigation: true,
+    });
   }
 
   protected readonly search = signal('');

@@ -33,3 +33,7 @@ export interface CreateUserDto {
     dateOfBirth: string; // Formato YYYY-MM-DD
   };
 }
+
+export type UpdateUserDto = Partial<Omit<CreateUserDto, 'person'>> & {
+  person?: Partial<CreateUserDto['person']>;
+};

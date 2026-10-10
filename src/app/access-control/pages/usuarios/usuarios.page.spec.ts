@@ -66,6 +66,10 @@ describe('UsuariosPage', () => {
 
     (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
     expect(open).toHaveBeenCalled();
+    (fixture.nativeElement.querySelector('app-usuario-detail button') as HTMLButtonElement).click();
+    expect(open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      id: 'edit-user-user-1', data: users[0],
+    }));
     fixture.destroy();
   });
 });

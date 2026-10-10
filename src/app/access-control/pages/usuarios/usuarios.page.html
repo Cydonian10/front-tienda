@@ -35,7 +35,7 @@
       (selectUser)="selectUser($event)"
     />
     @if (selectedUser(); as user) {
-      <app-usuario-detail [user]="user" />
+      <app-usuario-detail [user]="user" (edit)="openEditUser(user)" />
     } @else {
       <section
         class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center text-sm text-base-content/70"

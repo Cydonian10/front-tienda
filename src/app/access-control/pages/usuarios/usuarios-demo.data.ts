@@ -1,4 +1,7 @@
 // Datos locales basados en UserResponseDto, PersonResponseDto y UserRoleResponseDto de api-tienda.
+
+import { Usuario } from '../../../api/interfaces/access-control/usuario.interface';
+
 // La API de listado de usuarios no devuelve roles; esta vista los relaciona solo para la demo.
 export interface DemoUser {
   id: string;
@@ -171,8 +174,8 @@ export const DEMO_USERS: DemoUser[] = [
   },
 ];
 
-export const demoFullName = (user: DemoUser) => `${user.person.firstName} ${user.person.lastName}`;
-export const demoInitials = (user: DemoUser) =>
+export const demoFullName = (user: Usuario) => `${user.person.firstName} ${user.person.lastName}`;
+export const demoInitials = (user: Usuario) =>
   `${user.person.firstName.charAt(0)}${user.person.lastName.charAt(0)}`.toLocaleUpperCase('es');
 
 export const demoToday = () => {

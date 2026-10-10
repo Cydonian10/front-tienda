@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { Usuario } from '../../../../../api/interfaces/access-control/usuario.interface';
+import { Usuario, UsuarioRole } from '../../../../../api/interfaces/access-control/usuario.interface';
 import { Icon } from '../../../../../shared/components/icon/icon';
 
 @Component({
@@ -13,6 +13,8 @@ export class UsuarioDetail {
   readonly edit = output<void>();
   readonly assignRole = output<void>();
   readonly assignRoleDisabled = input(false);
+  readonly removeRole = output<UsuarioRole>();
+  readonly removeRolePending = input(false);
 
   protected readonly fullName = (user: Usuario) =>
     `${user.person.firstName} ${user.person.lastName}`;

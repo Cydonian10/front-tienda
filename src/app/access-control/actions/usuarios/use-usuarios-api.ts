@@ -74,5 +74,19 @@ export function useUsuariosApi() {
     },
   }));
 
-  return { findUsuariosQuery, createMutation, updateMutation, addRolesMutation };
+  const removeRolesMutation = injectMutation(() => ({
+    mutationFn: ({ userId, assignadoId }: { userId: string; assignadoId: string }) =>
+      usuariosApi.removeRoles(userId, assignadoId),
+    onSuccess: (_, { userId, assignadoId }) => {
+      queryClient.setQueryData<Usuario[]>([...useUsuariosQueryKey], (users) =>
+        users?.map((user) =>
+          user.id === userId
+            ? { ...user, roles: user.roles.filter((role) => role.id !== assignadoId) }
+            : user,
+        ),
+      );
+    },
+  }));
+
+  return { findUsuariosQuery, createMutation, updateMutation, addRolesMutation, removeRolesMutation };
 }

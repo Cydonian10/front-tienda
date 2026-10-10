@@ -8,8 +8,10 @@ import { UsuarioDetail } from './components/user-detail/usuario-detail';
 import { UsuarioFormDialog } from './components/usuario-form-dialog/usuario-form-dialog';
 import { AsignarRolDialog, AssignRoleData } from './components/asignar-rol-dialog/asignar-rol-dialog';
 import { useUsuariosApi } from '../../actions/usuarios/use-usuarios-api';
-import { Usuario } from '../../../api/interfaces/access-control/usuario.interface';
+import { Usuario, UsuarioRole } from '../../../api/interfaces/access-control/usuario.interface';
 import { useSystemsQuery } from '../../../system-portal/actions/find-systems-action';
+import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
+import { ToastService } from '../../../shared/services/toast/toast.service';
 
 @Component({
   imports: [Icon, UsuariosList, UsuarioDetail],
@@ -21,8 +23,11 @@ export default class UsuariosPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
+  private readonly confirmation = inject(ConfirmDialogService);
+  private readonly toast = inject(ToastService);
   private readonly usuariosApi = useUsuariosApi();
   readonly findUserQuery = this.usuariosApi.findUsuariosQuery;
+  readonly removeRolesMutation = this.usuariosApi.removeRolesMutation;
   readonly systemsQuery = useSystemsQuery();
 
   private readonly queryParams = toSignal(this.route.queryParamMap, {
@@ -92,6 +97,28 @@ export default class UsuariosPage {
       restoreFocus: true,
       closeOnNavigation: true,
     });
+  }
+
+  protected removeRole(user: Usuario, role: UsuarioRole): void {
+    if (this.removeRolesMutation.isPending()) return;
+
+    this.confirmation
+      .confirm({
+        title: '¿Quitar este rol?',
+        message: `Se quitará el rol «${role.name}» de ${user.person.firstName} ${user.person.lastName}.`,
+        confirmText: 'Quitar rol',
+        tone: 'danger',
+      })
+      .subscribe((confirmed) => {
+        if (!confirmed || this.removeRolesMutation.isPending()) return;
+        this.removeRolesMutation.mutate(
+          { userId: user.id, assignadoId: role.id },
+          {
+            onSuccess: () => this.toast.success('Rol quitado correctamente'),
+            onError: () => this.toast.error('No se pudo quitar el rol. Inténtalo de nuevo.'),
+          },
+        );
+      });
   }
 
   protected readonly assignRoleDisabled = computed(

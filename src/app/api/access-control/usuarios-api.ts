@@ -32,4 +32,10 @@ export class UsuariosApi {
       this.#http.post<UserRoleAssignment>(`${this.ENV.apiUrl}/users/${userId}/roles`, dto),
     );
   }
+
+  removeRoles(userId: string, assignadoId: string) {
+    return firstValueFrom(
+      this.#http.delete<void>(`${this.ENV.apiUrl}/users/${userId}/roles/${assignadoId}`),
+    );
+  }
 }

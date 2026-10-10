@@ -73,6 +73,15 @@
               </p>
             }
           </div>
+          <button
+            type="button"
+            class="btn btn-ghost btn-sm shrink-0 text-error"
+            [disabled]="removeRolePending()"
+            [attr.aria-label]="'Quitar rol ' + role.name"
+            (click)="removeRole.emit(role)"
+          >
+            Quitar
+          </button>
         </li>
       } @empty {
         <li class="rounded-box border border-dashed border-base-300 p-6 text-center text-sm text-base-content/70">

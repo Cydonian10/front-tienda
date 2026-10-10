@@ -49,7 +49,9 @@
       <app-usuario-detail
         [user]="user"
         [assignRoleDisabled]="assignRoleDisabled()"
+        [removeRolePending]="removeRolesMutation.isPending()"
         (assignRole)="openAssignRole(user)"
+        (removeRole)="removeRole(user, $event)"
         (edit)="openEditUser(user)"
       />
     } @else {

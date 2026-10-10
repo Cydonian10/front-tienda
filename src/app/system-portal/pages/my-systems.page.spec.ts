@@ -4,7 +4,7 @@ import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-exper
 import { SystemApi } from '../../api/access-control/system-api';
 import { AuthLogoutService } from '../../auth/services/auth-logout.service';
 import { findSystemsQueryKey } from '../actions/find-systems-action';
-import SystemPortalPage from './system-portal.page';
+import MySystemsPage from './my-systems.page';
 
 const systems = [
   {
@@ -25,12 +25,12 @@ const systems = [
   },
 ];
 
-describe('SystemPortalPage', () => {
+describe('MySystemsPage', () => {
   afterEach(() => TestBed.resetTestingModule());
 
-  function setup() {
+  function setup(records = systems) {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    client.setQueryData([...findSystemsQueryKey], systems);
+    client.setQueryData([...findSystemsQueryKey], records);
 
     TestBed.configureTestingModule({
       providers: [
@@ -41,7 +41,7 @@ describe('SystemPortalPage', () => {
       ],
     });
 
-    const fixture = TestBed.createComponent(SystemPortalPage);
+    const fixture = TestBed.createComponent(MySystemsPage);
     fixture.detectChanges();
     return { fixture, element: fixture.nativeElement as HTMLElement };
   }
@@ -66,5 +66,12 @@ describe('SystemPortalPage', () => {
 
     expect(element.textContent).toContain('Ventas');
     expect(element.textContent).not.toContain('Control de acceso');
+  });
+
+  it('does not link inactive systems even when their frontend route exists', () => {
+    const { element } = setup([{ ...systems[0], active: false }]);
+
+    expect(element.textContent).toContain('Inactivo');
+    expect(element.querySelector('a[href="/admin/access-control"]')).toBeNull();
   });
 });

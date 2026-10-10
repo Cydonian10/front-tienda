@@ -1,33 +1,9 @@
 <div class="min-h-dvh bg-base-200 text-base-content">
-  <header class="border-b border-base-300 bg-base-100">
-    <div class="navbar mx-auto min-h-18 max-w-7xl gap-3 px-4 sm:px-6 lg:px-8">
-      <a
-        routerLink="/admin"
-        class="flex min-w-0 flex-1 items-center gap-3 rounded-field text-base-content"
-      >
-        <span
-          class="grid size-10 shrink-0 place-items-center rounded-field border border-base-300 bg-base-200 text-primary"
-          aria-hidden="true"
-        >
-          <app-icon name="grid" />
-        </span>
-        <span class="min-w-0">
-          <strong class="block truncate text-sm font-bold tracking-wide">FERRETERÍA</strong>
-          <span class="mt-0.5 block truncate text-xs text-base-content/70"
-            >Centro de operaciones</span
-          >
-        </span>
-      </a>
+  <app-my-systems-header />
 
-      <div class="navbar-end w-auto shrink-0 gap-1 sm:gap-3">
-        <span class="hidden max-w-48 truncate text-sm font-medium sm:block">{{ userName() }}</span>
-        <app-theme-toggle />
-        <button type="button" class="btn btn-ghost min-h-11 px-3 text-sm" (click)="requestLogout()">
-          Salir
-        </button>
-      </div>
-    </div>
-  </header>
+  <a href="#systems-title" class="btn fixed top-3 left-3 z-50 -translate-y-24 focus:translate-y-0"
+    >Saltar a sistemas</a
+  >
 
   <main class="mx-auto max-w-7xl space-y-10 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
     <section
@@ -112,52 +88,7 @@
       } @else {
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           @for (system of filteredSystems(); track system.id) {
-            <article
-              class="card card-border min-w-0 bg-base-100 transition-colors duration-150 hover:border-primary/40"
-            >
-              <div class="card-body gap-5 p-5 sm:p-6">
-                <div class="flex items-start gap-4">
-                  <span
-                    class="grid size-12 shrink-0 place-items-center rounded-box bg-base-200 text-primary"
-                    aria-hidden="true"
-                  >
-                    <app-icon [name]="iconFor(system.code)" [size]="22" />
-                  </span>
-                  <div class="min-w-0 flex-1 pt-1">
-                    <h3 class="card-title text-lg leading-snug">{{ system.name }}</h3>
-                    <p class="mt-2 line-clamp-3 min-h-15 text-sm leading-6 text-base-content/70">
-                      {{ system.description || 'Sistema de trabajo' }}
-                    </p>
-                  </div>
-                </div>
-
-                <footer
-                  class="card-actions mt-auto items-center justify-between border-t border-base-300 pt-4"
-                >
-                  @if (routeFor(system.code); as route) {
-                    @if (system.active) {
-                      <span class="badge badge-success badge-soft">Disponible</span>
-                      <a [routerLink]="route" class="btn btn-ghost btn-sm min-h-11 gap-1">
-                        Ingresar
-                        <app-icon name="chevron-right" [size]="16" />
-                      </a>
-                    } @else {
-                      <span class="badge badge-ghost">Inactivo</span>
-                      <span class="text-sm text-base-content/60">Sin acceso</span>
-                    }
-                  } @else {
-                    <span
-                      class="badge badge-soft"
-                      [class.badge-warning]="system.active"
-                      [class.badge-ghost]="!system.active"
-                    >
-                      {{ statusFor(system) }}
-                    </span>
-                    <span class="text-sm text-base-content/60">En este frontend</span>
-                  }
-                </footer>
-              </div>
-            </article>
+            <app-system-card [system]="system" />
           }
         </div>
       }

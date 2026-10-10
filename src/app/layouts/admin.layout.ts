@@ -1,6 +1,13 @@
 import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { filter } from 'rxjs';
 import { AdminHeader } from './components/admin-header';
 import { AdminFooterPage } from './components/admin-footer';
@@ -10,6 +17,7 @@ import { AuthProfileService } from '../auth/services/auth-profile.service';
 import { QueryClient } from '@tanstack/angular-query-experimental';
 import { ConfirmDialogService } from '../shared/services/confirm-dialog/confirm-dialog.service';
 import { AuthStore } from '../store/auth/auth.store';
+import { SystemMenuGroup } from '../system-portal/models/system-menu.model';
 
 @Component({
   imports: [RouterOutlet, AdminHeader, AdminFooterPage, RouterLink, RouterLinkActive, Icon],
@@ -69,7 +77,7 @@ import { AuthStore } from '../store/auth/auth.store';
         >
           <div class="flex min-h-19 items-center gap-2 border-b border-base-300 px-5">
             <a
-              routerLink="/admin/sistemas-roles"
+              routerLink="/admin"
               class="flex min-w-0 flex-1 items-center gap-3 rounded-field"
               (click)="closeNavigation()"
             >
@@ -193,6 +201,7 @@ import { AuthStore } from '../store/auth/auth.store';
 })
 export class AdminLayout {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly session = inject(AuthSessionService);
   private readonly profile = inject(AuthProfileService);
   private readonly queryClient = inject(QueryClient);
@@ -213,36 +222,8 @@ export class AdminLayout {
 
   readonly navigationOpen = signal(false);
 
-  readonly navigationGroups = [
-    {
-      label: 'Accesos',
-      icon: 'shield',
-      items: [
-        {
-          label: 'Sistemas y roles',
-          url: '/admin/access-control/sistemas-roles',
-          icon: 'shield-check',
-        },
-        {
-          label: 'Usuarios',
-          url: '/admin/access-control/usuarios',
-          icon: 'users',
-        },
-        {
-          label: 'Permisos',
-          url: '/admin/access-control/permisos',
-          icon: 'users',
-        },
-        {
-          label: 'prueba',
-          url: '/admin/access-control/pruebas',
-          icon: 'users',
-        },
-      ],
-    },
-  ] as const;
-
-  private readonly navigationItems = this.navigationGroups.flatMap((group) => group.items);
+  readonly navigationGroups = (this.route.snapshot.data['systemMenu'] ??
+    []) as readonly SystemMenuGroup[];
 
   constructor() {
     this.router.events

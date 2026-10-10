@@ -10,7 +10,7 @@ export const accessControlRoutes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    loadComponent: () => import('../system-portal/pages/system-portal.page'),
+    loadComponent: () => import('../system-portal/pages/my-systems.page'),
     title: 'Mis sistemas',
   },
   {

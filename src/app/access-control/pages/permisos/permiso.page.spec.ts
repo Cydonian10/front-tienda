@@ -4,7 +4,7 @@ import { Permiso } from '../../../api/interfaces/access-control/permision.interf
 import { PermisosApi } from '../../../api/access-control/permisos-api';
 import { SystemApi } from '../../../api/access-control/system-api';
 import { getPermisosQueryKey } from '../../actions/permisos/get-permisos-action';
-import { findSystemsQueryKey } from '../../actions/systems/find-systems-action';
+import { findSystemsQueryKey } from '../../../system-portal/actions/find-systems-action';
 import PermisosPage from './permiso.page';
 
 const permissions: Permiso[] = [

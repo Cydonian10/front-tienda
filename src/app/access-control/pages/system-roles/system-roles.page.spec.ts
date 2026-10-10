@@ -7,7 +7,7 @@ import { PermisosApi } from '../../../api/access-control/permisos-api';
 import { Permiso } from '../../../api/interfaces/access-control/permision.interface';
 import { RolesApi } from '../../../api/access-control/roles-api';
 import { SystemApi } from '../../../api/access-control/system-api';
-import { findSystemsQueryKey } from '../../actions/systems/find-systems-action';
+import { findSystemsQueryKey } from '../../../system-portal/actions/find-systems-action';
 import { rolesQueryKey } from '../../actions/roles/roles-actions';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
 import SystemRolesPage from './system-roles.page';

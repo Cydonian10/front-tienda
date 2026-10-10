@@ -25,10 +25,10 @@ describe('authGuard', () => {
 
   it('redirects unauthenticated users to login with a return URL', async () => {
     const result = await TestBed.runInInjectionContext(() =>
-      authGuard({} as never, { url: '/admin/roles' } as never),
+      authGuard({} as never, { url: '/admin/access-control/sistemas-roles' } as never),
     );
     expect(TestBed.inject(Router).serializeUrl(result as ReturnType<Router['createUrlTree']>)).toBe(
-      '/auth/login?returnUrl=%2Fadmin%2Froles',
+      '/auth/login?returnUrl=%2Fadmin%2Faccess-control%2Fsistemas-roles',
     );
   });
 
@@ -52,11 +52,11 @@ describe('authGuard', () => {
     );
 
     const result = await TestBed.runInInjectionContext(() =>
-      authGuard({} as never, { url: '/admin/roles' } as never),
+      authGuard({} as never, { url: '/admin/access-control/sistemas-roles' } as never),
     );
 
     expect(TestBed.inject(Router).serializeUrl(result as ReturnType<Router['createUrlTree']>)).toBe(
-      '/auth/login?returnUrl=%2Fadmin%2Froles',
+      '/auth/login?returnUrl=%2Fadmin%2Faccess-control%2Fsistemas-roles',
     );
     expect(session.get()).toBeNull();
     expect(TestBed.inject(AuthProfileService).clear).toHaveBeenCalled();

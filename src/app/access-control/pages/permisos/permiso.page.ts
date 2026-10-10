@@ -7,7 +7,7 @@ import {
 } from '../../../shared/components/search-select/search-select';
 import { Icon } from '../../../shared/components/icon/icon';
 import { getPermisosQuery } from '../../actions/permisos/get-permisos-action';
-import { findSystemsQuery } from '../../actions/systems/find-systems-action';
+import { useSystemsQuery } from '../../../system-portal/actions/find-systems-action';
 
 const byLabel = (a: SearchSelectOption, b: SearchSelectOption) =>
   a.label.localeCompare(b.label, 'es');
@@ -19,7 +19,7 @@ const byLabel = (a: SearchSelectOption, b: SearchSelectOption) =>
   host: { class: 'block min-w-0' },
 })
 export default class PermisosPage {
-  readonly systemsQuery = findSystemsQuery();
+  readonly systemsQuery = useSystemsQuery();
 
   readonly systemControl = new FormControl<string | null>({ value: null, disabled: true });
   readonly resourceControl = new FormControl<string | null>({ value: null, disabled: true });

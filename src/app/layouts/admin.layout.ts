@@ -220,22 +220,22 @@ export class AdminLayout {
       items: [
         {
           label: 'Sistemas y roles',
-          url: '/admin/sistemas-roles',
+          url: '/admin/access-control/sistemas-roles',
           icon: 'shield-check',
         },
         {
           label: 'Usuarios',
-          url: '/admin/usuarios',
+          url: '/admin/access-control/usuarios',
           icon: 'users',
         },
         {
           label: 'Permisos',
-          url: '/admin/permisos',
+          url: '/admin/access-control/permisos',
           icon: 'users',
         },
         {
           label: 'prueba',
-          url: '/admin/pruebas',
+          url: '/admin/access-control/pruebas',
           icon: 'users',
         },
       ],

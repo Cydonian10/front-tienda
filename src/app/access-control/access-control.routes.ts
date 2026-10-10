@@ -4,11 +4,20 @@ import {
   confirmChangingSelection,
   confirmLeavingPage,
 } from './pages/system-roles/guards/pending-permission/pending-permissions.guard';
+import { systemMenuResolver } from '../system-portal/services/control-access/system-menu.resolver';
 
 export const accessControlRoutes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('../system-portal/pages/system-portal.page'),
+    title: 'Mis sistemas',
+  },
+  {
+    path: 'access-control',
     component: AdminLayout,
+    data: { systemCode: 'ACCESS_CONTROL' },
+    resolve: { systemMenu: systemMenuResolver },
     children: [
       {
         path: '',

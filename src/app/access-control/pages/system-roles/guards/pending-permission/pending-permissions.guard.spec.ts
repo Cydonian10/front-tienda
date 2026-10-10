@@ -4,7 +4,7 @@ import {
   PendingPermissionsGuard,
   confirmChangingSelection,
   confirmLeavingPage,
-} from './guards/pending-permissions.guard';
+} from './pending-permissions.guard';
 
 describe('PendingPermissionsGuard', () => {
   afterEach(() => {
@@ -19,7 +19,7 @@ describe('PendingPermissionsGuard', () => {
         {
           provide: Router,
           useValue: {
-            url: '/admin/sistemas-roles?step=permisos&roleCode=ADMIN',
+            url: '/admin/access-control/sistemas-roles?step=permisos&roleCode=ADMIN',
             parseUrl: (url: string) => serializer.parse(url),
           },
         },
@@ -37,15 +37,15 @@ describe('PendingPermissionsGuard', () => {
         confirmLeavingPage({} as never, {} as never, {} as never, {} as never),
       );
 
-    expect(changeSelection('/admin/sistemas-roles?step=roles&roleCode=ADMIN')).toBe(false);
+    expect(changeSelection('/admin/access-control/sistemas-roles?step=roles&roleCode=ADMIN')).toBe(false);
     expect(leavePage()).toBe(false);
     expect(confirm).toHaveBeenCalledTimes(2);
-    expect(changeSelection('/admin/sistemas-roles?step=permisos&roleCode=ADMIN&filter=all')).toBe(
+    expect(changeSelection('/admin/access-control/sistemas-roles?step=permisos&roleCode=ADMIN&filter=all')).toBe(
       true,
     );
 
     confirm.mockReturnValue(true);
-    expect(changeSelection('/admin/sistemas-roles?step=roles&roleCode=ADMIN')).toBe(true);
+    expect(changeSelection('/admin/access-control/sistemas-roles?step=roles&roleCode=ADMIN')).toBe(true);
     dirty = false;
     expect(leavePage()).toBe(true);
     stopWatching();

@@ -26,15 +26,15 @@ import { Icon } from '../../shared/components/icon/icon';
           <app-icon name="menu" [size]="18.4" />
         </label>
         <a
-          routerLink="/admin/roles"
+          routerLink="/admin"
           class="rounded-field text-sm leading-tight font-semibold text-base-content focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-          >Panel operativo</a
+          >Mis sistemas</a
         >
       </div>
       <div class="navbar-end w-auto shrink-0 gap-1 sm:gap-3">
         <app-theme-toggle />
         <a
-          routerLink="/admin/perfil"
+          routerLink="/admin/access-control/perfil"
           routerLinkActive="bg-base-200"
           ariaCurrentWhenActive="page"
           aria-label="Ver mi perfil"

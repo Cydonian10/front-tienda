@@ -3,6 +3,7 @@ import { AuthPerfil } from '../../../api/interfaces/access-control/auth.interfac
 import { IconName } from '../../../shared/components/icon/icons';
 import { Icon } from '../../../shared/components/icon/icon';
 import { AuthStore } from '../../../store/auth/auth.store';
+import { RouterLink } from '@angular/router';
 
 // Datos que se muestran en cada fila del perfil.
 interface ProfileRow {
@@ -23,7 +24,7 @@ const RESOURCE_LABELS: Readonly<Record<string, string>> = {
 };
 
 @Component({
-  imports: [Icon],
+  imports: [Icon, RouterLink],
   selector: 'app-perfil',
   templateUrl: './perfil.page.html',
   styleUrl: './perfil.page.css',

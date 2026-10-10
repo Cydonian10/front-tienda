@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { AuthPerfil } from '../../../api/interfaces/access-control/auth.interface';
 import { AuthStore } from '../../../store/auth/auth.store';
 import PerfilPage from './perfil.page';
@@ -49,6 +50,7 @@ describe('PerfilPage', () => {
   afterEach(() => TestBed.resetTestingModule());
 
   function setup(value: AuthPerfil | null = profile) {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
     const store = TestBed.inject(AuthStore);
     if (value) store.setProfile(value);
     const fixture = TestBed.createComponent(PerfilPage);
@@ -160,7 +162,7 @@ describe('PerfilPage', () => {
   it('provides a recovery link if the profile is unavailable', () => {
     const { element } = setup(null);
     expect(element.textContent).toContain('Tu perfil no está disponible');
-    expect(element.querySelector('a')?.getAttribute('href')).toBe('/admin/perfil');
+    expect(element.querySelector('a')?.getAttribute('href')).toBe('/admin/access-control/perfil');
   });
 
   it('falls back to the username if the personal name is not recorded', () => {

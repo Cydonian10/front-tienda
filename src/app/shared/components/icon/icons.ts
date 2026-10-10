@@ -12,6 +12,13 @@ export const ICONS = {
   'chevron-left': [{ type: 'path', d: 'm15 6-6 6 6 6' }],
   plus: [{ type: 'path', d: 'M12 5v14M5 12h14' }],
   grid: [{ type: 'path', d: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z' }],
+  package: [
+    {
+      type: 'path',
+      d: 'm12 3 8.5 4.5v9L12 21l-8.5-4.5v-9L12 3Zm0 9 8.5-4.5M12 12 3.5 7.5M12 12v9',
+    },
+  ],
+  'chart-line': [{ type: 'path', d: 'M3 3v18h18m-14-7 4-4 4 3 6-8' }],
   check: [{ type: 'path', d: 'm5 12 4 4L19 6' }],
   user: [
     { type: 'circle', cx: 12, cy: 7, r: 4 },

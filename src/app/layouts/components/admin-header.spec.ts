@@ -31,7 +31,7 @@ describe('AdminHeader', () => {
     const link = (fixture.nativeElement as HTMLElement).querySelector(
       'a[aria-label="Ver mi perfil"]',
     );
-    expect(link?.getAttribute('href')).toBe('/admin/perfil');
+    expect(link?.getAttribute('href')).toBe('/admin/access-control/perfil');
     expect(link?.textContent).toContain('Mi perfil');
   });
 });

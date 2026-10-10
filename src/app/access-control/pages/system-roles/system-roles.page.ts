@@ -1,7 +1,7 @@
 import { Component, DestroyRef, HostListener, computed, inject, linkedSignal } from '@angular/core';
 import { QueryClient } from '@tanstack/angular-query-experimental';
 import { TitleHeaderAdmin } from '../../../shared/components/title-header-admin/title-header-admin';
-import { findSystemsQuery } from '../../actions/systems/find-systems-action';
+import { useSystemsQuery } from '../../../system-portal/actions/find-systems-action';
 import { System } from '../../../api/interfaces/access-control/system.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -40,7 +40,7 @@ import { UpdateRoleDialog } from './components/update-role-dialog/update-role.di
   host: { class: 'block space-y-6' },
 })
 export default class SystemRolesPage {
-  readonly systemQuery = findSystemsQuery();
+  readonly systemQuery = useSystemsQuery();
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

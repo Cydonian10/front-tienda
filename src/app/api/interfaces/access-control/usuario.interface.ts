@@ -21,3 +21,15 @@ export interface Person {
   dateOfBirth: string; // Formato YYYY-MM-DD
   active: boolean;
 }
+
+export interface CreateUserDto {
+  nickName: string;
+  email: string;
+  password: string;
+  person: {
+    lastName: string;
+    firstName: string;
+    identityDocument: string;
+    dateOfBirth: string; // Formato YYYY-MM-DD
+  };
+}

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ENVIRONMENT } from '../config/env-dev';
-import { Usuario } from '../interfaces/access-control/usuario.interface';
+import { CreateUserDto, Usuario } from '../interfaces/access-control/usuario.interface';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -11,5 +11,9 @@ export class UsuariosApi {
 
   findUsuarios() {
     return firstValueFrom(this.#http.get<Usuario[]>(`${this.ENV.apiUrl}/users`));
+  }
+
+  create(dto: CreateUserDto) {
+    return firstValueFrom(this.#http.post<Usuario>(`${this.ENV.apiUrl}/users`, dto));
   }
 }

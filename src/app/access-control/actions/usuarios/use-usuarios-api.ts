@@ -5,8 +5,9 @@ import { CreateUserDto, Usuario } from '../../../api/interfaces/access-control/u
 
 export const useUsuariosQueryKey = ['Get-Usuarios'] as const;
 
-export function useUsuariosQuery() {
+export function useUsuariosApi() {
   const usuariosApi = inject(UsuariosApi);
+  const queryClient = inject(QueryClient);
 
   const findUsuariosQuery = injectQuery(() => ({
     queryKey: [...useUsuariosQueryKey],
@@ -15,14 +16,7 @@ export function useUsuariosQuery() {
     retry: false,
   }));
 
-  return { findUsuariosQuery };
-}
-
-export function useCreateUsuarioMutation() {
-  const usuariosApi = inject(UsuariosApi);
-  const queryClient = inject(QueryClient);
-
-  return injectMutation(() => ({
+  const createMutation = injectMutation(() => ({
     mutationFn: (dto: CreateUserDto) => usuariosApi.create(dto),
     onSuccess: (user) => {
       queryClient.setQueryData<Usuario[]>([...useUsuariosQueryKey], (users) =>
@@ -30,4 +24,6 @@ export function useCreateUsuarioMutation() {
       );
     },
   }));
+
+  return { findUsuariosQuery, createMutation };
 }

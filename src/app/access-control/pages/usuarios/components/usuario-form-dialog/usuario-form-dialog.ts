@@ -1,10 +1,19 @@
 import { DialogRef } from '@angular/cdk/dialog';
 import { Component, inject, signal } from '@angular/core';
-import { email, form, FormField, maxLength, minLength, required, submit, validate } from '@angular/forms/signals';
+import {
+  email,
+  form,
+  FormField,
+  maxLength,
+  minLength,
+  required,
+  submit,
+  validate,
+} from '@angular/forms/signals';
 import { CreateUserDto } from '../../../../../api/interfaces/access-control/usuario.interface';
 import { DialogShell } from '../../../../../shared/components/dialog-shell/dialog-shell';
 import { FieldErrors } from '../../../../../shared/components/field-errors/field-errors';
-import { useCreateUsuarioMutation } from '../../../../actions/usuarios/use-usuarios-api';
+import { useUsuariosApi } from '../../../../actions/usuarios/use-usuarios-api';
 
 @Component({
   selector: 'app-usuario-form-dialog',
@@ -17,7 +26,7 @@ export class UsuarioFormDialog {
   readonly titleId = `${this.dialogRef.id}-title`;
   readonly formId = `${this.dialogRef.id}-form`;
   readonly today = new Date().toLocaleDateString('sv-SE');
-  readonly addUsuarioMutation = useCreateUsuarioMutation();
+  readonly addUsuarioMutation = useUsuariosApi().createMutation;
 
   protected readonly model = signal<CreateUserDto>({
     nickName: '',
@@ -56,9 +65,7 @@ export class UsuarioFormDialog {
       ) {
         return { kind: 'date', message: 'Escribe una fecha válida.' };
       }
-      return date > this.today
-        ? { kind: 'date', message: 'La fecha no puede ser futura.' }
-        : null;
+      return date > this.today ? { kind: 'date', message: 'La fecha no puede ser futura.' } : null;
     });
   });
 

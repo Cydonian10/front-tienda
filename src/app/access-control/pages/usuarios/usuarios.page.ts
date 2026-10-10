@@ -6,7 +6,7 @@ import { Icon } from '../../../shared/components/icon/icon';
 import { UsuariosList } from './components/usuarios-list/usuarios-list';
 import { UsuarioDetail } from './components/user-detail/usuario-detail';
 import { UsuarioFormDialog } from './components/usuario-form-dialog/usuario-form-dialog';
-import { useUsuariosQuery } from '../../actions/usuarios/use-usuarios-api';
+import { useUsuariosApi } from '../../actions/usuarios/use-usuarios-api';
 
 @Component({
   imports: [Icon, UsuariosList, UsuarioDetail],
@@ -18,7 +18,7 @@ export default class UsuariosPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
-  readonly findUserQuery = useUsuariosQuery().findUsuariosQuery;
+  readonly findUserQuery = useUsuariosApi().findUsuariosQuery;
 
   private readonly queryParams = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,

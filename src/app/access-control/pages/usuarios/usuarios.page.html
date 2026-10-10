@@ -1,0 +1,46 @@
+<header class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <nav class="mb-3 text-xs text-base-content/70" aria-label="Ruta de navegación">
+      Administración <span class="mx-2" aria-hidden="true">›</span>
+      <span class="font-semibold text-primary" aria-current="page">Usuarios</span>
+    </nav>
+    <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">Usuarios</h1>
+    <p class="mt-1 text-sm text-base-content/70">Administra las cuentas y sus roles por sistema.</p>
+  </div>
+  <button class="btn btn-primary" type="button" (click)="openUserForm()">
+    <app-icon name="plus" [size]="18" /> Nuevo usuario
+  </button>
+</header>
+
+<div class="grid items-start gap-5 lg:grid-cols-[minmax(17rem,24rem)_minmax(0,1fr)]">
+  <app-usuarios-list
+    [users]="users()"
+    [filteredUsers]="filteredUsers()"
+    [selectedId]="selectedId()"
+    [search]="search()"
+    [status]="status()"
+    (searchChange)="search.set($event)"
+    (statusChange)="status.set($event)"
+    (selectUser)="selectedId.set($event)"
+  />
+  @if (selectedUser(); as user) {
+    <app-usuario-detail
+      [user]="user"
+      [systems]="systems"
+      [roles]="roles"
+      (edit)="openUserForm(user)"
+      (assign)="openAssignRole()"
+      (remove)="removeRole($event)"
+    />
+  } @else {
+    <section
+      class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center text-sm text-base-content/70"
+    >
+      Selecciona un usuario para ver sus datos y roles.
+    </section>
+  }
+</div>
+
+<footer class="flex flex-wrap justify-between gap-2 text-xs text-base-content/60">
+  <span>CONTROL DE ACCESO</span><span>Usuarios y roles por sistema · Datos de ejemplo</span>
+</footer>

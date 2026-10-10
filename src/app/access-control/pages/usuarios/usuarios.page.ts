@@ -2,11 +2,17 @@ import { Dialog } from '@angular/cdk/dialog';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Icon } from '../../../shared/components/icon/icon';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
-import { UsuariosList } from './components/usuarios-list';
-import { UsuarioDetail } from './components/usuario-detail';
-import { UsuarioFormDialog, UserFormResult } from './components/usuario-form-dialog';
-import { AsignarRolDialog, AssignRoleResult } from './components/asignar-rol-dialog';
+import { UsuariosList } from './components/usuarios-list/usuarios-list';
+import {
+  UsuarioFormDialog,
+  UserFormResult,
+} from './components/usuario-form-dialog/usuario-form-dialog';
 import { DEMO_ROLES, DEMO_SYSTEMS, DEMO_USERS, DemoUser, demoFullName } from './usuarios-demo.data';
+import {
+  AssignRoleResult,
+  AsignarRolDialog,
+} from './components/asignar-rol-dialog/asignar-rol-dialog';
+import { UsuarioDetail } from './components/user-detail/usuario-detail';
 
 @Component({
   imports: [Icon, UsuariosList, UsuarioDetail],

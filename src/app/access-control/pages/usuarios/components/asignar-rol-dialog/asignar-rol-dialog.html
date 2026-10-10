@@ -1,0 +1,75 @@
+<app-dialog-shell title="Asignar rol" [titleId]="titleId">
+  <form [id]="formId" [formGroup]="form" (ngSubmit)="save()" class="space-y-5" novalidate>
+    <p class="text-sm text-base-content/70">
+      Asigna un rol a <strong>{{ fullName(data.user) }}</strong> dentro del sistema elegido.
+    </p>
+    <label class="block space-y-2 text-sm font-semibold"
+      >Sistema
+      <select class="select w-full" formControlName="systemId" (change)="systemChanged()">
+        @for (system of data.systems; track system.id) {
+          <option [value]="system.id">{{ system.name }}</option>
+        }
+      </select>
+    </label>
+    <label class="block space-y-2 text-sm font-semibold"
+      >Rol
+      <select
+        class="select w-full"
+        formControlName="roleId"
+        [attr.aria-invalid]="form.controls.roleId.invalid && form.controls.roleId.touched"
+      >
+        <option value="">Selecciona un rol</option>
+        @for (role of availableRoles; track role.id) {
+          <option [value]="role.id">{{ role.name }} · {{ role.code }}</option>
+        }
+      </select>
+    </label>
+    @if (!availableRoles.length) {
+      <p class="text-sm text-base-content/70">
+        No hay roles disponibles para asignar en este sistema.
+      </p>
+    }
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="block space-y-2 text-sm font-semibold"
+        >Válido desde
+        <input
+          class="input w-full"
+          type="date"
+          formControlName="validFrom"
+          [attr.aria-invalid]="form.controls.validFrom.invalid && form.controls.validFrom.touched"
+        />
+      </label>
+      <label class="block space-y-2 text-sm font-semibold"
+        >Válido hasta <span class="text-xs font-normal text-base-content/70">(opcional)</span>
+        <input
+          class="input w-full"
+          type="date"
+          formControlName="validUntil"
+          [min]="form.controls.validFrom.value"
+        />
+      </label>
+    </div>
+    @if (invalidDates) {
+      <p role="alert" class="text-sm text-error">
+        La fecha final no puede ser anterior a la inicial.
+      </p>
+    }
+    @if (form.invalid && form.touched) {
+      <p role="alert" class="text-sm text-error">Selecciona un rol y una fecha de inicio.</p>
+    }
+    <p class="text-xs text-base-content/70">Asignación de prueba: no se envía a la API.</p>
+  </form>
+  <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
+    <button type="button" class="btn" data-dialog-cancel (click)="dialogRef.close()">
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [attr.form]="formId"
+      [disabled]="!availableRoles.length"
+    >
+      Asignar rol
+    </button>
+  </div>
+</app-dialog-shell>

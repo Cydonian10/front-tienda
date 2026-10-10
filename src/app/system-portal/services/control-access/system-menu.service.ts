@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { IconName } from '../../../shared/components/icon/icons';
-import { SystemMenuGroup } from '../../models/system-menu.model';
+import { SystemMenuGroup, SystemMenuItem } from '../../models/system-menu.model';
 
 interface FrontendSystem {
   readonly route: string;
@@ -38,6 +39,8 @@ const SYSTEM_ICONS: Readonly<Record<string, IconName>> = {
 
 @Injectable({ providedIn: 'root' })
 export class SystemMenuService {
+  private readonly router = inject(Router);
+
   routeFor(systemCode: string): string | null {
     return SYSTEMS[systemCode]?.route ?? null;
   }
@@ -48,5 +51,18 @@ export class SystemMenuService {
 
   menuFor(systemCode: string): readonly SystemMenuGroup[] {
     return SYSTEMS[systemCode]?.menu ?? [];
+  }
+
+  isActiveItem(item: SystemMenuItem): boolean {
+    return this.router.isActive(this.router.parseUrl(item.url), {
+      paths: 'subset',
+      queryParams: 'ignored',
+      matrixParams: 'ignored',
+      fragment: 'ignored',
+    });
+  }
+
+  isActiveGroup(group: SystemMenuGroup): boolean {
+    return group.items.some((item) => this.isActiveItem(item));
   }
 }

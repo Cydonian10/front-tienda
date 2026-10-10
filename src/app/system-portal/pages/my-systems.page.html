@@ -1,97 +1,95 @@
-<div class="min-h-dvh bg-base-200 text-base-content">
-  <app-my-systems-header />
+<app-my-systems-header />
 
-  <a href="#systems-title" class="btn fixed top-3 left-3 z-50 -translate-y-24 focus:translate-y-0"
-    >Saltar a sistemas</a
+<a href="#systems-title" class="btn fixed top-3 left-3 z-50 -translate-y-24 focus:translate-y-0"
+  >Saltar a sistemas</a
+>
+
+<main class="mx-auto max-w-7xl space-y-10 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+  <section
+    class="relative isolate overflow-hidden rounded-box bg-neutral px-6 py-8 text-neutral-content sm:px-9 sm:py-10 lg:px-12"
+    aria-labelledby="portal-title"
   >
+    <div class="relative z-10 max-w-2xl">
+      <h1
+        id="portal-title"
+        class="max-w-xl text-3xl leading-tight font-bold tracking-tight sm:text-4xl"
+      >
+        Todo tu trabajo, en un solo lugar.
+      </h1>
+      <p class="mt-4 max-w-xl text-sm leading-6 text-neutral-content/75 sm:text-base">
+        Entra a tus sistemas desde aquí y continúa donde lo necesitas.
+      </p>
+    </div>
 
-  <main class="mx-auto max-w-7xl space-y-10 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-    <section
-      class="relative isolate overflow-hidden rounded-box bg-neutral px-6 py-8 text-neutral-content sm:px-9 sm:py-10 lg:px-12"
-      aria-labelledby="portal-title"
+    <div
+      class="pointer-events-none absolute inset-y-0 right-8 hidden items-center gap-4 sm:flex lg:right-14"
+      aria-hidden="true"
     >
-      <div class="relative z-10 max-w-2xl">
-        <h1
-          id="portal-title"
-          class="max-w-xl text-3xl leading-tight font-bold tracking-tight sm:text-4xl"
-        >
-          Todo tu trabajo, en un solo lugar.
-        </h1>
-        <p class="mt-4 max-w-xl text-sm leading-6 text-neutral-content/75 sm:text-base">
-          Entra a tus sistemas desde aquí y continúa donde lo necesitas.
+      <span
+        class="grid size-20 rotate-[-8deg] place-items-center rounded-box border border-primary/25 bg-primary/15 text-primary sm:size-24"
+      >
+        <app-icon name="package" [size]="36" />
+      </span>
+      <span
+        class="mt-10 grid size-20 rotate-[7deg] place-items-center rounded-box border border-secondary/25 bg-secondary/15 text-secondary sm:size-24"
+      >
+        <app-icon name="grid" [size]="36" />
+      </span>
+    </div>
+  </section>
+
+  <section class="space-y-5" aria-labelledby="systems-title">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h2 id="systems-title" class="text-2xl font-semibold tracking-tight">Mis sistemas</h2>
+        <p class="mt-1 text-sm text-base-content/70">
+          Selecciona el sistema al que quieres ingresar.
         </p>
       </div>
+      @if (!systemsQuery.isPending() && !systemsQuery.isError()) {
+        <span class="badge badge-ghost badge-md">{{ systems().length }} sistemas</span>
+      }
+    </div>
 
-      <div
-        class="pointer-events-none absolute inset-y-0 right-8 hidden items-center gap-4 sm:flex lg:right-14"
-        aria-hidden="true"
-      >
-        <span
-          class="grid size-20 rotate-[-8deg] place-items-center rounded-box border border-primary/25 bg-primary/15 text-primary sm:size-24"
-        >
-          <app-icon name="package" [size]="36" />
-        </span>
-        <span
-          class="mt-10 grid size-20 rotate-[7deg] place-items-center rounded-box border border-secondary/25 bg-secondary/15 text-secondary sm:size-24"
-        >
-          <app-icon name="grid" [size]="36" />
-        </span>
-      </div>
-    </section>
+    <label class="input flex w-full max-w-lg items-center gap-2 bg-base-100">
+      <app-icon name="search" class="text-base-content/60" [size]="18" />
+      <input
+        type="search"
+        class="grow"
+        placeholder="Buscar un sistema…"
+        aria-label="Buscar sistemas"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      />
+    </label>
 
-    <section class="space-y-5" aria-labelledby="systems-title">
-      <div class="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 id="systems-title" class="text-2xl font-semibold tracking-tight">Mis sistemas</h2>
-          <p class="mt-1 text-sm text-base-content/70">
-            Selecciona el sistema al que quieres ingresar.
-          </p>
-        </div>
-        @if (!systemsQuery.isPending() && !systemsQuery.isError()) {
-          <span class="badge badge-ghost badge-md">{{ systems().length }} sistemas</span>
+    @if (systemsQuery.isPending()) {
+      <app-skeleton variant="cards" [count]="3" label="Cargando sistemas…" />
+    } @else if (systemsQuery.isError()) {
+      <app-empty-state
+        variant="error"
+        title="No se pudieron cargar los sistemas"
+        description="Comprueba tu conexión e inténtalo de nuevo."
+        actionLabel="Reintentar"
+        (action)="systemsQuery.refetch()"
+      />
+    } @else if (systems().length === 0) {
+      <app-empty-state
+        title="Todavía no tienes sistemas asignados"
+        description="Cuando tengas acceso a un sistema, aparecerá aquí."
+      />
+    } @else if (filteredSystems().length === 0) {
+      <app-empty-state
+        variant="no-results"
+        title="No encontramos sistemas"
+        description="Prueba con otro nombre o código."
+      />
+    } @else {
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        @for (system of filteredSystems(); track system.id) {
+          <app-system-card [system]="system" />
         }
       </div>
-
-      <label class="input flex w-full max-w-lg items-center gap-2 bg-base-100">
-        <app-icon name="search" class="text-base-content/60" [size]="18" />
-        <input
-          type="search"
-          class="grow"
-          placeholder="Buscar un sistema…"
-          aria-label="Buscar sistemas"
-          [ngModel]="searchTerm()"
-          (ngModelChange)="searchTerm.set($event)"
-        />
-      </label>
-
-      @if (systemsQuery.isPending()) {
-        <app-skeleton variant="cards" [count]="3" label="Cargando sistemas…" />
-      } @else if (systemsQuery.isError()) {
-        <app-empty-state
-          variant="error"
-          title="No se pudieron cargar los sistemas"
-          description="Comprueba tu conexión e inténtalo de nuevo."
-          actionLabel="Reintentar"
-          (action)="systemsQuery.refetch()"
-        />
-      } @else if (systems().length === 0) {
-        <app-empty-state
-          title="Todavía no tienes sistemas asignados"
-          description="Cuando tengas acceso a un sistema, aparecerá aquí."
-        />
-      } @else if (filteredSystems().length === 0) {
-        <app-empty-state
-          variant="no-results"
-          title="No encontramos sistemas"
-          description="Prueba con otro nombre o código."
-        />
-      } @else {
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          @for (system of filteredSystems(); track system.id) {
-            <app-system-card [system]="system" />
-          }
-        </div>
-      }
-    </section>
-  </main>
-</div>
+    }
+  </section>
+</main>

@@ -106,35 +106,29 @@ import { SystemMenuGroup } from '../system-portal/models/system-menu.model';
             class="admin-menu flex flex-1 flex-col justify-start px-3 py-6"
             aria-label="Navegación principal"
           >
-            <ul class="menu menu-md w-full gap-3 p-0">
+            <ul class="menu menu-md w-full gap-1 p-0">
               @for (group of navigationGroups; track group.label) {
-                <li>
-                  <details>
-                    <summary
-                      class="flex min-h-12 items-center gap-3 rounded-field bg-base-200 px-3 text-sm font-semibold text-base-content"
-                    >
-                      <app-icon [name]="group.icon" />
-                      <span class="flex-1">{{ group.label }}</span>
-                    </summary>
-                    <ul class="mt-2 gap-1">
-                      @for (item of group.items; track item.url) {
-                        <li>
-                          <a
-                            [routerLink]="item.url"
-                            routerLinkActive="menu-active"
-                            ariaCurrentWhenActive="page"
-                            class="flex min-h-12 items-center gap-3 rounded-field px-3 text-sm font-medium"
-                            (click)="closeNavigation()"
-                          >
-                            <app-icon [name]="item.icon" />
-                            <span class="flex-1">{{ item.label }}</span>
-                            <app-icon name="chevron-right" [size]="16" class="navigation-arrow" />
-                          </a>
-                        </li>
-                      }
-                    </ul>
-                  </details>
+                <li
+                  class="menu-title mt-5 mb-2 px-3 text-[0.67rem] font-bold tracking-widest text-base-content/70 first:mt-0"
+                >
+                  <span>{{ group.label }}</span>
                 </li>
+                @for (item of group.items; track item.url) {
+                  <li>
+                    <a
+                      [routerLink]="item.url"
+                      routerLinkActive="menu-active"
+                      ariaCurrentWhenActive="page"
+                      [routerLinkActiveOptions]="{ exact: false }"
+                      class="flex min-h-12 items-center gap-3 rounded-field px-3 text-sm font-medium"
+                      (click)="closeNavigation()"
+                    >
+                      <app-icon [name]="item.icon" />
+                      <span class="min-w-0 flex-1">{{ item.label }}</span>
+                      <app-icon name="chevron-right" [size]="16" class="navigation-arrow" />
+                    </a>
+                  </li>
+                }
               }
             </ul>
           </nav>
@@ -164,8 +158,7 @@ import { SystemMenuGroup } from '../system-portal/models/system-menu.model';
       --color-primary-content: var(--admin-nav-accent-content);
     }
 
-    a:focus-visible,
-    summary:focus-visible {
+    a:focus-visible {
       outline: 2px solid var(--color-primary);
       outline-offset: 3px;
     }
@@ -183,10 +176,6 @@ import { SystemMenuGroup } from '../system-portal/models/system-menu.model';
       background: var(--color-primary);
       color: var(--color-primary-content);
       font-weight: 600;
-    }
-
-    .admin-menu details[open] > summary {
-      background: transparent;
     }
 
     .navigation-arrow {
@@ -207,7 +196,6 @@ export class AdminLayout {
   private readonly queryClient = inject(QueryClient);
   private readonly confirmation = inject(ConfirmDialogService);
   private readonly header = viewChild(AdminHeader);
-  private readonly currentPath = signal(this.router.url);
 
   authStore = inject(AuthStore);
 
@@ -231,10 +219,7 @@ export class AdminLayout {
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe((event) => {
-        this.currentPath.set(event.urlAfterRedirects);
-        this.closeNavigation();
-      });
+      .subscribe(() => this.closeNavigation());
   }
 
   closeNavigation(): void {

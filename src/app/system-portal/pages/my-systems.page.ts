@@ -11,7 +11,7 @@ import { SystemCard } from '../components/system-card';
   selector: 'app-my-systems-page',
   imports: [EmptyState, FormsModule, Icon, MySystemsHeader, Skeleton, SystemCard],
   templateUrl: './my-systems.page.html',
-  host: { class: 'block min-h-dvh' },
+  host: { class: 'min-h-dvh bg-base-200 text-base-content block' },
 })
 export default class MySystemsPage {
   readonly systemsQuery = useSystemsQuery();

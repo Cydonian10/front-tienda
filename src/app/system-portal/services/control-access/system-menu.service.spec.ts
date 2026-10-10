@@ -1,9 +1,25 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  provideRouter,
+  Router,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { systemMenuResolver } from './system-menu.resolver';
 import { SystemMenuService } from './system-menu.service';
 
 describe('SystemMenuService', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([
+          { path: 'admin/access-control/usuarios', component: TestPage },
+          { path: 'admin/access-control/permisos', component: TestPage },
+        ]),
+      ],
+    }),
+  );
   afterEach(() => TestBed.resetTestingModule());
 
   it('provides an internal route and menu for implemented systems only', () => {
@@ -29,4 +45,23 @@ describe('SystemMenuService', () => {
 
     expect(menu).toEqual(TestBed.inject(SystemMenuService).menuFor('ACCESS_CONTROL'));
   });
+
+  it('marks the group and item active from the URL, including after direct navigation', async () => {
+    const router = TestBed.inject(Router);
+    const service = TestBed.inject(SystemMenuService);
+    const group = service.menuFor('ACCESS_CONTROL')[0];
+
+    await router.navigateByUrl('/admin/access-control/usuarios?tab=activos');
+    expect(service.isActiveGroup(group)).toBe(true);
+    expect(service.isActiveItem(group.items[1])).toBe(true);
+    expect(service.isActiveItem(group.items[2])).toBe(false);
+
+    await router.navigateByUrl('/admin/access-control/permisos');
+    expect(service.isActiveGroup(group)).toBe(true);
+    expect(service.isActiveItem(group.items[1])).toBe(false);
+    expect(service.isActiveItem(group.items[2])).toBe(true);
+  });
 });
+
+@Component({ template: '' })
+class TestPage {}

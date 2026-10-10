@@ -290,7 +290,7 @@ Los componentes son robustos y contenidos: acciones inequívocas, estados visibl
 ### Navigation
 
 - La barra lateral mantiene pizarra azulada en ambos temas y remapea localmente sus tokens sin alterar el tema global.
-- Los grupos nativos `details/summary` parten cerrados. Abrir un grupo no selecciona una ruta.
+- Los grupos actuales son secciones de navegación siempre visibles, con título discreto y enlaces accesibles sin desplegar nada. Los grupos plegables solo se introducen cuando su contenido lo justifique.
 - La ruta actual usa el turquesa local, texto oscuro, peso reforzado y flecha visible. En móvil, overlay, Escape y navegación cierran el drawer y restauran el foco al disparador.
 
 ### File Upload

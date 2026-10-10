@@ -26,6 +26,7 @@ describe('PerfilPage', () => {
       {
         id: 'p1',
         code: 'users.read',
+        systemCode: 'ACCESS_CONTROL',
         name: 'Ver usuarios',
         resourceCode: 'users',
         actionCode: 'READ',
@@ -33,6 +34,7 @@ describe('PerfilPage', () => {
       {
         id: 'p2',
         code: 'roles.read',
+        systemCode: 'ACCESS_CONTROL',
         name: 'Ver roles',
         resourceCode: 'roles',
         actionCode: 'READ',
@@ -40,6 +42,7 @@ describe('PerfilPage', () => {
       {
         id: 'p3',
         code: 'users.create',
+        systemCode: 'ACCESS_CONTROL',
         name: 'Crear usuarios',
         resourceCode: 'users',
         actionCode: 'CREATE',

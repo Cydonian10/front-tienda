@@ -18,6 +18,7 @@ import { QueryClient } from '@tanstack/angular-query-experimental';
 import { ConfirmDialogService } from '../shared/services/confirm-dialog/confirm-dialog.service';
 import { AuthStore } from '../store/auth/auth.store';
 import { SystemMenuGroup } from '../system-portal/models/system-menu.model';
+import { SystemMenuService } from '../system-portal/services/control-access/system-menu.service';
 
 @Component({
   imports: [RouterOutlet, AdminHeader, AdminFooterPage, RouterLink, RouterLinkActive, Icon],
@@ -193,6 +194,7 @@ export class AdminLayout {
   private readonly route = inject(ActivatedRoute);
   private readonly session = inject(AuthSessionService);
   private readonly profile = inject(AuthProfileService);
+  private readonly systemMenu = inject(SystemMenuService);
   private readonly queryClient = inject(QueryClient);
   private readonly confirmation = inject(ConfirmDialogService);
   private readonly header = viewChild(AdminHeader);
@@ -210,8 +212,10 @@ export class AdminLayout {
 
   readonly navigationOpen = signal(false);
 
-  readonly navigationGroups = (this.route.snapshot.data['systemMenu'] ??
-    []) as readonly SystemMenuGroup[];
+  get navigationGroups(): readonly SystemMenuGroup[] {
+    const systemCode = this.route.snapshot.data['systemCode'];
+    return typeof systemCode === 'string' ? this.systemMenu.menuFor(systemCode) : [];
+  }
 
   constructor() {
     this.router.events

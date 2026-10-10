@@ -8,6 +8,8 @@ import { AuthSessionService } from '../auth/services/auth-session.service';
 import { ConfirmDialogService } from '../shared/services/confirm-dialog/confirm-dialog.service';
 import { SystemMenuService } from '../system-portal/services/control-access/system-menu.service';
 import { AdminLayout } from './admin.layout';
+import { AuthStore } from '../store/auth/auth.store';
+import { PERMISSION_CODES } from '../api/interfaces/access-control/permision.interface';
 
 @Component({ template: '' })
 class TestPage {}
@@ -22,6 +24,7 @@ describe('AdminLayout navigation', () => {
           {
             path: 'admin/access-control',
             component: AdminLayout,
+            data: { systemCode: 'ACCESS_CONTROL' },
             resolve: { systemMenu: () => inject(SystemMenuService).menuFor('ACCESS_CONTROL') },
             children: [
               { path: 'usuarios', component: TestPage },
@@ -36,6 +39,8 @@ describe('AdminLayout navigation', () => {
         { provide: ConfirmDialogService, useValue: {} },
       ],
     });
+
+    TestBed.inject(AuthStore).setProfile({ isSuperAdmin: true, permissions: [] } as never);
 
     const harness = await RouterTestingHarness.create('/admin/access-control/usuarios');
     const sidebar = () => harness.routeNativeElement!.querySelector('nav') as HTMLElement;
@@ -55,5 +60,11 @@ describe('AdminLayout navigation', () => {
     await harness.navigateByUrl('/admin/access-control/perfil');
     expect(sidebar().querySelector('.menu-active')).toBeNull();
     expect(sidebar().querySelectorAll('a')).toHaveLength(3);
+
+    TestBed.inject(AuthStore).setProfile({
+      permissions: [{ systemCode: 'ACCESS_CONTROL', code: PERMISSION_CODES.USERS_READ }],
+    } as never);
+    harness.fixture.detectChanges();
+    expect(sidebar().querySelectorAll('a')).toHaveLength(1);
   });
 });

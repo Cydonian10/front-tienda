@@ -1,17 +1,17 @@
 import { inject, Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { containsTree, Router } from '@angular/router';
 import { IconName } from '../../../shared/components/icon/icons';
 import { SystemMenuGroup, SystemMenuItem } from '../../models/system-menu.model';
+import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
+import { AuthorizationService } from '../../../auth/services/authorization.service';
 
 interface FrontendSystem {
-  readonly route: string;
   readonly icon: IconName;
   readonly menu: readonly SystemMenuGroup[];
 }
 
 const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
   ACCESS_CONTROL: {
-    route: '/admin/access-control',
     icon: 'shield-check',
     menu: [
       {
@@ -22,9 +22,20 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             label: 'Sistemas y roles',
             url: '/admin/access-control/sistemas-roles',
             icon: 'shield-check',
+            permission: PERMISSION_CODES.SYSTEM_READ,
           },
-          { label: 'Usuarios', url: '/admin/access-control/usuarios', icon: 'users' },
-          { label: 'Permisos', url: '/admin/access-control/permisos', icon: 'key' },
+          {
+            label: 'Usuarios',
+            url: '/admin/access-control/usuarios',
+            icon: 'users',
+            permission: PERMISSION_CODES.USERS_READ,
+          },
+          {
+            label: 'Permisos',
+            url: '/admin/access-control/permisos',
+            icon: 'key',
+            permission: PERMISSION_CODES.PERMISSIONS_READ,
+          },
         ],
       },
     ],
@@ -40,9 +51,15 @@ const SYSTEM_ICONS: Readonly<Record<string, IconName>> = {
 @Injectable({ providedIn: 'root' })
 export class SystemMenuService {
   private readonly router = inject(Router);
+  private readonly authorization = inject(AuthorizationService);
 
   routeFor(systemCode: string): string | null {
-    return SYSTEMS[systemCode]?.route ?? null;
+    // Entra directamente a la primera página que el usuario puede consultar.
+    return this.menuFor(systemCode)[0]?.items[0]?.url ?? null;
+  }
+
+  isImplemented(systemCode: string): boolean {
+    return Object.hasOwn(SYSTEMS, systemCode);
   }
 
   iconFor(systemCode: string): IconName {
@@ -50,11 +67,18 @@ export class SystemMenuService {
   }
 
   menuFor(systemCode: string): readonly SystemMenuGroup[] {
-    return SYSTEMS[systemCode]?.menu ?? [];
+    return (SYSTEMS[systemCode]?.menu ?? [])
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((item) =>
+          this.authorization.hasPermission(systemCode, item.permission),
+        ),
+      }))
+      .filter((group) => group.items.length > 0);
   }
 
   isActiveItem(item: SystemMenuItem): boolean {
-    return this.router.isActive(this.router.parseUrl(item.url), {
+    return containsTree(this.router.parseUrl(this.router.url), this.router.parseUrl(item.url), {
       paths: 'subset',
       queryParams: 'ignored',
       matrixParams: 'ignored',

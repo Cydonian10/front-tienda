@@ -8,6 +8,8 @@ import {
 } from '@angular/router';
 import { systemMenuResolver } from './system-menu.resolver';
 import { SystemMenuService } from './system-menu.service';
+import { AuthStore } from '../../../store/auth/auth.store';
+import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
 
 describe('SystemMenuService', () => {
   beforeEach(() =>
@@ -22,10 +24,22 @@ describe('SystemMenuService', () => {
   );
   afterEach(() => TestBed.resetTestingModule());
 
+  function grant(...codes: string[]) {
+    TestBed.inject(AuthStore).setProfile({
+      isSuperAdmin: false,
+      permissions: codes.map((code) => ({ code, systemCode: 'ACCESS_CONTROL' })),
+    } as never);
+  }
+
   it('provides an internal route and menu for implemented systems only', () => {
+    grant(
+      PERMISSION_CODES.SYSTEM_READ,
+      PERMISSION_CODES.USERS_READ,
+      PERMISSION_CODES.PERMISSIONS_READ,
+    );
     const service = TestBed.inject(SystemMenuService);
 
-    expect(service.routeFor('ACCESS_CONTROL')).toBe('/admin/access-control');
+    expect(service.routeFor('ACCESS_CONTROL')).toBe('/admin/access-control/sistemas-roles');
     expect(service.menuFor('ACCESS_CONTROL')[0].items.map((item) => item.url)).toEqual([
       '/admin/access-control/sistemas-roles',
       '/admin/access-control/usuarios',
@@ -36,6 +50,7 @@ describe('SystemMenuService', () => {
   });
 
   it('resolves the menu using the system code declared on the route', () => {
+    grant(PERMISSION_CODES.USERS_READ);
     const route = {
       data: { systemCode: 'ACCESS_CONTROL' },
     } as unknown as ActivatedRouteSnapshot;
@@ -47,6 +62,11 @@ describe('SystemMenuService', () => {
   });
 
   it('marks the group and item active from the URL, including after direct navigation', async () => {
+    grant(
+      PERMISSION_CODES.SYSTEM_READ,
+      PERMISSION_CODES.USERS_READ,
+      PERMISSION_CODES.PERMISSIONS_READ,
+    );
     const router = TestBed.inject(Router);
     const service = TestBed.inject(SystemMenuService);
     const group = service.menuFor('ACCESS_CONTROL')[0];
@@ -60,6 +80,17 @@ describe('SystemMenuService', () => {
     expect(service.isActiveGroup(group)).toBe(true);
     expect(service.isActiveItem(group.items[1])).toBe(false);
     expect(service.isActiveItem(group.items[2])).toBe(true);
+  });
+
+  it('hides unauthorized items and empty groups', () => {
+    const service = TestBed.inject(SystemMenuService);
+    expect(service.menuFor('ACCESS_CONTROL')).toEqual([]);
+
+    grant(PERMISSION_CODES.USERS_READ);
+    expect(service.menuFor('ACCESS_CONTROL')[0].items.map((item) => item.label)).toEqual([
+      'Usuarios',
+    ]);
+    expect(service.routeFor('ACCESS_CONTROL')).toBe('/admin/access-control/usuarios');
   });
 });
 

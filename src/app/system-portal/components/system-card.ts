@@ -42,8 +42,13 @@ import { SystemMenuService } from '../services/control-access/system-menu.servic
               Ingresar <app-icon name="chevron-right" [size]="16" />
             </a>
           } @else {
-            <span class="badge badge-warning badge-soft">Aún no disponible</span>
-            <span class="text-sm text-base-content/70">En este frontend</span>
+            @if (systemMenu.isImplemented(system().code)) {
+              <span class="badge badge-ghost">Sin acceso</span>
+              <span class="text-sm text-base-content/70">No tienes permisos para ingresar</span>
+            } @else {
+              <span class="badge badge-warning badge-soft">Aún no disponible</span>
+              <span class="text-sm text-base-content/70">En este frontend</span>
+            }
           }
         </footer>
       </div>
@@ -51,7 +56,7 @@ import { SystemMenuService } from '../services/control-access/system-menu.servic
   `,
 })
 export class SystemCard {
-  private readonly systemMenu = inject(SystemMenuService);
+  protected readonly systemMenu = inject(SystemMenuService);
   readonly system = input.required<SystemRecord>();
   readonly route = computed(() => this.systemMenu.routeFor(this.system().code));
   readonly icon = computed(() => this.systemMenu.iconFor(this.system().code));

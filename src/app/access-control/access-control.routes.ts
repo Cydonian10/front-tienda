@@ -5,6 +5,10 @@ import {
   confirmLeavingPage,
 } from './pages/system-roles/guards/pending-permission/pending-permissions.guard';
 import { systemMenuResolver } from '../system-portal/services/control-access/system-menu.resolver';
+import { PERMISSION_CODES } from '../api/interfaces/access-control/permision.interface';
+import { permissionGuard } from '../auth/guards/permission.guard';
+
+const SYSTEM = 'ACCESS_CONTROL';
 
 export const accessControlRoutes: Routes = [
   {
@@ -27,17 +31,17 @@ export const accessControlRoutes: Routes = [
       {
         path: 'sistemas-roles',
         loadComponent: () => import('./pages/system-roles/system-roles.page'),
-        canActivate: [confirmChangingSelection],
+        canActivate: [
+          permissionGuard(SYSTEM, PERMISSION_CODES.SYSTEM_READ),
+          confirmChangingSelection,
+        ],
         canDeactivate: [confirmLeavingPage],
         runGuardsAndResolvers: 'paramsOrQueryParamsChange',
       },
       {
-        path: 'pruebas',
-        loadComponent: () => import('./pages/roles/roles.page'),
-      },
-      {
         path: 'usuarios',
         loadComponent: () => import('./pages/usuarios/usuarios.page'),
+        canActivate: [permissionGuard(SYSTEM, PERMISSION_CODES.USERS_READ)],
       },
       {
         path: 'perfil',
@@ -46,6 +50,7 @@ export const accessControlRoutes: Routes = [
       {
         path: 'permisos',
         loadComponent: () => import('./pages/permisos/permiso.page'),
+        canActivate: [permissionGuard(SYSTEM, PERMISSION_CODES.PERMISSIONS_READ)],
       },
     ],
   },

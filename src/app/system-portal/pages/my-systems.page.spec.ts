@@ -5,6 +5,7 @@ import { SystemApi } from '../../api/access-control/system-api';
 import { AuthLogoutService } from '../../auth/services/auth-logout.service';
 import { findSystemsQueryKey } from '../actions/find-systems-action';
 import MySystemsPage from './my-systems.page';
+import { AuthStore } from '../../store/auth/auth.store';
 
 const systems = [
   {
@@ -40,6 +41,7 @@ describe('MySystemsPage', () => {
         { provide: AuthLogoutService, useValue: { requestLogout: vi.fn() } },
       ],
     });
+    TestBed.inject(AuthStore).setProfile({ isSuperAdmin: true, permissions: [] } as never);
 
     const fixture = TestBed.createComponent(MySystemsPage);
     fixture.detectChanges();
@@ -48,7 +50,9 @@ describe('MySystemsPage', () => {
 
   it('links implemented systems to an internal route and leaves other systems without a link', () => {
     const { element } = setup();
-    const accessLink = element.querySelector<HTMLAnchorElement>('a[href="/admin/access-control"]');
+    const accessLink = element.querySelector<HTMLAnchorElement>(
+      'a[href="/admin/access-control/sistemas-roles"]',
+    );
 
     expect(accessLink).not.toBeNull();
     expect(accessLink?.textContent).toContain('Ingresar');
@@ -72,6 +76,15 @@ describe('MySystemsPage', () => {
     const { element } = setup([{ ...systems[0], active: false }]);
 
     expect(element.textContent).toContain('Inactivo');
-    expect(element.querySelector('a[href="/admin/access-control"]')).toBeNull();
+    expect(element.querySelector('a[href^="/admin/access-control/"]')).toBeNull();
+  });
+
+  it('does not offer entry to an implemented system without permissions', () => {
+    const { fixture, element } = setup();
+    TestBed.inject(AuthStore).setProfile({ permissions: [] } as never);
+    fixture.detectChanges();
+
+    expect(element.textContent).toContain('No tienes permisos para ingresar');
+    expect(element.querySelector('a[href^="/admin/access-control/"]')).toBeNull();
   });
 });

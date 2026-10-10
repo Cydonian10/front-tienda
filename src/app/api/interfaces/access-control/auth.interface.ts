@@ -34,6 +34,8 @@ export interface AuthPerfil {
   permissions: {
     id: string;
     code: string;
+    /** Sistema al que pertenece el rol que concedió este permiso. */
+    systemCode: string;
     name: string;
     resourceCode: string;
     actionCode: string;

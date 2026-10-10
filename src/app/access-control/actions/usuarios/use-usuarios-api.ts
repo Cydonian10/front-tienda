@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
-import { injectMutation, injectQuery } from '@tanstack/angular-query-experimental';
+import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import { UsuariosApi } from '../../../api/access-control/usuarios-api';
-import { CreateUserDto } from '../../../api/interfaces/access-control/usuario.interface';
+import { CreateUserDto, Usuario } from '../../../api/interfaces/access-control/usuario.interface';
 
 export const useUsuariosQueryKey = ['Get-Usuarios'] as const;
 
@@ -15,15 +15,19 @@ export function useUsuariosQuery() {
     retry: false,
   }));
 
-  const addUsuarioMutation = injectMutation(() => ({
+  return { findUsuariosQuery };
+}
+
+export function useCreateUsuarioMutation() {
+  const usuariosApi = inject(UsuariosApi);
+  const queryClient = inject(QueryClient);
+
+  return injectMutation(() => ({
     mutationFn: (dto: CreateUserDto) => usuariosApi.create(dto),
     onSuccess: (user) => {
-      // invalidar query
-      // añadir el user sin tner que llamar a la api de neuvo
+      queryClient.setQueryData<Usuario[]>([...useUsuariosQueryKey], (users) =>
+        users ? [user, ...users] : [user],
+      );
     },
   }));
-
-  return {
-    findUsuariosQuery,
-  };
 }

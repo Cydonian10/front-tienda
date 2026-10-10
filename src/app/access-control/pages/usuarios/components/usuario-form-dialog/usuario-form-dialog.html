@@ -1,95 +1,75 @@
-<app-dialog-shell [title]="data.user ? 'Editar usuario' : 'Nuevo usuario'" [titleId]="titleId">
-  <form [id]="formId" [formGroup]="form" (ngSubmit)="save()" class="space-y-4" novalidate>
+<app-dialog-shell title="Nuevo usuario" [titleId]="titleId">
+  <form [id]="formId" (submit)="$event.preventDefault(); save()" class="space-y-4" novalidate>
     <div class="grid gap-4 sm:grid-cols-2">
-      <label class="block space-y-2 text-sm font-semibold"
-        >Nombres
-        <input
-          class="input w-full"
-          formControlName="firstName"
-          autocomplete="given-name"
-          maxlength="100"
-          [attr.aria-invalid]="invalid('firstName')"
-        />
+      <label class="block space-y-2 text-sm font-semibold">
+        Nombres
+        <input class="input w-full" autocomplete="given-name"
+          [formField]="userForm.person.firstName"
+          [class.input-error]="userForm.person.firstName().touched() && userForm.person.firstName().invalid()"
+          [attr.aria-describedby]="userForm.person.firstName().touched() && userForm.person.firstName().invalid() ? 'first-name-errors' : null" />
+        <app-field-errors [field]="userForm.person.firstName()" errorId="first-name-errors" />
       </label>
-      <label class="block space-y-2 text-sm font-semibold"
-        >Apellidos
-        <input
-          class="input w-full"
-          formControlName="lastName"
-          autocomplete="family-name"
-          maxlength="100"
-          [attr.aria-invalid]="invalid('lastName')"
-        />
+      <label class="block space-y-2 text-sm font-semibold">
+        Apellidos
+        <input class="input w-full" autocomplete="family-name"
+          [formField]="userForm.person.lastName"
+          [class.input-error]="userForm.person.lastName().touched() && userForm.person.lastName().invalid()"
+          [attr.aria-describedby]="userForm.person.lastName().touched() && userForm.person.lastName().invalid() ? 'last-name-errors' : null" />
+        <app-field-errors [field]="userForm.person.lastName()" errorId="last-name-errors" />
       </label>
-      <label class="block space-y-2 text-sm font-semibold"
-        >Documento de identidad
-        <input
-          class="input w-full"
-          formControlName="identityDocument"
-          maxlength="50"
-          [attr.aria-invalid]="invalid('identityDocument')"
-        />
+      <label class="block space-y-2 text-sm font-semibold">
+        Documento de identidad
+        <input class="input w-full"
+          [formField]="userForm.person.identityDocument"
+          [class.input-error]="userForm.person.identityDocument().touched() && userForm.person.identityDocument().invalid()"
+          [attr.aria-describedby]="userForm.person.identityDocument().touched() && userForm.person.identityDocument().invalid() ? 'document-errors' : null" />
+        <app-field-errors [field]="userForm.person.identityDocument()" errorId="document-errors" />
       </label>
-      <label class="block space-y-2 text-sm font-semibold"
-        >Fecha de nacimiento
-        <input
-          class="input w-full"
-          type="date"
-          formControlName="dateOfBirth"
-          [max]="today"
-          [attr.aria-invalid]="invalid('dateOfBirth')"
-        />
+      <label class="block space-y-2 text-sm font-semibold">
+        Fecha de nacimiento
+        <input class="input w-full" type="date" [max]="today"
+          [formField]="userForm.person.dateOfBirth"
+          [class.input-error]="userForm.person.dateOfBirth().touched() && userForm.person.dateOfBirth().invalid()"
+          [attr.aria-describedby]="userForm.person.dateOfBirth().touched() && userForm.person.dateOfBirth().invalid() ? 'birth-errors' : null" />
+        <app-field-errors [field]="userForm.person.dateOfBirth()" errorId="birth-errors" />
       </label>
     </div>
-    <label class="block space-y-2 text-sm font-semibold"
-      >Correo electrónico
-      <input
-        class="input w-full"
-        type="email"
-        formControlName="email"
-        autocomplete="email"
-        [attr.aria-invalid]="invalid('email')"
-      />
+    <label class="block space-y-2 text-sm font-semibold">
+      Correo electrónico
+      <input class="input w-full" type="email" autocomplete="email"
+        [formField]="userForm.email"
+        [class.input-error]="userForm.email().touched() && userForm.email().invalid()"
+        [attr.aria-describedby]="userForm.email().touched() && userForm.email().invalid() ? 'email-errors' : null" />
+      <app-field-errors [field]="userForm.email()" errorId="email-errors" />
     </label>
-    <label class="block space-y-2 text-sm font-semibold"
-      >Nombre visible
-      <input
-        class="input w-full"
-        formControlName="nickName"
-        maxlength="100"
-        [attr.aria-invalid]="invalid('nickName')"
-      />
+    <label class="block space-y-2 text-sm font-semibold">
+      Nombre de usuario
+      <input class="input w-full" autocomplete="username"
+        [formField]="userForm.nickName"
+        [class.input-error]="userForm.nickName().touched() && userForm.nickName().invalid()"
+        [attr.aria-describedby]="userForm.nickName().touched() && userForm.nickName().invalid() ? 'nickname-errors' : null" />
+      <app-field-errors [field]="userForm.nickName()" errorId="nickname-errors" />
     </label>
-    <div class="flex flex-wrap gap-5 pt-1">
-      <label class="flex cursor-pointer items-center gap-2 text-sm"
-        ><input type="checkbox" class="checkbox checkbox-sm" formControlName="active" /> Usuario
-        activo</label
-      >
-      <label class="flex cursor-pointer items-center gap-2 text-sm"
-        ><input type="checkbox" class="checkbox checkbox-sm" formControlName="emailVerified" />
-        Correo verificado</label
-      >
-    </div>
-    @if (invalidData || (form.invalid && attempted)) {
-      <p class="text-sm text-error" role="alert">
-        Revisa los campos obligatorios y la fecha de nacimiento.
-      </p>
+    <label class="block space-y-2 text-sm font-semibold">
+      Contraseña
+      <input class="input w-full" type="password" autocomplete="new-password"
+        [formField]="userForm.password"
+        [class.input-error]="userForm.password().touched() && userForm.password().invalid()"
+        [attr.aria-describedby]="userForm.password().touched() && userForm.password().invalid() ? 'password-errors' : null" />
+      <app-field-errors [field]="userForm.password()" errorId="password-errors" />
+    </label>
+    @if (addUsuarioMutation.isError()) {
+      <div class="alert alert-error alert-soft" role="alert">
+        No se pudo crear el usuario. Revisa los datos e inténtalo de nuevo.
+      </div>
     }
-    @if (duplicateEmail) {
-      <p class="text-sm text-error" role="alert">
-        Ya existe un usuario con ese correo electrónico.
-      </p>
-    }
-    <p class="text-xs text-base-content/70">
-      Vista de demostración: estos datos no se envían a la API.
-    </p>
   </form>
   <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
-    <button type="button" class="btn" data-dialog-cancel (click)="dialogRef.close()">
-      Cancelar
-    </button>
-    <button type="submit" class="btn btn-primary" [attr.form]="formId">
-      {{ data.user ? 'Guardar cambios' : 'Crear usuario' }}
+    <button type="button" class="btn" data-dialog-cancel
+      [disabled]="addUsuarioMutation.isPending()" (click)="dialogRef.close()">Cancelar</button>
+    <button type="submit" class="btn btn-primary" [attr.form]="formId"
+      [disabled]="addUsuarioMutation.isPending()">
+      {{ addUsuarioMutation.isPending() ? 'Creando…' : 'Crear usuario' }}
     </button>
   </div>
 </app-dialog-shell>

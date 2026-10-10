@@ -1,10 +1,15 @@
-<header>
-  <nav class="mb-3 text-xs text-base-content/70" aria-label="Ruta de navegación">
-    Administración <span class="mx-2" aria-hidden="true">›</span>
-    <span class="font-semibold text-primary" aria-current="page">Usuarios</span>
-  </nav>
-  <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">Usuarios</h1>
-  <p class="mt-1 text-sm text-base-content/70">Consulta las cuentas de usuario.</p>
+<header class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <nav class="mb-3 text-xs text-base-content/70" aria-label="Ruta de navegación">
+      Administración <span class="mx-2" aria-hidden="true">›</span>
+      <span class="font-semibold text-primary" aria-current="page">Usuarios</span>
+    </nav>
+    <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">Usuarios</h1>
+    <p class="mt-1 text-sm text-base-content/70">Consulta las cuentas de usuario.</p>
+  </div>
+  <button class="btn btn-primary" type="button" (click)="openCreateUser()">
+    <app-icon name="plus" [size]="18" /> Nuevo usuario
+  </button>
 </header>
 
 @if (findUserQuery.isPending()) {

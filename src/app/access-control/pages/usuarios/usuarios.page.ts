@@ -1,12 +1,15 @@
+import { Dialog } from '@angular/cdk/dialog';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Icon } from '../../../shared/components/icon/icon';
 import { UsuariosList } from './components/usuarios-list/usuarios-list';
 import { UsuarioDetail } from './components/user-detail/usuario-detail';
+import { UsuarioFormDialog } from './components/usuario-form-dialog/usuario-form-dialog';
 import { useUsuariosQuery } from '../../actions/usuarios/use-usuarios-api';
 
 @Component({
-  imports: [UsuariosList, UsuarioDetail],
+  imports: [Icon, UsuariosList, UsuarioDetail],
   selector: 'app-usuarios',
   templateUrl: './usuarios.page.html',
   host: { class: 'block min-w-0 space-y-6' },
@@ -14,6 +17,7 @@ import { useUsuariosQuery } from '../../actions/usuarios/use-usuarios-api';
 export default class UsuariosPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly dialog = inject(Dialog);
   readonly findUserQuery = useUsuariosQuery().findUsuariosQuery;
 
   private readonly queryParams = toSignal(this.route.queryParamMap, {
@@ -30,6 +34,26 @@ export default class UsuariosPage {
       queryParams: { usuario: id },
       queryParamsHandling: 'merge',
     });
+  }
+
+  protected openCreateUser(): void {
+    this.dialog
+      .open<string>(UsuarioFormDialog, {
+        id: 'create-user',
+        width: '36rem',
+        maxWidth: 'calc(100vw - 2rem)',
+        ariaModal: true,
+        ariaLabelledBy: 'create-user-title',
+        autoFocus: '[data-dialog-cancel]',
+        restoreFocus: true,
+        closeOnNavigation: true,
+      })
+      .closed.subscribe((id) => {
+        if (!id) return;
+        this.search.set('');
+        this.status.set('all');
+        this.selectUser(id);
+      });
   }
 
   protected readonly search = signal('');

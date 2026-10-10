@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { Dialog } from '@angular/cdk/dialog';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { UsuariosApi } from '../../../api/access-control/usuarios-api';
 import { Usuario } from '../../../api/interfaces/access-control/usuario.interface';
 import { useUsuariosQueryKey } from '../../actions/usuarios/use-usuarios-api';
@@ -31,6 +32,7 @@ describe('UsuariosPage', () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     client.setQueryData([...useUsuariosQueryKey], users);
     const navigate = vi.fn().mockResolvedValue(true);
+    const open = vi.fn().mockReturnValue({ closed: of('user-1') });
     const route = { queryParamMap: params, snapshot: { queryParamMap: params.value } };
 
     TestBed.configureTestingModule({
@@ -38,6 +40,7 @@ describe('UsuariosPage', () => {
         provideTanStackQuery(client),
         { provide: ActivatedRoute, useValue: route },
         { provide: Router, useValue: { navigate } },
+        { provide: Dialog, useValue: { open } },
         { provide: UsuariosApi, useValue: { findUsuarios: vi.fn().mockResolvedValue(users) } },
       ],
     });
@@ -60,6 +63,9 @@ describe('UsuariosPage', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('[aria-label="Detalle del usuario"]')?.textContent)
       .toContain('Ana Rojas');
+
+    (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
+    expect(open).toHaveBeenCalled();
     fixture.destroy();
   });
 });

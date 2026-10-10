@@ -12,6 +12,17 @@
   </button>
 </header>
 
+@if (systemsQuery.isError()) {
+  <div class="alert alert-error alert-soft flex-wrap" role="alert">
+    <span>No se pudieron cargar los sistemas para asignar roles.</span>
+    <button class="btn btn-sm" type="button" (click)="systemsQuery.refetch()">Reintentar</button>
+  </div>
+} @else if (systemsQuery.isSuccess() && !systemsQuery.data()?.length) {
+  <div class="alert alert-warning alert-soft" role="status">
+    No hay sistemas disponibles para asignar roles.
+  </div>
+}
+
 @if (findUserQuery.isPending()) {
   <div class="flex items-center gap-3 rounded-box border border-base-300 bg-base-100 p-5" role="status">
     <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
@@ -35,7 +46,12 @@
       (selectUser)="selectUser($event)"
     />
     @if (selectedUser(); as user) {
-      <app-usuario-detail [user]="user" (edit)="openEditUser(user)" />
+      <app-usuario-detail
+        [user]="user"
+        [assignRoleDisabled]="assignRoleDisabled()"
+        (assignRole)="openAssignRole(user)"
+        (edit)="openEditUser(user)"
+      />
     } @else {
       <section
         class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center text-sm text-base-content/70"

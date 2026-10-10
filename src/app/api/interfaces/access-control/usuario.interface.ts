@@ -5,12 +5,31 @@ export interface Usuario {
   emailVerified: boolean;
   active: boolean;
   person: Person;
-  roles: {
-    id: string;
-    name: string;
-    inicio: string | null;
-    fin: string | null;
-  }[];
+  roles: UsuarioRole[];
+}
+
+export interface UsuarioRole {
+  id: string;
+  /** Puede no venir en el listado actual de usuarios. */
+  roleId?: string;
+  name: string;
+  inicio: string | null;
+  fin: string | null;
+}
+
+export interface AddUserRoleDto {
+  roleId: string;
+  validFrom: string; // YYYY-MM-DD
+  validUntil: string | null; // YYYY-MM-DD o sin fecha de vencimiento
+}
+
+export interface UserRoleAssignment {
+  id: string;
+  userId: string;
+  roleId: string;
+  rol: string;
+  validFrom: string;
+  validUntil: string | null;
 }
 
 export interface Person {

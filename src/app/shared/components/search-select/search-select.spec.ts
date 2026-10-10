@@ -1,4 +1,6 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SearchSelect, SearchSelectOption } from './search-select';
 
 describe('SearchSelect', () => {
@@ -146,6 +148,35 @@ describe('SearchSelect', () => {
     fixture.detectChanges();
     expect(component.selected()).toEqual([2]);
     expect(component.opened()).toBe(false);
+    fixture.destroy();
+  });
+
+  it('updates a reactive form control when selecting an option and when resetting', () => {
+    @Component({
+      imports: [SearchSelect, ReactiveFormsModule],
+      template: `<app-search-select [options]="options" [formControl]="roleId" />`,
+    })
+    class RoleForm {
+      readonly options = [
+        { value: 'admin', label: 'Administrador' },
+        { value: 'seller', label: 'Vendedor' },
+      ];
+      readonly roleId = new FormControl('', { nonNullable: true, validators: Validators.required });
+    }
+
+    const fixture = TestBed.createComponent(RoleForm);
+    fixture.detectChanges();
+    const select = fixture.debugElement.children[0].componentInstance as SearchSelect;
+    expect(fixture.componentInstance.roleId.invalid).toBe(true);
+
+    select.choose(select.filteredOptions()[1]);
+    expect(fixture.componentInstance.roleId.value).toBe('seller');
+    expect(fixture.componentInstance.roleId.valid).toBe(true);
+
+    fixture.componentInstance.roleId.setValue('');
+    fixture.detectChanges();
+    expect(select.displayValue()).toBe('');
+    expect(fixture.componentInstance.roleId.invalid).toBe(true);
     fixture.destroy();
   });
 });

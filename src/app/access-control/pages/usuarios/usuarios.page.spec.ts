@@ -4,7 +4,9 @@ import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { BehaviorSubject, of } from 'rxjs';
 import { UsuariosApi } from '../../../api/access-control/usuarios-api';
+import { SystemApi } from '../../../api/access-control/system-api';
 import { Usuario } from '../../../api/interfaces/access-control/usuario.interface';
+import { findSystemsQueryKey } from '../../../system-portal/actions/find-systems-action';
 import { useUsuariosQueryKey } from '../../actions/usuarios/use-usuarios-api';
 import UsuariosPage from './usuarios.page';
 
@@ -31,6 +33,10 @@ describe('UsuariosPage', () => {
     const params = new BehaviorSubject(convertToParamMap({ usuario: 'user-2' }));
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     client.setQueryData([...useUsuariosQueryKey], users);
+    const systems = [
+      { id: 'system-1', code: 'VENTAS', name: 'Ventas', description: '', active: true, order: 1 },
+    ];
+    client.setQueryData([...findSystemsQueryKey], systems);
     const navigate = vi.fn().mockResolvedValue(true);
     const open = vi.fn().mockReturnValue({ closed: of('user-1') });
     const route = { queryParamMap: params, snapshot: { queryParamMap: params.value } };
@@ -42,6 +48,7 @@ describe('UsuariosPage', () => {
         { provide: Router, useValue: { navigate } },
         { provide: Dialog, useValue: { open } },
         { provide: UsuariosApi, useValue: { findUsuarios: vi.fn().mockResolvedValue(users) } },
+        { provide: SystemApi, useValue: { findAllSystems: vi.fn().mockResolvedValue(systems) } },
       ],
     });
 
@@ -67,6 +74,10 @@ describe('UsuariosPage', () => {
     (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
     expect(open).toHaveBeenCalled();
     (fixture.nativeElement.querySelector('app-usuario-detail button') as HTMLButtonElement).click();
+    expect(open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      id: 'assign-role-user-1', data: { user: users[0], systems },
+    }));
+    (fixture.nativeElement.querySelector('app-usuario-detail button:last-child') as HTMLButtonElement).click();
     expect(open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       id: 'edit-user-user-1', data: users[0],
     }));

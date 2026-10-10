@@ -11,6 +11,8 @@ import { Icon } from '../../../../../shared/components/icon/icon';
 export class UsuarioDetail {
   readonly user = input.required<Usuario>();
   readonly edit = output<void>();
+  readonly assignRole = output<void>();
+  readonly assignRoleDisabled = input(false);
 
   protected readonly fullName = (user: Usuario) =>
     `${user.person.firstName} ${user.person.lastName}`;

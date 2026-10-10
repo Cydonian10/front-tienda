@@ -1,7 +1,13 @@
 import { inject } from '@angular/core';
 import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import { UsuariosApi } from '../../../api/access-control/usuarios-api';
-import { CreateUserDto, UpdateUserDto, Usuario } from '../../../api/interfaces/access-control/usuario.interface';
+import {
+  AddUserRoleDto,
+  CreateUserDto,
+  UpdateUserDto,
+  UserRoleAssignment,
+  Usuario,
+} from '../../../api/interfaces/access-control/usuario.interface';
 
 export const useUsuariosQueryKey = ['Get-Usuarios'] as const;
 
@@ -39,5 +45,34 @@ export function useUsuariosApi() {
     },
   }));
 
-  return { findUsuariosQuery, createMutation, updateMutation };
+  const addRolesMutation = injectMutation(() => ({
+    mutationFn: ({ userId, dto }: { userId: string; dto: AddUserRoleDto }) =>
+      usuariosApi.addRoles(dto, userId),
+    onSuccess: (assignment: UserRoleAssignment) => {
+      queryClient.setQueryData<Usuario[]>([...useUsuariosQueryKey], (users) =>
+        users?.map((user) => {
+          if (user.id !== assignment.userId) return user;
+
+          const roles = user.roles ?? [];
+          if (roles.some((role) => role.id === assignment.id)) return user;
+
+          return {
+            ...user,
+            roles: [
+              ...roles,
+              {
+                id: assignment.id,
+                roleId: assignment.roleId,
+                name: assignment.rol,
+                inicio: assignment.validFrom,
+                fin: assignment.validUntil,
+              },
+            ],
+          };
+        }),
+      );
+    },
+  }));
+
+  return { findUsuariosQuery, createMutation, updateMutation, addRolesMutation };
 }

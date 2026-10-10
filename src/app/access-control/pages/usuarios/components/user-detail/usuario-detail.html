@@ -18,6 +18,14 @@
       [class.badge-error]="!user().active"
       >{{ user().active ? 'Activo' : 'Inactivo' }}</span
     >
+    <button
+      type="button"
+      class="btn btn-sm"
+      [disabled]="assignRoleDisabled()"
+      (click)="assignRole.emit()"
+    >
+      Asignar rol
+    </button>
     <button type="button" class="btn btn-sm" (click)="edit.emit()">Editar</button>
   </header>
 

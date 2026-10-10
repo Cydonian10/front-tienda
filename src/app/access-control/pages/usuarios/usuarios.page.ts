@@ -6,8 +6,10 @@ import { Icon } from '../../../shared/components/icon/icon';
 import { UsuariosList } from './components/usuarios-list/usuarios-list';
 import { UsuarioDetail } from './components/user-detail/usuario-detail';
 import { UsuarioFormDialog } from './components/usuario-form-dialog/usuario-form-dialog';
+import { AsignarRolDialog, AssignRoleData } from './components/asignar-rol-dialog/asignar-rol-dialog';
 import { useUsuariosApi } from '../../actions/usuarios/use-usuarios-api';
 import { Usuario } from '../../../api/interfaces/access-control/usuario.interface';
+import { useSystemsQuery } from '../../../system-portal/actions/find-systems-action';
 
 @Component({
   imports: [Icon, UsuariosList, UsuarioDetail],
@@ -19,7 +21,9 @@ export default class UsuariosPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
-  readonly findUserQuery = useUsuariosApi().findUsuariosQuery;
+  private readonly usuariosApi = useUsuariosApi();
+  readonly findUserQuery = this.usuariosApi.findUsuariosQuery;
+  readonly systemsQuery = useSystemsQuery();
 
   private readonly queryParams = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
@@ -71,6 +75,28 @@ export default class UsuariosPage {
       closeOnNavigation: true,
     });
   }
+
+  protected openAssignRole(user: Usuario): void {
+    const systems = this.systemsQuery.data() ?? [];
+    if (!systems.length) return;
+
+    const id = `assign-role-${user.id}`;
+    this.dialog.open<void, AssignRoleData, AsignarRolDialog>(AsignarRolDialog, {
+      id,
+      data: { user, systems },
+      width: '36rem',
+      maxWidth: 'calc(100vw - 2rem)',
+      ariaModal: true,
+      ariaLabelledBy: `${id}-title`,
+      autoFocus: '[data-dialog-cancel]',
+      restoreFocus: true,
+      closeOnNavigation: true,
+    });
+  }
+
+  protected readonly assignRoleDisabled = computed(
+    () => this.systemsQuery.isPending() || this.systemsQuery.isError() || !this.systemsQuery.data()?.length,
+  );
 
   protected readonly search = signal('');
   protected readonly status = signal('all');

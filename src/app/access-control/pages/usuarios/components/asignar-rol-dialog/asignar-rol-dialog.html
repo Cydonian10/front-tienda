@@ -1,7 +1,9 @@
 <app-dialog-shell title="Asignar rol" [titleId]="titleId">
   <form [id]="formId" [formGroup]="form" (ngSubmit)="save()" class="space-y-5" novalidate>
     <p class="text-sm text-base-content/70">
-      Asigna un rol a <strong>{{ fullName(data.user) }}</strong> dentro del sistema elegido.
+      Asigna un rol a
+      <strong>{{ data.user.person.firstName }} {{ data.user.person.lastName }}</strong>
+      dentro del sistema elegido.
     </p>
     <label class="block space-y-2 text-sm font-semibold"
       >Sistema
@@ -11,20 +13,29 @@
         }
       </select>
     </label>
-    <label class="block space-y-2 text-sm font-semibold"
-      >Rol
-      <select
-        class="select w-full"
+    <div class="space-y-2 text-sm font-semibold">
+      <span class="block">Rol</span>
+      <app-search-select
+        [options]="roleOptions"
         formControlName="roleId"
+        ariaLabel="Seleccionar rol"
+        placeholder="Selecciona un rol"
+        searchPlaceholder="Buscar rol..."
+        [disabled]="rolesQuery.isPending() || rolesQuery.isError() || addRolesMutation.isPending()"
         [attr.aria-invalid]="form.controls.roleId.invalid && form.controls.roleId.touched"
-      >
-        <option value="">Selecciona un rol</option>
-        @for (role of availableRoles; track role.id) {
-          <option [value]="role.id">{{ role.name }} · {{ role.code }}</option>
-        }
-      </select>
-    </label>
-    @if (!availableRoles.length) {
+      />
+    </div>
+    @if (rolesQuery.isPending()) {
+      <p class="flex items-center gap-2 text-sm text-base-content/70" role="status">
+        <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
+        Cargando roles…
+      </p>
+    } @else if (rolesQuery.isError()) {
+      <div class="alert alert-error alert-soft" role="alert">
+        <span>No se pudieron cargar los roles de este sistema.</span>
+        <button class="btn btn-sm" type="button" (click)="rolesQuery.refetch()">Reintentar</button>
+      </div>
+    } @else if (!availableRoles.length) {
       <p class="text-sm text-base-content/70">
         No hay roles disponibles para asignar en este sistema.
       </p>
@@ -57,19 +68,29 @@
     @if (form.invalid && form.touched) {
       <p role="alert" class="text-sm text-error">Selecciona un rol y una fecha de inicio.</p>
     }
-    <p class="text-xs text-base-content/70">Asignación de prueba: no se envía a la API.</p>
+    @if (addRolesMutation.isError()) {
+      <div class="alert alert-error alert-soft" role="alert">
+        No se pudo asignar el rol. Revisa los datos e inténtalo de nuevo.
+      </div>
+    }
   </form>
   <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
-    <button type="button" class="btn" data-dialog-cancel (click)="dialogRef.close()">
+    <button
+      type="button"
+      class="btn"
+      data-dialog-cancel
+      [disabled]="addRolesMutation.isPending()"
+      (click)="dialogRef.close()"
+    >
       Cancelar
     </button>
     <button
       type="submit"
       class="btn btn-primary"
       [attr.form]="formId"
-      [disabled]="!availableRoles.length"
+      [disabled]="!availableRoles.length || rolesQuery.isPending() || rolesQuery.isError() || addRolesMutation.isPending()"
     >
-      Asignar rol
+      {{ addRolesMutation.isPending() ? 'Asignando…' : 'Asignar rol' }}
     </button>
   </div>
 </app-dialog-shell>

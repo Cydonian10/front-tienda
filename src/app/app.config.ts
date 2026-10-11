@@ -7,13 +7,14 @@ import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-exper
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { withDevtools } from '@tanstack/angular-query-experimental/devtools';
 import { authInterceptor } from './auth/interceptors/auth.interceptor';
+import { apiErrorInterceptor } from './shared/interceptors/api-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideClientHydration(),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, apiErrorInterceptor])),
     provideTanStackQuery(new QueryClient(), withDevtools()),
   ],
 };

@@ -177,7 +177,6 @@ export default class SystemRolesPage {
             if (this.selectedRol()?.id === role.id) this.clearSelectedRole();
             this.toastService.success('Rol eliminado correctamente');
           },
-          onError: () => this.toastService.error('No se pudo eliminar el rol'),
         });
       });
   }
@@ -295,7 +294,7 @@ export default class SystemRolesPage {
       );
       this.toastService.success('Permisos guardados correctamente');
     } catch {
-      this.toastService.error('No se pudieron guardar los permisos');
+      // El interceptor muestra el error; se mantienen los cambios para reintentar.
     }
   }
 }

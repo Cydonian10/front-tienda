@@ -6,7 +6,10 @@ import { Icon } from '../../../shared/components/icon/icon';
 import { UsuariosList } from './components/usuarios-list/usuarios-list';
 import { UsuarioDetail } from './components/user-detail/usuario-detail';
 import { UsuarioFormDialog } from './components/usuario-form-dialog/usuario-form-dialog';
-import { AsignarRolDialog, AssignRoleData } from './components/asignar-rol-dialog/asignar-rol-dialog';
+import {
+  AsignarRolDialog,
+  AssignRoleData,
+} from './components/asignar-rol-dialog/asignar-rol-dialog';
 import { useUsuariosApi } from '../../actions/usuarios/use-usuarios-api';
 import { Usuario, UsuarioRole } from '../../../api/interfaces/access-control/usuario.interface';
 import { useSystemsQuery } from '../../../system-portal/actions/find-systems-action';
@@ -115,14 +118,16 @@ export default class UsuariosPage {
           { userId: user.id, assignadoId: role.id },
           {
             onSuccess: () => this.toast.success('Rol quitado correctamente'),
-            onError: () => this.toast.error('No se pudo quitar el rol. Inténtalo de nuevo.'),
           },
         );
       });
   }
 
   protected readonly assignRoleDisabled = computed(
-    () => this.systemsQuery.isPending() || this.systemsQuery.isError() || !this.systemsQuery.data()?.length,
+    () =>
+      this.systemsQuery.isPending() ||
+      this.systemsQuery.isError() ||
+      !this.systemsQuery.data()?.length,
   );
 
   protected readonly search = signal('');

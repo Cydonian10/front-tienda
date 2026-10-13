@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "references": {
+    "api-tienda": {
+      "path": "../../api-tienda",
+      "description": "API de la tienda; consultar cuando se necesite contexto del backend."
+    }
+  },
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "type": "local",
+        "command": ["npx", "-y", "@playwright/mcp@latest"]
+      }
+    }
+  }
+}

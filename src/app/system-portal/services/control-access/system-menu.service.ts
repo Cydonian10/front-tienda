@@ -40,11 +40,28 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
       },
     ],
   },
+  INVENTARIO: {
+    icon: 'package',
+    menu: [
+      {
+        label: 'Catálogo',
+        icon: 'package',
+        items: [
+          {
+            label: 'Productos',
+            url: '/admin/inventario/productos',
+            icon: 'package',
+            permission: PERMISSION_CODES.PRODUCTS_READ,
+          },
+        ],
+      },
+    ],
+  },
 };
 
 const SYSTEM_ICONS: Readonly<Record<string, IconName>> = {
   ACCESS_CONTROL: 'shield-check',
-  INVENTORY: 'package',
+  INVENTARIO: 'package',
   SALES: 'chart-line',
 };
 

@@ -92,6 +92,27 @@ describe('SystemMenuService', () => {
     ]);
     expect(service.routeFor('ACCESS_CONTROL')).toBe('/admin/access-control/usuarios');
   });
+
+  it('provides the inventory menu only with permission for that system', () => {
+    const service = TestBed.inject(SystemMenuService);
+    grant(PERMISSION_CODES.PRODUCTS_READ);
+
+    expect(service.menuFor('INVENTARIO')).toEqual([]);
+    expect(service.routeFor('INVENTARIO')).toBeNull();
+
+    TestBed.inject(AuthStore).setProfile({
+      isSuperAdmin: false,
+      permissions: [
+        { code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' },
+      ],
+    } as never);
+
+    expect(service.isImplemented('INVENTARIO')).toBe(true);
+    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/productos');
+    expect(service.menuFor('INVENTARIO')[0].items.map((item) => item.label)).toEqual([
+      'Productos',
+    ]);
+  });
 });
 
 @Component({ template: '' })

@@ -67,4 +67,47 @@ describe('AdminLayout navigation', () => {
     harness.fixture.detectChanges();
     expect(sidebar().querySelectorAll('a')).toHaveLength(1);
   });
+
+  it('changes the sidebar menu when navigating between systems', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([
+          {
+            path: 'admin',
+            children: [
+              {
+                path: 'access-control',
+                component: AdminLayout,
+                data: { systemCode: 'ACCESS_CONTROL' },
+                children: [{ path: 'usuarios', component: TestPage }],
+              },
+              {
+                path: 'inventario',
+                component: AdminLayout,
+                data: { systemCode: 'INVENTARIO' },
+                children: [{ path: 'productos', component: TestPage }],
+              },
+            ],
+          },
+        ]),
+        provideTanStackQuery(new QueryClient()),
+        { provide: AuthSessionService, useValue: {} },
+        { provide: AuthProfileService, useValue: {} },
+        { provide: ConfirmDialogService, useValue: {} },
+      ],
+    });
+
+    TestBed.inject(AuthStore).setProfile({ isSuperAdmin: true, permissions: [] } as never);
+
+    const harness = await RouterTestingHarness.create('/admin/access-control/usuarios');
+    const sidebar = () => harness.routeNativeElement!.querySelector('nav') as HTMLElement;
+
+    expect(sidebar().querySelector('a[href="/admin/access-control/usuarios"]')).toBeTruthy();
+    expect(sidebar().querySelector('a[href="/admin/inventario/productos"]')).toBeNull();
+
+    await harness.navigateByUrl('/admin/inventario/productos');
+
+    expect(sidebar().querySelector('a[href="/admin/access-control/usuarios"]')).toBeNull();
+    expect(sidebar().querySelector('a[href="/admin/inventario/productos"]')).toBeTruthy();
+  });
 });

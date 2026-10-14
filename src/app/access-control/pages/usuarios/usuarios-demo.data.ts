@@ -42,7 +42,7 @@ export interface DemoAssignment {
 export const DEMO_SYSTEMS: DemoSystem[] = [
   { id: 'system-access', code: 'ACCESS_CONTROL', name: 'Control de acceso' },
   { id: 'system-sales', code: 'SALES', name: 'Ventas' },
-  { id: 'system-inventory', code: 'INVENTORY', name: 'Inventario' },
+  { id: 'system-inventory', code: 'INVENTARIO', name: 'Inventario' },
 ];
 
 export const DEMO_ROLES: DemoRole[] = [

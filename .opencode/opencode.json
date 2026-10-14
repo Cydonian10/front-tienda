@@ -10,7 +10,11 @@
     "servers": {
       "playwright": {
         "type": "local",
-        "command": ["npx", "-y", "@playwright/mcp@latest"]
+        "command": [
+          "/bin/bash",
+          "-lc",
+          "source \"$HOME/.nvm/nvm.sh\" && nvm use default >/dev/null 2>&1 && exec npx -y @playwright/mcp@latest"
+        ]
       }
     }
   }

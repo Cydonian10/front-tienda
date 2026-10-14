@@ -102,16 +102,16 @@ describe('SystemMenuService', () => {
 
     TestBed.inject(AuthStore).setProfile({
       isSuperAdmin: false,
-      permissions: [
-        { code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' },
-      ],
+      permissions: [{ code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' }],
     } as never);
 
     expect(service.isImplemented('INVENTARIO')).toBe(true);
     expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/productos');
     expect(service.menuFor('INVENTARIO')[0].items.map((item) => item.label)).toEqual([
       'Productos',
+      'Producto prueba',
     ]);
+    expect(service.menuFor('INVENTARIO')[0].items[1].url).toBe('/admin/inventario/producto-prueba');
   });
 });
 

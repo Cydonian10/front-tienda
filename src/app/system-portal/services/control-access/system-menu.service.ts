@@ -53,6 +53,12 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             icon: 'package',
             permission: PERMISSION_CODES.PRODUCTS_READ,
           },
+          {
+            label: 'Producto prueba',
+            url: '/admin/inventario/producto-prueba',
+            icon: 'file',
+            permission: PERMISSION_CODES.PRODUCTS_READ,
+          },
         ],
       },
     ],

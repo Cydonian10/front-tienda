@@ -1,12 +1,24 @@
-import { Component, inject, input, OnDestroy, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  OnDestroy,
+  output,
+  signal,
+  untracked,
+} from '@angular/core';
 import { form, FormField, maxLength, required, submit, validate } from '@angular/forms/signals';
 import {
-  ProductoApi,
   type CreateProductDto,
+  type ProductResponse,
+  type UpdateProductDto,
   type Unidad,
-} from '../../../../../api/inventario/product-api';
+} from '../../../../../api/interfaces/inventario/producto.interface';
 import { FieldErrors } from '../../../../../shared/components/field-errors/field-errors';
 import { Icon } from '../../../../../shared/components/icon/icon';
+import { ProductoApi } from '../../../../../api/inventario/product-api';
 
 interface SelectedImage {
   file: File;
@@ -22,13 +34,32 @@ interface SelectedImage {
 export class DatosGeneralesStep implements OnDestroy {
   private readonly api = inject(ProductoApi);
   readonly saving = input(false);
-  readonly created = input(false);
+  readonly product = input<ProductResponse | null>(null);
   readonly create = output<CreateProductDto>();
+  readonly update = output<UpdateProductDto>();
+  readonly editingChange = output<boolean>();
+  readonly editing = signal(false);
+  private previousProductId: string | null = null;
   readonly unidades = signal<Unidad[]>([]);
   readonly loadingUnidades = signal(true);
   readonly unitsError = signal(false);
   readonly images = signal<SelectedImage[]>([]);
+  readonly removedImageIds = signal<string[]>([]);
+  readonly savedImageUrls = signal<Record<string, string>>({});
+  readonly loadingImages = signal(false);
+  readonly imagesLoadError = signal(false);
   readonly imageError = signal('');
+  readonly existingImages = computed(() =>
+    (this.product()?.imagenes ?? [])
+      .filter((image) => !this.removedImageIds().includes(image.id))
+      .sort((a, b) => a.orden - b.orden),
+  );
+  readonly totalImages = computed(() => this.existingImages().length + this.images().length);
+  readonly principalImageId = computed(
+    () =>
+      this.existingImages().find((image) => image.esPrincipal)?.id ?? this.existingImages()[0]?.id,
+  );
+  private imageLoadVersion = 0;
 
   readonly model = signal<Omit<CreateProductDto, 'imagenes'>>({
     nombre: '',
@@ -47,6 +78,54 @@ export class DatosGeneralesStep implements OnDestroy {
 
   constructor() {
     void this.loadUnidades();
+    effect(() => {
+      const product = this.product();
+      untracked(() => {
+        if (product) {
+          this.clearNewImages();
+          this.removedImageIds.set([]);
+          this.imageError.set('');
+          this.model.set({
+            nombre: product.nombre,
+            descripcion: product.descripcion ?? '',
+            unidadBaseId: product.unidadBaseId,
+            activo: product.activo,
+          });
+          this.editing.set(false);
+          this.editingChange.emit(false);
+          void this.loadSavedImages(product.id, product.imagenes);
+        } else if (this.previousProductId) {
+          this.clearNewImages();
+          this.removedImageIds.set([]);
+          this.clearSavedImages();
+          this.model.set({ nombre: '', descripcion: '', unidadBaseId: '', activo: true });
+          this.editing.set(false);
+          this.editingChange.emit(false);
+        }
+        this.previousProductId = product?.id ?? null;
+      });
+    });
+  }
+
+  startEdit(): void {
+    this.editing.set(true);
+    this.editingChange.emit(true);
+  }
+
+  cancelEdit(): void {
+    const product = this.product();
+    if (!product) return;
+    this.model.set({
+      nombre: product.nombre,
+      descripcion: product.descripcion ?? '',
+      unidadBaseId: product.unidadBaseId,
+      activo: product.activo,
+    });
+    this.clearNewImages();
+    this.removedImageIds.set([]);
+    this.imageError.set('');
+    this.editing.set(false);
+    this.editingChange.emit(false);
   }
 
   async loadUnidades(): Promise<void> {
@@ -67,7 +146,7 @@ export class DatosGeneralesStep implements OnDestroy {
     input.value = '';
     if (!files.length) return;
 
-    if (this.images().length + files.length > 8) {
+    if (this.totalImages() + files.length > 8) {
       this.imageError.set('Puedes agregar hasta 8 imágenes por producto.');
       return;
     }
@@ -95,15 +174,68 @@ export class DatosGeneralesStep implements OnDestroy {
     this.imageError.set('');
   }
 
-  ngOnDestroy(): void {
+  removeSavedImage(id: string): void {
+    if (!this.editing() || this.saving()) return;
+    this.removedImageIds.update((ids) => [...ids, id]);
+    this.imageError.set('');
+  }
+
+  private async loadSavedImages(
+    productId: string,
+    images: NonNullable<ProductResponse['imagenes']>,
+  ): Promise<void> {
+    const version = ++this.imageLoadVersion;
+    this.clearSavedImageUrls();
+    this.loadingImages.set(images.length > 0);
+    this.imagesLoadError.set(false);
+    const results = await Promise.allSettled(
+      images.map(async (image) => ({
+        id: image.id,
+        url: URL.createObjectURL(await this.api.getImage(productId, image.imagenId)),
+      })),
+    );
+    if (version !== this.imageLoadVersion) {
+      for (const result of results) {
+        if (result.status === 'fulfilled') URL.revokeObjectURL(result.value.url);
+      }
+      return;
+    }
+    const urls: Record<string, string> = {};
+    for (const result of results) {
+      if (result.status === 'fulfilled') urls[result.value.id] = result.value.url;
+      else this.imagesLoadError.set(true);
+    }
+    this.savedImageUrls.set(urls);
+    this.loadingImages.set(false);
+  }
+
+  private clearSavedImageUrls(): void {
+    for (const url of Object.values(this.savedImageUrls())) URL.revokeObjectURL(url);
+    this.savedImageUrls.set({});
+  }
+
+  private clearSavedImages(): void {
+    this.imageLoadVersion++;
+    this.clearSavedImageUrls();
+    this.loadingImages.set(false);
+    this.imagesLoadError.set(false);
+  }
+
+  private clearNewImages(): void {
     for (const image of this.images()) URL.revokeObjectURL(image.url);
+    this.images.set([]);
+  }
+
+  ngOnDestroy(): void {
+    this.clearNewImages();
+    this.clearSavedImages();
   }
 
   async save(event: Event): Promise<void> {
     event.preventDefault();
     if (
       this.saving() ||
-      this.created() ||
+      (this.product() && !this.editing()) ||
       this.loadingUnidades() ||
       this.unitsError() ||
       this.imageError()
@@ -111,11 +243,20 @@ export class DatosGeneralesStep implements OnDestroy {
       return;
     await submit(this.productForm, async (formState) => {
       const value = formState().value();
-      this.create.emit({
-        ...value,
-        nombre: value.nombre.trim(),
-        imagenes: this.images().map((image) => image.file),
-      });
+      const dto = { ...value, nombre: value.nombre.trim() };
+      if (this.product()) {
+        this.update.emit(
+          this.removedImageIds().length || this.images().length
+            ? {
+                ...dto,
+                imagenesConservarIds: this.existingImages().map((image) => image.id),
+                imagenes: this.images().map((image) => image.file),
+              }
+            : dto,
+        );
+      } else {
+        this.create.emit({ ...dto, imagenes: this.images().map((image) => image.file) });
+      }
     });
   }
 }

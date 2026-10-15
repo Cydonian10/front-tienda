@@ -2,20 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ENVIRONMENT } from '../config/env-dev';
 import { firstValueFrom } from 'rxjs';
-
-export interface CreateProductDto {
-  nombre: string;
-  descripcion: string;
-  unidadBaseId: string;
-  activo: boolean;
-  imagenes: File[];
-}
-
-export interface Unidad {
-  id: string;
-  nombre: string;
-  simbolo: string;
-}
+import {
+  CreateProductDto,
+  ProductResponse,
+  Unidad,
+  UpdateProductDto,
+} from '../interfaces/inventario/producto.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ProductoApi {
@@ -30,7 +22,7 @@ export class ProductoApi {
     ).then((response) => response.data);
   }
 
-  create(dto: CreateProductDto): Promise<{ id: string }> {
+  create(dto: CreateProductDto): Promise<ProductResponse> {
     const body = new FormData();
     body.append('nombre', dto.nombre);
     body.append('descripcion', dto.descripcion);
@@ -39,7 +31,41 @@ export class ProductoApi {
     for (const image of dto.imagenes) body.append('imagenes', image);
 
     return firstValueFrom(
-      this.#http.post<{ id: string }>(`${this.#apirUrl.apiUrl}/productos`, body),
+      this.#http.post<ProductResponse>(`${this.#apirUrl.apiUrl}/productos`, body),
+    );
+  }
+
+  getById(id: string): Promise<ProductResponse> {
+    return firstValueFrom(
+      this.#http.get<ProductResponse>(`${this.#apirUrl.apiUrl}/productos/${id}`),
+    );
+  }
+
+  update(id: string, dto: UpdateProductDto): Promise<ProductResponse> {
+    if (dto.imagenesConservarIds !== undefined || dto.imagenes?.length) {
+      const body = new FormData();
+      body.append('nombre', dto.nombre);
+      body.append('descripcion', dto.descripcion);
+      body.append('unidadBaseId', dto.unidadBaseId);
+      body.append('activo', String(dto.activo));
+      if (dto.imagenesConservarIds !== undefined) {
+        body.append('imagenesConservarIds', JSON.stringify(dto.imagenesConservarIds));
+      }
+      for (const image of dto.imagenes ?? []) body.append('imagenes', image);
+      return firstValueFrom(
+        this.#http.patch<ProductResponse>(`${this.#apirUrl.apiUrl}/productos/${id}`, body),
+      );
+    }
+    return firstValueFrom(
+      this.#http.patch<ProductResponse>(`${this.#apirUrl.apiUrl}/productos/${id}`, dto),
+    );
+  }
+
+  getImage(productId: string, imageId: string): Promise<Blob> {
+    return firstValueFrom(
+      this.#http.get(`${this.#apirUrl.apiUrl}/productos/${productId}/imagenes/${imageId}/archivo`, {
+        responseType: 'blob',
+      }),
     );
   }
 }

@@ -50,4 +50,59 @@ describe('ProductoApi', () => {
     request.flush({ id: 'producto-1' });
     expect(await result).toEqual({ id: 'producto-1' });
   });
+
+  it('recupera un producto por ID', async () => {
+    const result = api.getById('producto-1');
+    const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
+    expect(request.request.method).toBe('GET');
+    request.flush({ id: 'producto-1', nombre: 'Martillo', imagenes: [] });
+    expect((await result).nombre).toBe('Martillo');
+  });
+
+  it('actualiza datos generales sin reenviar imágenes', async () => {
+    const dto = {
+      nombre: 'Martillo nuevo',
+      descripcion: '',
+      unidadBaseId: 'unidad-1',
+      activo: false,
+    };
+    const result = api.update('producto-1', dto);
+    const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual(dto);
+    request.flush({ id: 'producto-1', ...dto, imagenes: [] });
+    expect((await result).activo).toBe(false);
+  });
+
+  it('actualiza producto e imágenes juntos por multipart', async () => {
+    const file = new File(['foto'], 'foto.png', { type: 'image/png' });
+    const result = api.update('producto-1', {
+      nombre: 'Martillo',
+      descripcion: '',
+      unidadBaseId: 'unidad-1',
+      activo: true,
+      imagenesConservarIds: [],
+      imagenes: [file],
+    });
+    const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
+    expect(request.request.method).toBe('PATCH');
+    const body = request.request.body as FormData;
+    expect(body.get('imagenesConservarIds')).toBe('[]');
+    expect(body.getAll('imagenes')).toEqual([file]);
+    expect(body.get('activo')).toBe('true');
+    request.flush({ id: 'producto-1', imagenes: [] });
+    expect((await result).id).toBe('producto-1');
+  });
+
+  it('descarga una imagen usando el ID de imagen, no el de asociación', async () => {
+    const result = api.getImage('producto-1', 'imagen-1');
+    const request = http.expectOne(
+      'http://localhost:3000/api/productos/producto-1/imagenes/imagen-1/archivo',
+    );
+    expect(request.request.method).toBe('GET');
+    expect(request.request.responseType).toBe('blob');
+    const blob = new Blob(['foto'], { type: 'image/png' });
+    request.flush(blob);
+    expect(await result).toBe(blob);
+  });
 });

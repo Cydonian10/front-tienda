@@ -1,0 +1,179 @@
+<form class="space-y-7" (submit)="save($event)" novalidate>
+  <div class="space-y-5">
+    <div>
+      <label for="product-name" class="mb-2 block text-sm font-semibold"
+        >Nombre del producto <span class="text-error">*</span></label
+      >
+      <input
+        id="product-name"
+        class="input w-full"
+        type="text"
+        autocomplete="off"
+        [formField]="productForm.nombre"
+        [class.input-error]="productForm.nombre().touched() && productForm.nombre().invalid()"
+        aria-describedby="product-name-errors"
+      />
+      <app-field-errors [field]="productForm.nombre()" errorId="product-name-errors" />
+      <p class="mt-1.5 text-xs text-base-content/60">Nombre común a todas las variantes.</p>
+    </div>
+    <div>
+      <label for="product-description" class="mb-2 block text-sm font-semibold">Descripción</label>
+      <textarea
+        id="product-description"
+        class="textarea min-h-24 w-full"
+        [formField]="productForm.descripcion"
+      ></textarea>
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div>
+        <label for="product-base-unit" class="mb-2 block text-sm font-semibold"
+          >Unidad base <span class="text-error">*</span></label
+        >
+        <select
+          id="product-base-unit"
+          class="select w-full"
+          [formField]="productForm.unidadBaseId"
+          [class.select-error]="
+            productForm.unidadBaseId().touched() && productForm.unidadBaseId().invalid()
+          "
+          aria-describedby="product-base-unit-errors"
+        >
+          <option value="">Selecciona una unidad</option>
+          @for (unidad of unidades(); track unidad.id) {
+            <option [value]="unidad.id">{{ unidad.nombre }} ({{ unidad.simbolo }})</option>
+          }
+        </select>
+        <app-field-errors [field]="productForm.unidadBaseId()" errorId="product-base-unit-errors" />
+        @if (unitsError()) {
+          <p class="mt-2 text-sm text-error" role="alert">No se pudieron cargar las unidades.</p>
+          <button type="button" class="btn btn-sm mt-2" (click)="loadUnidades()">Reintentar</button>
+        }
+        <p class="mt-1.5 text-xs text-base-content/60">
+          El stock de todas las variantes se contabilizaría en esta unidad.
+        </p>
+      </div>
+      <div>
+        <span class="mb-2 block text-sm font-semibold">Estado del producto</span>
+        <div
+          class="flex min-h-10 items-center justify-between rounded-field border border-base-300 px-3 text-sm"
+        >
+          <span>{{ model().activo ? 'Activo' : 'Inactivo' }}</span
+          ><input
+            type="checkbox"
+            class="toggle toggle-primary toggle-sm"
+            aria-label="Producto activo"
+            [formField]="productForm.activo"
+          />
+        </div>
+        <p class="mt-1.5 text-xs text-base-content/60">
+          Se podría desactivar sin perder su historial.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <section
+    class="rounded-box border border-base-300 bg-base-200/50 p-4 sm:p-5"
+    aria-labelledby="create-images-title"
+  >
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h3 id="create-images-title" class="font-bold">
+          Imágenes del producto
+          <span class="badge badge-sm badge-ghost ml-1">{{ images().length }}/8</span>
+        </h3>
+        <p class="mt-1 text-xs text-base-content/65">
+          La primera imagen seleccionada será la portada. Puedes quitar fotos antes de crear el
+          producto.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <label for="product-images" class="sr-only">Subir imágenes</label>
+        <input
+          id="product-images"
+          type="file"
+          class="file-input file-input-sm max-w-full"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          [disabled]="saving() || created() || images().length === 8"
+          (change)="addImages($event)"
+        />
+        <button type="button" class="btn btn-sm" disabled>Biblioteca (0)</button>
+      </div>
+    </div>
+    @if (images().length) {
+      <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        @for (image of images(); track image.url; let i = $index) {
+          <div class="overflow-hidden rounded-field border border-base-300 bg-base-100">
+            <img
+              [src]="image.url"
+              [alt]="'Vista previa de ' + image.file.name"
+              class="aspect-square w-full object-cover"
+            />
+            <div class="flex items-center justify-between gap-1 p-2">
+              <span class="truncate text-xs" [title]="image.file.name"
+                >{{ i === 0 ? 'Portada · ' : '' }}{{ image.file.name }}</span
+              >
+              <button
+                type="button"
+                class="btn btn-ghost btn-xs"
+                [attr.aria-label]="'Quitar ' + image.file.name"
+                [disabled]="saving() || created()"
+                (click)="removeImage(i)"
+              >
+                Quitar
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div
+        class="mt-4 rounded-field border border-dashed border-base-300 bg-base-100 px-4 py-7 text-center text-sm text-base-content/65"
+      >
+        Todavía no hay fotos. Puedes crear el producto sin imágenes.
+      </div>
+    }
+    @if (imageError()) {
+      <p class="mt-3 text-sm text-error" role="alert">{{ imageError() }}</p>
+    }
+    <p class="mt-3 text-xs leading-relaxed text-base-content/60">
+      Hasta 8 imágenes JPEG, PNG o WebP, de máximo 5 MB cada una.
+    </p>
+  </section>
+
+  <section class="border-t border-base-300 pt-6" aria-labelledby="stock-policy-title">
+    <h3 id="stock-policy-title" class="mb-3 text-sm font-bold">Así se controlará el inventario</h3>
+    <div class="flex items-start gap-3 rounded-box border border-base-300 bg-base-200/60 p-4">
+      <span class="grid size-9 shrink-0 place-items-center rounded-field bg-primary/15 text-primary"
+        ><app-icon name="package" [size]="19"
+      /></span>
+      <div>
+        <strong class="text-sm">Stock por variante y almacén</strong>
+        <p class="mt-1 text-xs leading-relaxed text-base-content/65">
+          Expresado siempre en unidad (u). El stock inicial se registraría al confirmar una compra.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="
+        saving() ||
+        created() ||
+        loadingUnidades() ||
+        unitsError() ||
+        unidades().length === 0 ||
+        imageError()
+      "
+    >
+      {{ saving() ? 'Creando…' : created() ? 'Producto creado' : 'Crear producto' }}
+    </button>
+    @if (created()) {
+      <p class="text-sm text-success" role="status">Producto creado. Ya puedes continuar.</p>
+    }
+  </div>
+</form>

@@ -1,0 +1,44 @@
+<div class="space-y-7">
+  <div class="flex items-start gap-3 rounded-box border border-base-300 bg-base-200/60 p-4">
+    <span
+      class="grid size-9 shrink-0 place-items-center rounded-field bg-primary/15 text-primary font-bold"
+      >1</span
+    >
+    <div>
+      <strong class="text-sm">Unidad base: Unidad (u)</strong>
+      <p class="mt-1 text-xs text-base-content/65">
+        Siempre equivale a 1. No necesita otra fila de conversión.
+      </p>
+    </div>
+  </div>
+  <section class="border-t border-base-300 pt-6" aria-labelledby="secondary-units-title">
+    <h3 id="secondary-units-title" class="text-sm font-bold">Unidades secundarias</h3>
+    <p class="mt-1 text-xs text-base-content/65">
+      Son opcionales y sus factores pertenecen a este producto.
+    </p>
+    <div class="mt-4 overflow-x-auto rounded-field border border-base-300">
+      <table class="table table-sm min-w-[480px]">
+        <thead>
+          <tr>
+            <th>Unidad secundaria</th>
+            <th>Factor a base</th>
+            <th>Equivalencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Caja (caja)</td>
+            <td class="tabular-nums">12</td>
+            <td>1 caja = 12 u</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button type="button" class="btn btn-sm mt-4" disabled>
+      <app-icon name="plus" [size]="15" /> Agregar unidad secundaria
+    </button>
+    <p class="mt-5 rounded-box border border-base-300 bg-base-200/50 p-4 text-xs leading-relaxed">
+      <strong>Ejemplo:</strong> una caja con factor 12 equivale a 12 unidades base en existencias.
+    </p>
+  </section>
+</div>

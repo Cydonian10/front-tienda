@@ -43,8 +43,27 @@
       }
     </section>
   }
-  <p class="text-xs text-base-content/65">
-    Unidad base e ID: {{ product().unidadBaseId }}. Las unidades secundarias se gestionan en el paso
-    anterior.
-  </p>
+  @if (unitsLoading()) {
+    <p class="text-sm" role="status">Cargando unidades…</p>
+  } @else if (unitsError()) {
+    <div role="alert" class="rounded-box border border-error p-4">
+      <p class="text-sm">No se pudieron cargar las unidades del producto.</p>
+      <button type="button" class="btn btn-sm mt-3" (click)="retryUnits()">Reintentar</button>
+    </div>
+  } @else {
+    <section class="rounded-box border border-base-300 p-4" aria-labelledby="review-units-title">
+      <h3 id="review-units-title" class="text-sm font-bold">Unidades</h3>
+      <p class="mt-2 text-xs text-base-content/65">
+        Base: {{ baseUnit()?.nombre ?? product().unidadBaseId }} ({{ baseUnit()?.simbolo ?? '—' }})
+      </p>
+      @for (unit of units(); track unit.id) {
+        <p class="border-b border-base-300 py-2 text-xs last:border-0">
+          1 {{ unitName(unit) }} = <span class="tabular-nums">{{ unit.factorABase }}</span>
+          {{ baseUnit()?.simbolo ?? 'unidades base' }}
+        </p>
+      } @empty {
+        <p class="mt-2 text-xs text-base-content/65">Sin unidades secundarias.</p>
+      }
+    </section>
+  }
 </div>

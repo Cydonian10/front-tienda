@@ -86,7 +86,7 @@
                 <variantes-step [productId]="product()!.id" />
               }
               @case (2) {
-                <unidades-step />
+                <unidades-step [product]="product()!" />
               }
               @case (3) {
                 <revision-step [product]="product()!" />

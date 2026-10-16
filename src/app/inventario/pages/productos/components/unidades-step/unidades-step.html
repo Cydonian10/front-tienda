@@ -1,44 +1,229 @@
-<div class="space-y-7">
-  <div class="flex items-start gap-3 rounded-box border border-base-300 bg-base-200/60 p-4">
-    <span
-      class="grid size-9 shrink-0 place-items-center rounded-field bg-primary/15 text-primary font-bold"
-      >1</span
-    >
-    <div>
-      <strong class="text-sm">Unidad base: Unidad (u)</strong>
-      <p class="mt-1 text-xs text-base-content/65">
-        Siempre equivale a 1. No necesita otra fila de conversión.
+<div class="space-y-6">
+  @if (loading()) {
+    <p role="status" class="text-sm">Cargando unidades del producto…</p>
+  } @else if (loadError()) {
+    <div role="alert" class="rounded-box border border-error p-4">
+      <p class="text-sm">
+        No se pudieron cargar las unidades. Comprueba tu conexión e inténtalo de nuevo.
       </p>
+      <button type="button" class="btn btn-sm mt-3" (click)="retryLoad()">Reintentar</button>
     </div>
-  </div>
-  <section class="border-t border-base-300 pt-6" aria-labelledby="secondary-units-title">
-    <h3 id="secondary-units-title" class="text-sm font-bold">Unidades secundarias</h3>
-    <p class="mt-1 text-xs text-base-content/65">
-      Son opcionales y sus factores pertenecen a este producto.
-    </p>
-    <div class="mt-4 overflow-x-auto rounded-field border border-base-300">
-      <table class="table table-sm min-w-120">
-        <thead>
-          <tr>
-            <th>Unidad secundaria</th>
-            <th>Factor a base</th>
-            <th>Equivalencia</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Caja (caja)</td>
-            <td class="tabular-nums">12</td>
-            <td>1 caja = 12 u</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <button type="button" class="btn btn-sm mt-4" disabled>
-      <app-icon name="plus" [size]="15" /> Agregar unidad secundaria
-    </button>
-    <p class="mt-5 rounded-box border border-base-300 bg-base-200/50 p-4 text-xs leading-relaxed">
-      <strong>Ejemplo:</strong> una caja con factor 12 equivale a 12 unidades base en existencias.
-    </p>
-  </section>
+  } @else {
+    <section
+      class="flex items-start gap-3 rounded-box border border-base-300 bg-base-200/60 p-4"
+      aria-label="Unidad base"
+    >
+      <span
+        class="grid size-9 shrink-0 place-items-center rounded-field bg-primary/15 font-bold text-primary"
+        >1</span
+      >
+      <div>
+        <strong class="text-sm"
+          >Unidad base: {{ baseUnit()?.nombre ?? 'Unidad' }} ({{
+            baseUnit()?.simbolo ?? '—'
+          }})</strong
+        >
+        <p class="mt-1 text-xs text-base-content/65">
+          Siempre equivale a 1. No necesita otra conversión.
+        </p>
+      </div>
+    </section>
+
+    @if (actionError()) {
+      <p
+        role="alert"
+        class="rounded-field border border-error/40 bg-error/10 p-3 text-sm text-error"
+      >
+        {{ actionError() }}
+      </p>
+    }
+
+    <section class="border-t border-base-300 pt-6" aria-labelledby="secondary-units-title">
+      <h3 id="secondary-units-title" class="text-sm font-bold">
+        Unidades secundarias ({{ assignments().length }})
+      </h3>
+      <p class="mt-1 text-xs text-base-content/65">
+        El factor expresa cuántas unidades base contiene una unidad secundaria de este producto.
+      </p>
+
+      @if (assignments().length) {
+        <div class="mt-4 overflow-x-auto rounded-field border border-base-300">
+          <table class="table table-sm min-w-[560px]">
+            <thead>
+              <tr>
+                <th>Unidad</th>
+                <th>Factor a base</th>
+                <th>Equivalencia</th>
+                <th class="text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of assignments(); track item.id) {
+                <tr>
+                  <th class="font-semibold">
+                    {{ unitFor(item)?.nombre ?? item.unidadId }} ({{
+                      unitFor(item)?.simbolo ?? '—'
+                    }})
+                  </th>
+                  <td class="tabular-nums">
+                    @if (editingId() === item.id) {
+                      <form
+                        [id]="'unit-edit-' + item.id"
+                        (submit)="saveEdit($event, item)"
+                        novalidate
+                      >
+                        <fieldset [disabled]="busy()">
+                          <label [for]="'unit-factor-' + item.id" class="sr-only"
+                            >Nuevo factor a base de {{ unitFor(item)?.nombre }}</label
+                          >
+                          <input
+                            [id]="'unit-factor-' + item.id"
+                            type="text"
+                            inputmode="decimal"
+                            class="input input-sm w-32 tabular-nums"
+                            [formField]="editForm.factorABase"
+                            [class.input-error]="
+                              editForm.factorABase().touched() && editForm.factorABase().invalid()
+                            "
+                          />
+                          @if (
+                            editForm.factorABase().touched() && editForm.factorABase().invalid()
+                          ) {
+                            <p class="mt-1 max-w-40 text-xs text-error" role="alert">
+                              {{ editForm.factorABase().errors()[0]?.message }}
+                            </p>
+                          }
+                        </fieldset>
+                      </form>
+                    } @else {
+                      {{ item.factorABase }}
+                    }
+                  </td>
+                  <td class="text-xs">
+                    1 {{ unitFor(item)?.simbolo ?? 'unidad' }} = {{ item.factorABase }}
+                    {{ baseUnit()?.simbolo ?? 'base' }}
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-1">
+                      @if (editingId() === item.id) {
+                        <button
+                          type="submit"
+                          class="btn btn-primary btn-sm"
+                          [attr.form]="'unit-edit-' + item.id"
+                          [disabled]="busy()"
+                        >
+                          Guardar
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-sm"
+                          [disabled]="busy()"
+                          (click)="cancelEdit()"
+                        >
+                          Cancelar
+                        </button>
+                      } @else {
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-sm"
+                          [disabled]="busy() || !!editingId()"
+                          (click)="startEdit(item)"
+                          [attr.aria-label]="
+                            'Editar factor de ' + (unitFor(item)?.nombre ?? 'unidad')
+                          "
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-sm text-error"
+                          [disabled]="busy() || !!editingId()"
+                          (click)="remove(item)"
+                          [attr.aria-label]="'Eliminar ' + (unitFor(item)?.nombre ?? 'unidad')"
+                        >
+                          Eliminar
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="mt-4 rounded-field bg-base-200/50 p-4 text-sm text-base-content/70">
+          Aún no hay unidades secundarias. Agrégalas solo si este producto se vende o recibe en
+          otras presentaciones.
+        </p>
+      }
+    </section>
+
+    <form class="border-t border-base-300 pt-6" (submit)="add($event)" novalidate>
+      <fieldset [disabled]="busy() || !!editingId()">
+        <h3 class="text-sm font-bold">Agregar unidad secundaria</h3>
+        <p class="mt-1 text-xs text-base-content/65">
+          Por ejemplo, 1 caja = 12 {{ baseUnit()?.simbolo ?? 'unidades base' }}.
+        </p>
+        <div class="mt-4 grid items-start gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+          <fieldset class="fieldset">
+            <label class="label" for="secondary-unit"
+              >Unidad <span class="text-error">*</span></label
+            >
+            <select
+              id="secondary-unit"
+              class="select w-full"
+              [formField]="createForm.unidadId"
+              [class.select-error]="
+                createForm.unidadId().touched() && createForm.unidadId().invalid()
+              "
+            >
+              <option value="">Selecciona una unidad</option>
+              @for (unit of available(); track unit.id) {
+                <option [value]="unit.id">{{ unit.nombre }} ({{ unit.simbolo }})</option>
+              }
+            </select>
+            @if (createForm.unidadId().touched() && createForm.unidadId().invalid()) {
+              <p class="text-xs text-error" role="alert">
+                {{ createForm.unidadId().errors()[0]?.message }}
+              </p>
+            }
+          </fieldset>
+          <fieldset class="fieldset">
+            <label class="label" for="secondary-factor"
+              >Factor a base <span class="text-error">*</span></label
+            >
+            <input
+              id="secondary-factor"
+              class="input w-full tabular-nums"
+              type="text"
+              inputmode="decimal"
+              placeholder="Ej. 12"
+              [formField]="createForm.factorABase"
+              [class.input-error]="
+                createForm.factorABase().touched() && createForm.factorABase().invalid()
+              "
+            />
+            @if (createForm.factorABase().touched() && createForm.factorABase().invalid()) {
+              <p class="text-xs text-error" role="alert">
+                {{ createForm.factorABase().errors()[0]?.message }}
+              </p>
+            }
+          </fieldset>
+          <button
+            type="submit"
+            class="btn btn-primary self-end"
+            [disabled]="busy() || !available().length"
+          >
+            {{ busy() ? 'Guardando…' : 'Agregar unidad' }}
+          </button>
+        </div>
+        @if (!available().length) {
+          <p class="mt-3 text-xs text-base-content/65">
+            No quedan unidades disponibles en el catálogo para este producto.
+          </p>
+        }
+      </fieldset>
+    </form>
+  }
 </div>

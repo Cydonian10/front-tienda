@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatosGeneralesStep } from './components/datos-generales-step/datos-generales-step';
 import { ProductosHeader } from './components/productos-header/productos-header';
 import { ProductosStepNavigation } from './components/productos-step-navigation/productos-step-navigation';
-import type { ProductMode, ProductStep, ProductVariant } from './components/productos-types';
+import type { ProductMode, ProductStep } from './components/productos-types';
 import { RevisionStep } from './components/revision-step/revision-step';
 import { UnidadesStep } from './components/unidades-step/unidades-step';
 import { VariantesStep } from './components/variantes-step/variantes-step';
@@ -48,12 +48,6 @@ export default class ProductosPage {
     { title: 'Unidades', detail: 'Conversiones por producto' },
     { title: 'Revisar', detail: 'Confirma los detalles' },
   ];
-  readonly variants: readonly ProductVariant[] = [
-    { sku: 'CAM-NEG-M', color: 'Negro', size: 'M', price: '39.90', barcode: '7751234500012' },
-    { sku: 'CAM-NEG-L', color: 'Negro', size: 'L', price: '39.90', barcode: '7751234500029' },
-    { sku: 'CAM-BLA-M', color: 'Blanco', size: 'M', price: '39.90', barcode: '7751234500036' },
-  ];
-  readonly attributes = ['Color', 'Talla', 'Capacidad', 'Material', 'Presentación'] as const;
 
   constructor() {
     const id = this.route.snapshot.queryParamMap.get('productoId');

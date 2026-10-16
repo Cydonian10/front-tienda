@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { ENVIRONMENT } from '../config/env-dev';
 import { firstValueFrom } from 'rxjs';
 import {
+  AtributoProducto,
   CreateProductDto,
   ProductResponse,
   Unidad,
@@ -13,6 +14,28 @@ import {
 export class ProductoApi {
   readonly #apirUrl = inject(ENVIRONMENT);
   readonly #http = inject(HttpClient);
+
+  listAttributes(productId: string): Promise<AtributoProducto[]> {
+    return firstValueFrom(
+      this.#http.get<AtributoProducto[]>(
+        `${this.#apirUrl.apiUrl}/productos/${productId}/atributos`,
+      ),
+    );
+  }
+
+  addAttribute(productId: string, atributoId: string): Promise<unknown> {
+    return firstValueFrom(
+      this.#http.post(`${this.#apirUrl.apiUrl}/productos/${productId}/atributos`, { atributoId }),
+    );
+  }
+
+  removeAttribute(productId: string, atributoId: string): Promise<void> {
+    return firstValueFrom(
+      this.#http.delete<void>(
+        `${this.#apirUrl.apiUrl}/productos/${productId}/atributos/${atributoId}`,
+      ),
+    );
+  }
 
   listUnidades(): Promise<Unidad[]> {
     return firstValueFrom(

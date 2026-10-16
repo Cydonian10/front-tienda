@@ -32,3 +32,9 @@ export interface Unidad {
   nombre: string;
   simbolo: string;
 }
+
+export interface AtributoProducto {
+  atributoId: string;
+  atributo: string;
+  productoId: string | null;
+}

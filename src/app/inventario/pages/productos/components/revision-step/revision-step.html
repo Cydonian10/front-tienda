@@ -1,60 +1,50 @@
-<div class="space-y-7">
-  <div class="grid gap-3 sm:grid-cols-2">
-    <section
-      class="rounded-box border border-base-300 bg-base-200/50 p-4"
-      aria-label="Resumen del producto"
-    >
-      <p class="text-xs font-bold tracking-wide text-base-content/55 uppercase">Producto</p>
-      <strong class="mt-2 block text-sm">Camiseta básica</strong>
-      <p class="mt-1 text-xs leading-relaxed text-base-content/65">
-        Camiseta de algodón unisex, disponible en colores y tallas. · Activo
-      </p>
-    </section>
-    <section
-      class="rounded-box border border-base-300 bg-base-200/50 p-4"
-      aria-label="Resumen de unidad base"
-    >
-      <p class="text-xs font-bold tracking-wide text-base-content/55 uppercase">Unidad base</p>
-      <strong class="mt-2 block text-sm">Unidad (u)</strong>
-      <p class="mt-1 text-xs leading-relaxed text-base-content/65">
-        Stock registrado por variante y almacén.
-      </p>
-    </section>
-  </div>
-  <section class="rounded-box border border-base-300 p-4" aria-labelledby="review-variants-title">
-    <h3
-      id="review-variants-title"
-      class="mb-2 text-xs font-bold tracking-wide text-base-content/55 uppercase"
-    >
-      {{ variants().length }} variantes
-    </h3>
-    @for (variant of variants(); track variant.sku) {
-      <div class="flex flex-wrap justify-between gap-2 border-b border-base-300 py-3 last:border-0">
-        <div>
-          <strong class="text-sm">{{ variant.sku }}</strong>
-          <p class="mt-1 text-xs text-base-content/65">
-            Color: {{ variant.color }} · Talla: {{ variant.size }} · Código:
-            {{ variant.barcode }}
-          </p>
-        </div>
-        <strong class="text-sm tabular-nums">S/ {{ variant.price }}</strong>
-      </div>
-    }
+<div class="space-y-6">
+  <section
+    class="rounded-box border border-base-300 bg-base-200/50 p-4"
+    aria-label="Resumen del producto"
+  >
+    <p class="text-xs font-bold tracking-wide text-base-content/65 uppercase">Producto</p>
+    <strong class="mt-2 block text-sm">{{ product().nombre }}</strong>
+    <p class="mt-1 text-xs text-base-content/65">
+      {{ product().descripcion || 'Sin descripción' }} ·
+      {{ product().activo ? 'Activo' : 'Inactivo' }}
+    </p>
+    <p class="mt-2 text-xs text-base-content/65">
+      {{ product().imagenes.length }} fotos del producto
+    </p>
   </section>
-  <div class="grid gap-3 sm:grid-cols-2">
-    <div class="rounded-box border border-base-300 bg-base-200/50 p-4">
-      <p class="text-xs font-bold tracking-wide text-base-content/55 uppercase">Imágenes</p>
-      <strong class="mt-2 block text-sm">0 fotos · Podrás agregarlas después</strong>
+  @if (loading()) {
+    <p class="text-sm" role="status">Cargando variantes…</p>
+  } @else if (error()) {
+    <div role="alert" class="rounded-box border border-error p-4">
+      <p class="text-sm">No se pudieron cargar los atributos o las variantes.</p>
+      <button type="button" class="btn btn-sm mt-3" (click)="retryLoad()">Reintentar</button>
     </div>
-    <div class="rounded-box border border-base-300 bg-base-200/50 p-4">
-      <p class="text-xs font-bold tracking-wide text-base-content/55 uppercase">
-        Unidades secundarias
-      </p>
-      <strong class="mt-2 block text-sm">1 Caja = 12 u</strong>
-    </div>
-  </div>
-  <p class="rounded-box bg-info/10 p-4 text-xs leading-relaxed text-base-content">
-    Esta revisión muestra datos ficticios. No se enviará ni guardará ningún producto desde esta
-    pantalla.
+  } @else {
+    <section class="rounded-box border border-base-300 p-4" aria-labelledby="review-variants-title">
+      <h3 id="review-variants-title" class="text-sm font-bold">
+        {{ variants().length }} variantes guardadas
+      </h3>
+      @for (variant of variants(); track variant.id) {
+        <div
+          class="flex flex-wrap justify-between gap-2 border-b border-base-300 py-3 last:border-0"
+        >
+          <div>
+            <strong class="text-sm">{{ variant.sku }}</strong>
+            <p class="mt-1 text-xs text-base-content/65">
+              {{ describe(variant) }} · Código: {{ variant.codigoBarras || 'Sin código' }} ·
+              {{ variant.imagenes.length }} fotos propias
+            </p>
+          </div>
+          <strong class="text-sm tabular-nums">S/ {{ variant.precio }}</strong>
+        </div>
+      } @empty {
+        <p class="mt-3 text-sm text-base-content/65">Este producto aún no tiene variantes.</p>
+      }
+    </section>
+  }
+  <p class="text-xs text-base-content/65">
+    Unidad base e ID: {{ product().unidadBaseId }}. Las unidades secundarias se gestionan en el paso
+    anterior.
   </p>
 </div>

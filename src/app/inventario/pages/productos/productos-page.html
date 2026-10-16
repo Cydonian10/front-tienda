@@ -83,13 +83,13 @@
                 }
               }
               @case (1) {
-                <variantes-step [attributes]="attributes" [variants]="variants" />
+                <variantes-step [productId]="product()!.id" />
               }
               @case (2) {
                 <unidades-step />
               }
               @case (3) {
-                <revision-step [variants]="variants" />
+                <revision-step [product]="product()!" />
               }
             }
           </div>
@@ -110,16 +110,16 @@
                   <button
                     type="button"
                     class="btn btn-primary btn-sm"
-                    [disabled]="editingProduct() || createMutation.isPending() || updateMutation.isPending()"
+                    [disabled]="
+                      editingProduct() || createMutation.isPending() || updateMutation.isPending()
+                    "
                     (click)="goToStep(step() + 1)"
                   >
                     Siguiente →
                   </button>
                 }
               } @else {
-                <span class="text-sm text-base-content/65"
-                  >Producto creado. Los siguientes pasos son de muestra.</span
-                >
+                <span class="text-sm text-base-content/65">Producto y variantes guardados.</span>
               }
             </div>
           </footer>

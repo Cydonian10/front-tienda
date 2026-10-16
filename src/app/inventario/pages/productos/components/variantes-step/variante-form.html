@@ -1,0 +1,144 @@
+<form class="space-y-5" (submit)="save($event)" novalidate>
+  <fieldset [disabled]="busy()" class="space-y-6">
+    <div class="border-b border-base-300 pb-4">
+      <h3 class="text-base font-bold">Nueva variante</h3>
+      <p class="mt-1 text-xs leading-relaxed text-base-content/70">
+        Define los valores de los atributos elegidos y el precio de esta presentación.
+      </p>
+    </div>
+    @if (!attributes().length) {
+      <p class="rounded-field bg-base-200/50 p-4 text-sm text-base-content/70">
+        Selecciona un atributo del catálogo para empezar a crear variantes.
+      </p>
+    } @else {
+      <section aria-label="Valores de atributos">
+        <p class="text-xs font-semibold text-base-content/70">Valores de esta variante</p>
+        <div class="mt-2 grid gap-4 rounded-field bg-base-200/50 p-4 sm:grid-cols-2">
+          @for (attribute of attributes(); track attribute.atributoId) {
+            <fieldset class="fieldset">
+              <label class="label" [for]="'variant-value-' + attribute.atributoId"
+                >{{ attribute.atributo }} <span class="text-error">*</span></label
+              >
+              <input
+                class="input w-full"
+                type="text"
+                [id]="'variant-value-' + attribute.atributoId"
+                [formField]="variantForm.valores[attribute.atributoId]"
+                [class.input-error]="
+                  variantForm.valores().touched() && !model().valores[attribute.atributoId]?.trim()
+                "
+                [attr.aria-invalid]="
+                  variantForm.valores().touched() && !model().valores[attribute.atributoId]?.trim()
+                "
+                aria-describedby="variant-values-errors"
+              />
+            </fieldset>
+          }
+        </div>
+        @if (variantForm.valores().touched() && variantForm.valores().invalid()) {
+          <p id="variant-values-errors" class="mt-2 text-xs text-error" role="alert">
+            {{ variantForm.valores().errors()[0]?.message }}
+          </p>
+        }
+      </section>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <fieldset class="fieldset">
+          <label class="label" for="variant-price"
+            >Precio (S/) <span class="text-error">*</span></label
+          >
+          <input
+            id="variant-price"
+            class="input w-full tabular-nums"
+            type="text"
+            inputmode="decimal"
+            placeholder="0.00"
+            [formField]="variantForm.precio"
+            [class.input-error]="variantForm.precio().touched() && variantForm.precio().invalid()"
+          />
+          @if (variantForm.precio().touched() && variantForm.precio().invalid()) {
+            <p class="text-xs text-error" role="alert">
+              {{ variantForm.precio().errors()[0]?.message }}
+            </p>
+          }
+        </fieldset>
+        <fieldset class="fieldset">
+          <label class="label" for="variant-sku">SKU (opcional)</label>
+          <input id="variant-sku" class="input w-full" type="text" [formField]="variantForm.sku" />
+          @if (variantForm.sku().touched() && variantForm.sku().invalid()) {
+            <p class="text-xs text-error" role="alert">
+              {{ variantForm.sku().errors()[0]?.message }}
+            </p>
+          }
+        </fieldset>
+        <fieldset class="fieldset sm:col-span-2">
+          <label class="label" for="variant-barcode">Código de barras (opcional)</label>
+          <input
+            id="variant-barcode"
+            class="input w-full"
+            type="text"
+            [formField]="variantForm.codigoBarras"
+          />
+          @if (variantForm.codigoBarras().touched() && variantForm.codigoBarras().invalid()) {
+            <p class="text-xs text-error" role="alert">
+              {{ variantForm.codigoBarras().errors()[0]?.message }}
+            </p>
+          }
+          <p class="mt-1 text-xs text-base-content/65">
+            Si dejas el SKU vacío, se generará al guardar.
+          </p>
+        </fieldset>
+      </div>
+      <div class="border-t border-base-300 pt-5">
+        <fieldset class="fieldset">
+          <label class="label" for="variant-images"
+            >Fotos de la variante
+            <span class="text-base-content/60">· {{ images().length }}/10</span></label
+          >
+          <input
+            id="variant-images"
+            type="file"
+            class="file-input file-input-sm max-w-full"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            [disabled]="busy() || images().length === 10"
+            (change)="addImages($event)"
+          />
+          <p class="mt-1 text-xs text-base-content/65">
+            Opcionales · JPEG, PNG o WebP · hasta 5 MB por foto. La primera será la portada.
+          </p>
+          @if (imageError()) {
+            <p class="text-xs text-error" role="alert">{{ imageError() }}</p>
+          }
+        </fieldset>
+        @if (images().length) {
+          <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            @for (image of images(); track image.url; let i = $index) {
+              <div class="overflow-hidden rounded-field border border-base-300">
+                <img
+                  class="aspect-square w-full object-cover"
+                  [src]="image.url"
+                  [alt]="'Vista previa ' + (i + 1)"
+                />
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm w-full"
+                  [disabled]="busy()"
+                  (click)="removeImage(i)"
+                  [attr.aria-label]="'Quitar imagen ' + (i + 1)"
+                >
+                  Quitar
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 pt-5">
+        <p class="text-xs text-base-content/65">Los atributos y el precio son obligatorios.</p>
+        <button type="submit" class="btn btn-primary" [disabled]="busy()">
+          {{ busy() ? 'Guardando…' : 'Guardar variante' }}
+        </button>
+      </div>
+    }
+  </fieldset>
+</form>

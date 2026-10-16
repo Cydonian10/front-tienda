@@ -22,6 +22,27 @@ describe('ProductoApi', () => {
 
   afterEach(() => http.verify());
 
+  it('consulta y asocia atributos del producto', async () => {
+    const attrs = api.listAttributes('producto-1');
+    http
+      .expectOne('http://localhost:3000/api/productos/producto-1/atributos')
+      .flush([{ atributoId: 'a1', atributo: 'Color', productoId: 'producto-1' }]);
+    expect((await attrs)[0].atributo).toBe('Color');
+
+    const add = api.addAttribute('producto-1', 'a1');
+    const request = http.expectOne('http://localhost:3000/api/productos/producto-1/atributos');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ atributoId: 'a1' });
+    request.flush({});
+    await add;
+
+    const remove = api.removeAttribute('producto-1', 'a1');
+    const deletion = http.expectOne('http://localhost:3000/api/productos/producto-1/atributos/a1');
+    expect(deletion.request.method).toBe('DELETE');
+    deletion.flush(null);
+    await remove;
+  });
+
   it('carga las unidades para seleccionar un ID real', async () => {
     const result = api.listUnidades();
     const request = http.expectOne('http://localhost:3000/api/unidades?limit=100');

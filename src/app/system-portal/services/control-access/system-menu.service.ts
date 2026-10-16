@@ -59,6 +59,12 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             icon: 'file',
             permission: PERMISSION_CODES.PRODUCTS_READ,
           },
+          {
+            label: 'Unidades de medida',
+            url: '/admin/inventario/unidades',
+            icon: 'package',
+            permission: PERMISSION_CODES.UNIDADES_READ,
+          },
         ],
       },
     ],

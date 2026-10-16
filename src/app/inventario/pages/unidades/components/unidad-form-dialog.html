@@ -1,0 +1,96 @@
+<app-dialog-shell
+  [title]="unidad ? 'Editar unidad de medida' : 'Nueva unidad de medida'"
+  [titleId]="titleId"
+>
+  <form [id]="formId" (submit)="save($event)" class="space-y-4" novalidate>
+    <p class="text-sm text-base-content/70">
+      {{
+        unidad
+          ? 'Actualiza los datos de esta unidad.'
+          : 'Registra una unidad para reutilizarla en productos.'
+      }}
+    </p>
+    <fieldset class="fieldset">
+      <label class="label" for="unit-name">Nombre <span class="text-error">*</span></label>
+      <input
+        id="unit-name"
+        type="text"
+        class="input w-full"
+        autocomplete="off"
+        placeholder="Ej. Docena"
+        [formField]="unitForm.nombre"
+        [class.input-error]="unitForm.nombre().touched() && unitForm.nombre().invalid()"
+        aria-describedby="unit-name-errors"
+      />
+      <app-field-errors [field]="unitForm.nombre()" errorId="unit-name-errors" />
+      <p class="text-xs text-base-content/70">El nombre debe ser único.</p>
+    </fieldset>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <fieldset class="fieldset">
+        <label class="label" for="unit-symbol">Símbolo <span class="text-error">*</span></label>
+        <input
+          id="unit-symbol"
+          type="text"
+          class="input w-full"
+          autocomplete="off"
+          placeholder="Ej. doc"
+          [formField]="unitForm.simbolo"
+          [class.input-error]="unitForm.simbolo().touched() && unitForm.simbolo().invalid()"
+          aria-describedby="unit-symbol-errors"
+        />
+        <app-field-errors [field]="unitForm.simbolo()" errorId="unit-symbol-errors" />
+      </fieldset>
+      <fieldset class="fieldset">
+        <label class="label" for="unit-type">Tipo <span class="text-error">*</span></label>
+        <input
+          id="unit-type"
+          type="text"
+          list="unit-type-options"
+          class="input w-full"
+          autocomplete="off"
+          placeholder="Ej. empaque"
+          [formField]="unitForm.tipo"
+          [class.input-error]="unitForm.tipo().touched() && unitForm.tipo().invalid()"
+          aria-describedby="unit-type-errors"
+        />
+        <datalist id="unit-type-options">
+          <option value="conteo"></option>
+          <option value="empaque"></option>
+          <option value="masa"></option>
+          <option value="longitud"></option>
+          <option value="volumen"></option>
+          <option value="área"></option>
+        </datalist>
+        <app-field-errors [field]="unitForm.tipo()" errorId="unit-type-errors" />
+      </fieldset>
+    </div>
+    @if (serverError()) {
+      <div role="alert" class="alert alert-error alert-soft">{{ serverError() }}</div>
+    }
+  </form>
+  <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
+    <button
+      type="button"
+      class="btn"
+      data-dialog-cancel
+      [disabled]="createMutation.isPending() || updateMutation.isPending()"
+      (click)="dialogRef.close()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [attr.form]="formId"
+      [disabled]="createMutation.isPending() || updateMutation.isPending()"
+    >
+      {{
+        createMutation.isPending() || updateMutation.isPending()
+          ? 'Guardando…'
+          : unidad
+            ? 'Guardar cambios'
+            : 'Crear unidad'
+      }}
+    </button>
+  </div>
+</app-dialog-shell>

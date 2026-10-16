@@ -1,0 +1,134 @@
+<section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="admin-section-title">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 id="admin-section-title" class="text-2xl font-semibold tracking-tight">
+        Unidades de medida
+      </h1>
+      <p class="mt-2 max-w-prose text-sm text-base-content/70">
+        Administra las unidades disponibles para productos y sus conversiones.
+      </p>
+    </div>
+    @if (canCreate) {
+      <button type="button" class="btn btn-primary shrink-0" (click)="openCreate()">
+        Crear unidad
+      </button>
+    }
+  </header>
+
+  <section class="card card-border bg-base-100" aria-label="Catálogo de unidades">
+    <div class="card-body gap-5 p-4 sm:p-6">
+      <form class="flex flex-col gap-2 sm:flex-row" (submit)="searchUnits($event)" role="search">
+        <label class="sr-only" for="unit-search">Buscar por nombre</label>
+        <input
+          id="unit-search"
+          type="search"
+          class="input w-full sm:max-w-sm"
+          placeholder="Buscar por nombre"
+          [value]="searchDraft()"
+          (input)="searchDraft.set($any($event.target).value)"
+        />
+        <button type="submit" class="btn">Buscar</button>
+        @if (search()) {
+          <button type="button" class="btn btn-ghost" (click)="clearSearch()">Limpiar</button>
+        }
+      </form>
+
+      @if (actionError()) {
+        <div role="alert" class="alert alert-error alert-soft">{{ actionError() }}</div>
+      }
+
+      @if (query.isPending()) {
+        <p role="status" class="py-8 text-center text-sm text-base-content/70">
+          Cargando unidades…
+        </p>
+      } @else if (query.isError()) {
+        <app-empty-state variant="error" actionLabel="Reintentar" (action)="query.refetch()" />
+      } @else if (result(); as response) {
+        @if (response.data.length) {
+          <div class="overflow-x-auto rounded-field border border-base-300">
+            <table class="table table-sm min-w-[480px]">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Símbolo</th>
+                  <th>Tipo</th>
+                  @if (canEdit || canDelete) {
+                    <th class="text-right">Acciones</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (unidad of response.data; track unidad.id) {
+                  <tr>
+                    <th class="font-semibold">{{ unidad.nombre }}</th>
+                    <td>
+                      <span class="badge badge-ghost">{{ unidad.simbolo }}</span>
+                    </td>
+                    <td>{{ unidad.tipo }}</td>
+                    @if (canEdit || canDelete) {
+                      <td>
+                        <div class="flex justify-end gap-1">
+                          @if (canEdit) {
+                            <button
+                              type="button"
+                              class="btn btn-ghost btn-sm"
+                              [disabled]="removeMutation.isPending()"
+                              (click)="openEdit(unidad)"
+                              [attr.aria-label]="'Editar ' + unidad.nombre"
+                            >
+                              Editar
+                            </button>
+                          }
+                          @if (canDelete) {
+                            <button
+                              type="button"
+                              class="btn btn-ghost btn-sm text-error"
+                              [disabled]="removeMutation.isPending()"
+                              (click)="remove(unidad)"
+                              [attr.aria-label]="'Eliminar ' + unidad.nombre"
+                            >
+                              Eliminar
+                            </button>
+                          }
+                        </div>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div
+            class="flex flex-wrap items-center justify-between gap-3 text-sm text-base-content/70"
+          >
+            <p role="status">
+              {{ response.meta.total }} unidades · Página {{ response.meta.page }} de
+              {{ response.meta.totalPages }}
+            </p>
+            <app-pagination
+              [page]="page()"
+              [totalPages]="response.meta.totalPages"
+              [pageSize]="pageSize()"
+              [disabled]="query.isFetching() || removeMutation.isPending()"
+              (pageChange)="page.set($event)"
+              (pageSizeChange)="changePageSize($event)"
+            />
+          </div>
+        } @else if (search()) {
+          <app-empty-state
+            variant="no-results"
+            actionLabel="Limpiar búsqueda"
+            (action)="clearSearch()"
+          />
+        } @else {
+          <app-empty-state
+            title="Todavía no hay unidades"
+            description="Crea una unidad de medida para utilizarla en tus productos."
+            [actionLabel]="canCreate ? 'Crear unidad' : ''"
+            (action)="openCreate()"
+          />
+        }
+      }
+    </div>
+  </section>
+</section>

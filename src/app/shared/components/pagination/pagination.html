@@ -1,0 +1,66 @@
+@if (totalPages() > 0) {
+  <nav
+    class="flex flex-col items-center gap-3 sm:flex-row sm:justify-between"
+    aria-label="Paginación"
+  >
+    <label class="flex items-center gap-2 text-sm text-base-content/70">
+      Mostrar
+      <select
+        class="select select-sm w-18"
+        aria-label="Elementos por página"
+        [value]="pageSize()"
+        [disabled]="disabled()"
+        (change)="selectPageSize($event)"
+      >
+        @for (size of pageSizeOptions(); track size) {
+          <option [value]="size">{{ size }}</option>
+        }
+      </select>
+      por página
+    </label>
+    <div class="flex flex-wrap items-center justify-center gap-1.5">
+      <button
+        type="button"
+        class="btn btn-ghost btn-circle btn-sm size-9 border-0 text-base-content/70 shadow-none"
+        aria-label="Página anterior"
+        [disabled]="disabled() || page() <= 1"
+        (click)="select(page() - 1)"
+      >
+        <app-icon name="chevron-left" [size]="16" />
+      </button>
+      @for (item of items(); track item) {
+        @if (item === 'ellipsis-start' || item === 'ellipsis-end') {
+          <span
+            class="grid size-9 place-items-center text-sm text-base-content/60"
+            aria-hidden="true"
+            >…</span
+          >
+        } @else {
+          <button
+            type="button"
+            [class]="
+              item === page()
+                ? 'btn btn-circle btn-sm size-9 border-0 bg-primary/25 font-semibold text-primary shadow-none hover:bg-primary/30'
+                : 'btn btn-ghost btn-circle btn-sm size-9 border-0 text-base-content/70 shadow-none hover:bg-base-200 hover:text-base-content'
+            "
+            [attr.aria-label]="'Página ' + item"
+            [attr.aria-current]="item === page() ? 'page' : null"
+            [disabled]="disabled()"
+            (click)="select(item)"
+          >
+            {{ item }}
+          </button>
+        }
+      }
+      <button
+        type="button"
+        class="btn btn-ghost btn-circle btn-sm size-9 border-0 text-base-content/70 shadow-none"
+        aria-label="Página siguiente"
+        [disabled]="disabled() || page() >= totalPages()"
+        (click)="select(page() + 1)"
+      >
+        <app-icon name="chevron-right" [size]="16" />
+      </button>
+    </div>
+  </nav>
+}

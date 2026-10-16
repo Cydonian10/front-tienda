@@ -14,6 +14,11 @@ const inventarioRoutes: Routes = [
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ)],
   },
   {
+    path: 'unidades',
+    loadComponent: () => import('./pages/unidades/unidades-page'),
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.UNIDADES_READ)],
+  },
+  {
     path: 'producto-prueba',
     loadComponent: () => import('./pages/producto-prueba/producto-prueba-page'),
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ)],

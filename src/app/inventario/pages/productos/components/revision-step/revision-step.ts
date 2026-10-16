@@ -34,6 +34,10 @@ export class RevisionStep {
     () => this.variantsQuery.isPending() || this.attributesQuery.isPending(),
   );
   readonly error = computed(() => this.variantsQuery.isError() || this.attributesQuery.isError());
+  // No se puede dar por terminada una revisión con secciones aún pendientes o fallidas.
+  readonly ready = computed(
+    () => !this.loading() && !this.error() && !this.unitsLoading() && !this.unitsError(),
+  );
 
   retryLoad(): void {
     if (this.variantsQuery.isError()) void this.variantsQuery.refetch();

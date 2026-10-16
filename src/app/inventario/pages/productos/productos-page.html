@@ -2,7 +2,22 @@
   <productos-header [mode]="mode()" (create)="showCreate()" (manage)="showManage()" />
 
   @if (mode() === 'create') {
-    @if (loadingProduct()) {
+    @if (finished() && product(); as savedProduct) {
+      <div class="card card-border bg-base-100" role="status">
+        <div class="card-body gap-4 sm:p-8">
+          <h2 class="card-title text-success">Producto listo</h2>
+          <p class="text-sm">
+            <strong>{{ savedProduct.nombre }}</strong> y sus datos están guardados. Puedes crear
+            otro producto sin modificar este.
+          </p>
+          <div class="card-actions mt-2">
+            <button type="button" class="btn btn-primary" (click)="showCreate()">
+              Crear otro producto
+            </button>
+          </div>
+        </div>
+      </div>
+    } @else if (loadingProduct()) {
       <p role="status">Cargando producto…</p>
     } @else if (loadError()) {
       <div class="rounded-box border border-error p-4" role="alert">
@@ -53,7 +68,7 @@
                     Indica cuántas unidades base contiene cada presentación adicional.
                   }
                   @case (3) {
-                    Comprueba la configuración de ejemplo antes de continuar.
+                    Comprueba los datos guardados antes de terminar.
                   }
                 }
               </p>
@@ -119,7 +134,14 @@
                   </button>
                 }
               } @else {
-                <span class="text-sm text-base-content/65">Producto y variantes guardados.</span>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  [disabled]="!reviewStep()?.ready()"
+                  (click)="finish()"
+                >
+                  Terminar
+                </button>
               }
             </div>
           </footer>

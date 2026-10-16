@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatosGeneralesStep } from './components/datos-generales-step/datos-generales-step';
 import { ProductosHeader } from './components/productos-header/productos-header';
@@ -38,6 +38,8 @@ export default class ProductosPage {
   readonly loadingProduct = signal(false);
   readonly loadError = signal(false);
   readonly editingProduct = signal(false);
+  readonly finished = signal(false);
+  readonly reviewStep = viewChild(RevisionStep);
   private loadVersion = 0;
   private readonly actions = useProductoApi();
   readonly createMutation = this.actions.crearMutation;
@@ -75,9 +77,11 @@ export default class ProductosPage {
 
   showCreate(): void {
     if (this.createMutation.isPending() || this.updateMutation.isPending()) return;
+    // Reinicia solo el asistente y la URL; el producto terminado permanece en el servidor.
     this.loadVersion++;
     this.loadingProduct.set(false);
     this.mode.set('create');
+    this.finished.set(false);
     this.step.set(0);
     this.editingProduct.set(false);
     this.product.set(null);
@@ -97,6 +101,7 @@ export default class ProductosPage {
 
   goToStep(step: number): void {
     if (
+      !this.finished() &&
       !this.loadingProduct() &&
       !this.loadError() &&
       !this.editingProduct() &&
@@ -108,6 +113,13 @@ export default class ProductosPage {
     ) {
       this.step.set(step);
     }
+  }
+
+  finish(): void {
+    // El producto y sus relaciones ya se guardaron en los pasos anteriores.
+    // Terminar solo cierra el flujo cuando todas las consultas del resumen están listas.
+    if (this.step() !== 3 || !this.product() || !this.reviewStep()?.ready()) return;
+    this.finished.set(true);
   }
 
   async createProduct(dto: CreateProductDto): Promise<void> {

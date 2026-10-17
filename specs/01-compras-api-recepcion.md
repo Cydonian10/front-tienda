@@ -34,7 +34,7 @@
 
 - `Compra` en `api-tienda/src/features/inventory/entities/compra.entity.ts`: conservar `fecha`, `totalDocumento` y `observaciones`; añadir `tipoDocumento: 'factura' | 'boleta' | 'otro'`, `serieDocumento: string` y conservar/usar `numeroDocumento: string` como número separado. Los tres datos documentales son obligatorios para las compras creadas por este flujo. Una migración añade las columnas y la unicidad `(proveedor_id, tipo_documento, serie_documento, numero_documento)` para filas con datos completos, sin invalidar registros anteriores incompletos.
 - `DetalleCompra`: `varianteId`, `unidadId`, `cantidad`, `factorABase` copiado del catálogo y `precioUnitario`; cantidades, factores, precios, subtotales y costos se manejan como decimales exactos y se exponen como cadenas, no como `number` de coma flotante.
-- `Compra.totalDocumento` es la suma de `cantidad × precioUnitario` de sus renglones, expresada en PEN; `DetalleMovimiento.costoTotal` es el subtotal de su renglón. La cantidad recibida en unidad base es `cantidad × factorABase`; `Existencia.cantidad` y `Existencia.valorCosto` acumulan las cantidades base y costos respectivos. Se admiten renglones repetidos de una variante si su unidad o precio difiere.
+- `Compra.totalDocumento` es la suma de los subtotales `cantidad × precioUnitario` de sus renglones, expresada en PEN; cada subtotal y `DetalleMovimiento.costoTotal` se redondean a seis decimales con la regla mitad hacia arriba antes de sumar. La cantidad recibida en unidad base es `cantidad × factorABase`; si el resultado no se representa exactamente con seis decimales, se rechaza la compra, sin redondear stock. `Existencia.cantidad` y `Existencia.valorCosto` acumulan las cantidades base y costos respectivos. Se admiten renglones repetidos de una variante si su unidad o precio difiere.
 - `MovimientoInventario`: `tipo = ingreso`, `estado = confirmado`, `compraId`, `proveedorId`, `almacenDestinoId`, `usuarioId` tomado de la sesión y un `DetalleMovimiento` por renglón enlazado a `DetalleCompra`; nunca aceptar `usuarioId`, factor de conversión ni costo aplicado como valores autoritativos enviados por el cliente.
 - `ComprobanteCompra`: cero o un registro por compra en este flujo, con nombre original, MIME verificado, tamaño y clave privada. La ausencia de registro significa que el archivo puede adjuntarse más tarde; no se guarda un estado de fallo permanente. Usar almacenamiento privado independiente de imágenes públicas bajo `uploads/`, con ruta configurable, nombre aleatorio, lectura por ID autorizado y limpieza de archivos huérfanos ante errores; no exponer la clave como URL. Rechazar un segundo adjunto si ya existe uno, incluso ante subidas simultáneas.
 - Contratos en `api-tienda/src/features/inventory/proveedores/`, `compras/` y la consulta de `variante-producto/`: `GET /api/proveedores` con `page`, `limit`, `nombre`, `documento`; `GET /api/proveedores/todos` con filtros opcionales; `GET /api/variantes` con búsqueda y paginación; `GET /api/compras` con `page`, `limit`, `q`; `GET /api/compras/:id`; `POST /api/compras` multipart con los datos de compra y el archivo opcional `comprobante`; `POST /api/compras/:id/comprobante` multipart solo con el archivo para un adjunto pendiente, protegido por `COMPRAS_CREAR`; `GET /api/compras/:id/comprobante/archivo` para descargarlo con `COMPRAS_LEER`. La creación responde HTTP 201 con el ID y `comprobante: { estado: 'adjuntado' | 'pendiente' | 'fallido', advertencia?: string }`: `pendiente` si no se envió archivo y `fallido` con advertencia si se intentó adjuntar sin éxito. El detalle informa si existe archivo y expone sus metadatos; el listado expone fecha, documento, proveedor, almacén y total.
@@ -52,20 +52,21 @@
 
 ## Acceptance criteria
 
-- [ ] `GET /api/proveedores` filtra por nombre y documento con paginación, y `GET /api/proveedores/todos` devuelve todos los proveedores coincidentes sin paginar.
-- [ ] La búsqueda de variantes devuelve solo variantes activas de productos activos, con las unidades válidas del producto y su conversión; rechaza parámetros inválidos.
-- [ ] Con permiso `COMPRAS_CREAR`, una compra válida sin archivo crea exactamente una compra, un ingreso confirmado y sus detalles, y suma las cantidades y costos correctos a las existencias del almacén elegido.
-- [ ] Dos renglones de una variante con unidades o precios distintos conservan sus factores y costos individuales y actualizan correctamente la existencia conjunta.
-- [ ] El servidor rechaza proveedor, almacén o variante inexistente/inactivo, unidad ajena al producto, cantidades/factores inválidos y precio negativo sin dejar cambios parciales.
-- [ ] Un documento con mismo proveedor, tipo, serie y número no puede confirmar dos compras, incluso ante solicitudes concurrentes.
-- [ ] Si falla la transacción de compra e ingreso, no quedan compra, movimiento ni stock alterado; si solo falla el comprobante seleccionado, se conserva una única compra con su ingreso confirmado y la respuesta HTTP 201 incluye ID, `estado: 'fallido'` y advertencia.
-- [ ] Si no se selecciona archivo, la compra se confirma con `estado: 'pendiente'`; si se adjunta correctamente, responde con `estado: 'adjuntado'`.
-- [ ] Un PDF, JPG o PNG real de hasta 10 MB se guarda privadamente y se descarga solo con sesión y `COMPRAS_LEER`; MIME falso, tipo distinto o tamaño mayor no se almacenan y, al crear una compra válida, se informa el fallo del adjunto sin revertir el inventario.
-- [ ] `POST /api/compras/:id/comprobante` permite a quien tiene `COMPRAS_CREAR` adjuntar el archivo pendiente tras un fallo inicial o una compra sin archivo, sin volver a crear compra o ingreso; un fallo de este endpoint deja la compra intacta y admite otro intento.
-- [ ] Una compra no admite un segundo comprobante cuando ya tiene uno, tampoco ante solicitudes simultáneas; la consulta muestra ausencia de archivo o sus metadatos según corresponda.
-- [ ] Las consultas de compras tienen paginación y búsqueda por proveedor/documento, muestran primero las recientes y el detalle incluye la referencia del ingreso y, si existe, metadatos del archivo.
-- [ ] `COMPRAS_LEER`, `COMPRAS_CREAR` y `PROVEEDORES_LEER` figuran en el catálogo de `INVENTARIO` sin asignación automática; usuarios sin el permiso exigido reciben denegación.
-- [ ] La migración se aplica sobre una base existente; `npm run build` y las pruebas específicas de handlers/controladores pasan en `api-tienda`.
+- [x] `GET /api/proveedores` filtra por nombre y documento con paginación, y `GET /api/proveedores/todos` devuelve todos los proveedores coincidentes sin paginar.
+- [x] La búsqueda de variantes devuelve solo variantes activas de productos activos, con las unidades válidas del producto y su conversión; rechaza parámetros inválidos.
+- [x] Con permiso `COMPRAS_CREAR`, una compra válida sin archivo crea exactamente una compra, un ingreso confirmado y sus detalles, y suma las cantidades y costos correctos a las existencias del almacén elegido.
+- [x] Dos renglones de una variante con unidades o precios distintos conservan sus factores y costos individuales y actualizan correctamente la existencia conjunta.
+- [x] Una cantidad base que requiera más de seis decimales se rechaza sin efectos; cada subtotal monetario se redondea mitad hacia arriba a seis decimales antes de sumar el total.
+- [x] El servidor rechaza proveedor, almacén o variante inexistente/inactivo, unidad ajena al producto, cantidades/factores inválidos y precio negativo sin dejar cambios parciales.
+- [x] Un documento con mismo proveedor, tipo, serie y número no puede confirmar dos compras, incluso ante solicitudes concurrentes.
+- [x] Si falla la transacción de compra e ingreso, no quedan compra, movimiento ni stock alterado; si solo falla el comprobante seleccionado, se conserva una única compra con su ingreso confirmado y la respuesta HTTP 201 incluye ID, `estado: 'fallido'` y advertencia.
+- [x] Si no se selecciona archivo, la compra se confirma con `estado: 'pendiente'`; si se adjunta correctamente, responde con `estado: 'adjuntado'`.
+- [x] Un PDF, JPG o PNG real de hasta 10 MB se guarda privadamente y se descarga solo con sesión y `COMPRAS_LEER`; MIME falso, tipo distinto o tamaño mayor no se almacenan y, al crear una compra válida, se informa el fallo del adjunto sin revertir el inventario.
+- [x] `POST /api/compras/:id/comprobante` permite a quien tiene `COMPRAS_CREAR` adjuntar el archivo pendiente tras un fallo inicial o una compra sin archivo, sin volver a crear compra o ingreso; un fallo de este endpoint deja la compra intacta y admite otro intento.
+- [x] Una compra no admite un segundo comprobante cuando ya tiene uno, tampoco ante solicitudes simultáneas; la consulta muestra ausencia de archivo o sus metadatos según corresponda.
+- [x] Las consultas de compras tienen paginación y búsqueda por proveedor/documento, muestran primero las recientes y el detalle incluye la referencia del ingreso y, si existe, metadatos del archivo.
+- [x] `COMPRAS_LEER`, `COMPRAS_CREAR` y `PROVEEDORES_LEER` figuran en el catálogo de `INVENTARIO` sin asignación automática; usuarios sin el permiso exigido reciben denegación.
+- [x] La migración se aplica sobre una base existente; `npm run build` y las pruebas específicas de handlers/controladores pasan en `api-tienda`.
 
 ## Decisions
 
@@ -73,6 +74,7 @@
 - **No:** entregas parciales o recepción diferida, aunque el modelo de datos pueda admitir varios ingresos; requieren un flujo propio.
 - **Yes:** documento separado por tipo, serie y número, con unicidad por proveedor; evita perder información y duplicar stock.
 - **Yes:** total y costo calculados en servidor a partir de renglones en PEN; no se acepta un total manual independiente en este alcance.
+- **Yes:** rechazar conversiones a unidad base que no sean exactas a seis decimales y redondear cada subtotal monetario mitad hacia arriba a seis decimales; evita pérdidas silenciosas de stock y fija el costo aplicado.
 - **Yes:** la compra y el ingreso tienen prioridad sobre el archivo opcional; el fallo del comprobante se informa como advertencia sin revertir la operación.
 - **Yes:** intentar el comprobante en el mismo multipart y ofrecer un endpoint separado de adjunto posterior protegido por `COMPRAS_CREAR`; la descarga requiere `COMPRAS_LEER`.
 - **No:** reemplazar un archivo existente ni exponer archivos en una carpeta pública.

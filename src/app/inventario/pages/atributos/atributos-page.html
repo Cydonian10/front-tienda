@@ -1,0 +1,233 @@
+<section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="admin-section-title">
+  <header>
+    <p class="text-xs font-bold tracking-widest text-base-content/65 uppercase">
+      Configuración / Atributos
+    </p>
+    <h1 id="admin-section-title" class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+      Atributos
+    </h1>
+    <p class="mt-2 max-w-prose text-sm text-base-content/70">
+      Organiza las características que definen las variantes de tus productos.
+    </p>
+  </header>
+
+  <div
+    class="flex w-full gap-x-4 rounded-box border border-base-300 bg-base-100 px-5 py-4 sm:w-fit sm:gap-x-10 sm:px-6"
+    aria-label="Resumen de atributos"
+  >
+    <div class="flex min-w-0 flex-1 flex-col gap-1 sm:min-w-30 sm:flex-none">
+      <strong class="text-2xl font-semibold leading-none text-base-content tabular-nums">{{
+        result()?.totalRegistrados ?? '—'
+      }}</strong>
+      <span class="text-xs text-base-content/70">Atributos registrados</span>
+    </div>
+    <div
+      class="flex min-w-0 flex-1 flex-col gap-1 border-l border-base-300 pl-4 sm:min-w-30 sm:flex-none sm:pl-8"
+    >
+      <strong class="text-2xl font-semibold leading-none text-base-content tabular-nums">{{
+        result()?.totalEnUso ?? '—'
+      }}</strong>
+      <span class="text-xs text-base-content/70">En uso por productos</span>
+    </div>
+  </div>
+
+  <section
+    class="card card-border overflow-hidden bg-base-100"
+    aria-labelledby="attributes-list-title"
+  >
+    <div class="flex flex-col gap-5 border-b border-base-300 px-5 py-5 sm:px-6 sm:py-6">
+      <div>
+        <h2 id="attributes-list-title" class="text-lg font-semibold tracking-tight sm:text-xl">
+          Listado de atributos
+        </h2>
+        <p class="mt-1 text-sm text-base-content/70">
+          Administra los nombres disponibles en productos y variantes.
+        </p>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div role="search" class="w-full sm:max-w-sm">
+          <label class="sr-only" for="attribute-search">Buscar atributos por nombre</label>
+          <input
+            id="attribute-search"
+            type="search"
+            class="input h-11 w-full"
+            placeholder="Buscar por nombre"
+            maxlength="100"
+            [value]="search()"
+            (input)="searchAttributes($any($event.target).value)"
+          />
+        </div>
+        @if (permissions.create()) {
+          <button type="button" class="btn btn-primary min-h-11" (click)="openCreate()">
+            <app-icon name="plus" [size]="16" /> Nuevo atributo
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (actionError()) {
+      <div class="px-5 pt-5 sm:px-6">
+        <div role="alert" class="alert alert-error alert-soft">{{ actionError() }}</div>
+      </div>
+    }
+
+    @if (query.isPending()) {
+      <p role="status" class="p-8 text-center text-sm text-base-content/70">Cargando atributos…</p>
+    } @else if (query.isError()) {
+      <div class="p-5 sm:p-6">
+        <app-empty-state variant="error" actionLabel="Reintentar" (action)="query.refetch()" />
+      </div>
+    } @else if (result(); as response) {
+      @if (response.data.length) {
+        <div class="hidden overflow-x-auto sm:block">
+          <table class="table table-md w-full min-w-147.5">
+            <thead class="bg-base-200 text-xs uppercase">
+              <tr>
+                <th scope="col" class="w-[40%] pl-6">Atributo</th>
+                <th scope="col" class="w-[25%]">Uso</th>
+                @if (permissions.edit() || permissions.delete()) {
+                  <th scope="col" class="pr-6 text-right">Acciones</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (atributo of response.data; track atributo.id) {
+                <tr class="border-b border-base-300/70 last:border-b-0 hover:bg-base-200/60">
+                  <th scope="row" class="pl-6 font-semibold">
+                    <span class="inline-flex items-center gap-3">
+                      <span
+                        class="grid size-9 shrink-0 place-items-center rounded-field bg-primary/10 text-primary"
+                        aria-hidden="true"
+                        ><app-icon name="tag" [size]="16"
+                      /></span>
+                      <span class="wrap-break-words">{{ atributo.nombre }}</span>
+                    </span>
+                  </th>
+                  <td class="text-sm text-base-content/70 tabular-nums">
+                    <strong class="font-semibold text-base-content">{{
+                      atributo.usoProductos
+                    }}</strong>
+                    {{ atributo.usoProductos === 1 ? 'producto' : 'productos' }}
+                  </td>
+                  @if (permissions.edit() || permissions.delete()) {
+                    <td class="pr-6">
+                      <div class="flex justify-end gap-1">
+                        @if (permissions.edit()) {
+                          <button
+                            type="button"
+                            class="btn btn-ghost btn-sm min-h-10"
+                            [disabled]="removeMutation.isPending()"
+                            [attr.aria-label]="'Editar ' + atributo.nombre"
+                            (click)="openEdit(atributo)"
+                          >
+                            Editar
+                          </button>
+                        }
+                        @if (permissions.delete()) {
+                          <button
+                            type="button"
+                            class="btn btn-ghost btn-sm min-h-10 text-error"
+                            [disabled]="removeMutation.isPending()"
+                            [attr.aria-label]="'Eliminar ' + atributo.nombre"
+                            (click)="remove(atributo)"
+                          >
+                            Eliminar
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <ul class="divide-y divide-base-300 sm:hidden" aria-label="Listado de atributos">
+          @for (atributo of response.data; track atributo.id) {
+            <li class="space-y-4 px-5 py-5">
+              <div class="flex min-w-0 items-start gap-3">
+                <span
+                  class="grid size-9 shrink-0 place-items-center rounded-field bg-primary/10 text-primary"
+                  aria-hidden="true"
+                  ><app-icon name="tag" [size]="16"
+                /></span>
+                <div class="min-w-0 flex-1">
+                  <strong class="block wrap-break-words text-sm font-semibold">{{
+                    atributo.nombre
+                  }}</strong>
+                  <span class="mt-1 block text-xs text-base-content/70 tabular-nums"
+                    >{{ atributo.usoProductos }}
+                    {{ atributo.usoProductos === 1 ? 'producto' : 'productos' }}</span
+                  >
+                </div>
+              </div>
+              @if (permissions.edit() || permissions.delete()) {
+                <div class="flex gap-2">
+                  @if (permissions.edit()) {
+                    <button
+                      type="button"
+                      class="btn btn-outline min-h-11 flex-1"
+                      [disabled]="removeMutation.isPending()"
+                      [attr.aria-label]="'Editar ' + atributo.nombre"
+                      (click)="openEdit(atributo)"
+                    >
+                      Editar
+                    </button>
+                  }
+                  @if (permissions.delete()) {
+                    <button
+                      type="button"
+                      class="btn btn-outline min-h-11 flex-1 text-error"
+                      [disabled]="removeMutation.isPending()"
+                      [attr.aria-label]="'Eliminar ' + atributo.nombre"
+                      (click)="remove(atributo)"
+                    >
+                      Eliminar
+                    </button>
+                  }
+                </div>
+              }
+            </li>
+          }
+        </ul>
+        <div
+          class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 px-5 py-4 text-sm text-base-content/70 sm:px-6"
+        >
+          <p role="status">
+            {{ response.meta.total }} atributos · Página {{ response.meta.page }} de
+            {{ response.meta.totalPages }}
+          </p>
+          <app-pagination
+            [page]="page()"
+            [totalPages]="response.meta.totalPages"
+            [pageSize]="pageSize()"
+            [disabled]="query.isFetching() || removeMutation.isPending()"
+            (pageChange)="page.set($event)"
+            (pageSizeChange)="changePageSize($event)"
+          />
+        </div>
+      } @else if (search()) {
+        <div class="p-5 sm:p-6">
+          <app-empty-state
+            variant="no-results"
+            actionLabel="Limpiar búsqueda"
+            (action)="clearSearch()"
+          />
+        </div>
+      } @else {
+        <div class="p-5 sm:p-6">
+          <app-empty-state
+            title="Todavía no hay atributos"
+            description="Crea una característica para utilizarla en las variantes de tus productos."
+            [actionLabel]="permissions.create() ? 'Nuevo atributo' : ''"
+            (action)="openCreate()"
+          />
+        </div>
+      }
+    }
+  </section>
+  <p class="max-w-prose text-xs leading-relaxed text-base-content/70">
+    Los atributos usados por productos o variantes no se pueden eliminar. Puedes renombrarlos sin
+    perder los valores de sus variantes.
+  </p>
+</section>

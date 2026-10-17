@@ -1,134 +1,208 @@
 <section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="admin-section-title">
-  <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 id="admin-section-title" class="text-2xl font-semibold tracking-tight">
-        Unidades de medida
-      </h1>
-      <p class="mt-2 max-w-prose text-sm text-base-content/70">
-        Administra las unidades disponibles para productos y sus conversiones.
-      </p>
-    </div>
-    @if (canCreate) {
-      <button type="button" class="btn btn-primary shrink-0" (click)="openCreate()">
-        Crear unidad
-      </button>
-    }
+  <header>
+    <h1 id="admin-section-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">
+      Unidades de medida
+    </h1>
+    <p class="mt-2 max-w-prose text-sm text-base-content/70">
+      Administra las unidades disponibles para productos y sus conversiones.
+    </p>
   </header>
 
-  <section class="card card-border bg-base-100" aria-label="Catálogo de unidades">
-    <div class="card-body gap-5 p-4 sm:p-6">
-      <form class="flex flex-col gap-2 sm:flex-row" (submit)="searchUnits($event)" role="search">
-        <label class="sr-only" for="unit-search">Buscar por nombre</label>
-        <input
-          id="unit-search"
-          type="search"
-          class="input w-full sm:max-w-sm"
-          placeholder="Buscar por nombre"
-          [value]="searchDraft()"
-          (input)="searchDraft.set($any($event.target).value)"
-        />
-        <button type="submit" class="btn">Buscar</button>
-        @if (search()) {
-          <button type="button" class="btn btn-ghost" (click)="clearSearch()">Limpiar</button>
-        }
-      </form>
-
-      @if (actionError()) {
-        <div role="alert" class="alert alert-error alert-soft">{{ actionError() }}</div>
-      }
-
-      @if (query.isPending()) {
-        <p role="status" class="py-8 text-center text-sm text-base-content/70">
-          Cargando unidades…
+  <section class="card card-border overflow-hidden bg-base-100" aria-labelledby="units-list-title">
+    <div class="flex flex-col gap-5 border-b border-base-300 px-5 py-5 sm:px-6 sm:py-6">
+      <div>
+        <h2 id="units-list-title" class="text-lg font-semibold tracking-tight sm:text-xl">
+          Listado de unidades
+        </h2>
+        <p class="mt-1 text-sm text-base-content/70">
+          Consulta los nombres, símbolos y tipos disponibles en el catálogo.
         </p>
-      } @else if (query.isError()) {
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <form
+          class="flex w-full flex-col gap-2 sm:max-w-xl sm:flex-row"
+          (submit)="searchUnits($event)"
+          role="search"
+        >
+          <label class="sr-only" for="unit-search">Buscar unidades por nombre</label>
+          <input
+            id="unit-search"
+            type="search"
+            class="input h-11 w-full sm:max-w-sm"
+            placeholder="Buscar por nombre"
+            [value]="searchDraft()"
+            (input)="searchDraft.set($any($event.target).value)"
+          />
+          <div class="flex gap-2">
+            <button type="submit" class="btn min-h-11 flex-1 sm:flex-none">Buscar</button>
+            @if (search()) {
+              <button
+                type="button"
+                class="btn btn-ghost min-h-11 flex-1 sm:flex-none"
+                (click)="clearSearch()"
+              >
+                Limpiar
+              </button>
+            }
+          </div>
+        </form>
+        @if (canCreate) {
+          <button type="button" class="btn btn-primary min-h-11 shrink-0" (click)="openCreate()">
+            Crear unidad
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (actionError()) {
+      <div class="px-5 pt-5 sm:px-6">
+        <div role="alert" class="alert alert-error alert-soft">{{ actionError() }}</div>
+      </div>
+    }
+
+    @if (query.isPending()) {
+      <p role="status" class="p-8 text-center text-sm text-base-content/70">Cargando unidades…</p>
+    } @else if (query.isError()) {
+      <div class="p-5 sm:p-6">
         <app-empty-state variant="error" actionLabel="Reintentar" (action)="query.refetch()" />
-      } @else if (result(); as response) {
-        @if (response.data.length) {
-          <div class="overflow-x-auto rounded-field border border-base-300">
-            <table class="table table-sm min-w-[480px]">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Símbolo</th>
-                  <th>Tipo</th>
+      </div>
+    } @else if (result(); as response) {
+      @if (response.data.length) {
+        <div class="hidden overflow-x-auto sm:block">
+          <table class="table table-md w-full min-w-[640px]">
+            <thead class="bg-base-200 text-xs uppercase">
+              <tr>
+                <th scope="col" class="w-[35%] pl-6">Nombre</th>
+                <th scope="col" class="w-[18%]">Símbolo</th>
+                <th scope="col" class="w-[20%]">Tipo</th>
+                @if (canEdit || canDelete) {
+                  <th scope="col" class="pr-6 text-right">Acciones</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (unidad of response.data; track unidad.id) {
+                <tr class="border-b border-base-300/70 last:border-b-0 hover:bg-base-200/60">
+                  <th scope="row" class="pl-6 font-semibold break-words">{{ unidad.nombre }}</th>
+                  <td>
+                    <span class="badge badge-outline border-base-300 bg-base-200 font-semibold">{{
+                      unidad.simbolo
+                    }}</span>
+                  </td>
+                  <td class="text-sm text-base-content/70 break-words">{{ unidad.tipo }}</td>
                   @if (canEdit || canDelete) {
-                    <th class="text-right">Acciones</th>
+                    <td class="pr-6">
+                      <div class="flex justify-end gap-1">
+                        @if (canEdit) {
+                          <button
+                            type="button"
+                            class="btn btn-ghost btn-sm min-h-10"
+                            [disabled]="removeMutation.isPending()"
+                            (click)="openEdit(unidad)"
+                            [attr.aria-label]="'Editar ' + unidad.nombre"
+                          >
+                            Editar
+                          </button>
+                        }
+                        @if (canDelete) {
+                          <button
+                            type="button"
+                            class="btn btn-ghost btn-sm min-h-10 text-error"
+                            [disabled]="removeMutation.isPending()"
+                            (click)="remove(unidad)"
+                            [attr.aria-label]="'Eliminar ' + unidad.nombre"
+                          >
+                            Eliminar
+                          </button>
+                        }
+                      </div>
+                    </td>
                   }
                 </tr>
-              </thead>
-              <tbody>
-                @for (unidad of response.data; track unidad.id) {
-                  <tr>
-                    <th class="font-semibold">{{ unidad.nombre }}</th>
-                    <td>
-                      <span class="badge badge-ghost">{{ unidad.simbolo }}</span>
-                    </td>
-                    <td>{{ unidad.tipo }}</td>
-                    @if (canEdit || canDelete) {
-                      <td>
-                        <div class="flex justify-end gap-1">
-                          @if (canEdit) {
-                            <button
-                              type="button"
-                              class="btn btn-ghost btn-sm"
-                              [disabled]="removeMutation.isPending()"
-                              (click)="openEdit(unidad)"
-                              [attr.aria-label]="'Editar ' + unidad.nombre"
-                            >
-                              Editar
-                            </button>
-                          }
-                          @if (canDelete) {
-                            <button
-                              type="button"
-                              class="btn btn-ghost btn-sm text-error"
-                              [disabled]="removeMutation.isPending()"
-                              (click)="remove(unidad)"
-                              [attr.aria-label]="'Eliminar ' + unidad.nombre"
-                            >
-                              Eliminar
-                            </button>
-                          }
-                        </div>
-                      </td>
-                    }
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-          <div
-            class="flex flex-wrap items-center justify-between gap-3 text-sm text-base-content/70"
-          >
-            <p role="status">
-              {{ response.meta.total }} unidades · Página {{ response.meta.page }} de
-              {{ response.meta.totalPages }}
-            </p>
-            <app-pagination
-              [page]="page()"
-              [totalPages]="response.meta.totalPages"
-              [pageSize]="pageSize()"
-              [disabled]="query.isFetching() || removeMutation.isPending()"
-              (pageChange)="page.set($event)"
-              (pageSizeChange)="changePageSize($event)"
-            />
-          </div>
-        } @else if (search()) {
+              }
+            </tbody>
+          </table>
+        </div>
+        <ul class="divide-y divide-base-300 sm:hidden" aria-label="Listado de unidades">
+          @for (unidad of response.data; track unidad.id) {
+            <li class="space-y-4 px-5 py-5">
+              <div class="flex min-w-0 items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <strong class="block break-words text-sm font-semibold">{{
+                    unidad.nombre
+                  }}</strong>
+                  <span class="mt-1 block break-words text-xs text-base-content/70">{{
+                    unidad.tipo
+                  }}</span>
+                </div>
+                <span
+                  class="badge badge-outline h-auto max-w-[45%] shrink-0 break-all whitespace-normal border-base-300 bg-base-200 py-1 text-center font-semibold"
+                  >{{ unidad.simbolo }}</span
+                >
+              </div>
+              @if (canEdit || canDelete) {
+                <div class="flex gap-2">
+                  @if (canEdit) {
+                    <button
+                      type="button"
+                      class="btn btn-outline min-h-11 flex-1"
+                      [disabled]="removeMutation.isPending()"
+                      (click)="openEdit(unidad)"
+                      [attr.aria-label]="'Editar ' + unidad.nombre"
+                    >
+                      Editar
+                    </button>
+                  }
+                  @if (canDelete) {
+                    <button
+                      type="button"
+                      class="btn btn-outline min-h-11 flex-1 text-error"
+                      [disabled]="removeMutation.isPending()"
+                      (click)="remove(unidad)"
+                      [attr.aria-label]="'Eliminar ' + unidad.nombre"
+                    >
+                      Eliminar
+                    </button>
+                  }
+                </div>
+              }
+            </li>
+          }
+        </ul>
+        <div
+          class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 px-5 py-4 text-sm text-base-content/70 sm:px-6"
+        >
+          <p role="status">
+            {{ response.meta.total }} unidades · Página {{ response.meta.page }} de
+            {{ response.meta.totalPages }}
+          </p>
+          <app-pagination
+            [page]="page()"
+            [totalPages]="response.meta.totalPages"
+            [pageSize]="pageSize()"
+            [disabled]="query.isFetching() || removeMutation.isPending()"
+            (pageChange)="page.set($event)"
+            (pageSizeChange)="changePageSize($event)"
+          />
+        </div>
+      } @else if (search()) {
+        <div class="p-5 sm:p-6">
           <app-empty-state
             variant="no-results"
             actionLabel="Limpiar búsqueda"
             (action)="clearSearch()"
           />
-        } @else {
+        </div>
+      } @else {
+        <div class="p-5 sm:p-6">
           <app-empty-state
             title="Todavía no hay unidades"
             description="Crea una unidad de medida para utilizarla en tus productos."
             [actionLabel]="canCreate ? 'Crear unidad' : ''"
             (action)="openCreate()"
           />
-        }
+        </div>
       }
-    </div>
+    }
   </section>
 </section>

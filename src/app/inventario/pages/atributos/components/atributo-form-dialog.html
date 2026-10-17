@@ -1,0 +1,59 @@
+<app-dialog-shell [title]="atributo ? 'Editar atributo' : 'Nuevo atributo'" [titleId]="titleId">
+  <form [id]="formId" (submit)="save($event)" class="space-y-4" novalidate>
+    <p class="text-sm text-base-content/70">
+      {{
+        atributo
+          ? 'El nuevo nombre se aplicará también a los productos y sus variantes.'
+          : 'Añade una característica para usarla en las variantes de productos.'
+      }}
+    </p>
+    <fieldset class="fieldset">
+      <label class="label" for="attribute-name">Nombre <span class="text-error">*</span></label>
+      <input
+        id="attribute-name"
+        type="text"
+        class="input w-full"
+        autocomplete="off"
+        placeholder="Ej. Color"
+        [formField]="attributeForm.nombre"
+        [class.input-error]="attributeForm.nombre().touched() && attributeForm.nombre().invalid()"
+        aria-describedby="attribute-name-errors attribute-name-help"
+      />
+      <app-field-errors [field]="attributeForm.nombre()" errorId="attribute-name-errors" />
+      <p id="attribute-name-help" class="text-xs text-base-content/70">
+        Debe ser único. Máximo 100 caracteres.
+      </p>
+    </fieldset>
+    <div class="alert alert-info alert-soft text-sm" role="note">
+      Los valores como Negro, Blanco o M se definen para cada variante del producto.
+    </div>
+    @if (serverError()) {
+      <div role="alert" class="alert alert-error alert-soft">{{ serverError() }}</div>
+    }
+  </form>
+  <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
+    <button
+      type="button"
+      class="btn"
+      data-dialog-cancel
+      [disabled]="createMutation.isPending() || updateMutation.isPending()"
+      (click)="dialogRef.close()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [attr.form]="formId"
+      [disabled]="createMutation.isPending() || updateMutation.isPending()"
+    >
+      {{
+        createMutation.isPending() || updateMutation.isPending()
+          ? 'Guardando…'
+          : atributo
+            ? 'Guardar cambios'
+            : 'Crear atributo'
+      }}
+    </button>
+  </div>
+</app-dialog-shell>

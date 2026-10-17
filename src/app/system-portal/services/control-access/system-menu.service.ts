@@ -65,6 +65,24 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             icon: 'package',
             permission: PERMISSION_CODES.UNIDADES_READ,
           },
+          {
+            label: 'Atributos',
+            url: '/admin/inventario/atributos',
+            icon: 'tag',
+            permission: PERMISSION_CODES.ATRIBUTOS_READ,
+          },
+        ],
+      },
+      {
+        label: 'Configuración',
+        icon: 'settings',
+        items: [
+          {
+            label: 'Almacenes',
+            url: '/admin/inventario/almacenes',
+            icon: 'warehouse',
+            permission: PERMISSION_CODES.ALMACENES_READ,
+          },
         ],
       },
     ],

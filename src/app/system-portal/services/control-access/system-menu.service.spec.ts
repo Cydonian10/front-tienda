@@ -112,6 +112,13 @@ describe('SystemMenuService', () => {
       'Producto prueba',
     ]);
     expect(service.menuFor('INVENTARIO')[0].items[1].url).toBe('/admin/inventario/producto-prueba');
+
+    TestBed.inject(AuthStore).setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.ATRIBUTOS_READ, systemCode: 'INVENTARIO' }],
+    } as never);
+    expect(service.menuFor('INVENTARIO')[0].items.map((item) => item.label)).toEqual(['Atributos']);
+    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/atributos');
   });
 });
 

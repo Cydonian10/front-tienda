@@ -11,6 +11,10 @@ export const ICONS = {
   'chevron-right': [{ type: 'path', d: 'm9 6 6 6-6 6' }],
   'chevron-left': [{ type: 'path', d: 'm15 6-6 6 6 6' }],
   plus: [{ type: 'path', d: 'M12 5v14M5 12h14' }],
+  tag: [
+    { type: 'path', d: 'M3 12 12 3h8v8l-9 9a2 2 0 0 1-2.8 0L3 14.8a2 2 0 0 1 0-2.8Z' },
+    { type: 'circle', cx: 16, cy: 7, r: 1 },
+  ],
   grid: [{ type: 'path', d: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z' }],
   package: [
     {
@@ -18,6 +22,7 @@ export const ICONS = {
       d: 'm12 3 8.5 4.5v9L12 21l-8.5-4.5v-9L12 3Zm0 9 8.5-4.5M12 12 3.5 7.5M12 12v9',
     },
   ],
+  warehouse: [{ type: 'path', d: 'M3 10 12 4l9 6v11H3V10Zm0 0h18M8 21v-7h8v7' }],
   'chart-line': [{ type: 'path', d: 'M3 3v18h18m-14-7 4-4 4 3 6-8' }],
   check: [{ type: 'path', d: 'm5 12 4 4L19 6' }],
   user: [

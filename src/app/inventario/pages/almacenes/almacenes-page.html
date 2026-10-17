@@ -1,0 +1,237 @@
+<section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="admin-section-title">
+  <header>
+    <h1 id="admin-section-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">
+      Almacenes
+    </h1>
+    <p class="mt-2 max-w-prose text-sm text-base-content/70">
+      Define los lugares donde se registra el stock de cada variante.
+    </p>
+  </header>
+
+  <div class="grid gap-3 sm:grid-cols-3" aria-label="Resumen de almacenes">
+    <div class="card card-border bg-base-100">
+      <div class="card-body gap-1 p-5">
+        <span class="text-sm text-base-content/70">Almacenes registrados</span>
+        <strong class="text-2xl font-semibold tabular-nums">{{
+          result()?.totalRegistrados ?? '—'
+        }}</strong>
+      </div>
+    </div>
+    <div class="card card-border bg-base-100">
+      <div class="card-body gap-1 p-5">
+        <span class="text-sm text-base-content/70">Activos</span>
+        <strong class="text-2xl font-semibold tabular-nums">{{
+          result()?.totalActivos ?? '—'
+        }}</strong>
+      </div>
+    </div>
+    <div class="card card-border bg-base-100">
+      <div class="card-body gap-1 p-5">
+        <span class="text-sm text-base-content/70">Inactivos</span>
+        <strong class="text-2xl font-semibold tabular-nums">{{
+          result()?.totalInactivos ?? '—'
+        }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <section class="card card-border overflow-hidden bg-base-100" aria-labelledby="warehouses-title">
+    <div class="space-y-5 border-b border-base-300 px-5 py-5 sm:px-6 sm:py-6">
+      <div>
+        <h2 id="warehouses-title" class="text-lg font-semibold tracking-tight sm:text-xl">
+          Listado de almacenes
+        </h2>
+        <p class="mt-1 text-sm text-base-content/70">
+          Consulta y administra los lugares disponibles para el inventario.
+        </p>
+      </div>
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <form
+            class="flex flex-col gap-2 sm:flex-row"
+            role="search"
+            (submit)="searchWarehouses($event)"
+          >
+            <div>
+              <label class="sr-only" for="warehouse-search">Buscar almacenes por nombre</label>
+              <input
+                id="warehouse-search"
+                type="search"
+                class="input h-11 w-full sm:w-60"
+                maxlength="150"
+                placeholder="Buscar por nombre"
+                [value]="searchDraft()"
+                (input)="searchDraft.set($any($event.target).value)"
+              />
+            </div>
+            <button type="submit" class="btn min-h-11">Buscar</button>
+          </form>
+          <div>
+            <label class="sr-only" for="warehouse-status">Filtrar almacenes por estado</label>
+            <select
+              id="warehouse-status"
+              class="select h-11 w-full sm:w-40"
+              [value]="status()"
+              (change)="changeStatus($any($event.target).value)"
+            >
+              <option value="todos">Todos</option>
+              <option value="activos">Activos</option>
+              <option value="inactivos">Inactivos</option>
+            </select>
+          </div>
+          @if (search() || status() !== 'todos') {
+            <button type="button" class="btn btn-ghost min-h-11" (click)="clearFilters()">
+              Limpiar filtros
+            </button>
+          }
+        </div>
+        @if (canCreate) {
+          <button type="button" class="btn btn-primary min-h-11" (click)="openCreate()">
+            <app-icon name="plus" size="sm" /> Nuevo almacén
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (actionError()) {
+      <div class="px-5 pt-5 sm:px-6">
+        <div role="alert" class="alert alert-error alert-soft">{{ actionError() }}</div>
+      </div>
+    }
+    @if (query.isPending()) {
+      <p class="p-8 text-center text-sm text-base-content/70" role="status">Cargando almacenes…</p>
+    } @else if (query.isError()) {
+      <div class="p-5 sm:p-6">
+        <app-empty-state variant="error" actionLabel="Reintentar" (action)="query.refetch()" />
+      </div>
+    } @else if (result(); as response) {
+      @if (response.data.length) {
+        <div class="hidden overflow-x-auto sm:block">
+          <table class="table table-md w-full min-w-[560px]">
+            <thead class="bg-base-200 text-xs uppercase">
+              <tr>
+                <th scope="col" class="pl-6">Almacén</th>
+                <th scope="col">Estado</th>
+                @if (canEdit) {
+                  <th scope="col" class="pr-6 text-right">Acciones</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (almacen of response.data; track almacen.id) {
+                <tr class="border-b border-base-300/70 last:border-b-0 hover:bg-base-200/60">
+                  <th scope="row" class="pl-6 font-semibold break-words">{{ almacen.nombre }}</th>
+                  <td>
+                    <span class="badge badge-outline" [class.badge-success]="almacen.activo">{{
+                      almacen.activo ? 'Activo' : 'Inactivo'
+                    }}</span>
+                  </td>
+                  @if (canEdit) {
+                    <td class="pr-6">
+                      <div class="flex justify-end gap-1">
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-sm min-h-10"
+                          [disabled]="updateMutation.isPending()"
+                          (click)="openEdit(almacen)"
+                          [attr.aria-label]="'Editar ' + almacen.nombre"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-sm min-h-10"
+                          [disabled]="updateMutation.isPending()"
+                          (click)="toggleStatus(almacen)"
+                          [attr.aria-label]="
+                            (almacen.activo ? 'Desactivar ' : 'Activar ') + almacen.nombre
+                          "
+                        >
+                          {{ almacen.activo ? 'Desactivar' : 'Activar' }}
+                        </button>
+                      </div>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <ul class="divide-y divide-base-300 sm:hidden" aria-label="Listado de almacenes">
+          @for (almacen of response.data; track almacen.id) {
+            <li class="space-y-4 px-5 py-5">
+              <div class="flex items-start justify-between gap-3">
+                <strong class="min-w-0 break-words text-sm">{{ almacen.nombre }}</strong>
+                <span class="badge badge-outline shrink-0" [class.badge-success]="almacen.activo">{{
+                  almacen.activo ? 'Activo' : 'Inactivo'
+                }}</span>
+              </div>
+              @if (canEdit) {
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-outline min-h-11 flex-1"
+                    [disabled]="updateMutation.isPending()"
+                    (click)="openEdit(almacen)"
+                    [attr.aria-label]="'Editar ' + almacen.nombre"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline min-h-11 flex-1"
+                    [disabled]="updateMutation.isPending()"
+                    (click)="toggleStatus(almacen)"
+                    [attr.aria-label]="
+                      (almacen.activo ? 'Desactivar ' : 'Activar ') + almacen.nombre
+                    "
+                  >
+                    {{ almacen.activo ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="p-5 sm:p-6">
+          @if (search() || status() !== 'todos') {
+            <app-empty-state
+              variant="no-results"
+              actionLabel="Limpiar filtros"
+              (action)="clearFilters()"
+            />
+          } @else {
+            <app-empty-state
+              title="Todavía no hay almacenes"
+              description="Crea un almacén para organizar tus existencias."
+              [actionLabel]="canCreate ? 'Nuevo almacén' : ''"
+              (action)="openCreate()"
+            />
+          }
+        </div>
+      }
+      <div
+        class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 px-5 py-4 text-sm text-base-content/70 sm:px-6"
+      >
+        <p role="status">
+          {{ response.meta.total }} resultados · Página {{ response.meta.page }} de
+          {{ response.meta.totalPages || 1 }}
+        </p>
+        @if (response.meta.total > 0) {
+          <app-pagination
+            [page]="page()"
+            [totalPages]="response.meta.totalPages"
+            [pageSize]="pageSize()"
+            [disabled]="query.isFetching() || updateMutation.isPending()"
+            (pageChange)="page.set($event)"
+            (pageSizeChange)="changePageSize($event)"
+          />
+        }
+      </div>
+    }
+  </section>
+  <p class="text-xs text-base-content/70">
+    Desactivar un almacén conserva sus existencias y su historial.
+  </p>
+</section>

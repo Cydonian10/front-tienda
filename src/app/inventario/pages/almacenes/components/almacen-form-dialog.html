@@ -1,0 +1,71 @@
+<app-dialog-shell [title]="almacen ? 'Editar almacén' : 'Nuevo almacén'" [titleId]="titleId">
+  <form [id]="formId" (submit)="save($event)" class="space-y-5" novalidate>
+    <p class="text-sm text-base-content/70">
+      Identifica un lugar físico o lógico para organizar las existencias.
+    </p>
+    <fieldset class="fieldset">
+      <label class="label" for="warehouse-name"
+        >Nombre del almacén <span class="text-error">*</span></label
+      >
+      <input
+        id="warehouse-name"
+        type="text"
+        class="input w-full"
+        autocomplete="off"
+        placeholder="Ej. Almacén principal"
+        [formField]="warehouseForm.nombre"
+        [class.input-error]="warehouseForm.nombre().touched() && warehouseForm.nombre().invalid()"
+        aria-describedby="warehouse-name-errors"
+      />
+      <app-field-errors [field]="warehouseForm.nombre()" errorId="warehouse-name-errors" />
+      <p class="text-xs text-base-content/70">El nombre debe ser único.</p>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend class="label">Estado</legend>
+      <label
+        class="flex items-center justify-between gap-4 rounded-field border border-base-300 p-3"
+      >
+        <span class="text-sm font-semibold">{{
+          warehouseForm.activo().value() ? 'Activo' : 'Inactivo'
+        }}</span>
+        <input
+          type="checkbox"
+          class="toggle toggle-primary"
+          [formField]="warehouseForm.activo"
+          aria-label="Almacén activo"
+        />
+      </label>
+      <p class="text-xs text-base-content/70">
+        Un almacén inactivo conserva su historial y no debe usarse en nuevos movimientos.
+      </p>
+    </fieldset>
+    @if (serverError()) {
+      <div role="alert" class="alert alert-error alert-soft">{{ serverError() }}</div>
+    }
+  </form>
+  <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
+    <button
+      type="button"
+      class="btn"
+      data-dialog-cancel
+      [disabled]="createMutation.isPending() || updateMutation.isPending()"
+      (click)="dialogRef.close()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [attr.form]="formId"
+      [disabled]="createMutation.isPending() || updateMutation.isPending()"
+    >
+      {{
+        createMutation.isPending() || updateMutation.isPending()
+          ? 'Guardando…'
+          : almacen
+            ? 'Guardar cambios'
+            : 'Crear almacén'
+      }}
+    </button>
+  </div>
+</app-dialog-shell>

@@ -43,6 +43,8 @@ describe('UnidadesPage', () => {
     await vi.waitFor(() => expect(fixture.componentInstance.result()?.data[0].nombre).toBe('Caja'));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Caja');
+    expect(fixture.nativeElement.querySelector('table tbody tr')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('ul[aria-label="Listado de unidades"] li')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('button.btn-primary')).toBeNull();
     fixture.componentInstance.openCreate();
     expect(open).not.toHaveBeenCalled();

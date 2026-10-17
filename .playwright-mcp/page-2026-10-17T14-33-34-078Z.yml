@@ -1,0 +1,61 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]: ▦
+    - button [ref=e6] [cursor=pointer]
+    - button [ref=e12] [cursor=pointer]
+    - button [ref=e18] [cursor=pointer]
+    - button [ref=e22] [cursor=pointer]
+    - button [ref=e25] [cursor=pointer]
+    - button [ref=e28] [cursor=pointer]
+    - button [ref=e31] [cursor=pointer]
+    - button [ref=e35] [cursor=pointer]
+    - button [ref=e38] [cursor=pointer]
+    - button [ref=e41] [cursor=pointer]
+    - generic [ref=e45]: G
+  - main [ref=e47]:
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - text: Operaciones /
+        - strong [ref=e50]: Compras
+      - generic [ref=e51]:
+        - generic [ref=e52]: Datos de prueba locales
+        - generic [aria-hidden] [ref=e54]: ◌
+    - generic [ref=e55]:
+      - generic [ref=e57]:
+        - generic [ref=e58]: Operaciones / Compras
+        - heading "Compras" [level=1] [ref=e150]
+        - paragraph [ref=e60]: Registra el comprobante del proveedor y recibe los productos en almacén.
+      - generic [ref=e151]:
+        - generic [ref=e152]:
+          - strong [ref=e153]: Compras
+          - text: guarda el proveedor, su comprobante y los precios pagados. Al confirmar, crea el ingreso en Historial.
+          - strong [ref=e154]: Movimientos
+          - text: queda para salidas, traslados y ajustes.
+        - generic [ref=e155]:
+          - generic [ref=e156]:
+            - strong [ref=e157]: "0"
+            - text: Compras recibidas
+          - generic [ref=e158]:
+            - strong [ref=e159]: "0"
+            - text: Borradores
+        - searchbox "Buscar compras" [ref=e161]
+        - generic [ref=e162]:
+          - generic [ref=e163]:
+            - generic [ref=e164]:
+              - generic [ref=e165]: COMPRAS / COMPROBANTES
+              - heading "Compras registradas" [level=2] [ref=e166]
+              - paragraph [ref=e167]: Cada compra confirmada tiene un ingreso vinculado.
+            - button "＋ Nueva compra" [ref=e168] [cursor=pointer]
+          - table [ref=e170]:
+            - rowgroup [ref=e171]:
+              - row [ref=e172]:
+                - columnheader "Comprobante" [ref=e173]
+                - columnheader "Proveedor" [ref=e174]
+                - columnheader "Almacén" [ref=e175]
+                - columnheader "Detalle" [ref=e176]
+                - columnheader "Total pagado" [ref=e177]
+                - columnheader "Estado" [ref=e178]
+                - columnheader [ref=e179]
+            - rowgroup [ref=e180]:
+              - row [ref=e181]:
+                - cell "Todavía no hay compras para esta búsqueda. Crea una para registrar el comprobante y recibir productos." [ref=e182]

@@ -1,0 +1,119 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]: ▦
+    - button [ref=e6] [cursor=pointer]
+    - button [ref=e12] [cursor=pointer]
+    - button [ref=e18] [cursor=pointer]
+    - button [ref=e22] [cursor=pointer]
+    - button [ref=e25] [cursor=pointer]
+    - button [ref=e28] [cursor=pointer]
+    - button [ref=e31] [cursor=pointer]
+    - button [ref=e35] [cursor=pointer]
+    - button [ref=e38] [cursor=pointer]
+    - button [ref=e41] [cursor=pointer]
+    - generic [ref=e45]: G
+  - main [ref=e47]:
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - text: Operaciones /
+        - strong [ref=e50]: Compras
+      - generic [ref=e51]:
+        - generic [ref=e52]: Datos de prueba locales
+        - generic [aria-hidden] [ref=e54]: ◌
+    - generic [ref=e55]:
+      - generic [ref=e57]:
+        - generic [ref=e58]: Operaciones / Compras
+        - heading "Nueva compra" [level=1] [ref=e183]
+        - paragraph [ref=e60]: Registra el comprobante del proveedor y recibe los productos en almacén.
+      - generic [ref=e151]:
+        - generic [ref=e184]:
+          - generic [ref=e185]: 1 · Proveedor y comprobante
+          - generic [ref=e186]: →
+          - generic [ref=e187]: 2 · Productos y precios
+          - generic [ref=e188]: →
+          - generic [ref=e189]: 3 · Confirmar y recibir
+        - generic [ref=e190]:
+          - text: Al confirmar esta compra, se registra
+          - strong [ref=e191]: un ingreso vinculado
+          - text: y se actualizan la cantidad y el valor a costo del almacén. Guardar borrador no cambia existencias.
+        - generic [ref=e192]:
+          - generic [ref=e194]:
+            - generic [ref=e195]: 01 · COMPROBANTE DEL PROVEEDOR
+            - heading "¿A quién compras y dónde lo recibes?" [level=2] [ref=e196]
+            - paragraph [ref=e197]: El comprobante queda asociado a esta compra.
+          - generic [ref=e199]:
+            - generic [ref=e200]:
+              - generic [ref=e201]: Proveedor *
+              - combobox "Proveedor *" [ref=e202]:
+                - option "Selecciona un proveedor" [selected]
+                - option "Distribuidora Andina S.A.C."
+                - option "Textiles del Sur"
+                - option "Comercial Rivera"
+            - generic [ref=e203]:
+              - generic [ref=e204]: Almacén de recepción *
+              - combobox "Almacén de recepción *" [ref=e205]:
+                - option "Selecciona un almacén" [selected]
+                - option "Almacén principal"
+                - option "Tienda Centro"
+            - generic [ref=e206]:
+              - generic [ref=e207]: Tipo de comprobante *
+              - combobox "Tipo de comprobante *" [ref=e208]:
+                - option "Factura" [selected]
+                - option "Boleta"
+                - option "Otro"
+            - generic [ref=e209]:
+              - generic [ref=e210]: Fecha del comprobante *
+              - textbox "Fecha del comprobante *" [ref=e211]: 2026-10-17
+            - generic [ref=e212]:
+              - generic [ref=e213]: Serie *
+              - textbox "Serie *" [ref=e214]:
+                - /placeholder: Ej. F001
+            - generic [ref=e215]:
+              - generic [ref=e216]: Número *
+              - textbox "Número *" [ref=e217]:
+                - /placeholder: Ej. 00001234
+            - generic [ref=e218]:
+              - generic [ref=e219]: Observaciones
+              - textbox "Observaciones" [ref=e220]:
+                - /placeholder: Opcional
+        - generic [ref=e221]:
+          - generic [ref=e222]:
+            - generic [ref=e223]:
+              - generic [ref=e224]: 02 · DETALLE DE COMPRA
+              - heading "¿Qué productos compraste?" [level=2] [ref=e225]
+              - paragraph [ref=e226]: El precio unitario corresponde a la unidad elegida. Se conserva aquí, no en Movimientos.
+            - button "＋ Añadir producto" [ref=e227] [cursor=pointer]
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - generic [ref=e230]:
+                - generic [ref=e231]: Producto y variante *
+                - combobox "Producto y variante *" [ref=e232]:
+                  - option "Selecciona una variante" [selected]
+                  - option "Camiseta básica · CAM-NEG-M"
+                  - option "Camiseta básica · CAM-NEG-L"
+                  - option "Camiseta básica · CAM-BLA-M"
+              - generic [ref=e233]:
+                - generic [ref=e234]: Cantidad *
+                - textbox "Cantidad *" [ref=e235]:
+                  - /placeholder: Ej. 2
+              - generic [ref=e236]:
+                - generic [ref=e237]: Unidad *
+                - combobox "Unidad *" [disabled] [ref=e238]
+              - generic [ref=e239]:
+                - generic [ref=e240]: Precio compra / unidad (S/) *
+                - textbox "Precio compra / unidad (S/) *" [ref=e241]:
+                  - /placeholder: Ej. 120.00
+              - generic [ref=e242]:
+                - generic [ref=e243]: Conversión y subtotal
+                - generic [ref=e244]: Selecciona variante, unidad y cantidad
+              - button "Quitar renglón 1" [ref=e245] [cursor=pointer]: ×
+            - generic [ref=e246]:
+              - generic [ref=e247]:
+                - generic [ref=e248]: Total del comprobante · PEN
+                - strong [ref=e249]: —
+              - generic [ref=e250]: El stock se convertirá a la unidad base al confirmar.
+          - generic [ref=e251]:
+            - button "← Volver a compras" [ref=e252] [cursor=pointer]
+            - generic [ref=e253]:
+              - button "Guardar borrador" [ref=e254] [cursor=pointer]
+              - button "Confirmar compra y recibir →" [ref=e255] [cursor=pointer]

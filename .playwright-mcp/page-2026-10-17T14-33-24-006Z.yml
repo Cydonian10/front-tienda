@@ -1,0 +1,133 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]: ▦
+    - button [ref=e6] [cursor=pointer]
+    - button [ref=e12] [cursor=pointer]
+    - button [ref=e18] [cursor=pointer]
+    - button [ref=e22] [cursor=pointer]
+    - button [ref=e25] [cursor=pointer]
+    - button [ref=e28] [cursor=pointer]
+    - button [ref=e31] [cursor=pointer]
+    - button [ref=e35] [cursor=pointer]
+    - button [ref=e38] [cursor=pointer]
+    - button [ref=e41] [cursor=pointer]
+    - generic [ref=e45]: G
+  - main [ref=e47]:
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - text: Inicio /
+        - strong [ref=e50]: Dashboard
+      - generic [ref=e51]:
+        - generic [ref=e52]: Datos de prueba locales
+        - generic [aria-hidden] [ref=e54]: ◌
+    - generic [ref=e55]:
+      - generic [ref=e57]:
+        - generic [ref=e58]: Inicio / Dashboard
+        - heading "Dashboard de inventario" [level=1] [ref=e59]
+        - paragraph [ref=e60]: Resumen actualizado con tus datos locales · 17 de octubre de 2026
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]: VISTA GENERAL
+            - heading "Tu inventario, de un vistazo" [level=2] [ref=e65]
+            - paragraph [ref=e66]: Productos, compras registradas, actividad y variantes que requieren atención.
+          - button "＋ Registrar compra" [ref=e67] [cursor=pointer]
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - generic [ref=e70]: ▦
+            - generic [ref=e71]: Productos activos
+            - strong [ref=e72]: "1"
+            - emphasis [ref=e73]: Productos del catálogo
+          - generic [ref=e74]:
+            - generic [ref=e75]: ◈
+            - generic [ref=e76]: Variantes activas
+            - strong [ref=e77]: "3"
+            - emphasis [ref=e78]: SKU para controlar stock
+          - generic [ref=e79]:
+            - generic [ref=e80]: ↙
+            - generic [ref=e81]: Compras recibidas hoy
+            - strong [ref=e82]: S/ 0.00
+            - emphasis [ref=e83]: 0 ingresos confirmados
+          - generic [ref=e84]:
+            - generic [ref=e85]: ⇄
+            - generic [ref=e86]: Movimientos hoy
+            - strong [ref=e87]: "0"
+            - emphasis [ref=e88]: Solo operaciones confirmadas
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - generic [ref=e91]:
+              - generic [ref=e92]:
+                - generic [ref=e93]: ACTIVIDAD
+                - heading "Movimientos por día" [level=2] [ref=e94]
+                - paragraph [ref=e95]: Ingresos, salidas, traslados y ajustes confirmados.
+              - group "Período del gráfico" [ref=e96]:
+                - button "7 días" [pressed] [ref=e97] [cursor=pointer]
+                - button "8 semanas" [ref=e98] [cursor=pointer]
+            - generic [ref=e99]:
+              - 'img "Movimientos confirmados por día: dom 11, 0; lun 12, 0; mar 13, 0; mié 14, 0; jue 15, 0; vie 16, 0; sáb 17, 0" [ref=e100]':
+                - generic [ref=e102]:
+                  - 'generic "dom 11 · Ingreso: 0"'
+                  - 'generic "dom 11 · Salida: 0"'
+                  - 'generic "dom 11 · Traslado: 0"'
+                  - 'generic "dom 11 · Ajuste: 0"'
+                - generic [ref=e104]:
+                  - 'generic "lun 12 · Ingreso: 0"'
+                  - 'generic "lun 12 · Salida: 0"'
+                  - 'generic "lun 12 · Traslado: 0"'
+                  - 'generic "lun 12 · Ajuste: 0"'
+                - generic [ref=e106]:
+                  - 'generic "mar 13 · Ingreso: 0"'
+                  - 'generic "mar 13 · Salida: 0"'
+                  - 'generic "mar 13 · Traslado: 0"'
+                  - 'generic "mar 13 · Ajuste: 0"'
+                - generic [ref=e108]:
+                  - 'generic "mié 14 · Ingreso: 0"'
+                  - 'generic "mié 14 · Salida: 0"'
+                  - 'generic "mié 14 · Traslado: 0"'
+                  - 'generic "mié 14 · Ajuste: 0"'
+                - generic [ref=e110]:
+                  - 'generic "jue 15 · Ingreso: 0"'
+                  - 'generic "jue 15 · Salida: 0"'
+                  - 'generic "jue 15 · Traslado: 0"'
+                  - 'generic "jue 15 · Ajuste: 0"'
+                - generic [ref=e112]:
+                  - 'generic "vie 16 · Ingreso: 0"'
+                  - 'generic "vie 16 · Salida: 0"'
+                  - 'generic "vie 16 · Traslado: 0"'
+                  - 'generic "vie 16 · Ajuste: 0"'
+                - generic [ref=e114]:
+                  - 'generic "sáb 17 · Ingreso: 0"'
+                  - 'generic "sáb 17 · Salida: 0"'
+                  - 'generic "sáb 17 · Traslado: 0"'
+                  - 'generic "sáb 17 · Ajuste: 0"'
+              - generic [ref=e115]:
+                - generic [ref=e116]: dom 11
+                - generic [ref=e117]: lun 12
+                - generic [ref=e118]: mar 13
+                - generic [ref=e119]: mié 14
+                - generic [ref=e120]: jue 15
+                - generic [ref=e121]: vie 16
+                - generic [ref=e122]: sáb 17
+              - generic [ref=e123]:
+                - generic [ref=e124]: Ingreso
+                - generic [ref=e126]: Salida
+                - generic [ref=e128]: Traslado
+                - generic [ref=e130]: Ajuste
+              - paragraph [ref=e132]: Aún no hay movimientos confirmados. Registra un ingreso para empezar a ver la actividad.
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - generic [ref=e136]: ATENCIÓN
+                - heading "Existencias bajas" [level=2] [ref=e137]
+                - paragraph [ref=e138]: Variantes con 10 o menos unidades base en todos los almacenes activos.
+              - generic [ref=e139]: "1"
+            - generic [ref=e140]:
+              - generic [ref=e141]:
+                - generic [ref=e142]:
+                  - strong [ref=e143]: Camiseta básica · CAM-BLA-M
+                  - generic [ref=e144]: Blanco / M
+                - generic [ref=e145]: Sin stock
+              - button "Ver existencias →" [ref=e146] [cursor=pointer]
+        - generic [ref=e147]:
+          - generic [ref=e148]: i
+          - generic [ref=e149]: "Valor de inventario a costo: S/ 4410.00. Las compras del día reflejan ingresos confirmados, no órdenes de compra. Las cantidades de unidades distintas se muestran por variante, sin sumarlas como si fueran iguales."

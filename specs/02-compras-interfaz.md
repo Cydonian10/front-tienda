@@ -1,6 +1,6 @@
 # SPEC 02 — Interfaz para registrar y consultar compras
 
-> **Status:** Draft
+> **Status:** Aprobado
 > **Depends on:** SPEC 01
 > **Date:** 2026-10-17
 > **Objective:** Permitir registrar y consultar compras con recepción inmediata y comprobante opcional desde el panel de inventario de Ferretería Atlas.
@@ -75,12 +75,12 @@ La referencia visual `https://inventario-productos-gabriel.zudex85.chatgpt.site/
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| SPEC 01 o los permisos asignados manualmente aún no están disponibles. | No usar datos ficticios como reemplazo; mostrar error de acceso/carga y documentar los permisos necesarios. |
-| La confirmación tarda y el usuario intenta enviarla otra vez. | Bloquear el botón durante el envío y mostrar error de documento duplicado cuando la API detecte un reintento posterior. |
+| Risk                                                                                 | Mitigation                                                                                                                                |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| SPEC 01 o los permisos asignados manualmente aún no están disponibles.               | No usar datos ficticios como reemplazo; mostrar error de acceso/carga y documentar los permisos necesarios.                               |
+| La confirmación tarda y el usuario intenta enviarla otra vez.                        | Bloquear el botón durante el envío y mostrar error de documento duplicado cuando la API detecte un reintento posterior.                   |
 | Se pierde la respuesta tras confirmar, pero antes de informar del fallo del archivo. | Buscar la compra por sus datos documentales antes de reintentar; la subida posterior usa el ID recuperado y nunca repite la confirmación. |
-| Los cálculos de la vista difieren por redondeo del resultado persistido. | Tratar el total de la API como fuente final y usar decimales, no sumar importes binarios de coma flotante. |
+| Los cálculos de la vista difieren por redondeo del resultado persistido.             | Tratar el total de la API como fuente final y usar decimales, no sumar importes binarios de coma flotante.                                |
 
 ## What is **not** in this spec
 

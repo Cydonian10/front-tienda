@@ -1,6 +1,6 @@
 # SPEC 01 — API de compras y recepción de inventario
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** None
 > **Date:** 2026-10-17
 > **Objective:** Registrar compras con comprobante opcional y confirmar su recepción inmediata en inventario mediante una API autorizada y transaccional.

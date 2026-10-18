@@ -73,6 +73,8 @@ export class CompraForm {
   readonly serieDocumento = signal('');
   readonly numeroDocumento = signal('');
   readonly observaciones = signal('');
+  readonly submitted = signal(false);
+  private readonly touched = signal<ReadonlySet<string>>(new Set());
   private nextRowKey = 1;
   readonly renglones = signal<RenglonFormulario[]>([this.blankRow()]);
 
@@ -137,6 +139,14 @@ export class CompraForm {
   );
   readonly money = formatTotalPEN;
   readonly calculate = renglonCalculo;
+
+  touch(field: string): void {
+    this.touched.update((fields) => new Set(fields).add(field));
+  }
+
+  showError(field: string): boolean {
+    return this.submitted() || this.touched().has(field);
+  }
 
   private blankRow(): RenglonFormulario {
     return {
@@ -222,7 +232,9 @@ export class CompraForm {
   }
 
   async confirm(): Promise<void> {
-    if (this.confirmed() || this.sending() || !this.canConfirm()) return;
+    if (this.confirmed() || this.sending()) return;
+    this.submitted.set(true);
+    if (!this.canConfirm()) return;
     if (!this.authorization.hasPermission('INVENTARIO', PERMISSION_CODES.COMPRAS_CREATE)) {
       this.actionError.set('No tienes permiso para confirmar compras.');
       return;

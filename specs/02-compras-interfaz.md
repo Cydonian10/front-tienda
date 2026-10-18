@@ -1,6 +1,6 @@
 # SPEC 02 — Interfaz para registrar y consultar compras
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-10-17
 > **Objective:** Permitir registrar y consultar compras con recepción inmediata y comprobante opcional desde el panel de inventario de Ferretería Atlas.
@@ -47,20 +47,20 @@ La referencia visual `https://inventario-productos-gabriel.zudex85.chatgpt.site/
 
 ## Acceptance criteria
 
-- [ ] Usuarios con `COMPRAS_LEER` ven `Operaciones → Compras` y pueden abrir la ruta; sin él no ven el enlace ni acceden a la pantalla.
-- [ ] Usuarios con `COMPRAS_LEER` y sin `COMPRAS_CREAR` pueden consultar compras, pero no confirmar una nueva; la comprobación se repite al ejecutar la acción.
-- [ ] El listado consulta la API con página y texto de búsqueda, muestra primero las compras recientes y presenta carga, error con reintento y vacío diferenciados.
-- [ ] El formulario carga proveedores existentes, almacenes activos y variantes mediante búsqueda; si no hay proveedores muestra una explicación y bloquea la confirmación sin ofrecer alta de proveedor.
-- [ ] Elegir variante limita las unidades a las válidas de su producto; cantidad y precio generan subtotales y total visible en PEN, y se admiten renglones repetidos de una variante.
-- [ ] No se puede confirmar sin proveedor, almacén, tipo, fecha, serie, número, al menos un renglón, cantidad positiva y precio no negativo; cada error aparece junto al campo correspondiente.
-- [ ] Seleccionar un archivo válido es opcional; un tipo distinto a PDF/JPG/PNG o tamaño mayor de 10 MB presenta error de adjunto antes del envío, sin impedir confirmar la compra sin ese archivo, y el archivo puede retirarse.
-- [ ] “Confirmar compra y recibir” envía un solo multipart; deshabilita el doble envío y únicamente muestra éxito y refresca la lista cuando la API confirma compra e ingreso.
-- [ ] Un documento duplicado u otro error de compra deja la pantalla editable y no afirma que se haya recibido stock; una respuesta HTTP 201 con `estado: 'fallido'` afirma que la compra y el stock sí se registraron, muestra advertencia y no permite reenviar la compra como si hubiera fallado.
-- [ ] La consulta de una compra muestra proveedor, almacén, documento, renglones, total e ingreso; si tiene archivo ofrece descarga con sesión, y si no lo tiene ofrece adjuntarlo posteriormente solo a quien posee `COMPRAS_CREAR`.
-- [ ] Si falla la subida posterior, la compra permanece confirmada y se puede reintentar sin crear otro ingreso; si el archivo ya existe, no se ofrece reemplazarlo.
-- [ ] La pantalla no contiene “Guardar borrador”; el botón de `producto-prueba` no cambia.
-- [ ] La interfaz se puede usar por teclado y en móvil sin desbordamiento horizontal; respeta los temas y componentes del panel existente.
-- [ ] `npm test -- --watch=false` y `npm run build` pasan en `front-tienda`; las pruebas cubren permisos, formulario, error y archivo opcional.
+- [x] Usuarios con `COMPRAS_LEER` ven `Operaciones → Compras` y pueden abrir la ruta; sin él no ven el enlace ni acceden a la pantalla.
+- [x] Usuarios con `COMPRAS_LEER` y sin `COMPRAS_CREAR` pueden consultar compras, pero no confirmar una nueva; la comprobación se repite al ejecutar la acción.
+- [x] El listado consulta la API con página y texto de búsqueda, muestra primero las compras recientes y presenta carga, error con reintento y vacío diferenciados.
+- [x] El formulario carga proveedores existentes, almacenes activos y variantes mediante búsqueda; si no hay proveedores muestra una explicación y bloquea la confirmación sin ofrecer alta de proveedor.
+- [x] Elegir variante limita las unidades a las válidas de su producto; cantidad y precio generan subtotales y total visible en PEN, y se admiten renglones repetidos de una variante.
+- [x] No se puede confirmar sin proveedor, almacén, tipo, fecha, serie, número, al menos un renglón, cantidad positiva y precio no negativo; cada error aparece junto al campo correspondiente.
+- [x] Seleccionar un archivo válido es opcional; un tipo distinto a PDF/JPG/PNG o tamaño mayor de 10 MB presenta error de adjunto antes del envío, sin impedir confirmar la compra sin ese archivo, y el archivo puede retirarse.
+- [x] “Confirmar compra y recibir” envía un solo multipart; deshabilita el doble envío y únicamente muestra éxito y refresca la lista cuando la API confirma compra e ingreso.
+- [x] Un documento duplicado u otro error de compra deja la pantalla editable y no afirma que se haya recibido stock; una respuesta HTTP 201 con `estado: 'fallido'` afirma que la compra y el stock sí se registraron, muestra advertencia y no permite reenviar la compra como si hubiera fallado.
+- [x] La consulta de una compra muestra proveedor, almacén, documento, renglones, total e ingreso; si tiene archivo ofrece descarga con sesión, y si no lo tiene ofrece adjuntarlo posteriormente solo a quien posee `COMPRAS_CREAR`.
+- [x] Si falla la subida posterior, la compra permanece confirmada y se puede reintentar sin crear otro ingreso; si el archivo ya existe, no se ofrece reemplazarlo.
+- [x] La pantalla no contiene “Guardar borrador”; el botón de `producto-prueba` no cambia.
+- [x] La interfaz se puede usar por teclado y en móvil sin desbordamiento horizontal; respeta los temas y componentes del panel existente.
+- [x] `npm test -- --watch=false` y `npm run build` pasan en `front-tienda`; las pruebas cubren permisos, formulario, error y archivo opcional.
 
 ## Decisions
 

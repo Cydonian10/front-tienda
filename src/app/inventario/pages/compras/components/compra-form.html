@@ -93,8 +93,13 @@
           <select
             aria-label="Proveedor de la compra"
             class="select min-h-11 w-full"
+            [attr.aria-invalid]="showError('proveedor') && !proveedor() ? 'true' : null"
+            [attr.aria-describedby]="
+              showError('proveedor') && !proveedor() ? 'proveedor-error' : null
+            "
             [value]="proveedor()?.id ?? ''"
-            (change)="selectProveedor($any($event.target).value)"
+            (change)="touch('proveedor'); selectProveedor($any($event.target).value)"
+            (blur)="touch('proveedor')"
           >
             <option value="">Selecciona un proveedor</option>
             @for (item of proveedores(); track item.id) {
@@ -116,8 +121,10 @@
               (pageSizeChange)="changeProviderLimit($event)"
             />
           }
-          @if (!proveedor()) {
-            <p class="text-xs text-error">Selecciona un proveedor existente.</p>
+          @if (showError('proveedor') && !proveedor()) {
+            <p id="proveedor-error" class="text-xs text-error">
+              Selecciona un proveedor existente.
+            </p>
           }
         </fieldset>
 
@@ -140,8 +147,13 @@
           <select
             aria-label="Almacén de recepción"
             class="select min-h-11 w-full"
+            [attr.aria-invalid]="showError('almacen') && !almacen()?.activo ? 'true' : null"
+            [attr.aria-describedby]="
+              showError('almacen') && !almacen()?.activo ? 'almacen-error' : null
+            "
             [value]="almacen()?.id ?? ''"
-            (change)="selectAlmacen($any($event.target).value)"
+            (change)="touch('almacen'); selectAlmacen($any($event.target).value)"
+            (blur)="touch('almacen')"
           >
             <option value="">Selecciona un almacén activo</option>
             @for (item of almacenes(); track item.id) {
@@ -160,8 +172,8 @@
               />
             }
           }
-          @if (!almacen()?.activo) {
-            <p class="text-xs text-error">Selecciona un almacén activo.</p>
+          @if (showError('almacen') && !almacen()?.activo) {
+            <p id="almacen-error" class="text-xs text-error">Selecciona un almacén activo.</p>
           }
         </fieldset>
       </div>
@@ -172,15 +184,18 @@
           <select
             class="select min-h-11 w-full"
             aria-label="Tipo de documento"
+            [attr.aria-invalid]="showError('tipo') && !tipoDocumento() ? 'true' : null"
+            [attr.aria-describedby]="showError('tipo') && !tipoDocumento() ? 'tipo-error' : null"
             [value]="tipoDocumento()"
-            (change)="tipoDocumento.set($any($event.target).value)"
+            (change)="touch('tipo'); tipoDocumento.set($any($event.target).value)"
+            (blur)="touch('tipo')"
           >
             <option value="factura">Factura</option>
             <option value="boleta">Boleta</option>
             <option value="otro">Otro</option>
           </select>
-          @if (!tipoDocumento()) {
-            <p class="text-xs text-error">Elige un tipo de documento.</p>
+          @if (showError('tipo') && !tipoDocumento()) {
+            <p id="tipo-error" class="text-xs text-error">Elige un tipo de documento.</p>
           }
         </fieldset>
         <fieldset class="fieldset min-w-0">
@@ -189,11 +204,16 @@
             type="date"
             class="input min-h-11 w-full"
             aria-label="Fecha del documento"
+            [attr.aria-invalid]="showError('fecha') && !validDate() ? 'true' : null"
+            [attr.aria-describedby]="showError('fecha') && !validDate() ? 'fecha-error' : null"
             [value]="fecha()"
             (input)="fecha.set($any($event.target).value)"
+            (blur)="touch('fecha')"
           />
-          @if (!validDate()) {
-            <p class="text-xs text-error">Indica una fecha válida del documento.</p>
+          @if (showError('fecha') && !validDate()) {
+            <p id="fecha-error" class="text-xs text-error">
+              Indica una fecha válida del documento.
+            </p>
           }
         </fieldset>
         <fieldset class="fieldset min-w-0">
@@ -203,11 +223,16 @@
             class="input min-h-11 w-full"
             maxlength="100"
             aria-label="Serie del documento"
+            [attr.aria-invalid]="showError('serie') && !serieDocumento().trim() ? 'true' : null"
+            [attr.aria-describedby]="
+              showError('serie') && !serieDocumento().trim() ? 'serie-error' : null
+            "
             [value]="serieDocumento()"
             (input)="serieDocumento.set($any($event.target).value)"
+            (blur)="touch('serie')"
           />
-          @if (!serieDocumento().trim()) {
-            <p class="text-xs text-error">Indica la serie del documento.</p>
+          @if (showError('serie') && !serieDocumento().trim()) {
+            <p id="serie-error" class="text-xs text-error">Indica la serie del documento.</p>
           }
         </fieldset>
         <fieldset class="fieldset min-w-0">
@@ -217,11 +242,16 @@
             class="input min-h-11 w-full"
             maxlength="100"
             aria-label="Número del documento"
+            [attr.aria-invalid]="showError('numero') && !numeroDocumento().trim() ? 'true' : null"
+            [attr.aria-describedby]="
+              showError('numero') && !numeroDocumento().trim() ? 'numero-error' : null
+            "
             [value]="numeroDocumento()"
             (input)="numeroDocumento.set($any($event.target).value)"
+            (blur)="touch('numero')"
           />
-          @if (!numeroDocumento().trim()) {
-            <p class="text-xs text-error">Indica el número del documento.</p>
+          @if (showError('numero') && !numeroDocumento().trim()) {
+            <p id="numero-error" class="text-xs text-error">Indica el número del documento.</p>
           }
         </fieldset>
         <fieldset class="fieldset min-w-0 sm:col-span-2">
@@ -290,6 +320,11 @@
 
         @for (row of renglones(); track row.key; let index = $index) {
           @let calc = calculate(row);
+          @let conversionError =
+            calc.cantidadValida &&
+            calc.unidad &&
+            !calc.cantidadBaseExacta &&
+            (showError('cantidad:' + row.key) || showError('unidad:' + row.key));
           <div
             class="rounded-box border border-base-300 bg-base-200/50 p-4 sm:p-5"
             [attr.aria-label]="'Renglón ' + (index + 1)"
@@ -311,8 +346,19 @@
                 <select
                   class="select min-h-11 w-full"
                   [attr.aria-label]="'Variante del renglón ' + (index + 1)"
+                  [attr.aria-invalid]="
+                    showError('variante:' + row.key) && !row.variante ? 'true' : null
+                  "
+                  [attr.aria-describedby]="
+                    showError('variante:' + row.key) && !row.variante
+                      ? 'variante-error-' + row.key
+                      : null
+                  "
                   [value]="row.variante?.id ?? ''"
-                  (change)="selectVariant(row.key, $any($event.target).value)"
+                  (change)="
+                    touch('variante:' + row.key); selectVariant(row.key, $any($event.target).value)
+                  "
+                  (blur)="touch('variante:' + row.key)"
                 >
                   <option value="">Selecciona una variante</option>
                   @for (variant of rowOptions(row); track variant.id) {
@@ -321,8 +367,10 @@
                     </option>
                   }
                 </select>
-                @if (!row.variante) {
-                  <p class="text-xs text-error">Selecciona una variante activa.</p>
+                @if (showError('variante:' + row.key) && !row.variante) {
+                  <p [id]="'variante-error-' + row.key" class="text-xs text-error">
+                    Selecciona una variante activa.
+                  </p>
                 }
               </fieldset>
               <fieldset class="fieldset min-w-0">
@@ -330,17 +378,31 @@
                 <select
                   class="select min-h-11 w-full"
                   [attr.aria-label]="'Unidad del renglón ' + (index + 1)"
+                  [attr.aria-invalid]="
+                    showError('unidad:' + row.key) && row.variante && !calc.unidad ? 'true' : null
+                  "
+                  [attr.aria-describedby]="
+                    showError('unidad:' + row.key) && row.variante && !calc.unidad
+                      ? 'unidad-error-' + row.key
+                      : null
+                  "
                   [value]="row.unidadId"
                   [disabled]="!row.variante"
-                  (change)="updateRow(row.key, { unidadId: $any($event.target).value })"
+                  (change)="
+                    touch('unidad:' + row.key);
+                    updateRow(row.key, { unidadId: $any($event.target).value })
+                  "
+                  (blur)="touch('unidad:' + row.key)"
                 >
                   <option value="">Selecciona una unidad</option>
                   @for (unit of row.variante?.unidades ?? []; track unit.id) {
                     <option [value]="unit.id">{{ unit.nombre }} ({{ unit.simbolo }})</option>
                   }
                 </select>
-                @if (row.variante && !calc.unidad) {
-                  <p class="text-xs text-error">Selecciona una unidad válida.</p>
+                @if (showError('unidad:' + row.key) && row.variante && !calc.unidad) {
+                  <p [id]="'unidad-error-' + row.key" class="text-xs text-error">
+                    Selecciona una unidad válida.
+                  </p>
                 }
               </fieldset>
               <fieldset class="fieldset min-w-0">
@@ -350,12 +412,27 @@
                   inputmode="decimal"
                   class="input min-h-11 w-full tabular-nums"
                   [attr.aria-label]="'Cantidad del renglón ' + (index + 1)"
+                  [attr.aria-invalid]="
+                    (showError('cantidad:' + row.key) && !calc.cantidadValida) || conversionError
+                      ? 'true'
+                      : null
+                  "
+                  [attr.aria-describedby]="
+                    showError('cantidad:' + row.key) && !calc.cantidadValida
+                      ? 'cantidad-error-' + row.key
+                      : conversionError
+                        ? 'conversion-error-' + row.key
+                        : null
+                  "
                   placeholder="0.000000"
                   [value]="row.cantidad"
                   (input)="updateRow(row.key, { cantidad: $any($event.target).value })"
+                  (blur)="touch('cantidad:' + row.key)"
                 />
-                @if (!calc.cantidadValida) {
-                  <p class="text-xs text-error">Cantidad positiva, hasta 6 decimales.</p>
+                @if (showError('cantidad:' + row.key) && !calc.cantidadValida) {
+                  <p [id]="'cantidad-error-' + row.key" class="text-xs text-error">
+                    Cantidad positiva, hasta 6 decimales.
+                  </p>
                 }
               </fieldset>
               <fieldset class="fieldset min-w-0">
@@ -365,12 +442,23 @@
                   inputmode="decimal"
                   class="input min-h-11 w-full tabular-nums"
                   [attr.aria-label]="'Precio del renglón ' + (index + 1)"
+                  [attr.aria-invalid]="
+                    showError('precio:' + row.key) && !calc.precioValido ? 'true' : null
+                  "
+                  [attr.aria-describedby]="
+                    showError('precio:' + row.key) && !calc.precioValido
+                      ? 'precio-error-' + row.key
+                      : null
+                  "
                   placeholder="0.00"
                   [value]="row.precioUnitario"
                   (input)="updateRow(row.key, { precioUnitario: $any($event.target).value })"
+                  (blur)="touch('precio:' + row.key)"
                 />
-                @if (!calc.precioValido) {
-                  <p class="text-xs text-error">Precio no negativo, hasta 6 decimales.</p>
+                @if (showError('precio:' + row.key) && !calc.precioValido) {
+                  <p [id]="'precio-error-' + row.key" class="text-xs text-error">
+                    Precio no negativo, hasta 6 decimales.
+                  </p>
                 }
               </fieldset>
               <div class="min-w-0 sm:col-span-2 lg:col-span-3">
@@ -384,8 +472,8 @@
                   <p class="text-sm text-base-content/70">
                     Cantidad base: {{ calc.cantidadBase }} {{ row.variante?.unidadBase?.simbolo }}.
                   </p>
-                } @else if (calc.cantidadValida && calc.unidad && !calc.cantidadBaseExacta) {
-                  <p class="text-xs text-error">
+                } @else if (conversionError) {
+                  <p [id]="'conversion-error-' + row.key" class="text-xs text-error">
                     Esta conversión no se representa exactamente con 6 decimales en inventario.
                   </p>
                 }
@@ -396,7 +484,9 @@
             </div>
           </div>
         } @empty {
-          <p class="text-sm text-error">Añade al menos un renglón válido.</p>
+          @if (submitted()) {
+            <p class="text-sm text-error">Añade al menos un renglón válido.</p>
+          }
         }
         <button type="button" class="btn btn-outline min-h-11" (click)="addRow()">
           Añadir renglón
@@ -443,10 +533,15 @@
           <strong class="text-2xl font-semibold tabular-nums">{{ money(total()) }}</strong>
         </div>
         <div class="text-sm text-base-content/70 sm:text-right">
+          @if (submitted() && !canConfirm()) {
+            <p role="alert" class="mb-2 text-sm text-error">
+              Revisa los campos marcados antes de confirmar.
+            </p>
+          }
           <button
             type="button"
             class="btn btn-primary min-h-11"
-            [disabled]="!canConfirm() || sending()"
+            [disabled]="sending()"
             (click)="confirm()"
           >
             {{ sending() ? 'Confirmando compra…' : 'Confirmar compra y recibir' }}

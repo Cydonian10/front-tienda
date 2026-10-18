@@ -117,7 +117,7 @@ describe('CompraForm', () => {
     await vi.waitFor(() => expect(form.proveedoresQuery.data()?.data).toEqual([proveedor]));
     await vi.waitFor(() => expect(form.almacenesQuery.data()?.data).toEqual([almacen]));
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Selecciona un proveedor existente');
+    expect(fixture.nativeElement.textContent).not.toContain('Selecciona un proveedor existente');
     expect(form.canConfirm()).toBe(false);
 
     form.selectProveedor('p1');
@@ -149,10 +149,75 @@ describe('CompraForm', () => {
     expect(form.renglones()).toHaveLength(1);
     form.removeRow(second);
     expect(form.canConfirm()).toBe(false);
+    await form.confirm();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Añade al menos un renglón válido');
     form.addRow();
     form.fecha.set('2026-02-31');
+    expect(form.canConfirm()).toBe(false);
+  });
+
+  it('abre sin errores, muestra solo el campo abandonado y al intentar confirmar indica los pendientes', async () => {
+    const fixture = TestBed.createComponent(CompraForm);
+    const form = fixture.componentInstance;
+    await vi.waitFor(() => expect(form.proveedoresQuery.data()?.data).toEqual([proveedor]));
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelectorAll('[aria-invalid="true"]')).toHaveLength(0);
+    expect(root.querySelectorAll('.text-error')).toHaveLength(0);
+    const button = [...root.querySelectorAll('button')].find((item) =>
+      item.textContent?.includes('Confirmar compra'),
+    )!;
+    expect(button.disabled).toBe(false);
+
+    const serie = root.querySelector('[aria-label="Serie del documento"]') as HTMLInputElement;
+    serie.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    expect(serie.getAttribute('aria-invalid')).toBe('true');
+    expect(serie.getAttribute('aria-describedby')).toBe('serie-error');
+    expect(root.textContent).toContain('Indica la serie del documento');
+    expect(root.textContent).not.toContain('Selecciona un proveedor existente');
+    serie.value = 'F001';
+    serie.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(serie.hasAttribute('aria-invalid')).toBe(false);
+    expect(root.textContent).not.toContain('Indica la serie del documento');
+
+    button.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root.textContent).toContain('Revisa los campos marcados');
+    expect(root.textContent).toContain('Selecciona un proveedor existente');
+    expect(root.textContent).toContain('Cantidad positiva, hasta 6 decimales');
+    expect(
+      root.querySelector('[aria-label="Proveedor de la compra"]')?.getAttribute('aria-describedby'),
+    ).toBe('proveedor-error');
+    expect(create).not.toHaveBeenCalled();
+    expect(form.canConfirm()).toBe(false);
+  });
+
+  it('muestra errores de renglón al salir del campo y los retira al corregir', async () => {
+    const fixture = TestBed.createComponent(CompraForm);
+    const form = fixture.componentInstance;
+    await vi.waitFor(() => expect(form.variantesQuery.data()?.data).toEqual([variante]));
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const cantidad = root.querySelector(
+      '[aria-label="Cantidad del renglón 1"]',
+    ) as HTMLInputElement;
+    cantidad.value = '-1';
+    cantidad.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(root.textContent).not.toContain('Cantidad positiva, hasta 6 decimales');
+    cantidad.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    expect(cantidad.getAttribute('aria-invalid')).toBe('true');
+    expect(root.textContent).toContain('Cantidad positiva, hasta 6 decimales');
+    cantidad.value = '2';
+    cantidad.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(cantidad.hasAttribute('aria-invalid')).toBe(false);
+    expect(root.textContent).not.toContain('Cantidad positiva, hasta 6 decimales');
     expect(form.canConfirm()).toBe(false);
   });
 

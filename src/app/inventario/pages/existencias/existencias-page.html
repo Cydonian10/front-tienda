@@ -156,8 +156,15 @@
                       }
                     </th>
                     <td>{{ fila.almacen.nombre }}</td>
-                    <td class="text-right tabular-nums whitespace-nowrap">
-                      {{ fila.cantidadBase }} {{ fila.producto.unidadBase.simbolo }}
+                    <td class="text-right tabular-nums align-top">
+                      <span class="whitespace-nowrap"
+                        >{{ fila.cantidadBase }} {{ fila.producto.unidadBase.simbolo }}</span
+                      >
+                      <app-existencia-unidad
+                        [fila]="fila"
+                        [unidadId]="unidadElegida(fila)"
+                        (unidadChange)="elegirUnidad(fila, $event)"
+                      />
                     </td>
                     <td class="text-right tabular-nums whitespace-nowrap">
                       {{ promedio(fila.costoPromedioBase) }}
@@ -198,10 +205,15 @@
                     <dt class="text-base-content/70">Almacén</dt>
                     <dd>{{ fila.almacen.nombre }}</dd>
                   </div>
-                  <div>
+                  <div class="col-span-2">
                     <dt class="text-base-content/70">Stock base</dt>
                     <dd class="tabular-nums break-words">
                       {{ fila.cantidadBase }} {{ fila.producto.unidadBase.simbolo }}
+                      <app-existencia-unidad
+                        [fila]="fila"
+                        [unidadId]="unidadElegida(fila)"
+                        (unidadChange)="elegirUnidad(fila, $event)"
+                      />
                     </dd>
                   </div>
                   <div>
@@ -236,9 +248,7 @@
                   ? 'Prueba con otra búsqueda o ajusta los filtros.'
                   : 'No hay variantes disponibles para el alcance seleccionado.'
               "
-              [actionLabel]="
-                q() || disponibilidad() !== 'todas' ? 'Limpiar filtros' : ''
-              "
+              [actionLabel]="q() || disponibilidad() !== 'todas' ? 'Limpiar filtros' : ''"
               (action)="limpiarFiltros()"
             />
           </div>

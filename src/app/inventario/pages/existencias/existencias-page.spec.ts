@@ -159,4 +159,68 @@ describe('ExistenciasPage', () => {
     expect(text).toContain('S/ 500.00');
     expect(text).toContain('3.000000 u');
   });
+
+  it('cambia la presentación por fila sin alterar el saldo base, el valor ni solicitar nuevos datos', async () => {
+    listar.mockResolvedValue({
+      items: [
+        {
+          producto: {
+            id: 'p1',
+            nombre: 'Tornillo',
+            activo: true,
+            unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
+          },
+          variante: { id: 'v1', sku: 'TOR-M8', activo: true, valores: [], precioVenta: '12.00' },
+          almacen: { id: 'a1', nombre: 'Principal' },
+          cantidadBase: '25.000000',
+          valorCosto: '75.000000',
+          costoPromedioBase: '3.000000',
+          costoRegistradoCero: false,
+          unidadesSecundarias: [
+            { id: 'caja', nombre: 'Caja', simbolo: 'cja', factorABase: '12.00000000' },
+          ],
+        },
+      ],
+      page: 1,
+      limit: 20,
+      totalItems: 1,
+      totalValorCosto: '900.000000',
+    });
+    const fixture = TestBed.createComponent(ExistenciasPage);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()?.length).toBe(1));
+    fixture.componentInstance.elegirAlmacen('a1');
+    await vi.waitFor(() =>
+      expect(fixture.componentInstance.existencias.data()?.items.length).toBe(1),
+    );
+    fixture.detectChanges();
+    const original = fixture.componentInstance.existencias.data();
+    const select = fixture.nativeElement.querySelector(
+      'app-existencia-unidad select',
+    ) as HTMLSelectElement;
+    expect(select.value).toBe('');
+
+    select.value = 'caja';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('2 cajas + 1 unidad base');
+    expect(text).toContain('25.000000 u');
+    expect(text).toContain('S/ 900.00');
+    expect(fixture.componentInstance.existencias.data()).toBe(original);
+    expect(listar).toHaveBeenCalledOnce();
+    expect(
+      (
+        fixture.nativeElement.querySelectorAll(
+          'app-existencia-unidad select',
+        )[1] as HTMLSelectElement
+      ).value,
+    ).toBe('caja');
+
+    select.value = '';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('2 cajas + 1 unidad base');
+    expect(fixture.nativeElement.textContent).toContain('25.000000 u');
+  });
 });

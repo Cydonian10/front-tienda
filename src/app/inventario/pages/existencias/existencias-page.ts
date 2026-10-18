@@ -1,8 +1,12 @@
 import { Component, computed, signal } from '@angular/core';
-import type { FiltroExistencias } from '../../../api/interfaces/inventario/existencia.interface';
+import type {
+  ExistenciaItem,
+  FiltroExistencias,
+} from '../../../api/interfaces/inventario/existencia.interface';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { useAlmacenesExistencias, useExistencias } from '../../actions/use-existencias-action';
+import { ExistenciaUnidad } from './components/existencia-unidad';
 
 /** Redondea a centavos sin pasar por aritmética binaria. */
 export function soles(valor: string): string {
@@ -26,7 +30,7 @@ export function promedio(valor: string | null): string {
 
 @Component({
   selector: 'app-existencias-page',
-  imports: [EmptyState, Pagination],
+  imports: [EmptyState, Pagination, ExistenciaUnidad],
   templateUrl: './existencias-page.html',
   host: { class: 'block min-w-0' },
 })
@@ -37,6 +41,7 @@ export default class ExistenciasPage {
   readonly q = signal('');
   readonly searchDraft = signal('');
   readonly disponibilidad = signal<FiltroExistencias['disponibilidad']>('todas');
+  readonly unidadesElegidas = signal<Record<string, string>>({});
   readonly filtro = computed<FiltroExistencias | null>(() => {
     const almacenId = this.almacenId();
     return almacenId
@@ -57,6 +62,21 @@ export default class ExistenciasPage {
   });
   readonly soles = soles;
   readonly promedio = promedio;
+
+  unidadElegida(fila: ExistenciaItem): string | null {
+    return this.unidadesElegidas()[`${fila.variante.id}:${fila.almacen.id}`] ?? null;
+  }
+
+  elegirUnidad(fila: ExistenciaItem, id: string | null): void {
+    const key = `${fila.variante.id}:${fila.almacen.id}`;
+    if (id && !fila.unidadesSecundarias.some((unidad) => unidad.id === id)) return;
+    this.unidadesElegidas.update((actual) => {
+      const siguiente = { ...actual };
+      if (id) siguiente[key] = id;
+      else delete siguiente[key];
+      return siguiente;
+    });
+  }
 
   elegirAlmacen(id: string): void {
     this.almacenId.set(id || null);

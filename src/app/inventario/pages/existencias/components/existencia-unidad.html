@@ -1,0 +1,20 @@
+@if (fila().unidadesSecundarias.length) {
+  <label class="mt-2 block text-xs font-normal text-base-content/70">
+    <span class="block">Ver en otra unidad</span>
+    <select
+      class="select select-sm mt-1 min-h-11 w-full max-w-44 text-base-content"
+      [value]="unidadId() ?? ''"
+      (change)="cambiarUnidad($any($event.target).value)"
+    >
+      <option value="">Unidad base</option>
+      @for (opcion of fila().unidadesSecundarias; track opcion.id) {
+        <option [value]="opcion.id">{{ opcion.nombre }} (× {{ opcion.factorABase }})</option>
+      }
+    </select>
+  </label>
+  @if (conversion(); as texto) {
+    <p class="mt-1 text-xs font-semibold tabular-nums whitespace-normal break-words" role="status">
+      {{ texto }}
+    </p>
+  }
+}

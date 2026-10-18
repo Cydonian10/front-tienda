@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { CompraApi } from './compra-api';
+import type { NuevaCompra } from '../interfaces/inventario/compra.interface';
 
 describe('CompraApi (lectura)', () => {
   beforeEach(() =>
@@ -41,5 +42,67 @@ describe('CompraApi (lectura)', () => {
     expect(request.request.method).toBe('GET');
     request.flush({ id: 'compra-1', comprobante: null, renglones: [] });
     expect((await detail).id).toBe('compra-1');
+  });
+
+  it('confirma por multipart sin totales calculados ni identidad de usuario, con archivo opcional', async () => {
+    const api = TestBed.inject(CompraApi);
+    const http = TestBed.inject(HttpTestingController);
+    const compra: NuevaCompra = {
+      proveedorId: 'p1',
+      almacenId: 'a1',
+      tipoDocumento: 'factura',
+      fecha: '2026-10-17',
+      serieDocumento: 'F001',
+      numeroDocumento: '123',
+      observaciones: 'Entrega completa',
+      renglones: [{ varianteId: 'v1', unidadId: 'u1', cantidad: '2', precioUnitario: '10.50' }],
+      comprobante: new File(['%PDF-1.4'], 'factura.pdf', { type: 'application/pdf' }),
+    };
+    const result = api.create(compra);
+    const request = http.expectOne('http://localhost:3000/api/compras');
+    expect(request.request.method).toBe('POST');
+    const body = request.request.body as FormData;
+    expect(body).toBeInstanceOf(FormData);
+    expect([...body.keys()]).toEqual([
+      'proveedorId',
+      'almacenId',
+      'tipoDocumento',
+      'fecha',
+      'serieDocumento',
+      'numeroDocumento',
+      'observaciones',
+      'renglones',
+      'comprobante',
+    ]);
+    expect(body.get('renglones')).toBe(JSON.stringify(compra.renglones));
+    expect(body.get('comprobante')).toBe(compra.comprobante);
+    expect(request.request.headers.has('Content-Type')).toBe(false);
+    request.flush({ id: 'c1', comprobante: { estado: 'adjuntado' } });
+    await expect(result).resolves.toEqual({ id: 'c1', comprobante: { estado: 'adjuntado' } });
+
+    const withoutFile = api.create({ ...compra, comprobante: null, observaciones: '' });
+    const second = http.expectOne('http://localhost:3000/api/compras');
+    const secondBody = second.request.body as FormData;
+    expect(secondBody.has('comprobante')).toBe(false);
+    expect(secondBody.has('observaciones')).toBe(false);
+    second.flush({ id: 'c2', comprobante: { estado: 'pendiente' } });
+    await withoutFile;
+  });
+
+  it('propaga el error de compra sin convertirlo en éxito de recepción', async () => {
+    const result = TestBed.inject(CompraApi).create({
+      proveedorId: 'p1',
+      almacenId: 'a1',
+      tipoDocumento: 'factura',
+      fecha: '2026-10-17',
+      serieDocumento: 'F001',
+      numeroDocumento: '123',
+      renglones: [],
+      comprobante: null,
+    });
+    TestBed.inject(HttpTestingController)
+      .expectOne('http://localhost:3000/api/compras')
+      .flush({ message: 'Documento duplicado' }, { status: 409, statusText: 'Conflict' });
+    await expect(result).rejects.toMatchObject({ status: 409 });
   });
 });

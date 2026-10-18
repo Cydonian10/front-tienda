@@ -5,6 +5,8 @@ import { ENVIRONMENT } from '../config/env-dev';
 import type {
   CompraListadoResponse,
   CompraResponse,
+  CrearCompraResponse,
+  NuevaCompra,
   PaginatedResponse,
 } from '../interfaces/inventario/compra.interface';
 
@@ -23,5 +25,19 @@ export class CompraApi {
 
   getById(id: string): Promise<CompraResponse> {
     return firstValueFrom(this.http.get<CompraResponse>(`${this.url}/${id}`));
+  }
+
+  create(compra: NuevaCompra): Promise<CrearCompraResponse> {
+    const body = new FormData();
+    body.append('proveedorId', compra.proveedorId);
+    body.append('almacenId', compra.almacenId);
+    body.append('tipoDocumento', compra.tipoDocumento);
+    body.append('fecha', compra.fecha);
+    body.append('serieDocumento', compra.serieDocumento);
+    body.append('numeroDocumento', compra.numeroDocumento);
+    if (compra.observaciones) body.append('observaciones', compra.observaciones);
+    body.append('renglones', JSON.stringify(compra.renglones));
+    if (compra.comprobante) body.append('comprobante', compra.comprobante);
+    return firstValueFrom(this.http.post<CrearCompraResponse>(this.url, body));
   }
 }

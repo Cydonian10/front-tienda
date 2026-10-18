@@ -1,0 +1,90 @@
+import { inject } from '@angular/core';
+import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query-experimental';
+import { CompraApi } from '../../api/inventario/compra-api';
+import { ProveedorApi } from '../../api/inventario/proveedor-api';
+import { VarianteCompraApi } from '../../api/inventario/variante-compra-api';
+import type { NuevaCompra } from '../../api/interfaces/inventario/compra.interface';
+
+export const comprasListadoKey = ['compras', 'listado'] as const;
+export const comprasListadoQueryKey = (page: number, limit: number, q: string) =>
+  [...comprasListadoKey, page, limit, q] as const;
+export const compraDetalleQueryKey = (id: string) => ['compras', 'detalle', id] as const;
+export const proveedoresQueryKey = (
+  page: number,
+  limit: number,
+  nombre: string,
+  documento: string,
+) => ['proveedores', 'listado', page, limit, nombre, documento] as const;
+export const variantesCompraQueryKey = (page: number, limit: number, q: string) =>
+  ['variantes', 'compra', page, limit, q] as const;
+
+export function useComprasListado(page: () => number, limit: () => number, q: () => string) {
+  const api = inject(CompraApi);
+  return injectQuery(() => {
+    const [currentPage, currentLimit, search] = [page(), limit(), q()];
+    return {
+      queryKey: comprasListadoQueryKey(currentPage, currentLimit, search),
+      queryFn: () => api.list(currentPage, currentLimit, search || undefined),
+      retry: false,
+    };
+  });
+}
+
+export function useCompraDetalle(id: () => string) {
+  const api = inject(CompraApi);
+  return injectQuery(() => {
+    const compraId = id();
+    return {
+      queryKey: compraDetalleQueryKey(compraId),
+      queryFn: () => api.getById(compraId),
+      enabled: !!compraId,
+      retry: false,
+    };
+  });
+}
+
+export function useProveedoresCompra(
+  page: () => number,
+  limit: () => number,
+  nombre: () => string,
+  documento: () => string,
+) {
+  const api = inject(ProveedorApi);
+  return injectQuery(() => {
+    const [currentPage, currentLimit, searchName, searchDocument] = [
+      page(),
+      limit(),
+      nombre(),
+      documento(),
+    ];
+    return {
+      queryKey: proveedoresQueryKey(currentPage, currentLimit, searchName, searchDocument),
+      queryFn: () =>
+        api.list(currentPage, currentLimit, searchName || undefined, searchDocument || undefined),
+      retry: false,
+    };
+  });
+}
+
+export function useVariantesCompra(page: () => number, limit: () => number, q: () => string) {
+  const api = inject(VarianteCompraApi);
+  return injectQuery(() => {
+    const [currentPage, currentLimit, search] = [page(), limit(), q()];
+    return {
+      queryKey: variantesCompraQueryKey(currentPage, currentLimit, search),
+      queryFn: () => api.list(currentPage, currentLimit, search || undefined),
+      retry: false,
+    };
+  });
+}
+
+export function useConfirmarCompra() {
+  const api = inject(CompraApi);
+  const client = inject(QueryClient);
+  return injectMutation(() => ({
+    mutationFn: (compra: NuevaCompra) => api.create(compra),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: comprasListadoKey });
+    },
+  }));
+}

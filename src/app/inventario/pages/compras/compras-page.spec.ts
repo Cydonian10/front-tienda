@@ -173,4 +173,26 @@ describe('ruta y acciones de compras', () => {
       }),
     ).toBe('Documento sin número');
   });
+
+  it('busca el número documental en el listado sin volver a confirmar la compra', async () => {
+    grant(PERMISSION_CODES.COMPRAS_READ);
+    const harness = await RouterTestingHarness.create('/admin/inventario/compras');
+    const page = await harness.navigateByUrl('/admin/inventario/compras', ComprasPage);
+    page.page.set(3);
+    page.findDocument('123');
+    await vi.waitFor(() => expect(list).toHaveBeenCalledWith(1, 10, '123'));
+    expect(page.searchDraft()).toBe('123');
+    expect(page.showCreate()).toBe(false);
+  });
+
+  it('protege también la ruta provisional de detalle con COMPRAS_LEER', async () => {
+    grant(PERMISSION_CODES.COMPRAS_CREATE);
+    const harness = await RouterTestingHarness.create('/admin/inventario/compras/c1');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+    grant(PERMISSION_CODES.COMPRAS_READ);
+    await harness.navigateByUrl('/admin/inventario/compras/c1');
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/compras/c1');
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('La consulta y el reintento');
+  });
 });

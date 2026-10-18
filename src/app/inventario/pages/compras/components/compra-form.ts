@@ -1,15 +1,35 @@
-import { ChangeDetectionStrategy, Component, computed, output, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewChild,
+  computed,
+  inject,
+  output,
+  signal,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { PERMISSION_CODES } from '../../../../api/interfaces/access-control/permision.interface';
 import type { Almacen } from '../../../../api/interfaces/inventario/almacen.interface';
 import type {
+  CrearCompraResponse,
+  NuevaCompra,
   ProveedorResponse,
   VarianteCompraResponse,
 } from '../../../../api/interfaces/inventario/compra.interface';
+import { AuthorizationService } from '../../../../auth/services/authorization.service';
+import {
+  FileUpload,
+  type FileUploadRejection,
+} from '../../../../shared/components/file-upload/file-upload';
 import { Pagination } from '../../../../shared/components/pagination/pagination';
 import {
   useAlmacenesCompra,
+  useConfirmarCompra,
   useProveedoresCompra,
   useVariantesCompra,
 } from '../../../actions/use-compras-action';
+import { comprobanteError } from '../comprobante-validation';
 import {
   formatTotalPEN,
   renglonCalculo,
@@ -30,13 +50,22 @@ function validDate(value: string): boolean {
 
 @Component({
   selector: 'app-compra-form',
-  imports: [Pagination],
+  imports: [Pagination, FileUpload, RouterLink],
   templateUrl: './compra-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0' },
 })
 export class CompraForm {
   readonly cancel = output<void>();
+  readonly findDocument = output<string>();
+  private readonly authorization = inject(AuthorizationService);
+  @ViewChild(FileUpload) private upload?: FileUpload;
+  readonly comprobante = signal<File | null>(null);
+  readonly fileError = signal('');
+  readonly actionError = signal('');
+  readonly confirmed = signal<CrearCompraResponse | null>(null);
+  readonly sending = signal(false);
+  readonly confirmMutation = useConfirmarCompra();
   readonly proveedor = signal<ProveedorResponse | null>(null);
   readonly almacen = signal<Almacen | null>(null);
   readonly tipoDocumento = signal<'factura' | 'boleta' | 'otro' | ''>('factura');
@@ -173,5 +202,60 @@ export class CompraForm {
   changeVariantLimit(limit: number): void {
     this.variantePage.set(1);
     this.varianteLimit.set(limit);
+  }
+
+  onFilesChange(files: File[]): void {
+    const selected = files[0] ?? null;
+    const error = selected ? comprobanteError(selected) : null;
+    if (error) {
+      this.comprobante.set(null);
+      this.upload?.writeValue(null);
+      this.fileError.set(error);
+      return;
+    }
+    this.comprobante.set(selected);
+    if (!selected || !this.upload?.errors().length) this.fileError.set('');
+  }
+
+  onFilesRejected(rejected: FileUploadRejection[]): void {
+    this.fileError.set(rejected.map(({ message }) => message).join(' '));
+  }
+
+  async confirm(): Promise<void> {
+    if (this.confirmed() || this.sending() || !this.canConfirm()) return;
+    if (!this.authorization.hasPermission('INVENTARIO', PERMISSION_CODES.COMPRAS_CREATE)) {
+      this.actionError.set('No tienes permiso para confirmar compras.');
+      return;
+    }
+    const input: NuevaCompra = {
+      proveedorId: this.proveedor()!.id,
+      almacenId: this.almacen()!.id,
+      tipoDocumento: this.tipoDocumento() as NuevaCompra['tipoDocumento'],
+      fecha: this.fecha(),
+      serieDocumento: this.serieDocumento().trim(),
+      numeroDocumento: this.numeroDocumento().trim(),
+      observaciones: this.observaciones().trim() || undefined,
+      renglones: this.renglones().map((row) => ({
+        varianteId: row.variante!.id,
+        unidadId: row.unidadId,
+        cantidad: row.cantidad,
+        precioUnitario: row.precioUnitario,
+      })),
+      comprobante: this.comprobante(),
+    };
+    this.actionError.set('');
+    this.sending.set(true);
+    try {
+      // Una respuesta 201 confirma compra e ingreso incluso cuando el adjunto falló.
+      this.confirmed.set(await this.confirmMutation.mutateAsync(input));
+    } catch (error) {
+      this.actionError.set(
+        error instanceof HttpErrorResponse && error.status === 409
+          ? 'Este documento ya figura registrado para el proveedor. Consulta el listado antes de reintentar; este intento no se confirmó.'
+          : 'No recibimos confirmación de la compra. Busca el documento en el listado antes de reintentar para evitar un duplicado.',
+      );
+    } finally {
+      this.sending.set(false);
+    }
   }
 }

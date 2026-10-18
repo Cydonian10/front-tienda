@@ -1,9 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { AlmacenApi } from '../../../../api/inventario/almacen-api';
+import { CompraApi } from '../../../../api/inventario/compra-api';
 import { ProveedorApi } from '../../../../api/inventario/proveedor-api';
 import { VarianteCompraApi } from '../../../../api/inventario/variante-compra-api';
 import type { VarianteCompraResponse } from '../../../../api/interfaces/inventario/compra.interface';
+import { PERMISSION_CODES } from '../../../../api/interfaces/access-control/permision.interface';
+import { AuthStore } from '../../../../store/auth/auth.store';
+import { FileUpload } from '../../../../shared/components/file-upload/file-upload';
+import { By } from '@angular/platform-browser';
 import { renglonCalculo, totalVistaPrevia } from '../compra-form.model';
 import { CompraForm } from './compra-form';
 
@@ -25,6 +32,7 @@ describe('CompraForm', () => {
   const listProveedores = vi.fn();
   const listAlmacenes = vi.fn();
   const listVariantes = vi.fn();
+  const create = vi.fn();
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -46,7 +54,9 @@ describe('CompraForm', () => {
     );
     TestBed.configureTestingModule({
       providers: [
+        provideRouter([]),
         provideTanStackQuery(new QueryClient({ defaultOptions: { queries: { retry: false } } })),
+        { provide: CompraApi, useValue: { create } },
         { provide: ProveedorApi, useValue: { list: listProveedores } },
         { provide: AlmacenApi, useValue: { list: listAlmacenes } },
         { provide: VarianteCompraApi, useValue: { list: listVariantes } },
@@ -54,6 +64,31 @@ describe('CompraForm', () => {
     });
   });
   afterEach(() => TestBed.resetTestingModule());
+
+  async function validForm() {
+    const fixture = TestBed.createComponent(CompraForm);
+    const form = fixture.componentInstance;
+    await vi.waitFor(() => expect(form.proveedoresQuery.data()?.data).toEqual([proveedor]));
+    await vi.waitFor(() => expect(form.almacenesQuery.data()?.data).toEqual([almacen]));
+    await vi.waitFor(() => expect(form.variantesQuery.data()?.data).toEqual([variante]));
+    TestBed.inject(AuthStore).setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.COMPRAS_CREATE, systemCode: 'INVENTARIO' }],
+    } as never);
+    form.selectProveedor('p1');
+    form.selectAlmacen('a1');
+    form.serieDocumento.set('F001');
+    form.numeroDocumento.set('123');
+    const row = form.renglones()[0].key;
+    form.selectVariant(row, 'v1');
+    form.updateRow(row, { cantidad: '2', precioUnitario: '10.50' });
+    fixture.detectChanges();
+    return {
+      fixture,
+      form,
+      upload: fixture.debugElement.query(By.directive(FileUpload)).componentInstance as FileUpload,
+    };
+  }
 
   it('consulta proveedores paginados, almacenes activos y variantes por búsqueda remota', async () => {
     const fixture = TestBed.createComponent(CompraForm);
@@ -180,5 +215,129 @@ describe('CompraForm', () => {
     await vi.waitFor(() => expect(form.variantesQuery.data()?.meta.page).toBe(2));
     expect(form.proveedores().map((item) => item.id)).toContain('p1');
     expect(form.rowOptions(form.renglones()[0]).map((item) => item.id)).toContain('v1');
+  });
+
+  it('adjunta solo un PDF/JPG/PNG de hasta 10 MB, permite quitarlo y confirmar sin archivo inválido', async () => {
+    const { fixture, form, upload } = await validForm();
+    const pdf = new File(['%PDF-1.4'], 'factura.pdf', { type: 'application/pdf' });
+    upload.addFiles([pdf]);
+    expect(form.comprobante()).toBe(pdf);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('factura.pdf');
+    upload.remove(0);
+    expect(form.comprobante()).toBeNull();
+    upload.addFiles([new File(['x'], 'factura.exe', { type: 'application/octet-stream' })]);
+    expect(form.fileError()).toContain('formato no está permitido');
+    expect(form.canConfirm()).toBe(true);
+    const oversized = new File(['x'], 'grande.pdf', { type: 'application/pdf' });
+    Object.defineProperty(oversized, 'size', { value: 10 * 1024 * 1024 + 1 });
+    upload.addFiles([oversized]);
+    expect(form.fileError()).toContain('supera el límite');
+    upload.addFiles([new File(['x'], 'falso.pdf', { type: 'image/gif' })]);
+    expect(form.fileError()).toContain('PDF, JPG o PNG válido');
+    expect(upload.files()).toEqual([]);
+    expect(form.comprobante()).toBeNull();
+    upload.addFiles([pdf]);
+    expect(form.fileError()).toBe('');
+    expect(form.comprobante()).toBe(pdf);
+  });
+
+  it('envía una sola compra y muestra éxito de recepción con advertencia si falla el adjunto', async () => {
+    const { fixture, form, upload } = await validForm();
+    const pdf = new File(['%PDF-1.4'], 'factura.pdf', { type: 'application/pdf' });
+    upload.addFiles([pdf]);
+    let release!: (value: unknown) => void;
+    create.mockReturnValue(
+      new Promise((resolve) => {
+        release = resolve;
+      }),
+    );
+    const first = form.confirm();
+    const second = form.confirm();
+    expect(form.sending()).toBe(true);
+    await vi.waitFor(() => expect(create).toHaveBeenCalledOnce());
+    expect(create.mock.calls[0][0]).toEqual({
+      proveedorId: 'p1',
+      almacenId: 'a1',
+      tipoDocumento: 'factura',
+      fecha: form.fecha(),
+      serieDocumento: 'F001',
+      numeroDocumento: '123',
+      observaciones: undefined,
+      renglones: [{ varianteId: 'v1', unidadId: 'u1', cantidad: '2', precioUnitario: '10.50' }],
+      comprobante: pdf,
+    });
+    fixture.detectChanges();
+    expect(
+      (fixture.nativeElement.querySelector('button.btn-primary') as HTMLButtonElement).disabled,
+    ).toBe(true);
+    release({
+      id: 'c1',
+      comprobante: { estado: 'fallido', advertencia: 'El archivo no se guardó.' },
+    });
+    await Promise.all([first, second]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain(
+      'Compra e ingreso de inventario confirmados',
+    );
+    expect(fixture.nativeElement.textContent).toContain('El archivo no se guardó');
+    expect(fixture.nativeElement.textContent).toContain('La compra y el stock sí se registraron');
+    expect(
+      fixture.nativeElement.querySelector('a[href="/admin/inventario/compras/c1"]'),
+    ).not.toBeNull();
+    await form.confirm();
+    expect(create).toHaveBeenCalledOnce();
+  });
+
+  it('deja editable el formulario ante conflicto sin afirmar que el stock se recibió', async () => {
+    const { fixture, form } = await validForm();
+    create.mockRejectedValueOnce(new HttpErrorResponse({ status: 409, statusText: 'Conflict' }));
+    await form.confirm();
+    fixture.detectChanges();
+    expect(form.confirmed()).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Este documento ya figura registrado');
+    expect(fixture.nativeElement.textContent).not.toContain(
+      'Compra e ingreso de inventario confirmados',
+    );
+    expect(
+      (
+        fixture.nativeElement.querySelector(
+          'input[aria-label="Serie del documento"]',
+        ) as HTMLInputElement
+      ).disabled,
+    ).toBe(false);
+    expect(form.serieDocumento()).toBe('F001');
+    create.mockResolvedValueOnce({ id: 'c2', comprobante: { estado: 'pendiente' } });
+    await form.confirm();
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(form.confirmed()?.id).toBe('c2');
+    expect(create.mock.calls[1][0].comprobante).toBeNull();
+  });
+
+  it('comprueba COMPRAS_CREAR al ejecutar, incluso con datos válidos', async () => {
+    const { form } = await validForm();
+    TestBed.inject(AuthStore).setProfile({ isSuperAdmin: false, permissions: [] } as never);
+    await form.confirm();
+    expect(create).not.toHaveBeenCalled();
+    expect(form.actionError()).toContain('No tienes permiso');
+  });
+
+  it('ante una respuesta perdida invita a buscar el documento antes de reintentar', async () => {
+    const { fixture, form } = await validForm();
+    create.mockRejectedValueOnce(new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' }));
+    const find = vi.fn();
+    form.findDocument.subscribe(find);
+    await form.confirm();
+    fixture.detectChanges();
+    expect(form.confirmed()).toBeNull();
+    expect(form.actionError()).toContain('Busca el documento en el listado');
+    expect(fixture.nativeElement.textContent).not.toContain(
+      'Compra e ingreso de inventario confirmados',
+    );
+    const lookup = [...fixture.nativeElement.querySelectorAll('button')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('Buscar documento'),
+    );
+    lookup?.click();
+    expect(find).toHaveBeenCalledExactlyOnceWith('123');
   });
 });

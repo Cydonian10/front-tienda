@@ -10,7 +10,7 @@
   </header>
 
   @if (showCreate() && permissions.create()) {
-    <app-compra-form (cancel)="showCreate.set(false)" />
+    <app-compra-form (cancel)="showCreate.set(false)" (findDocument)="findDocument($event)" />
   }
 
   <section

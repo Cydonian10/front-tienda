@@ -59,4 +59,11 @@ export default class ComprasPage {
     if (!this.authorization.hasPermission('INVENTARIO', PERMISSION_CODES.COMPRAS_CREATE)) return;
     this.showCreate.set(true);
   }
+
+  findDocument(numero: string): void {
+    if (!numero) return;
+    this.searchDraft.set(numero);
+    this.search.set(numero);
+    this.page.set(1);
+  }
 }

@@ -1,6 +1,6 @@
 # SPEC 04 — Interfaz de existencias y valoración
 
-> **Status:** Borrador
+> **Status:** Aprobado
 > **Depends on:** SPEC 03
 > **Date:** 2026-10-18
 > **Objective:** Consultar desde el menú de Inventario el stock y su valoración por almacén, variante y unidad de medida sin modificar los saldos.
@@ -70,11 +70,11 @@ La referencia `https://inventario-productos-gabriel.zudex85.chatgpt.site/` prese
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| Una tabla con muchas filas o columnas se desborda en móvil. | Usar presentación adaptable y conservar etiquetas de unidad, importes y acciones accesibles; verificar móvil y teclado. |
-| Una conversión con factor decimal puede perder unidades por operaciones con `number`. | Operar con decimales exactos sobre cadenas, conservar saldo base visible y probar restos fraccionarios. |
-| Costo promedio o totales pueden parecer inconsistentes al redondear la pantalla. | Mostrar totales provistos por la API y diferenciar la precisión del promedio de los dos decimales monetarios de visualización. |
+| Risk                                                                                  | Mitigation                                                                                                                     |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Una tabla con muchas filas o columnas se desborda en móvil.                           | Usar presentación adaptable y conservar etiquetas de unidad, importes y acciones accesibles; verificar móvil y teclado.        |
+| Una conversión con factor decimal puede perder unidades por operaciones con `number`. | Operar con decimales exactos sobre cadenas, conservar saldo base visible y probar restos fraccionarios.                        |
+| Costo promedio o totales pueden parecer inconsistentes al redondear la pantalla.      | Mostrar totales provistos por la API y diferenciar la precisión del promedio de los dos decimales monetarios de visualización. |
 
 ## What is **not** in this spec
 

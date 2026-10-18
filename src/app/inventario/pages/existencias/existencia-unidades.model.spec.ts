@@ -1,4 +1,18 @@
-import { descomponerUnidadBase, nombreUnidad } from './existencia-unidades.model';
+import { decimalCompacto, descomponerUnidadBase, nombreUnidad } from './existencia-unidades.model';
+
+describe('decimalCompacto', () => {
+  it('omite ceros finales sin redondear ni perder decimales significativos', () => {
+    expect(decimalCompacto('12.000000')).toBe('12');
+    expect(decimalCompacto('12.340000')).toBe('12.34');
+    expect(decimalCompacto('12.123456')).toBe('12.123456');
+    expect(decimalCompacto('0.000001')).toBe('0.000001');
+    expect(decimalCompacto('-12.5000')).toBe('-12.5');
+  });
+
+  it('deja intacta una cadena decimal mal formada', () => {
+    expect(decimalCompacto('12.caja')).toBe('12.caja');
+  });
+});
 
 describe('descomponerUnidadBase', () => {
   it('presenta 25 unidades como 2 cajas y 1 unidad base sin perder el resto', () => {

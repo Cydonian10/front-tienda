@@ -58,6 +58,16 @@ describe('ExistenciasPage', () => {
     );
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('S/ 50.00');
+    expect(
+      fixture.nativeElement.querySelector('[aria-label="Valor del inventario a costo"]')
+        .textContent,
+    ).toContain('Principal');
+    const total = fixture.nativeElement.querySelector(
+      '[aria-label="Valor del inventario a costo"]',
+    ) as HTMLElement;
+    const filtros = fixture.nativeElement.querySelector('#filtros-existencias-title')
+      .parentElement as HTMLElement;
+    expect(total.compareDocumentPosition(filtros) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
 
     fixture.componentInstance.page.set(2);
     fixture.componentInstance.elegirAlmacen('todos');
@@ -77,11 +87,13 @@ describe('ExistenciasPage', () => {
     expect(listar).not.toHaveBeenCalled();
   });
 
-  it('formatea PEN sin convertir cadenas monetarias a number y conserva seis decimales del promedio', () => {
+  it('formatea PEN a dos decimales sin convertir cadenas monetarias a number', () => {
     expect(soles('123456789012345678.125000')).toContain('123,456,789,012,345,678.13');
     expect(soles('0.000000')).toBe('S/ 0.00');
     expect(promedio(null)).toBe('—');
-    expect(promedio('0.123457')).toBe('S/ 0.123457');
+    expect(promedio('0.123457')).toBe('S/ 0.12');
+    expect(promedio('0.125000')).toBe('S/ 0.13');
+    expect(promedio('12.999999')).toBe('S/ 13.00');
   });
 
   it('filtra búsqueda y disponibilidad, reinicia página y conserva el total del almacén', async () => {
@@ -134,7 +146,7 @@ describe('ExistenciasPage', () => {
           },
           variante: { id: 'v1', sku: 'TOR-M8', activo: false, valores: [], precioVenta: '12.00' },
           almacen: { id: 'a1', nombre: 'Principal' },
-          cantidadBase: '3.000000',
+          cantidadBase: '3.120000',
           valorCosto: '6.000000',
           costoPromedioBase: '2.000000',
           costoRegistradoCero: false,
@@ -157,7 +169,7 @@ describe('ExistenciasPage', () => {
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Inactivo con stock');
     expect(text).toContain('S/ 500.00');
-    expect(text).toContain('3.000000 u');
+    expect(text).toContain('3.12 u');
   });
 
   it('cambia la presentación por fila sin alterar el saldo base, el valor ni solicitar nuevos datos', async () => {
@@ -199,13 +211,15 @@ describe('ExistenciasPage', () => {
       'app-existencia-unidad select',
     ) as HTMLSelectElement;
     expect(select.value).toBe('');
+    expect(select.options[1].textContent).toContain('× 12');
+    expect(select.options[1].textContent).not.toContain('12.00000000');
 
     select.value = 'caja';
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('2 cajas + 1 unidad base');
-    expect(text).toContain('25.000000 u');
+    expect(text).toContain('25 u');
     expect(text).toContain('S/ 900.00');
     expect(fixture.componentInstance.existencias.data()).toBe(original);
     expect(listar).toHaveBeenCalledOnce();
@@ -221,7 +235,7 @@ describe('ExistenciasPage', () => {
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).not.toContain('2 cajas + 1 unidad base');
-    expect(fixture.nativeElement.textContent).toContain('25.000000 u');
+    expect(fixture.nativeElement.textContent).toContain('25 u');
   });
 
   it('muestra saldos sin stock y costo cero por separado del precio de venta en escritorio y móvil', async () => {
@@ -329,6 +343,7 @@ describe('ExistenciasPage', () => {
     fixture.componentInstance.elegirAlmacen('a1');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Cargando existencias');
+    expect(fixture.nativeElement.querySelector('#filtros-existencias-title')).not.toBeNull();
     fail(new Error('sin conexión'));
     await vi.waitFor(() => expect(fixture.componentInstance.existencias.isError()).toBe(true));
     fixture.detectChanges();

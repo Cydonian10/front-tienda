@@ -33,7 +33,7 @@ La referencia `https://inventario-productos-gabriel.zudex85.chatgpt.site/` prese
 - Servicio `src/app/api/inventario/existencia-api.ts` para `GET /api/existencias/almacenes` y `GET /api/existencias`; consultas en `src/app/inventario/actions/use-existencias-action.ts` con claves estables para almacén, página, búsqueda, producto y disponibilidad. El total y las filas proceden de la API, no de señales locales ni de sumar la página.
 - En `src/app/inventario/pages/existencias/`, señales locales para `almacenId: string | null`, `page`, `q`, `productoId`, `disponibilidad` y unidad seleccionada por fila. `null` significa «aún no elegido» y deshabilita la consulta; `todos` es una elección explícita. Al cambiar almacén o filtros de tabla, volver a la primera página.
 - La conversión visual usa decimales exactos: `unidadesCompletas = parte entera inferior de cantidadBase / factorABase`; `restoBase = cantidadBase - unidadesCompletas × factorABase`. Un factor decimal o una cantidad base fraccionaria mantienen el resto decimal exacto. Elegir la unidad base muestra solamente `cantidadBase`; cambiar la presentación nunca altera el saldo persistido ni el total monetario.
-- Mostrar `totalValorCosto` en PEN con dos decimales; el costo promedio por unidad base admite hasta seis. El redondeo visual no reemplaza las cadenas exactas recibidas de la API.
+- Mostrar `totalValorCosto` y el costo promedio por unidad base en PEN con dos decimales. El redondeo visual no reemplaza las cadenas exactas recibidas de la API.
 
 ## Implementation plan
 
@@ -51,7 +51,7 @@ La referencia `https://inventario-productos-gabriel.zudex85.chatgpt.site/` prese
 - [ ] Al entrar no se elige ningún almacén automáticamente y no se solicita `/api/existencias` hasta elegir un almacén activo o «Todos los almacenes».
 - [ ] Elegir un almacén muestra únicamente sus filas y su `totalValorCosto`; elegir «Todos» muestra una fila por variante/almacén activo y el total conjunto. No se muestran almacenes inactivos.
 - [ ] Buscar por nombre/SKU, filtrar producto o disponibilidad y cambiar de página modifica el listado, pero no el valor del inventario mostrado para el almacén seleccionado.
-- [ ] La tabla muestra stock cero de catálogo activo, identifica catálogo inactivo con stock y diferencia claramente costo promedio de precio de venta, sin mostrar precio de última compra.
+- [ ] La tabla muestra stock cero de catálogo activo, identifica catálogo inactivo con stock y diferencia claramente el costo promedio por unidad base (PEN a dos decimales) del precio de venta, sin mostrar precio de última compra.
 - [ ] Una fila con 25 unidades base y caja de factor 12 muestra `2 cajas + 1 unidad base` al seleccionarla; la cifra exacta `25 unidades base` permanece visible.
 - [ ] Un factor o saldo base fraccionario presenta unidades completas y el resto exacto; cambiar de unidad no modifica ni valor monetario ni stock de la API.
 - [ ] Sin stock se muestra `—` como costo promedio; stock positivo con `valorCosto = 0` muestra S/ 0 y aviso neutral sin afirmar que falta costo de apertura.

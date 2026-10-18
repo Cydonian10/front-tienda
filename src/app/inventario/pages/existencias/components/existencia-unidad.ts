@@ -1,6 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
 import type { ExistenciaItem } from '../../../../api/interfaces/inventario/existencia.interface';
-import { descomponerUnidadBase, nombreUnidad } from '../existencia-unidades.model';
+import { decimalCompacto, descomponerUnidadBase, nombreUnidad } from '../existencia-unidades.model';
 
 @Component({
   selector: 'app-existencia-unidad',
@@ -8,6 +8,7 @@ import { descomponerUnidadBase, nombreUnidad } from '../existencia-unidades.mode
   host: { class: 'block min-w-0' },
 })
 export class ExistenciaUnidad {
+  readonly decimalCompacto = decimalCompacto;
   readonly fila = input.required<ExistenciaItem>();
   readonly unidadId = input<string | null>(null);
   readonly unidadChange = output<string | null>();

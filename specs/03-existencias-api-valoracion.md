@@ -1,6 +1,6 @@
 # SPEC 03 — API de existencias y valoración
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-10-18
 > **Objective:** Consultar existencias y su valor a costo por variante y almacén activo mediante una API paginada, autorizada y basada en saldos reales.
@@ -48,16 +48,16 @@ SPEC 01 actualiza `existencias.cantidad` y `existencias.valor_costo` al confirma
 
 ## Acceptance criteria
 
-- [ ] `EXISTENCIAS_LEER` aparece en el catálogo `INVENTARIO` sin asignarse automáticamente; ambas consultas rechazan usuarios sin ese permiso.
-- [ ] Un usuario con `EXISTENCIAS_LEER` y sin `ALMACENES_LEER` obtiene la lista completa de almacenes activos y consulta saldos; no accede por ello al CRUD de almacenes.
-- [ ] Falta de `almacenId`, identificador inválido/inexistente/inactivo o filtros/paginación inválidos producen error de validación o recurso no disponible, sin consultar otros saldos.
-- [ ] Con un almacén elegido, `totalValorCosto` suma todos sus saldos; con `todos`, suma todos los almacenes activos, pero ninguno inactivo.
-- [ ] Búsqueda, filtro de producto, disponibilidad y cambio de página afectan las filas visibles y `totalItems`, pero no alteran `totalValorCosto` del almacén o conjunto seleccionado.
-- [ ] Una variante activa sin fila persistida aparece con saldo y valor cero; una inactiva con cantidad positiva aparece marcada como inactiva y se incluye en el total; una inactiva sin stock no aparece.
-- [ ] Para 10 unidades y valor S/ 50 más una compra de 10 unidades por S/ 70, la fila refleja 20 unidades, valor S/ 120 y promedio S/ 6 por unidad base, sin usar el precio de venta.
-- [ ] Cantidad cero devuelve promedio `null`; cantidad positiva con valor cero devuelve promedio cero y `costoRegistradoCero = true`, sin afirmar si se trata de una compra gratuita o una apertura pendiente.
-- [ ] Los importes, factores y cantidades se entregan como cadenas decimales; la suma del valor no pierde precisión por paginación, redondeo del promedio ni operaciones de coma flotante.
-- [ ] La API devuelve unidad base, unidades secundarias válidas y factores por producto, y `npm run build` y las pruebas específicas pasan en `api-tienda`.
+- [x] `EXISTENCIAS_LEER` aparece en el catálogo `INVENTARIO` sin asignarse automáticamente; ambas consultas rechazan usuarios sin ese permiso.
+- [x] Un usuario con `EXISTENCIAS_LEER` y sin `ALMACENES_LEER` obtiene la lista completa de almacenes activos y consulta saldos; no accede por ello al CRUD de almacenes.
+- [x] Falta de `almacenId`, identificador inválido/inexistente/inactivo o filtros/paginación inválidos producen error de validación o recurso no disponible, sin consultar otros saldos.
+- [x] Con un almacén elegido, `totalValorCosto` suma todos sus saldos; con `todos`, suma todos los almacenes activos, pero ninguno inactivo.
+- [x] Búsqueda, filtro de producto, disponibilidad y cambio de página afectan las filas visibles y `totalItems`, pero no alteran `totalValorCosto` del almacén o conjunto seleccionado.
+- [x] Una variante activa sin fila persistida aparece con saldo y valor cero; una inactiva con cantidad positiva aparece marcada como inactiva y se incluye en el total; una inactiva sin stock no aparece.
+- [x] Para 10 unidades y valor S/ 50 más una compra de 10 unidades por S/ 70, la fila refleja 20 unidades, valor S/ 120 y promedio S/ 6 por unidad base, sin usar el precio de venta.
+- [x] Cantidad cero devuelve promedio `null`; cantidad positiva con valor cero devuelve promedio cero y `costoRegistradoCero = true`, sin afirmar si se trata de una compra gratuita o una apertura pendiente.
+- [x] Los importes, factores y cantidades se entregan como cadenas decimales; la suma del valor no pierde precisión por paginación, redondeo del promedio ni operaciones de coma flotante.
+- [x] La API devuelve unidad base, unidades secundarias válidas y factores por producto, y `npm run build` y las pruebas específicas pasan en `api-tienda`.
 
 ## Decisions
 

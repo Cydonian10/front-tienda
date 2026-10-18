@@ -120,6 +120,40 @@ describe('SystemMenuService', () => {
     expect(service.menuFor('INVENTARIO')[0].items.map((item) => item.label)).toEqual(['Atributos']);
     expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/atributos');
   });
+
+  it('muestra Operaciones → Compras solo con COMPRAS_LEER de INVENTARIO', () => {
+    const service = TestBed.inject(SystemMenuService);
+    const store = TestBed.inject(AuthStore);
+    store.setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'ACCESS_CONTROL' }],
+    } as never);
+    expect(service.menuFor('INVENTARIO')).toEqual([]);
+
+    store.setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.COMPRAS_CREATE, systemCode: 'INVENTARIO' }],
+    } as never);
+    expect(service.menuFor('INVENTARIO')).toEqual([]);
+
+    store.setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' }],
+    } as never);
+    expect(service.menuFor('INVENTARIO')).toEqual([
+      expect.objectContaining({
+        label: 'Operaciones',
+        items: [
+          expect.objectContaining({
+            label: 'Compras',
+            url: '/admin/inventario/compras',
+            permission: PERMISSION_CODES.COMPRAS_READ,
+          }),
+        ],
+      }),
+    ]);
+    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/compras');
+  });
 });
 
 @Component({ template: '' })

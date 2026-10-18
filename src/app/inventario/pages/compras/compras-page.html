@@ -1,0 +1,21 @@
+<section class="space-y-6" aria-labelledby="compras-title">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 id="compras-title" class="text-2xl font-semibold tracking-tight">Compras</h1>
+      <p class="mt-1 text-sm text-base-content/70">Registro y recepción de mercancía.</p>
+    </div>
+    @if (permissions.create()) {
+      <button type="button" class="btn btn-primary" (click)="openCreate()">Nueva compra</button>
+    }
+  </header>
+
+  @if (showCreate()) {
+    <div role="status" class="alert alert-info">
+      El formulario para confirmar y recibir compras estará disponible en un próximo paso.
+    </div>
+  } @else {
+    <p class="text-sm text-base-content/70">
+      El listado de compras estará disponible en un próximo paso.
+    </p>
+  }
+</section>

@@ -74,6 +74,18 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
         ],
       },
       {
+        label: 'Operaciones',
+        icon: 'package',
+        items: [
+          {
+            label: 'Compras',
+            url: '/admin/inventario/compras',
+            icon: 'file',
+            permission: PERMISSION_CODES.COMPRAS_READ,
+          },
+        ],
+      },
+      {
         label: 'Configuración',
         icon: 'settings',
         items: [

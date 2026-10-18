@@ -4,15 +4,13 @@
       <h1 id="compras-title" class="text-2xl font-semibold tracking-tight">Compras</h1>
       <p class="mt-1 text-sm text-base-content/70">Consulta las compras recibidas en inventario.</p>
     </div>
-    @if (permissions.create()) {
+    @if (permissions.create() && !showCreate()) {
       <button type="button" class="btn btn-primary" (click)="openCreate()">Nueva compra</button>
     }
   </header>
 
-  @if (showCreate()) {
-    <div role="status" class="alert alert-info">
-      El formulario para confirmar y recibir compras estará disponible en un próximo paso.
-    </div>
+  @if (showCreate() && permissions.create()) {
+    <app-compra-form (cancel)="showCreate.set(false)" />
   }
 
   <section

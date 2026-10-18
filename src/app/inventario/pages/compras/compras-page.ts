@@ -6,14 +6,10 @@ import { usePermissions } from '../../../auth/services/use-permissions';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { useComprasListado } from '../../actions/use-compras-action';
+import { CompraForm } from './components/compra-form';
+import { formatTotalPEN } from './compra-form.model';
 
-/** Muestra el total persistido sin recalcularlo con coma flotante. */
-export function formatTotalPEN(value: string | null): string {
-  if (value === null) return '—';
-  const [whole, fraction = ''] = value.split('.');
-  const decimals = fraction.replace(/0+$/, '').padEnd(2, '0');
-  return `S/ ${whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}.${decimals}`;
-}
+export { formatTotalPEN } from './compra-form.model';
 
 export function documentoCompra(compra: CompraListadoResponse): string {
   const tipo = compra.tipoDocumento
@@ -25,7 +21,7 @@ export function documentoCompra(compra: CompraListadoResponse): string {
 
 @Component({
   selector: 'app-compras-page',
-  imports: [EmptyState, Pagination],
+  imports: [EmptyState, Pagination, CompraForm],
   templateUrl: './compras-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0' },

@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import { CompraApi } from '../../api/inventario/compra-api';
+import { AlmacenApi } from '../../api/inventario/almacen-api';
 import { ProveedorApi } from '../../api/inventario/proveedor-api';
 import { VarianteCompraApi } from '../../api/inventario/variante-compra-api';
 import type { NuevaCompra } from '../../api/interfaces/inventario/compra.interface';
@@ -17,6 +18,8 @@ export const proveedoresQueryKey = (
 ) => ['proveedores', 'listado', page, limit, nombre, documento] as const;
 export const variantesCompraQueryKey = (page: number, limit: number, q: string) =>
   ['variantes', 'compra', page, limit, q] as const;
+export const almacenesCompraQueryKey = (page: number) =>
+  ['almacenes', 'listado', page, 100, '', true] as const;
 
 export function useComprasListado(page: () => number, limit: () => number, q: () => string) {
   const api = inject(CompraApi);
@@ -73,6 +76,18 @@ export function useVariantesCompra(page: () => number, limit: () => number, q: (
     return {
       queryKey: variantesCompraQueryKey(currentPage, currentLimit, search),
       queryFn: () => api.list(currentPage, currentLimit, search || undefined),
+      retry: false,
+    };
+  });
+}
+
+export function useAlmacenesCompra(page: () => number) {
+  const api = inject(AlmacenApi);
+  return injectQuery(() => {
+    const currentPage = page();
+    return {
+      queryKey: almacenesCompraQueryKey(currentPage),
+      queryFn: () => api.list(currentPage, 100, '', true),
       retry: false,
     };
   });

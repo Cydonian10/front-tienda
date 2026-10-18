@@ -1,0 +1,213 @@
+<section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="existencias-title">
+  <header>
+    <h1 id="existencias-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">
+      Existencias
+    </h1>
+    <p class="mt-2 text-sm text-base-content/70">
+      Consulta las cantidades y el valor a costo por almacén y variante.
+    </p>
+  </header>
+
+  <section class="card card-border bg-base-100" aria-labelledby="alcance-title">
+    <div class="card-body gap-3 p-5 sm:p-6">
+      <h2 id="alcance-title" class="text-lg font-semibold">Alcance del inventario</h2>
+      @if (almacenes.isPending()) {
+        <p role="status" class="flex items-center gap-2 text-sm text-base-content/70">
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>Cargando
+          almacenes…
+        </p>
+      } @else if (almacenes.isError()) {
+        <app-empty-state variant="error" actionLabel="Reintentar" (action)="almacenes.refetch()" />
+      } @else if (almacenes.data(); as opciones) {
+        @if (opciones.length) {
+          <label for="existencias-almacen" class="text-sm font-semibold">Almacén</label>
+          <select
+            id="existencias-almacen"
+            class="select h-11 w-full max-w-md"
+            [value]="almacenId() ?? ''"
+            (change)="elegirAlmacen($any($event.target).value)"
+          >
+            <option value="">Selecciona un almacén</option>
+            <option value="todos">Todos los almacenes</option>
+            @for (opcion of opciones; track opcion.id) {
+              <option [value]="opcion.id">{{ opcion.nombre }}</option>
+            }
+          </select>
+          <p class="text-xs text-base-content/70">
+            Selecciona un almacén o «Todos los almacenes» para consultar los saldos.
+          </p>
+        } @else {
+          <app-empty-state
+            title="No hay almacenes activos"
+            description="No hay almacenes disponibles para consultar existencias."
+          />
+        }
+      }
+    </div>
+  </section>
+
+  @if (almacenId() && almacenes.data()?.length) {
+    @if (existencias.isPending()) {
+      <div class="card card-border bg-base-100 p-6" role="status">
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+        <span class="mt-2 text-sm text-base-content/70">Cargando existencias…</span>
+      </div>
+    } @else if (existencias.isError()) {
+      <div class="card card-border bg-base-100 p-5 sm:p-6">
+        <app-empty-state
+          variant="error"
+          actionLabel="Reintentar"
+          (action)="existencias.refetch()"
+        />
+      </div>
+    } @else if (existencias.data(); as resultado) {
+      <section class="card card-border bg-base-100" aria-label="Valor del inventario a costo">
+        <div class="card-body gap-2 p-5 sm:p-6">
+          <span class="text-sm text-base-content/70">Valor del inventario a costo · PEN</span>
+          <strong class="text-2xl font-semibold tabular-nums break-all sm:text-3xl">{{
+            soles(resultado.totalValorCosto)
+          }}</strong>
+          <p class="text-xs text-base-content/70">
+            {{ almacenId() === 'todos' ? 'Todos los almacenes activos' : 'Almacén seleccionado' }} ·
+            No depende de la página consultada.
+          </p>
+        </div>
+      </section>
+
+      <section class="card card-border overflow-hidden bg-base-100" aria-labelledby="saldos-title">
+        <div class="border-b border-base-300 px-5 py-5 sm:px-6">
+          <h2 id="saldos-title" class="text-lg font-semibold">Saldos por variante y almacén</h2>
+          <p class="mt-1 text-sm text-base-content/70">
+            Costo promedio y valor del saldo; el precio de venta se muestra aparte.
+          </p>
+        </div>
+        @if (resultado.items.length) {
+          <div class="hidden overflow-x-auto md:block">
+            <table class="table table-md w-full min-w-[840px]">
+              <thead class="bg-base-200 text-xs uppercase">
+                <tr>
+                  <th scope="col" class="pl-6">Producto / variante</th>
+                  <th scope="col">Almacén</th>
+                  <th scope="col" class="text-right">Stock base</th>
+                  <th scope="col" class="text-right">Costo promedio / base</th>
+                  <th scope="col" class="text-right">Valor a costo</th>
+                  <th scope="col" class="pr-6 text-right">Precio de venta</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (fila of resultado.items; track fila.variante.id + ':' + fila.almacen.id) {
+                  <tr class="border-b border-base-300/70 last:border-b-0 hover:bg-base-200/60">
+                    <th scope="row" class="pl-6 font-semibold">
+                      <span class="block">{{ fila.producto.nombre }}</span>
+                      <span class="block text-xs font-normal text-base-content/70"
+                        >{{ fila.variante.sku }}
+                        @for (valor of fila.variante.valores; track valor.atributoId) {
+                          · {{ valor.atributo }}: {{ valor.valor }}
+                        }
+                      </span>
+                      @if (!fila.producto.activo || !fila.variante.activo) {
+                        <span class="badge badge-outline mt-1">Inactivo con stock</span>
+                      }
+                    </th>
+                    <td>{{ fila.almacen.nombre }}</td>
+                    <td class="text-right tabular-nums whitespace-nowrap">
+                      {{ fila.cantidadBase }} {{ fila.producto.unidadBase.simbolo }}
+                    </td>
+                    <td class="text-right tabular-nums whitespace-nowrap">
+                      {{ promedio(fila.costoPromedioBase) }}
+                      @if (fila.costoRegistradoCero) {
+                        <span class="block text-xs text-base-content/70"
+                          >Costo registrado en cero</span
+                        >
+                      }
+                    </td>
+                    <td class="text-right tabular-nums whitespace-nowrap">
+                      {{ soles(fila.valorCosto) }}
+                    </td>
+                    <td class="pr-6 text-right tabular-nums whitespace-nowrap">
+                      {{ soles(fila.variante.precioVenta) }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <ul class="divide-y divide-base-300 md:hidden" aria-label="Saldos de existencias">
+            @for (fila of resultado.items; track fila.variante.id + ':' + fila.almacen.id) {
+              <li class="space-y-3 px-5 py-5">
+                <div class="min-w-0">
+                  <strong class="block break-words">{{ fila.producto.nombre }}</strong
+                  ><span class="block break-words text-xs text-base-content/70"
+                    >{{ fila.variante.sku }}
+                    @for (valor of fila.variante.valores; track valor.atributoId) {
+                      · {{ valor.atributo }}: {{ valor.valor }}
+                    }
+                  </span>
+                  @if (!fila.producto.activo || !fila.variante.activo) {
+                    <span class="badge badge-outline mt-1">Inactivo con stock</span>
+                  }
+                </div>
+                <dl class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                  <div class="col-span-2">
+                    <dt class="text-base-content/70">Almacén</dt>
+                    <dd>{{ fila.almacen.nombre }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-base-content/70">Stock base</dt>
+                    <dd class="tabular-nums break-words">
+                      {{ fila.cantidadBase }} {{ fila.producto.unidadBase.simbolo }}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-base-content/70">Costo promedio / base</dt>
+                    <dd class="tabular-nums">{{ promedio(fila.costoPromedioBase) }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-base-content/70">Valor a costo</dt>
+                    <dd class="tabular-nums">{{ soles(fila.valorCosto) }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-base-content/70">Precio de venta</dt>
+                    <dd class="tabular-nums">{{ soles(fila.variante.precioVenta) }}</dd>
+                  </div>
+                </dl>
+                @if (fila.costoRegistradoCero) {
+                  <p class="text-xs text-base-content/70">Costo registrado en cero.</p>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="p-5 sm:p-6">
+            <app-empty-state
+              title="No hay saldos para mostrar"
+              description="No hay variantes disponibles para el alcance seleccionado."
+            />
+          </div>
+        }
+        <div
+          class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 px-5 py-4 text-sm text-base-content/70 sm:px-6"
+        >
+          <p role="status">
+            {{ resultado.totalItems }} resultados · Página {{ resultado.page }} de
+            {{ totalPages() || 1 }}
+          </p>
+          @if (resultado.totalItems > 0) {
+            <app-pagination
+              [page]="page()"
+              [totalPages]="totalPages()"
+              [pageSize]="pageSize()"
+              [disabled]="existencias.isFetching()"
+              (pageChange)="page.set($event)"
+              (pageSizeChange)="cambiarTamano($event)"
+            />
+          }
+        </div>
+      </section>
+    }
+  } @else if (almacenes.data()?.length) {
+    <div role="status" class="alert alert-soft">
+      Elige un almacén o «Todos los almacenes» para consultar existencias.
+    </div>
+  }
+</section>

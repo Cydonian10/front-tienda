@@ -154,6 +154,35 @@ describe('SystemMenuService', () => {
     ]);
     expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/compras');
   });
+
+  it('muestra Operaciones → Existencias con EXISTENCIAS_LEER, sin ALMACENES_LEER', () => {
+    const service = TestBed.inject(SystemMenuService);
+    const store = TestBed.inject(AuthStore);
+    store.setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'INVENTARIO' }],
+    } as never);
+
+    expect(service.menuFor('INVENTARIO')).toEqual([
+      expect.objectContaining({
+        label: 'Operaciones',
+        items: [
+          expect.objectContaining({
+            label: 'Existencias',
+            url: '/admin/inventario/existencias',
+            permission: PERMISSION_CODES.EXISTENCIAS_READ,
+          }),
+        ],
+      }),
+    ]);
+    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/existencias');
+
+    store.setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'ACCESS_CONTROL' }],
+    } as never);
+    expect(service.menuFor('INVENTARIO')).toEqual([]);
+  });
 });
 
 @Component({ template: '' })

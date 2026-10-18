@@ -83,6 +83,12 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             icon: 'file',
             permission: PERMISSION_CODES.COMPRAS_READ,
           },
+          {
+            label: 'Existencias',
+            url: '/admin/inventario/existencias',
+            icon: 'warehouse',
+            permission: PERMISSION_CODES.EXISTENCIAS_READ,
+          },
         ],
       },
       {

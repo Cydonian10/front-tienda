@@ -34,6 +34,11 @@ const inventarioRoutes: Routes = [
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.COMPRAS_READ)],
   },
   {
+    path: 'existencias',
+    loadComponent: () => import('./pages/existencias/existencias-page'),
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.EXISTENCIAS_READ)],
+  },
+  {
     path: 'compras/:id',
     loadComponent: () => import('./pages/compras/compra-detalle-page'),
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.COMPRAS_READ)],

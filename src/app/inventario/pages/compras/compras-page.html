@@ -1,8 +1,8 @@
-<section class="space-y-6" aria-labelledby="compras-title">
+<section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="compras-title">
   <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h1 id="compras-title" class="text-2xl font-semibold tracking-tight">Compras</h1>
-      <p class="mt-1 text-sm text-base-content/70">Registro y recepción de mercancía.</p>
+      <p class="mt-1 text-sm text-base-content/70">Consulta las compras recibidas en inventario.</p>
     </div>
     @if (permissions.create()) {
       <button type="button" class="btn btn-primary" (click)="openCreate()">Nueva compra</button>
@@ -13,9 +13,161 @@
     <div role="status" class="alert alert-info">
       El formulario para confirmar y recibir compras estará disponible en un próximo paso.
     </div>
-  } @else {
-    <p class="text-sm text-base-content/70">
-      El listado de compras estará disponible en un próximo paso.
-    </p>
   }
+
+  <section
+    class="card card-border overflow-hidden bg-base-100"
+    aria-labelledby="compras-listado-title"
+  >
+    <div class="space-y-4 border-b border-base-300 px-5 py-5 sm:px-6">
+      <div>
+        <h2 id="compras-listado-title" class="text-lg font-semibold tracking-tight">
+          Listado de compras
+        </h2>
+        <p class="mt-1 text-sm text-base-content/70">Las compras más recientes aparecen primero.</p>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <form
+          class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row"
+          role="search"
+          (submit)="searchCompras($event)"
+        >
+          <div class="min-w-0 flex-1 sm:max-w-sm">
+            <label class="sr-only" for="compra-search"
+              >Buscar compras por proveedor, serie o número</label
+            >
+            <input
+              id="compra-search"
+              type="search"
+              class="input h-11 w-full"
+              maxlength="200"
+              placeholder="Proveedor, serie o número"
+              [value]="searchDraft()"
+              (input)="searchDraft.set($any($event.target).value)"
+            />
+          </div>
+          <button type="submit" class="btn min-h-11">Buscar</button>
+        </form>
+        @if (search()) {
+          <button type="button" class="btn btn-ghost min-h-11" (click)="clearSearch()">
+            Limpiar búsqueda
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (query.isPending()) {
+      <p
+        class="flex items-center justify-center gap-3 p-8 text-sm text-base-content/70"
+        role="status"
+      >
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+        Cargando compras…
+      </p>
+    } @else if (query.isError()) {
+      <div class="p-5 sm:p-6">
+        <app-empty-state variant="error" actionLabel="Reintentar" (action)="query.refetch()" />
+      </div>
+    } @else if (query.data(); as response) {
+      @if (response.data.length) {
+        <div class="hidden overflow-x-auto sm:block">
+          <table class="table table-md w-full min-w-[680px]">
+            <thead class="bg-base-200 text-xs uppercase">
+              <tr>
+                <th scope="col" class="pl-6">Comprobante</th>
+                <th scope="col">Proveedor</th>
+                <th scope="col">Almacén</th>
+                <th scope="col" class="text-right">Renglones</th>
+                <th scope="col" class="pr-6 text-right">Total en PEN</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (compra of response.data; track compra.id) {
+                <tr class="border-b border-base-300/70 last:border-b-0 hover:bg-base-200/60">
+                  <th scope="row" class="pl-6 font-semibold">
+                    <span class="block break-words">
+                      {{ documento(compra) }}
+                    </span>
+                    <span class="block text-xs font-normal text-base-content/70">{{
+                      compra.fecha
+                    }}</span>
+                  </th>
+                  <td class="break-words">{{ compra.proveedor.nombre }}</td>
+                  <td class="break-words">{{ compra.almacen?.nombre || '—' }}</td>
+                  <td class="text-right tabular-nums">{{ compra.cantidadRenglones }}</td>
+                  <td class="pr-6 text-right font-semibold tabular-nums whitespace-nowrap">
+                    {{ formatTotal(compra.totalDocumento) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <ul class="divide-y divide-base-300 sm:hidden" aria-label="Listado de compras">
+          @for (compra of response.data; track compra.id) {
+            <li class="space-y-3 px-5 py-5">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <strong class="block break-words text-sm">
+                    {{ documento(compra) }}
+                  </strong>
+                  <span class="text-xs text-base-content/70">{{ compra.fecha }}</span>
+                </div>
+                <strong class="tabular-nums whitespace-nowrap">{{
+                  formatTotal(compra.totalDocumento)
+                }}</strong>
+              </div>
+              <dl class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                <div class="min-w-0">
+                  <dt class="text-base-content/70">Proveedor</dt>
+                  <dd class="break-words">{{ compra.proveedor.nombre }}</dd>
+                </div>
+                <div class="min-w-0">
+                  <dt class="text-base-content/70">Almacén</dt>
+                  <dd class="break-words">{{ compra.almacen?.nombre || '—' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-base-content/70">Renglones</dt>
+                  <dd class="tabular-nums">{{ compra.cantidadRenglones }}</dd>
+                </div>
+              </dl>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="p-5 sm:p-6">
+          @if (search()) {
+            <app-empty-state
+              variant="no-results"
+              actionLabel="Limpiar búsqueda"
+              (action)="clearSearch()"
+            />
+          } @else {
+            <app-empty-state
+              title="Todavía no hay compras"
+              description="Las compras confirmadas aparecerán aquí cuando se reciba la primera."
+            />
+          }
+        </div>
+      }
+      <div
+        class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 px-5 py-4 text-sm text-base-content/70 sm:px-6"
+      >
+        <p role="status">
+          {{ response.meta.total }} resultados · Página {{ response.meta.page }} de
+          {{ response.meta.totalPages || 1 }}
+        </p>
+        @if (response.meta.total > 0) {
+          <app-pagination
+            [page]="page()"
+            [totalPages]="response.meta.totalPages"
+            [pageSize]="pageSize()"
+            [disabled]="query.isFetching()"
+            (pageChange)="page.set($event)"
+            (pageSizeChange)="changePageSize($event)"
+          />
+        }
+      </div>
+    }
+  </section>
 </section>

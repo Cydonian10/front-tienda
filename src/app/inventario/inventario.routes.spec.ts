@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
+import { ExistenciaApi } from '../api/inventario/existencia-api';
 import { PERMISSION_CODES } from '../api/interfaces/access-control/permision.interface';
 import { AuthStore } from '../store/auth/auth.store';
 import { AuthProfileService } from '../auth/services/auth-profile.service';
@@ -12,9 +14,16 @@ import inventarioRoutes from './inventario.routes';
 class EmptyPage {}
 
 describe('rutas de inventario', () => {
+  let client: QueryClient;
   beforeEach(() => {
+    client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     TestBed.configureTestingModule({
       providers: [
+        provideTanStackQuery(client),
+        {
+          provide: ExistenciaApi,
+          useValue: { listarAlmacenes: vi.fn().mockResolvedValue([]), listar: vi.fn() },
+        },
         provideRouter([
           {
             path: 'admin',
@@ -41,6 +50,7 @@ describe('rutas de inventario', () => {
   });
 
   afterEach(() => {
+    client.clear();
     TestBed.resetTestingModule();
   });
 

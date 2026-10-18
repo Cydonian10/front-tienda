@@ -207,7 +207,7 @@
                   </div>
                   <div class="col-span-2">
                     <dt class="text-base-content/70">Stock base</dt>
-                    <dd class="tabular-nums break-words">
+                    <dd class="tabular-nums break-all">
                       {{ fila.cantidadBase }} {{ fila.producto.unidadBase.simbolo }}
                       <app-existencia-unidad
                         [fila]="fila"
@@ -216,17 +216,17 @@
                       />
                     </dd>
                   </div>
-                  <div>
+                  <div class="min-w-0">
                     <dt class="text-base-content/70">Costo promedio / base</dt>
-                    <dd class="tabular-nums">{{ promedio(fila.costoPromedioBase) }}</dd>
+                    <dd class="tabular-nums break-all">{{ promedio(fila.costoPromedioBase) }}</dd>
                   </div>
-                  <div>
+                  <div class="min-w-0">
                     <dt class="text-base-content/70">Valor a costo</dt>
-                    <dd class="tabular-nums">{{ soles(fila.valorCosto) }}</dd>
+                    <dd class="tabular-nums break-all">{{ soles(fila.valorCosto) }}</dd>
                   </div>
-                  <div>
+                  <div class="min-w-0">
                     <dt class="text-base-content/70">Precio de venta</dt>
-                    <dd class="tabular-nums">{{ soles(fila.variante.precioVenta) }}</dd>
+                    <dd class="tabular-nums break-all">{{ soles(fila.variante.precioVenta) }}</dd>
                   </div>
                 </dl>
                 @if (fila.costoRegistradoCero) {

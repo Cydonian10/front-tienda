@@ -223,4 +223,163 @@ describe('ExistenciasPage', () => {
     expect(fixture.nativeElement.textContent).not.toContain('2 cajas + 1 unidad base');
     expect(fixture.nativeElement.textContent).toContain('25.000000 u');
   });
+
+  it('muestra saldos sin stock y costo cero por separado del precio de venta en escritorio y móvil', async () => {
+    listar.mockResolvedValue({
+      items: [
+        {
+          producto: {
+            id: 'p1',
+            nombre: 'Tuerca',
+            activo: true,
+            unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
+          },
+          variante: { id: 'v1', sku: 'TUE-1', activo: true, valores: [], precioVenta: '9.500000' },
+          almacen: { id: 'a1', nombre: 'Principal' },
+          cantidadBase: '0.000000',
+          valorCosto: '0.000000',
+          costoPromedioBase: null,
+          costoRegistradoCero: false,
+          unidadesSecundarias: [],
+        },
+        {
+          producto: {
+            id: 'p2',
+            nombre: 'Perno',
+            activo: true,
+            unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
+          },
+          variante: { id: 'v2', sku: 'PER-1', activo: true, valores: [], precioVenta: '8.000000' },
+          almacen: { id: 'a1', nombre: 'Principal' },
+          cantidadBase: '5.000000',
+          valorCosto: '0.000000',
+          costoPromedioBase: '0.000000',
+          costoRegistradoCero: true,
+          unidadesSecundarias: [],
+        },
+      ],
+      page: 1,
+      limit: 20,
+      totalItems: 2,
+      totalValorCosto: '0.000000',
+    });
+    const fixture = TestBed.createComponent(ExistenciasPage);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()?.length).toBe(1));
+    fixture.componentInstance.elegirAlmacen('a1');
+    await vi.waitFor(() =>
+      expect(fixture.componentInstance.existencias.data()?.items.length).toBe(2),
+    );
+    fixture.detectChanges();
+
+    const desktopRows = fixture.nativeElement.querySelectorAll(
+      'tbody tr',
+    ) as NodeListOf<HTMLElement>;
+    const mobileRows = fixture.nativeElement.querySelectorAll(
+      'ul[aria-label="Saldos de existencias"] li',
+    ) as NodeListOf<HTMLElement>;
+    expect(desktopRows).toHaveLength(2);
+    expect(mobileRows).toHaveLength(2);
+    for (const rows of [desktopRows, mobileRows]) {
+      expect(rows[0].textContent).toContain('—');
+      expect(rows[0].textContent).toContain('S/ 9.50');
+      expect(rows[1].textContent).toContain('Costo registrado en cero');
+      expect(rows[1].textContent).toContain('S/ 0.00');
+      expect(rows[1].textContent).toContain('S/ 8.00');
+    }
+    expect(fixture.nativeElement.textContent).toContain('Valor del inventario a costo · PEN');
+  });
+
+  it('distingue la carga y el error de almacenes y permite reintentar', async () => {
+    let fail!: (error: Error) => void;
+    listarAlmacenes.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          fail = reject;
+        }),
+    );
+    const fixture = TestBed.createComponent(ExistenciasPage);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Cargando almacenes');
+    expect(listar).not.toHaveBeenCalled();
+    fail(new Error('sin conexión'));
+    await vi.waitFor(() => expect(fixture.componentInstance.almacenes.isError()).toBe(true));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('#existencias-almacen')).toBeNull();
+    const reintentar = Array.from(
+      fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>,
+    ).find((button) => button.textContent?.includes('Reintentar'))!;
+    reintentar.click();
+    await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()?.length).toBe(1));
+    expect(listarAlmacenes).toHaveBeenCalledTimes(2);
+    expect(listar).not.toHaveBeenCalled();
+  });
+
+  it('muestra carga, error y reintento del listado para el almacén elegido', async () => {
+    let fail!: (error: Error) => void;
+    listar.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          fail = reject;
+        }),
+    );
+    const fixture = TestBed.createComponent(ExistenciasPage);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()?.length).toBe(1));
+    fixture.componentInstance.elegirAlmacen('a1');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Cargando existencias');
+    fail(new Error('sin conexión'));
+    await vi.waitFor(() => expect(fixture.componentInstance.existencias.isError()).toBe(true));
+    fixture.detectChanges();
+    const reintentar = Array.from(
+      fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>,
+    ).find((button) => button.textContent?.includes('Reintentar'))!;
+    reintentar.click();
+    await vi.waitFor(() =>
+      expect(fixture.componentInstance.existencias.data()?.totalValorCosto).toBe('50.000000'),
+    );
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('S/ 50.00');
+    expect(listar).toHaveBeenCalledTimes(2);
+  });
+
+  it('permite recorrer y usar con teclado los controles de alcance, búsqueda y disponibilidad', async () => {
+    const fixture = TestBed.createComponent(ExistenciasPage);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()?.length).toBe(1));
+    fixture.detectChanges();
+    const almacen = fixture.nativeElement.querySelector(
+      '#existencias-almacen',
+    ) as HTMLSelectElement;
+    expect(almacen.labels?.[0]?.textContent).toContain('Almacén');
+    almacen.value = 'todos';
+    almacen.dispatchEvent(new Event('change'));
+    await vi.waitFor(() =>
+      expect(fixture.componentInstance.existencias.data()?.totalValorCosto).toBe('120.000000'),
+    );
+    fixture.detectChanges();
+    const search = fixture.nativeElement.querySelector('#existencias-busqueda') as HTMLInputElement;
+    const disponibilidad = fixture.nativeElement.querySelector(
+      '#existencias-disponibilidad',
+    ) as HTMLSelectElement;
+    expect(search.labels?.[0]?.textContent).toContain('Producto o SKU');
+    expect(disponibilidad.labels?.[0]?.textContent).toContain('Disponibilidad');
+    search.value = 'Tuerca';
+    search.dispatchEvent(new Event('input'));
+    search.closest('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    disponibilidad.value = 'con_stock';
+    disponibilidad.dispatchEvent(new Event('change'));
+    await vi.waitFor(() =>
+      expect(listar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          almacenId: 'todos',
+          q: 'Tuerca',
+          disponibilidad: 'con_stock',
+        }),
+      ),
+    );
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('S/ 120.00');
+  });
 });

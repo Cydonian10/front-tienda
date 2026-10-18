@@ -1,27 +1,19 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
-import type { CompraListadoResponse } from '../../../api/interfaces/inventario/compra.interface';
 import { AuthorizationService } from '../../../auth/services/authorization.service';
 import { usePermissions } from '../../../auth/services/use-permissions';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { useComprasListado } from '../../actions/use-compras-action';
 import { CompraForm } from './components/compra-form';
-import { formatTotalPEN } from './compra-form.model';
+import { documentoCompra, formatTotalPEN } from './compra-form.model';
 
-export { formatTotalPEN } from './compra-form.model';
-
-export function documentoCompra(compra: CompraListadoResponse): string {
-  const tipo = compra.tipoDocumento
-    ? compra.tipoDocumento[0].toUpperCase() + compra.tipoDocumento.slice(1)
-    : 'Documento';
-  const numero = [compra.serieDocumento, compra.numeroDocumento].filter(Boolean).join('-');
-  return numero ? `${tipo} ${numero}` : `${tipo} sin número`;
-}
+export { documentoCompra, formatTotalPEN } from './compra-form.model';
 
 @Component({
   selector: 'app-compras-page',
-  imports: [EmptyState, Pagination, CompraForm],
+  imports: [EmptyState, Pagination, CompraForm, RouterLink],
   templateUrl: './compras-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0' },

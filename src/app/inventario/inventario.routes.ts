@@ -35,7 +35,7 @@ const inventarioRoutes: Routes = [
   },
   {
     path: 'compras/:id',
-    loadComponent: () => import('./pages/compras/components/compra-detalle-pendiente'),
+    loadComponent: () => import('./pages/compras/compra-detalle-page'),
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.COMPRAS_READ)],
   },
   {

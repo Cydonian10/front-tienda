@@ -18,6 +18,7 @@ class EmptyPage {}
 describe('ruta y acciones de compras', () => {
   const profile = { load: vi.fn().mockResolvedValue(undefined), clear: vi.fn() };
   const list = vi.fn();
+  const getById = vi.fn();
   const empty = { data: [], meta: { page: 1, limit: 10, total: 0, totalPages: 0 } };
   const compra: CompraListadoResponse = {
     id: 'c1',
@@ -35,10 +36,17 @@ describe('ruta y acciones de compras', () => {
     vi.resetAllMocks();
     profile.load.mockResolvedValue(undefined);
     list.mockResolvedValue(empty);
+    getById.mockResolvedValue({
+      ...compra,
+      observaciones: null,
+      ingreso: { id: 'm1', fecha: '2026-10-17T12:00:00Z', estado: 'confirmado' },
+      renglones: [],
+      comprobante: null,
+    });
     TestBed.configureTestingModule({
       providers: [
         provideTanStackQuery(new QueryClient({ defaultOptions: { queries: { retry: false } } })),
-        { provide: CompraApi, useValue: { list } },
+        { provide: CompraApi, useValue: { list, getById } },
         provideRouter([
           { path: 'admin', component: EmptyPage },
           { path: 'auth/login', component: EmptyPage },
@@ -185,14 +193,18 @@ describe('ruta y acciones de compras', () => {
     expect(page.showCreate()).toBe(false);
   });
 
-  it('protege también la ruta provisional de detalle con COMPRAS_LEER', async () => {
+  it('protege la ruta de detalle con COMPRAS_LEER y consulta la compra solicitada', async () => {
     grant(PERMISSION_CODES.COMPRAS_CREATE);
     const harness = await RouterTestingHarness.create('/admin/inventario/compras/c1');
     expect(TestBed.inject(Router).url).toBe('/admin');
     grant(PERMISSION_CODES.COMPRAS_READ);
     await harness.navigateByUrl('/admin/inventario/compras/c1');
     expect(TestBed.inject(Router).url).toBe('/admin/inventario/compras/c1');
+    await vi.waitFor(() => expect(getById).toHaveBeenCalledWith('c1'));
     harness.detectChanges();
-    expect(harness.routeNativeElement?.textContent).toContain('La consulta y el reintento');
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(harness.routeNativeElement?.textContent).toContain('Factura F001-123');
+    });
   });
 });

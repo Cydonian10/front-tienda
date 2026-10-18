@@ -10,6 +10,7 @@ import {
   comprasListadoQueryKey,
   proveedoresQueryKey,
   useCompraDetalle,
+  useAdjuntarComprobante,
   useComprasListado,
   useConfirmarCompra,
   useProveedoresCompra,
@@ -22,6 +23,7 @@ describe('acciones de compras', () => {
   const list = vi.fn();
   const getById = vi.fn();
   const create = vi.fn();
+  const attachComprobante = vi.fn();
   const proveedores = vi.fn();
   const variantes = vi.fn();
   const empty = { data: [], meta: { page: 1, limit: 20, total: 0, totalPages: 0 } };
@@ -36,7 +38,7 @@ describe('acciones de compras', () => {
     TestBed.configureTestingModule({
       providers: [
         provideTanStackQuery(client),
-        { provide: CompraApi, useValue: { list, getById, create } },
+        { provide: CompraApi, useValue: { list, getById, create, attachComprobante } },
         { provide: ProveedorApi, useValue: { list: proveedores } },
         { provide: VarianteCompraApi, useValue: { list: variantes } },
       ],
@@ -147,5 +149,50 @@ describe('acciones de compras', () => {
     await expect(mutation.mutateAsync(compra)).rejects.toBe(error);
     expect(invalidate).not.toHaveBeenCalled();
     expect(client.getQueryState(comprasListadoQueryKey(1, 20, ''))?.isInvalidated).toBe(false);
+  });
+
+  it('al adjuntar invalida solo el detalle de esa compra y no sus listados ni otros detalles', async () => {
+    const file = new File(['pdf'], 'factura.pdf', { type: 'application/pdf' });
+    const metadata = {
+      id: 'f1',
+      nombreOriginal: 'factura.pdf',
+      tipoMime: 'application/pdf',
+      tamanoBytes: 3,
+      fechaSubida: '2026-10-17T10:00:00Z',
+    };
+    attachComprobante.mockResolvedValue(metadata);
+    client.setQueryData(compraDetalleQueryKey('c1'), { id: 'c1', comprobante: null });
+    client.setQueryData(compraDetalleQueryKey('c2'), { id: 'c2', comprobante: null });
+    client.setQueryData(comprasListadoQueryKey(1, 20, ''), empty);
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
+    const mutation = TestBed.runInInjectionContext(() => useAdjuntarComprobante());
+
+    await expect(mutation.mutateAsync({ id: 'c1', file })).resolves.toEqual(metadata);
+    expect(attachComprobante).toHaveBeenCalledExactlyOnceWith('c1', file);
+    expect(invalidate).toHaveBeenCalledExactlyOnceWith({ queryKey: compraDetalleQueryKey('c1') });
+    expect(client.getQueryState(compraDetalleQueryKey('c1'))?.isInvalidated).toBe(true);
+    expect(client.getQueryState(compraDetalleQueryKey('c2'))?.isInvalidated).toBe(false);
+    expect(client.getQueryState(comprasListadoQueryKey(1, 20, ''))?.isInvalidated).toBe(false);
+  });
+
+  it('un fallo de adjunto no invalida ni modifica la compra confirmada', async () => {
+    const error = { status: 500 };
+    attachComprobante.mockRejectedValue(error);
+    client.setQueryData(compraDetalleQueryKey('c1'), {
+      id: 'c1',
+      ingreso: { estado: 'confirmado' },
+      comprobante: null,
+    });
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
+    const mutation = TestBed.runInInjectionContext(() => useAdjuntarComprobante());
+
+    await expect(mutation.mutateAsync({ id: 'c1', file: new File(['pdf'], 'f.pdf') })).rejects.toBe(
+      error,
+    );
+    expect(invalidate).not.toHaveBeenCalled();
+    expect(client.getQueryData(compraDetalleQueryKey('c1'))).toMatchObject({
+      ingreso: { estado: 'confirmado' },
+      comprobante: null,
+    });
   });
 });

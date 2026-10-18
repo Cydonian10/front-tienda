@@ -103,3 +103,14 @@ export function useConfirmarCompra() {
     },
   }));
 }
+
+export function useAdjuntarComprobante() {
+  const api = inject(CompraApi);
+  const client = inject(QueryClient);
+  return injectMutation(() => ({
+    mutationFn: ({ id, file }: { id: string; file: File }) => api.attachComprobante(id, file),
+    onSuccess: async (_, { id }) => {
+      await client.invalidateQueries({ queryKey: compraDetalleQueryKey(id) });
+    },
+  }));
+}

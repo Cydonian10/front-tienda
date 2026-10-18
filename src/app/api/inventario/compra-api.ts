@@ -5,6 +5,7 @@ import { ENVIRONMENT } from '../config/env-dev';
 import type {
   CompraListadoResponse,
   CompraResponse,
+  ComprobanteCompraResponse,
   CrearCompraResponse,
   NuevaCompra,
   PaginatedResponse,
@@ -39,5 +40,19 @@ export class CompraApi {
     body.append('renglones', JSON.stringify(compra.renglones));
     if (compra.comprobante) body.append('comprobante', compra.comprobante);
     return firstValueFrom(this.http.post<CrearCompraResponse>(this.url, body));
+  }
+
+  attachComprobante(id: string, file: File): Promise<ComprobanteCompraResponse> {
+    const body = new FormData();
+    body.append('comprobante', file);
+    return firstValueFrom(
+      this.http.post<ComprobanteCompraResponse>(`${this.url}/${id}/comprobante`, body),
+    );
+  }
+
+  downloadComprobante(id: string): Promise<Blob> {
+    return firstValueFrom(
+      this.http.get(`${this.url}/${id}/comprobante/archivo`, { responseType: 'blob' }),
+    );
   }
 }

@@ -1,4 +1,7 @@
-import type { VarianteCompraResponse } from '../../../api/interfaces/inventario/compra.interface';
+import type {
+  CompraListadoResponse,
+  VarianteCompraResponse,
+} from '../../../api/interfaces/inventario/compra.interface';
 
 export interface RenglonFormulario {
   key: number;
@@ -14,6 +17,14 @@ export function formatTotalPEN(value: string | null): string {
   const [whole, fraction = ''] = value.split('.');
   const decimals = fraction.replace(/0+$/, '').padEnd(2, '0');
   return `S/ ${whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}.${decimals}`;
+}
+
+export function documentoCompra(compra: CompraListadoResponse): string {
+  const tipo = compra.tipoDocumento
+    ? compra.tipoDocumento[0].toUpperCase() + compra.tipoDocumento.slice(1)
+    : 'Documento';
+  const numero = [compra.serieDocumento, compra.numeroDocumento].filter(Boolean).join('-');
+  return numero ? `${tipo} ${numero}` : `${tipo} sin número`;
 }
 
 const MAX_INTEGER_DIGITS = 14;

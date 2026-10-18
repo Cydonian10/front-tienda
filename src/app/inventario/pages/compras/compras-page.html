@@ -83,9 +83,13 @@
               @for (compra of response.data; track compra.id) {
                 <tr class="border-b border-base-300/70 last:border-b-0 hover:bg-base-200/60">
                   <th scope="row" class="pl-6 font-semibold">
-                    <span class="block break-words">
+                    <a
+                      class="link link-hover block break-words focus-visible:outline-2 focus-visible:outline-primary"
+                      [routerLink]="['/admin/inventario/compras', compra.id]"
+                      [attr.aria-label]="'Consultar ' + documento(compra)"
+                    >
                       {{ documento(compra) }}
-                    </span>
+                    </a>
                     <span class="block text-xs font-normal text-base-content/70">{{
                       compra.fecha
                     }}</span>
@@ -106,9 +110,13 @@
             <li class="space-y-3 px-5 py-5">
               <div class="flex flex-wrap items-start justify-between gap-2">
                 <div class="min-w-0">
-                  <strong class="block break-words text-sm">
+                  <a
+                    class="link link-hover block break-words text-sm font-semibold focus-visible:outline-2 focus-visible:outline-primary"
+                    [routerLink]="['/admin/inventario/compras', compra.id]"
+                    [attr.aria-label]="'Consultar ' + documento(compra)"
+                  >
                     {{ documento(compra) }}
-                  </strong>
+                  </a>
                   <span class="text-xs text-base-content/70">{{ compra.fecha }}</span>
                 </div>
                 <strong class="tabular-nums whitespace-nowrap">{{

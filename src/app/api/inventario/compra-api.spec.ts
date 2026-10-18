@@ -105,4 +105,38 @@ describe('CompraApi (lectura)', () => {
       .flush({ message: 'Documento duplicado' }, { status: 409, statusText: 'Conflict' });
     await expect(result).rejects.toMatchObject({ status: 409 });
   });
+
+  it('adjunta un comprobante pendiente sin reenviar la compra', async () => {
+    const api = TestBed.inject(CompraApi);
+    const http = TestBed.inject(HttpTestingController);
+    const file = new File(['%PDF-1.4'], 'factura.pdf', { type: 'application/pdf' });
+    const result = api.attachComprobante('c1', file);
+    const request = http.expectOne('http://localhost:3000/api/compras/c1/comprobante');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toBeInstanceOf(FormData);
+    expect([...(request.request.body as FormData).keys()]).toEqual(['comprobante']);
+    expect((request.request.body as FormData).get('comprobante')).toBe(file);
+    expect(request.request.headers.has('Content-Type')).toBe(false);
+    const metadata = {
+      id: 'archivo-1',
+      nombreOriginal: 'factura.pdf',
+      tipoMime: 'application/pdf',
+      tamanoBytes: 8,
+      fechaSubida: '2026-10-17T10:00:00Z',
+    };
+    request.flush(metadata);
+    await expect(result).resolves.toEqual(metadata);
+  });
+
+  it('descarga el binario autenticable como Blob, no como URL pública', async () => {
+    const result = TestBed.inject(CompraApi).downloadComprobante('c1');
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      'http://localhost:3000/api/compras/c1/comprobante/archivo',
+    );
+    expect(request.request.method).toBe('GET');
+    expect(request.request.responseType).toBe('blob');
+    const blob = new Blob(['archivo'], { type: 'application/pdf' });
+    request.flush(blob);
+    await expect(result).resolves.toBe(blob);
+  });
 });

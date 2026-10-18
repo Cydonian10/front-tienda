@@ -77,7 +77,6 @@ describe('ExistenciaApi', () => {
       page: 2,
       limit: 20,
       q: 'tornillo M8',
-      productoId: 'producto-1',
       disponibilidad: 'con_stock',
     });
     const request = http.expectOne((req) => req.url === 'http://localhost:3000/api/existencias');
@@ -88,14 +87,13 @@ describe('ExistenciaApi', () => {
       'page',
       'limit',
       'q',
-      'productoId',
       'disponibilidad',
     ]);
     expect(request.request.params.get('almacenId')).toBe('todos');
     expect(request.request.params.get('page')).toBe('2');
     expect(request.request.params.get('limit')).toBe('20');
     expect(request.request.params.get('q')).toBe('tornillo M8');
-    expect(request.request.params.get('productoId')).toBe('producto-1');
+    expect(request.request.params.has('productoId')).toBe(false);
     expect(request.request.params.get('disponibilidad')).toBe('con_stock');
     request.flush(response);
 

@@ -25,9 +25,6 @@ export class ExistenciaApi {
       .set('limit', filtro.limit);
 
     if (filtro.q !== undefined) params = params.set('q', filtro.q);
-    if (filtro.productoId !== undefined) {
-      params = params.set('productoId', filtro.productoId);
-    }
     if (filtro.disponibilidad !== undefined) {
       params = params.set('disponibilidad', filtro.disponibilidad);
     }

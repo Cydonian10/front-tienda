@@ -35,7 +35,7 @@ export default class ExistenciasPage {
   readonly page = signal(1);
   readonly pageSize = signal(20);
   readonly q = signal('');
-  readonly productoId = signal<string | undefined>(undefined);
+  readonly searchDraft = signal('');
   readonly disponibilidad = signal<FiltroExistencias['disponibilidad']>('todas');
   readonly filtro = computed<FiltroExistencias | null>(() => {
     const almacenId = this.almacenId();
@@ -45,7 +45,6 @@ export default class ExistenciasPage {
           page: this.page(),
           limit: this.pageSize(),
           q: this.q(),
-          productoId: this.productoId(),
           disponibilidad: this.disponibilidad(),
         }
       : null;
@@ -61,6 +60,25 @@ export default class ExistenciasPage {
 
   elegirAlmacen(id: string): void {
     this.almacenId.set(id || null);
+    this.page.set(1);
+  }
+
+  buscar(event: Event): void {
+    event.preventDefault();
+    this.q.set(this.searchDraft().trim());
+    this.page.set(1);
+  }
+
+  elegirDisponibilidad(value: string): void {
+    if (value !== 'todas' && value !== 'con_stock' && value !== 'sin_stock') return;
+    this.disponibilidad.set(value);
+    this.page.set(1);
+  }
+
+  limpiarFiltros(): void {
+    this.searchDraft.set('');
+    this.q.set('');
+    this.disponibilidad.set('todas');
     this.page.set(1);
   }
 

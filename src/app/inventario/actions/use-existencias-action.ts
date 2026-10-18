@@ -5,7 +5,6 @@ import type { FiltroExistencias } from '../../api/interfaces/inventario/existenc
 
 export const existenciasAlmacenesQueryKey = ['existencias', 'almacenes'] as const;
 export const existenciasListadoQueryKey = ['existencias', 'listado'] as const;
-
 export const existenciasQueryKey = (filtro: FiltroExistencias | null) =>
   [
     ...existenciasListadoQueryKey,
@@ -13,7 +12,6 @@ export const existenciasQueryKey = (filtro: FiltroExistencias | null) =>
     filtro?.page ?? null,
     filtro?.limit ?? null,
     filtro?.q ?? null,
-    filtro?.productoId ?? null,
     filtro?.disponibilidad ?? null,
   ] as const;
 

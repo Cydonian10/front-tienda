@@ -36,7 +36,11 @@ describe('ExistenciasPage', () => {
     const fixture = TestBed.createComponent(ExistenciasPage);
     fixture.detectChanges();
     await vi.waitFor(() => expect(listarAlmacenes).toHaveBeenCalledOnce());
-    await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()).toEqual([{ id: 'a1', nombre: 'Principal' }]));
+    await vi.waitFor(() =>
+      expect(fixture.componentInstance.almacenes.data()).toEqual([
+        { id: 'a1', nombre: 'Principal' },
+      ]),
+    );
     fixture.detectChanges();
     expect(fixture.componentInstance.almacenId()).toBeNull();
     expect(listar).not.toHaveBeenCalled();
@@ -78,5 +82,81 @@ describe('ExistenciasPage', () => {
     expect(soles('0.000000')).toBe('S/ 0.00');
     expect(promedio(null)).toBe('—');
     expect(promedio('0.123457')).toBe('S/ 0.123457');
+  });
+
+  it('filtra búsqueda y disponibilidad, reinicia página y conserva el total del almacén', async () => {
+    const fixture = TestBed.createComponent(ExistenciasPage);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()?.length).toBe(1));
+    const page = fixture.componentInstance;
+    page.elegirAlmacen('a1');
+    page.page.set(3);
+    page.searchDraft.set('Tornillo');
+    page.buscar(new Event('submit'));
+    expect(page.page()).toBe(1);
+    expect(page.filtro()?.q).toBe('Tornillo');
+
+    page.page.set(2);
+    page.elegirDisponibilidad('sin_stock');
+    expect(page.page()).toBe(1);
+    await vi.waitFor(() =>
+      expect(listar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          almacenId: 'a1',
+          q: 'Tornillo',
+          disponibilidad: 'sin_stock',
+          page: 1,
+        }),
+      ),
+    );
+    await vi.waitFor(() => expect(page.existencias.data()?.totalValorCosto).toBe('50.000000'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('S/ 50.00');
+    expect(fixture.nativeElement.textContent).toContain('No hay resultados para estos filtros');
+
+    page.limpiarFiltros();
+    expect(page.filtro()).toMatchObject({
+      q: '',
+      disponibilidad: 'todas',
+      page: 1,
+    });
+  });
+
+  it('identifica variantes inactivas con saldo y muestra el valor del almacén, no la suma de filas', async () => {
+    listar.mockResolvedValue({
+      items: [
+        {
+          producto: {
+            id: 'p1',
+            nombre: 'Tornillo',
+            activo: false,
+            unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
+          },
+          variante: { id: 'v1', sku: 'TOR-M8', activo: false, valores: [], precioVenta: '12.00' },
+          almacen: { id: 'a1', nombre: 'Principal' },
+          cantidadBase: '3.000000',
+          valorCosto: '6.000000',
+          costoPromedioBase: '2.000000',
+          costoRegistradoCero: false,
+          unidadesSecundarias: [],
+        },
+      ],
+      page: 1,
+      limit: 20,
+      totalItems: 1,
+      totalValorCosto: '500.000000',
+    });
+    const fixture = TestBed.createComponent(ExistenciasPage);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()?.length).toBe(1));
+    fixture.componentInstance.elegirAlmacen('a1');
+    await vi.waitFor(() =>
+      expect(fixture.componentInstance.existencias.data()?.items.length).toBe(1),
+    );
+    fixture.detectChanges();
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Inactivo con stock');
+    expect(text).toContain('S/ 500.00');
+    expect(text).toContain('3.000000 u');
   });
 });

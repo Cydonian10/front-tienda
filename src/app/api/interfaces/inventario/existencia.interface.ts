@@ -62,6 +62,5 @@ export interface FiltroExistencias {
   page: number;
   limit: number;
   q?: string;
-  productoId?: string;
   disponibilidad?: DisponibilidadExistencias;
 }

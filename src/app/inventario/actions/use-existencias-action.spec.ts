@@ -65,7 +65,6 @@ describe('acciones de existencias', () => {
       page: 1,
       limit: 20,
       q: '',
-      productoId: undefined,
       disponibilidad: 'todas',
     };
     filtro.set(seleccionado);
@@ -82,7 +81,6 @@ describe('acciones de existencias', () => {
       page: 1,
       limit: 20,
       q: 'tornillo',
-      productoId: 'p1',
       disponibilidad: 'con_stock',
     };
     const baseKey = existenciasQueryKey(base);
@@ -91,7 +89,6 @@ describe('acciones de existencias', () => {
       { page: 2 },
       { limit: 10 },
       { q: 'tuerca' },
-      { productoId: 'p2' },
       { disponibilidad: 'sin_stock' },
     ];
 
@@ -100,4 +97,5 @@ describe('acciones de existencias', () => {
     }
     expect(existenciasQueryKey(null)).not.toEqual(baseKey);
   });
+
 });

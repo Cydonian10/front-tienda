@@ -47,6 +47,52 @@
   </section>
 
   @if (almacenId() && almacenes.data()?.length) {
+    <section class="card card-border bg-base-100" aria-labelledby="filtros-existencias-title">
+      <div class="card-body gap-4 p-5 sm:p-6">
+        <h2 id="filtros-existencias-title" class="text-lg font-semibold">Filtrar existencias</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <form role="search" class="min-w-0 space-y-2" (submit)="buscar($event)">
+            <label for="existencias-busqueda" class="block text-sm font-semibold"
+              >Producto o SKU</label
+            >
+            <div class="flex min-w-0 flex-col gap-2 sm:flex-row">
+              <input
+                id="existencias-busqueda"
+                type="search"
+                class="input h-11 w-full min-w-0"
+                maxlength="150"
+                placeholder="Nombre o SKU"
+                [value]="searchDraft()"
+                (input)="searchDraft.set($any($event.target).value)"
+              />
+              <button class="btn min-h-11" type="submit">Buscar</button>
+            </div>
+          </form>
+          <div class="space-y-2">
+            <label for="existencias-disponibilidad" class="block text-sm font-semibold"
+              >Disponibilidad</label
+            >
+            <select
+              id="existencias-disponibilidad"
+              class="select h-11 w-full"
+              [value]="disponibilidad()"
+              (change)="elegirDisponibilidad($any($event.target).value)"
+            >
+              <option value="todas">Todas</option>
+              <option value="con_stock">Con stock</option>
+              <option value="sin_stock">Sin stock</option>
+            </select>
+          </div>
+        </div>
+        @if (q() || disponibilidad() !== 'todas') {
+          <div>
+            <button type="button" class="btn btn-ghost min-h-11" (click)="limpiarFiltros()">
+              Limpiar filtros
+            </button>
+          </div>
+        }
+      </div>
+    </section>
     @if (existencias.isPending()) {
       <div class="card card-border bg-base-100 p-6" role="status">
         <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
@@ -69,7 +115,7 @@
           }}</strong>
           <p class="text-xs text-base-content/70">
             {{ almacenId() === 'todos' ? 'Todos los almacenes activos' : 'Almacén seleccionado' }} ·
-            No depende de la página consultada.
+            No depende de la búsqueda, los filtros ni la página consultada.
           </p>
         </div>
       </section>
@@ -180,8 +226,20 @@
         } @else {
           <div class="p-5 sm:p-6">
             <app-empty-state
-              title="No hay saldos para mostrar"
-              description="No hay variantes disponibles para el alcance seleccionado."
+              [title]="
+                q() || disponibilidad() !== 'todas'
+                  ? 'No hay resultados para estos filtros'
+                  : 'No hay saldos para mostrar'
+              "
+              [description]="
+                q() || disponibilidad() !== 'todas'
+                  ? 'Prueba con otra búsqueda o ajusta los filtros.'
+                  : 'No hay variantes disponibles para el alcance seleccionado.'
+              "
+              [actionLabel]="
+                q() || disponibilidad() !== 'todas' ? 'Limpiar filtros' : ''
+              "
+              (action)="limpiarFiltros()"
             />
           </div>
         }

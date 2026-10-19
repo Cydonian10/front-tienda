@@ -1,0 +1,66 @@
+<section class="mx-auto w-full max-w-6xl space-y-6 pb-10">
+  <header class="space-y-3">
+    <h1 id="admin-section-title" class="text-3xl font-bold tracking-tight sm:text-4xl">
+      Gestionar productos
+    </h1>
+    <p class="max-w-2xl text-sm text-base-content/70">
+      Busca por nombre para consultar los productos existentes y sus variantes.
+    </p>
+    <a routerLink="/admin/inventario/productos" class="btn btn-ghost">
+      Volver a crear productos
+    </a>
+  </header>
+
+  <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(17rem,21rem)_minmax(0,1fr)]">
+    <producto-selector
+      [selectedId]="selectedId()"
+      [searchText]="searchText()"
+      [requestedPages]="requestedPages()"
+      (searchChanged)="search($event)"
+      (moreRequested)="requestedPages.update((page) => page + 1)"
+      (selected)="selectProduct($event)"
+    />
+
+    <section class="card card-border min-w-0 bg-base-100" aria-label="Detalle del producto">
+      <div class="card-body gap-5">
+        @if (!selectedId()) {
+          <h2 class="card-title">Selecciona un producto</h2>
+          <p class="text-sm text-base-content/70">
+            Escribe al menos dos caracteres para buscar en el catálogo.
+          </p>
+        } @else if (invalidId()) {
+          <div role="alert" class="alert alert-error alert-soft">
+            El enlace del producto no es válido. Puedes buscar otro producto.
+          </div>
+          <button type="button" class="btn" (click)="clearProduct()">Volver al selector</button>
+        } @else if (productQuery.isPending()) {
+          <p role="status">Cargando producto…</p>
+        } @else if (productQuery.isError()) {
+          <div role="alert" class="alert alert-error alert-soft">
+            No se pudo abrir el producto. Es posible que no exista o no tengas acceso.
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="btn" (click)="productQuery.refetch()">Reintentar</button>
+            <button type="button" class="btn btn-ghost" (click)="clearProduct()">
+              Volver al selector
+            </button>
+          </div>
+        } @else if (productQuery.data(); as product) {
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h2 class="card-title wrap-break-word">{{ product.nombre }}</h2>
+              <p class="text-sm text-base-content/70">{{ product.descripcion || 'Sin descripción' }}</p>
+            </div>
+            @if (!product.activo) {
+              <span class="badge badge-warning badge-soft">Inactivo</span>
+            }
+          </div>
+          <p class="text-sm text-base-content/70">Unidad base: {{ product.unidadBaseId }}</p>
+          <button type="button" class="btn btn-ghost self-start" (click)="clearProduct()">
+            Buscar otro producto
+          </button>
+        }
+      </div>
+    </section>
+  </div>
+</section>

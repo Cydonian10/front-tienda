@@ -1,0 +1,61 @@
+<section class="card card-border bg-base-100" aria-labelledby="selector-title">
+  <div class="card-body gap-4">
+    <div>
+      <h2 id="selector-title" class="card-title">Buscar producto</h2>
+      <label for="buscar-producto" class="mt-2 block text-sm text-base-content/70">
+        Nombre del producto
+      </label>
+      <input
+        id="buscar-producto"
+        class="input mt-2 w-full"
+        type="search"
+        autocomplete="off"
+        placeholder="Escribe al menos 2 caracteres"
+        [value]="searchText()"
+        (input)="onSearch($event)"
+      />
+    </div>
+
+    @if (!ready()) {
+      <p class="text-sm text-base-content/70">Escribe dos caracteres para ver sugerencias.</p>
+    } @else {
+      @if (results().length) {
+        <ul class="list" aria-label="Productos encontrados">
+          @for (product of results(); track product.id) {
+            <li class="list-row p-0">
+              <button
+                type="button"
+                class="btn btn-ghost h-auto min-h-11 w-full justify-between whitespace-normal text-left"
+                [class.btn-active]="selectedId() === product.id"
+                [attr.aria-current]="selectedId() === product.id ? 'true' : null"
+                (click)="selected.emit(product)"
+              >
+                <span class="min-w-0 wrap-break-word">{{ product.nombre }}</span>
+                @if (!product.activo) {
+                  <span class="badge badge-warning badge-soft shrink-0">Inactivo</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+      @if (loading()) {
+        <p role="status" class="text-sm">Buscando productos…</p>
+      } @else if (error()) {
+        <div role="alert" class="alert alert-error alert-soft">
+          No se pudo completar la búsqueda.
+        </div>
+        <button type="button" class="btn self-start" (click)="retry()">Reintentar búsqueda</button>
+      } @else if (!results().length) {
+        <p role="status" class="text-sm text-base-content/70">
+          No hay productos con ese nombre. Prueba otra búsqueda.
+        </p>
+      }
+      @if (hasMore() && !error()) {
+        <button type="button" class="btn btn-outline" [disabled]="loading()" (click)="loadMore()">
+          Cargar más
+        </button>
+      }
+    }
+  </div>
+</section>

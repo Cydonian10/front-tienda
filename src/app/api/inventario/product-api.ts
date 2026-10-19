@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ENVIRONMENT } from '../config/env-dev';
 import { firstValueFrom } from 'rxjs';
@@ -6,6 +6,7 @@ import {
   AtributoProducto,
   CreateProductDto,
   ProductResponse,
+  ProductosPagina,
   Unidad,
   UpdateProductDto,
 } from '../interfaces/inventario/producto.interface';
@@ -14,6 +15,13 @@ import {
 export class ProductoApi {
   readonly #apirUrl = inject(ENVIRONMENT);
   readonly #http = inject(HttpClient);
+
+  search({ q, page, limit }: { q: string; page: number; limit: number }): Promise<ProductosPagina> {
+    const params = new HttpParams().set('q', q).set('page', page).set('limit', limit);
+    return firstValueFrom(
+      this.#http.get<ProductosPagina>(`${this.#apirUrl.apiUrl}/productos`, { params }),
+    );
+  }
 
   listAttributes(productId: string): Promise<AtributoProducto[]> {
     return firstValueFrom(

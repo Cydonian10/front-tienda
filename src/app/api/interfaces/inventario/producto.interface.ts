@@ -24,7 +24,21 @@ export interface ProductResponse {
   descripcion: string | null;
   unidadBaseId: string;
   activo: boolean;
+  puedeCambiarUnidadBase: boolean;
   imagenes: ProductImage[];
+}
+
+export interface ProductoSeleccion {
+  id: string;
+  nombre: string;
+  activo: boolean;
+}
+
+export interface ProductosPagina {
+  items: ProductoSeleccion[];
+  page: number;
+  limit: number;
+  totalItems: number;
 }
 
 export interface Unidad {

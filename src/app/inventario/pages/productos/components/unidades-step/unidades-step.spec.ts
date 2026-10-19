@@ -24,6 +24,7 @@ describe('UnidadesStep', () => {
     unidadBaseId: 'u1',
     activo: true,
     imagenes: [],
+    puedeCambiarUnidadBase: true,
   };
   const unitsApi = { list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn() };
   const confirmation = { confirm: vi.fn() };

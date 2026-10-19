@@ -1,6 +1,6 @@
 # SPEC 06 — Interfaz móvil para gestionar productos existentes
 
-> **Status:** Borrador
+> **Status:** Aprobado
 > **Depends on:** SPEC 05
 > **Date:** 2026-10-18
 > **Objective:** Buscar y gestionar productos existentes y sus variantes desde una pantalla adaptable que guarde los cambios en la API.
@@ -71,11 +71,11 @@ En `src/app/inventario/pages/productos/productos-page.ts`, el botón «Gestionar
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| Una búsqueda anterior responde después de escribir otro término. | Incluir término/página en la clave de consulta y mostrar resultados solo del término vigente; cancelar o ignorar respuestas obsoletas. |
-| Al añadir fotos propias desaparece visualmente la galería heredada. | Etiquetar el origen antes de guardar y explicar el cambio; al quedar sin fotos propias, volver a consultar la galería heredada. |
-| Cambiar de producto o ruta pierde ediciones pendientes. | Señalar formularios sucios, confirmar salida/cambio y mantener datos locales al cancelar o tras fallo de guardado. |
+| Risk                                                                | Mitigation                                                                                                                             |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Una búsqueda anterior responde después de escribir otro término.    | Incluir término/página en la clave de consulta y mostrar resultados solo del término vigente; cancelar o ignorar respuestas obsoletas. |
+| Al añadir fotos propias desaparece visualmente la galería heredada. | Etiquetar el origen antes de guardar y explicar el cambio; al quedar sin fotos propias, volver a consultar la galería heredada.        |
+| Cambiar de producto o ruta pierde ediciones pendientes.             | Señalar formularios sucios, confirmar salida/cambio y mantener datos locales al cancelar o tras fallo de guardado.                     |
 
 ## What is **not** in this spec
 

@@ -45,4 +45,68 @@ describe('VarianteApi', () => {
     request.flush({ id: 'v1' });
     expect((await result).id).toBe('v1');
   });
+
+  it('actualiza campos de variante por JSON sin enviar fotos', async () => {
+    const result = api.update('p1', 'v1', { precio: '23.50', codigoBarras: null, activo: false });
+    const request = http.expectOne(`${url}/productos/p1/variantes/v1`);
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ precio: '23.50', codigoBarras: null, activo: false });
+    request.flush({ id: 'v1', precio: '23.50', codigoBarras: null, activo: false });
+    expect((await result).precio).toBe('23.50');
+  });
+
+  it('actualiza fotos y campos juntos en multipart conservando solo asociaciones propias', async () => {
+    const image = new File(['foto'], 'nueva.png', { type: 'image/png' });
+    const result = api.update('p1', 'v1', {
+      precio: '25.00',
+      codigoBarras: null,
+      activo: false,
+      imagenesConservarIds: ['asociacion-propia'],
+      imagenes: [image],
+    });
+    const request = http.expectOne(`${url}/productos/p1/variantes/v1`);
+    expect(request.request.method).toBe('PATCH');
+    const body = request.request.body as FormData;
+    expect(body.get('precio')).toBe('25.00');
+    expect(body.get('codigoBarras')).toBe('');
+    expect(body.get('activo')).toBe('false');
+    expect(body.get('imagenesConservarIds')).toBe('["asociacion-propia"]');
+    expect(body.getAll('imagenes')).toEqual([image]);
+    request.flush({ id: 'v1' });
+    expect((await result).id).toBe('v1');
+  });
+
+  it('permite quitar todas las fotos propias sin subir nuevas', async () => {
+    const result = api.update('p1', 'v1', { imagenesConservarIds: [] });
+    const request = http.expectOne(`${url}/productos/p1/variantes/v1`);
+    expect(request.request.body).toBeInstanceOf(FormData);
+    expect((request.request.body as FormData).get('imagenesConservarIds')).toBe('[]');
+    request.flush({ id: 'v1', imagenes: [] });
+    await result;
+  });
+
+  it('lee la galería efectiva con su origen y el archivo de una imagen heredada', async () => {
+    const images = api.listImages('p1', 'v1');
+    const list = http.expectOne(`${url}/productos/p1/variantes/v1/imagenes`);
+    expect(list.request.method).toBe('GET');
+    list.flush([{ id: 'as1', imagenId: 'i1', origen: 'producto', orden: 0, esPrincipal: true }]);
+    expect((await images)[0].origen).toBe('producto');
+
+    const file = api.getImage('p1', 'v1', 'i1');
+    const download = http.expectOne(`${url}/productos/p1/variantes/v1/imagenes/i1/archivo`);
+    expect(download.request.method).toBe('GET');
+    expect(download.request.responseType).toBe('blob');
+    const blob = new Blob(['foto'], { type: 'image/png' });
+    download.flush(blob);
+    expect(await file).toBe(blob);
+  });
+
+  it('propaga errores de actualización sin confirmar datos', async () => {
+    const result = api.update('p1', 'v1', { precio: '12.00' });
+    http.expectOne(`${url}/productos/p1/variantes/v1`).flush(
+      { message: 'Precio inválido' },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await expect(result).rejects.toMatchObject({ status: 400, error: { message: 'Precio inválido' } });
+  });
 });

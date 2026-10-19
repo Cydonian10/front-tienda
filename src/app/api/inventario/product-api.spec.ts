@@ -76,8 +76,35 @@ describe('ProductoApi', () => {
     const result = api.getById('producto-1');
     const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
     expect(request.request.method).toBe('GET');
-    request.flush({ id: 'producto-1', nombre: 'Martillo', imagenes: [] });
-    expect((await result).nombre).toBe('Martillo');
+    request.flush({ id: 'producto-1', nombre: 'Martillo', imagenes: [], puedeCambiarUnidadBase: false });
+    expect((await result).puedeCambiarUnidadBase).toBe(false);
+  });
+
+  it('busca por nombre y página con los parámetros de SPEC 05', async () => {
+    const result = api.search({ q: 'martillo', page: 2, limit: 20 });
+    const request = http.expectOne((req) => req.url === 'http://localhost:3000/api/productos');
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.keys().sort()).toEqual(['limit', 'page', 'q']);
+    expect(request.request.params.get('q')).toBe('martillo');
+    expect(request.request.params.get('page')).toBe('2');
+    expect(request.request.params.get('limit')).toBe('20');
+    const page = {
+      items: [{ id: 'producto-1', nombre: 'Martillo', activo: false }],
+      page: 2,
+      limit: 20,
+      totalItems: 21,
+    };
+    request.flush(page);
+    expect(await result).toEqual(page);
+  });
+
+  it('propaga el error de búsqueda sin devolver resultados simulados', async () => {
+    const result = api.search({ q: 'martillo', page: 1, limit: 20 });
+    http.expectOne((req) => req.url === 'http://localhost:3000/api/productos').flush(
+      { message: 'No autorizado' },
+      { status: 403, statusText: 'Forbidden' },
+    );
+    await expect(result).rejects.toMatchObject({ status: 403, error: { message: 'No autorizado' } });
   });
 
   it('actualiza datos generales sin reenviar imágenes', async () => {

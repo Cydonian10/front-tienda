@@ -1,3 +1,5 @@
+import type { ProductImage } from './producto.interface';
+
 export interface ValorVariante {
   atributoId: string;
   valor: string;
@@ -11,6 +13,18 @@ export interface CreateVarianteDto {
   imagenes: File[];
 }
 
+export interface UpdateVarianteDto {
+  precio?: string;
+  codigoBarras?: string | null;
+  activo?: boolean;
+  imagenesConservarIds?: string[];
+  imagenes?: File[];
+}
+
+export interface VarianteImagenEfectiva extends ProductImage {
+  origen: 'producto' | 'variante';
+}
+
 export interface VarianteResponse {
   id: string;
   productoId: string;
@@ -19,5 +33,5 @@ export interface VarianteResponse {
   codigoBarras: string | null;
   activo: boolean;
   valores: ValorVariante[];
-  imagenes: { id: string; imagenId: string; orden: number; esPrincipal: boolean }[];
+  imagenes: ProductImage[];
 }

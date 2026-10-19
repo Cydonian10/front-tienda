@@ -21,6 +21,7 @@ describe('ProductosPage: terminar revisión', () => {
     activo: true,
     imagenes: [],
     unidadBaseId: 'u1',
+    puedeCambiarUnidadBase: true,
   };
   const navigate = vi.fn().mockResolvedValue(true);
   const create = vi.fn();

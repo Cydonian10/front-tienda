@@ -22,6 +22,7 @@ describe('RevisionStep', () => {
     activo: true,
     imagenes: [],
     unidadBaseId: 'u1',
+    puedeCambiarUnidadBase: true,
   };
 
   it('reutiliza variantes, atributos y unidades en caché para revisar el producto', () => {

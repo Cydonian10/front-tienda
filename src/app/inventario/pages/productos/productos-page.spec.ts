@@ -107,4 +107,19 @@ describe('ProductosPage: terminar revisión', () => {
     page.finish();
     expect(page.finished()).toBe(false);
   });
+
+  it('abre gestión desde el botón sin trasladar el producto del asistente', () => {
+    const fixture = TestBed.createComponent(ProductosPage);
+    fixture.componentInstance.product.set(product);
+    fixture.detectChanges();
+
+    const manageButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find(
+      (element) => (element as HTMLButtonElement).textContent?.includes('Gestionar producto existente'),
+    ) as HTMLButtonElement;
+    manageButton.click();
+
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(['/admin/inventario/productos/gestion']);
+    expect(fixture.componentInstance.product()).toEqual(product);
+    expect(fixture.componentInstance.mode()).toBe('create');
+  });
 });

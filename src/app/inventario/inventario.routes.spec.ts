@@ -74,4 +74,24 @@ describe('rutas de inventario', () => {
 
     expect(TestBed.inject(Router).url).toBe('/admin');
   });
+
+  it('permite gestionar productos con PRODUCTOS_LEER sin requerir PRODUCTOS_EDITAR', async () => {
+    setPermissions([{ code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' }]);
+
+    const harness = await RouterTestingHarness.create('/admin/inventario/productos/gestion');
+
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/productos/gestion');
+    expect(harness.routeNativeElement?.textContent).toContain('Gestionar productos');
+    expect(harness.routeNativeElement?.querySelector('a')?.getAttribute('href')).toBe(
+      '/admin/inventario/productos',
+    );
+  });
+
+  it('deniega gestionar productos sin PRODUCTOS_LEER', async () => {
+    setPermissions([{ code: PERMISSION_CODES.PRODUCTS_UPDATE, systemCode: 'INVENTARIO' }]);
+
+    await RouterTestingHarness.create('/admin/inventario/productos/gestion');
+
+    expect(TestBed.inject(Router).url).toBe('/admin');
+  });
 });

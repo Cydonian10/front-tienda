@@ -96,7 +96,7 @@ export default class ProductosPage {
   }
 
   showManage(): void {
-    this.mode.set('manage');
+    void this.router.navigate(['/admin/inventario/productos/gestion']);
   }
 
   goToStep(step: number): void {

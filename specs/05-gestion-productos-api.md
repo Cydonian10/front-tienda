@@ -1,6 +1,6 @@
 # SPEC 05 — API para gestionar productos y variantes existentes
 
-> **Status:** Borrador
+> **Status:** Aprobado
 > **Depends on:** SPEC 01
 > **Date:** 2026-10-18
 > **Objective:** Permitir buscar productos existentes y actualizar sus variantes de forma segura sin reinterpretar existencias ni perder imágenes.
@@ -67,11 +67,11 @@ La pantalla de productos ya puede consultar y actualizar un producto por ID, cre
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| Un cambio concurrente crea un movimiento durante el cambio de unidad base. | Verificar saldos y movimientos dentro de la escritura del producto con bloqueo o aislamiento suficiente y probar concurrencia. |
-| Los archivos están fuera de la transacción de base de datos. | Limpiar archivos nuevos tras fallar y retirar archivos anteriores solo después de confirmar, siguiendo el patrón de `update-product.handler.ts`. |
-| Las rutas antiguas de imágenes podrían eludir el permiso del PATCH. | Proteger también los controladores de imágenes de producto y variante; probar acceso directo sin permisos. |
+| Risk                                                                       | Mitigation                                                                                                                                       |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Un cambio concurrente crea un movimiento durante el cambio de unidad base. | Verificar saldos y movimientos dentro de la escritura del producto con bloqueo o aislamiento suficiente y probar concurrencia.                   |
+| Los archivos están fuera de la transacción de base de datos.               | Limpiar archivos nuevos tras fallar y retirar archivos anteriores solo después de confirmar, siguiendo el patrón de `update-product.handler.ts`. |
+| Las rutas antiguas de imágenes podrían eludir el permiso del PATCH.        | Proteger también los controladores de imágenes de producto y variante; probar acceso directo sin permisos.                                       |
 
 ## What is **not** in this spec
 

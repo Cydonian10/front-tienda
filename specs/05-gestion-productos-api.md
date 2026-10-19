@@ -1,6 +1,6 @@
 # SPEC 05 — API para gestionar productos y variantes existentes
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-10-18
 > **Objective:** Permitir buscar productos existentes y actualizar sus variantes de forma segura sin reinterpretar existencias ni perder imágenes.
@@ -45,15 +45,15 @@ La pantalla de productos ya puede consultar y actualizar un producto por ID, cre
 
 ## Acceptance criteria
 
-- [ ] `GET /api/productos` sin `PRODUCTOS_LEER` es denegado; con el permiso y `q` de al menos dos caracteres devuelve nombre coincidente, activos e inactivos, `page`, `limit`, `totalItems` y páginas sin duplicados.
-- [ ] Los resultados no se filtran únicamente en memoria ni devuelven el catálogo completo para un selector; un `q` inválido o página inválida se rechaza.
-- [ ] `GET /api/productos/:id` devuelve `puedeCambiarUnidadBase = false` con saldo no nulo o un movimiento histórico aunque hoy el saldo sea cero; si no existen ambos, devuelve `true`.
-- [ ] Cambiar la unidad base bloqueada mediante PATCH produce error y no modifica el producto, incluso si el cliente ignora la bandera; actualizar nombre, descripción, estado y galería continúa permitido.
-- [ ] El PATCH de variante acepta precio, código anulable, estado y fotos propias, pero no cambia SKU ni valores de atributos; sin `PRODUCTOS_EDITAR`, con variante ajena o IDs de imágenes ajenos, se rechaza.
-- [ ] Si falla una validación, almacenamiento o escritura de imágenes de variante, permanecen intactos tanto los campos como la galería persistidos; omitir `imagenesConservarIds` conserva las fotos previas.
-- [ ] La galería heredada no se puede eliminar desde una variante; cargar una foto propia sustituye visualmente la herencia y quitar la última propia la restablece.
-- [ ] Una variante o producto puede pasar a inactivo con stock sin eliminarlo ni cambiar cantidades o movimientos; los endpoints existentes de imágenes rechazan lectura sin `PRODUCTOS_LEER` y escritura sin `PRODUCTOS_EDITAR`.
-- [ ] La compilación y las pruebas específicas pasan en `api-tienda`.
+- [x] `GET /api/productos` sin `PRODUCTOS_LEER` es denegado; con el permiso y `q` de al menos dos caracteres devuelve nombre coincidente, activos e inactivos, `page`, `limit`, `totalItems` y páginas sin duplicados.
+- [x] Los resultados no se filtran únicamente en memoria ni devuelven el catálogo completo para un selector; un `q` inválido o página inválida se rechaza.
+- [x] `GET /api/productos/:id` devuelve `puedeCambiarUnidadBase = false` con saldo no nulo o un movimiento histórico aunque hoy el saldo sea cero; si no existen ambos, devuelve `true`.
+- [x] Cambiar la unidad base bloqueada mediante PATCH produce error y no modifica el producto, incluso si el cliente ignora la bandera; actualizar nombre, descripción, estado y galería continúa permitido.
+- [x] El PATCH de variante acepta precio, código anulable, estado y fotos propias, pero no cambia SKU ni valores de atributos; sin `PRODUCTOS_EDITAR`, con variante ajena o IDs de imágenes ajenos, se rechaza.
+- [x] Si falla una validación, almacenamiento o escritura de imágenes de variante, permanecen intactos tanto los campos como la galería persistidos; omitir `imagenesConservarIds` conserva las fotos previas.
+- [x] La galería heredada no se puede eliminar desde una variante; cargar una foto propia sustituye visualmente la herencia y quitar la última propia la restablece.
+- [x] Una variante o producto puede pasar a inactivo con stock sin eliminarlo ni cambiar cantidades o movimientos; los endpoints existentes de imágenes rechazan lectura sin `PRODUCTOS_LEER` y escritura sin `PRODUCTOS_EDITAR`.
+- [x] La compilación y las pruebas específicas pasan en `api-tienda`.
 
 ## Decisions
 

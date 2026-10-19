@@ -8,6 +8,8 @@ import { PERMISSION_CODES } from '../api/interfaces/access-control/permision.int
 import { AuthStore } from '../store/auth/auth.store';
 import { AuthProfileService } from '../auth/services/auth-profile.service';
 import { AuthSessionService } from '../auth/services/auth-session.service';
+import { ProductoApi } from '../api/inventario/product-api';
+import { ConfirmDialogService } from '../shared/services/confirm-dialog/confirm-dialog.service';
 import inventarioRoutes from './inventario.routes';
 
 @Component({ template: '' })
@@ -20,6 +22,8 @@ describe('rutas de inventario', () => {
     TestBed.configureTestingModule({
       providers: [
         provideTanStackQuery(client),
+        { provide: ProductoApi, useValue: { listUnidades: vi.fn().mockResolvedValue([]) } },
+        { provide: ConfirmDialogService, useValue: { confirm: vi.fn() } },
         {
           provide: ExistenciaApi,
           useValue: { listarAlmacenes: vi.fn().mockResolvedValue([]), listar: vi.fn() },

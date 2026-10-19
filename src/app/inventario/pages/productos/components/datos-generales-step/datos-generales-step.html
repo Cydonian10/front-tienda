@@ -4,18 +4,14 @@
       class="flex flex-wrap items-center justify-between gap-3 rounded-box border border-base-300 bg-base-200/50 p-4"
     >
       <p class="text-sm">
-        {{
-          editing()
-            ? 'Editando datos generales'
-            : 'Producto creado · Datos generales en solo lectura'
-        }}
+        {{ editing() ? 'Editando datos generales' : 'Datos generales en solo lectura' }}
       </p>
-      @if (!editing()) {
+      @if (!editing() && (!management() || canEdit())) {
         <button type="button" class="btn btn-sm" (click)="startEdit()">Editar</button>
       }
     </div>
   }
-  <fieldset [disabled]="saving() || (!!product() && !editing())" class="space-y-7">
+  <fieldset [disabled]="saving() || (!!product() && !editing()) || (management() && !canEdit())" class="space-y-7">
     <div class="space-y-5">
       <fieldset class="fieldset">
         <label for="product-name" class="label">
@@ -54,7 +50,7 @@
             [class.select-error]="
               productForm.unidadBaseId().touched() && productForm.unidadBaseId().invalid()
             "
-            aria-describedby="product-base-unit-errors"
+            [attr.aria-describedby]="unitLocked() ? 'product-base-unit-errors product-base-unit-locked' : 'product-base-unit-errors'"
           >
             <option value="">Selecciona una unidad</option>
             @for (unidad of unidades(); track unidad.id) {
@@ -71,9 +67,15 @@
               Reintentar
             </button>
           }
-          <p class="mt-1.5 text-xs text-base-content/60">
-            El stock de todas las variantes se contabilizaría en esta unidad.
-          </p>
+          @if (unitLocked()) {
+            <p id="product-base-unit-locked" class="mt-1.5 text-xs text-warning">
+              No se puede cambiar la unidad base porque hay saldos o movimientos registrados.
+            </p>
+          } @else {
+            <p class="mt-1.5 text-xs text-base-content/60">
+              El stock de todas las variantes se contabiliza en esta unidad.
+            </p>
+          }
         </fieldset>
         <fieldset class="fieldset">
           <label for="product-active" class="label">Estado del producto</label>
@@ -89,7 +91,7 @@
             />
           </div>
           <p class="mt-1.5 text-xs text-base-content/60">
-            Se podría desactivar sin perder su historial.
+            Puedes desactivar el producto sin perder su historial.
           </p>
         </fieldset>
       </div>
@@ -106,7 +108,9 @@
             <span class="badge badge-sm badge-ghost ml-1">{{ totalImages() }}/8</span>
           </h3>
           <p class="mt-1 text-xs text-base-content/65">
-            @if (product() && editing()) {
+            @if (management() && !canEdit()) {
+              Las imágenes son de solo lectura.
+            } @else if (product() && editing()) {
               Quita o agrega imágenes; los cambios se aplican al guardar.
             } @else if (product()) {
               Pulsa Editar para modificar estas imágenes.
@@ -115,7 +119,7 @@
             }
           </p>
         </div>
-        @if (!product() || editing()) {
+        @if ((!product() || editing()) && (!management() || canEdit())) {
           <div class="flex flex-wrap items-end gap-2">
             <fieldset class="fieldset">
               <label for="product-images" class="label">Subir imágenes</label>
@@ -129,7 +133,9 @@
                 (change)="addImages($event)"
               />
             </fieldset>
-            <button type="button" class="btn btn-sm" disabled>Biblioteca (0)</button>
+            @if (!management()) {
+              <button type="button" class="btn btn-sm" disabled>Biblioteca (0)</button>
+            }
           </div>
         }
       </div>
@@ -154,7 +160,7 @@
                 <span class="truncate text-xs">{{
                   principalImageId() === image.id ? 'Portada' : 'Imagen ' + ($index + 1)
                 }}</span>
-                @if (editing()) {
+                @if (editing() && (!management() || canEdit())) {
                   <button
                     type="button"
                     class="btn btn-ghost btn-xs"
@@ -197,7 +203,11 @@
         <div
           class="mt-4 rounded-field border border-dashed border-base-300 bg-base-100 px-4 py-7 text-center text-sm text-base-content/65"
         >
-          Todavía no hay fotos. Puedes guardar el producto sin imágenes.
+          @if (management() && !canEdit()) {
+            Todavía no hay fotos en este producto.
+          } @else {
+            Todavía no hay fotos. Puedes guardar el producto sin imágenes.
+          }
         </div>
       }
       @if (imagesLoadError()) {
@@ -213,6 +223,7 @@
       </p>
     </section>
 
+    @if (!management()) {
     <section class="border-t border-base-300 pt-6" aria-labelledby="stock-policy-title">
       <h3 id="stock-policy-title" class="mb-3 text-sm font-bold">
         Así se controlará el inventario
@@ -231,8 +242,9 @@
         </div>
       </div>
     </section>
+    }
 
-    @if (!product() || editing()) {
+    @if ((!product() || editing()) && (!management() || canEdit())) {
       <div class="flex flex-wrap items-center gap-3">
         <button
           type="submit"
@@ -244,7 +256,7 @@
           {{ saving() ? 'Guardando…' : product() ? 'Guardar cambios' : 'Crear y continuar' }}
         </button>
         @if (product()) {
-          <button type="button" class="btn" [disabled]="saving()" (click)="cancelEdit()">
+          <button type="button" class="btn" [disabled]="saving()" (click)="management() ? discardRequested.emit() : cancelEdit()">
             Cancelar
           </button>
         }

@@ -1,14 +1,22 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { ProductoApi } from '../../../api/inventario/product-api';
+import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
+import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
+import { ToastService } from '../../../shared/services/toast/toast.service';
+import { AuthStore } from '../../../store/auth/auth.store';
 import GestionProductosPage from './gestion-productos-page';
 
 describe('GestionProductosPage', () => {
   const productId = 'b020d35c-3d9e-4e2e-9798-c96033ef1015';
   const search = vi.fn();
   const getById = vi.fn();
+  const getImage = vi.fn();
+  const update = vi.fn();
+  const confirm = vi.fn();
   const params = new BehaviorSubject(convertToParamMap({}));
   const navigate = vi.fn().mockImplementation(async (_, options) => {
     params.next(convertToParamMap(options.queryParams.productoId
@@ -27,7 +35,12 @@ describe('GestionProductosPage', () => {
         provideTanStackQuery(client),
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: params.value }, queryParamMap: params } },
-        { provide: ProductoApi, useValue: { search, getById } },
+        { provide: ProductoApi, useValue: {
+          search, getById, listUnidades: vi.fn().mockResolvedValue([{ id: 'u1', nombre: 'Unidad', simbolo: 'u' }]),
+          getImage, update,
+        } },
+        { provide: ConfirmDialogService, useValue: { confirm } },
+        { provide: ToastService, useValue: { success: vi.fn() } },
       ],
     });
     vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(navigate);
@@ -37,6 +50,26 @@ describe('GestionProductosPage', () => {
     client.clear();
     TestBed.resetTestingModule();
   });
+
+  function grantEdit(): void {
+    TestBed.inject(AuthStore).setProfile({ isSuperAdmin: false, permissions: [
+      { code: PERMISSION_CODES.PRODUCTS_UPDATE, systemCode: 'INVENTARIO' },
+    ] } as never);
+  }
+
+  async function openProduct(locked = false) {
+    params.next(convertToParamMap({ productoId: productId }));
+    const product = {
+      id: productId, nombre: 'Martillo', descripcion: 'Acero', activo: true,
+      unidadBaseId: 'u1', imagenes: [], puedeCambiarUnidadBase: !locked,
+    };
+    getById.mockResolvedValue(product);
+    const fixture = TestBed.createComponent(GestionProductosPage);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.productQuery.data()).toEqual(product));
+    fixture.detectChanges();
+    return { fixture, product };
+  }
 
   it('abre sin selección ni petición y permite volver al asistente', () => {
     const fixture = TestBed.createComponent(GestionProductosPage);
@@ -50,7 +83,10 @@ describe('GestionProductosPage', () => {
 
   it('abre un enlace con UUID y muestra el detalle cargado', async () => {
     params.next(convertToParamMap({ productoId: productId }));
-    getById.mockResolvedValue({ id: productId, nombre: 'Martillo', activo: false, unidadBaseId: 'u1' });
+    getById.mockResolvedValue({
+      id: productId, nombre: 'Martillo', descripcion: null, activo: false,
+      unidadBaseId: 'u1', imagenes: [], puedeCambiarUnidadBase: true,
+    });
     const fixture = TestBed.createComponent(GestionProductosPage);
     fixture.detectChanges();
 
@@ -123,5 +159,123 @@ describe('GestionProductosPage', () => {
     expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({
       queryParams: { productoId: productId },
     }));
+  });
+
+  it('permite consultar sin editar y comprueba permiso incluso al invocar el guardado directamente', async () => {
+    const { fixture, product } = await openProduct();
+    const page = fixture.componentInstance;
+    expect(page.permissions.edit()).toBe(false);
+    expect(fixture.nativeElement.querySelector('datos-generales-step button')).toBeNull();
+    await page.saveProduct({ nombre: 'Cambiado', descripcion: '', unidadBaseId: 'u1', activo: true });
+    expect(update).not.toHaveBeenCalled();
+
+    grantEdit();
+    fixture.detectChanges();
+    expect(page.permissions.edit()).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Editar');
+    page.generalData()?.startEdit();
+    page.generalData()?.model.update((value) => ({ ...value, nombre: 'Martillo nuevo' }));
+    expect(page.hasUnsavedChanges()).toBe(true);
+    update.mockResolvedValue({ ...product, nombre: 'Martillo nuevo' });
+    await page.saveProduct({ nombre: 'Martillo nuevo', descripcion: 'Acero', unidadBaseId: 'u1', activo: true });
+    fixture.detectChanges();
+    expect(update).toHaveBeenCalledOnce();
+    expect(page.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('deshabilita la unidad base bloqueada y conserva el borrador ante error de API', async () => {
+    grantEdit();
+    const { fixture } = await openProduct(true);
+    const page = fixture.componentInstance;
+    expect((fixture.nativeElement.querySelector('#product-base-unit') as HTMLSelectElement).disabled).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('saldos o movimientos');
+
+    page.generalData()?.startEdit();
+    page.generalData()?.model.update((value) => ({ ...value, nombre: 'Martillo nuevo' }));
+    const dto = { nombre: 'Martillo nuevo', descripcion: 'Acero', unidadBaseId: 'u1', activo: true };
+    update.mockRejectedValue(new HttpErrorResponse({
+      status: 409, error: { message: 'El nombre ya está en uso' },
+    }));
+    await page.saveProduct(dto);
+    await vi.waitFor(() => expect(page.updateMutation.isError()).toBe(true));
+    fixture.detectChanges();
+    expect(page.hasUnsavedChanges()).toBe(true);
+    expect(page.generalData()?.model().nombre).toBe('Martillo nuevo');
+    expect(fixture.nativeElement.textContent).toContain('El nombre ya está en uso');
+
+    await page.saveProduct({ ...dto, unidadBaseId: 'u2' });
+    expect(update).toHaveBeenCalledOnce();
+  });
+
+  it('confirma antes de descartar, conserva la edición si se cancela y limpia al aceptar', async () => {
+    grantEdit();
+    const { fixture } = await openProduct();
+    const page = fixture.componentInstance;
+    page.generalData()?.startEdit();
+    page.generalData()?.model.update((value) => ({ ...value, nombre: 'Pendiente' }));
+    confirm.mockReturnValueOnce(of(false)).mockReturnValueOnce(of(true));
+
+    await page.discardEdit();
+    expect(page.hasUnsavedChanges()).toBe(true);
+    await page.discardEdit();
+    expect(page.hasUnsavedChanges()).toBe(false);
+    expect(page.generalData()?.model().nombre).toBe('Martillo');
+    expect(confirm).toHaveBeenCalledTimes(2);
+  });
+
+  it('envía el formulario de gestión aunque la unidad base esté bloqueada', async () => {
+    grantEdit();
+    const { fixture, product } = await openProduct(true);
+    const form = fixture.componentInstance.generalData()!;
+    form.startEdit();
+    form.model.update((value) => ({ ...value, nombre: 'Martillo de acero' }));
+    update.mockResolvedValue({ ...product, nombre: 'Martillo de acero' });
+
+    await form.save(new Event('submit'));
+    await vi.waitFor(() => expect(update).toHaveBeenCalledWith(productId, expect.objectContaining({
+      nombre: 'Martillo de acero', unidadBaseId: 'u1',
+    })));
+  });
+
+  it('mantiene las fotos pendientes tras un rechazo y envía las asociaciones conservadas', async () => {
+    const originalCreate = URL.createObjectURL;
+    const originalRevoke = URL.revokeObjectURL;
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:foto') });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() });
+    try {
+      grantEdit();
+      params.next(convertToParamMap({ productoId: productId }));
+      const product = {
+        id: productId, nombre: 'Martillo', descripcion: null, activo: true,
+        unidadBaseId: 'u1', puedeCambiarUnidadBase: true,
+        imagenes: [{ id: 'as1', imagenId: 'i1', orden: 0, esPrincipal: true }],
+      };
+      getById.mockResolvedValue(product);
+      getImage.mockResolvedValue(new Blob(['guardada']));
+      const fixture = TestBed.createComponent(GestionProductosPage);
+      fixture.detectChanges();
+      await vi.waitFor(() => expect(fixture.componentInstance.generalData()).toBeDefined());
+      const form = fixture.componentInstance.generalData()!;
+      form.startEdit();
+      form.removeSavedImage('as1');
+      const file = new File(['nueva'], 'nueva.png', { type: 'image/png' });
+      const input = document.createElement('input');
+      Object.defineProperty(input, 'files', { value: [file] });
+      form.addImages({ target: input } as unknown as Event);
+      expect(form.totalImages()).toBe(1);
+      update.mockRejectedValue(new HttpErrorResponse({ status: 409 }));
+
+      await form.save(new Event('submit'));
+      await vi.waitFor(() => expect(update).toHaveBeenCalledWith(productId, expect.objectContaining({
+        imagenesConservarIds: [], imagenes: [file],
+      })));
+      expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+      expect(form.images()).toHaveLength(1);
+    } finally {
+      if (originalCreate) Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: originalCreate });
+      else delete (URL as unknown as Record<string, unknown>)['createObjectURL'];
+      if (originalRevoke) Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: originalRevoke });
+      else delete (URL as unknown as Record<string, unknown>)['revokeObjectURL'];
+    }
   });
 });

@@ -1,6 +1,10 @@
 import { Routes } from '@angular/router';
 import { PERMISSION_CODES } from '../api/interfaces/access-control/permision.interface';
 import { permissionGuard } from '../auth/guards/permission.guard';
+import {
+  confirmChangingProduct,
+  confirmLeavingProduct,
+} from './pages/productos/guards/pending-product-changes.guard';
 
 const inventarioRoutes: Routes = [
   {
@@ -16,7 +20,9 @@ const inventarioRoutes: Routes = [
   {
     path: 'productos/gestion',
     loadComponent: () => import('./pages/productos/gestion-productos-page'),
-    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ)],
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ), confirmChangingProduct],
+    canDeactivate: [confirmLeavingProduct],
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
   },
   {
     path: 'unidades',

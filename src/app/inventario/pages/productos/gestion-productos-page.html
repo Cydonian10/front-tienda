@@ -55,7 +55,21 @@
               <span class="badge badge-warning badge-soft">Inactivo</span>
             }
           </div>
-          <p class="text-sm text-base-content/70">Unidad base: {{ product.unidadBaseId }}</p>
+          <div class="border-t border-base-300 pt-5">
+            <h3 class="mb-4 text-lg font-bold">Datos generales y galería</h3>
+            <datos-generales-step
+              [product]="product"
+              [management]="true"
+              [canEdit]="permissions.edit()"
+              [savedVersion]="savedVersion()"
+              [saving]="updateMutation.isPending()"
+              (update)="saveProduct($event)"
+              (discardRequested)="discardEdit()"
+            />
+            @if (updateMutation.isError()) {
+              <p role="alert" class="mt-4 text-sm text-error">{{ saveError() }}</p>
+            }
+          </div>
           <button type="button" class="btn btn-ghost self-start" (click)="clearProduct()">
             Buscar otro producto
           </button>

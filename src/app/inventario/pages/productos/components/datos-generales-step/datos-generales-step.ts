@@ -9,7 +9,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { form, FormField, maxLength, required, submit, validate } from '@angular/forms/signals';
+import { disabled, form, FormField, maxLength, required, submit, validate } from '@angular/forms/signals';
 import {
   type CreateProductDto,
   type ProductResponse,
@@ -35,11 +35,17 @@ export class DatosGeneralesStep implements OnDestroy {
   private readonly api = inject(ProductoApi);
   readonly saving = input(false);
   readonly product = input<ProductResponse | null>(null);
+  readonly management = input(false);
+  readonly canEdit = input(true);
+  readonly savedVersion = input(0);
+  readonly unitLocked = computed(() => this.management() && this.product()?.puedeCambiarUnidadBase === false);
   readonly create = output<CreateProductDto>();
   readonly update = output<UpdateProductDto>();
   readonly editingChange = output<boolean>();
+  readonly discardRequested = output<void>();
   readonly editing = signal(false);
   private previousProductId: string | null = null;
+  private previousSavedVersion = 0;
   readonly unidades = signal<Unidad[]>([]);
   readonly loadingUnidades = signal(true);
   readonly unitsError = signal(false);
@@ -55,6 +61,19 @@ export class DatosGeneralesStep implements OnDestroy {
       .sort((a, b) => a.orden - b.orden),
   );
   readonly totalImages = computed(() => this.existingImages().length + this.images().length);
+  readonly dirty = computed(() => {
+    const product = this.product();
+    if (!product || !this.editing()) return false;
+    const model = this.model();
+    return (
+      model.nombre !== product.nombre ||
+      model.descripcion !== (product.descripcion ?? '') ||
+      model.unidadBaseId !== product.unidadBaseId ||
+      model.activo !== product.activo ||
+      this.images().length > 0 ||
+      this.removedImageIds().length > 0
+    );
+  });
   readonly principalImageId = computed(
     () =>
       this.existingImages().find((image) => image.esPrincipal)?.id ?? this.existingImages()[0]?.id,
@@ -74,13 +93,21 @@ export class DatosGeneralesStep implements OnDestroy {
     );
     maxLength(path.nombre, 200, { message: 'Máximo 200 caracteres.' });
     required(path.unidadBaseId, { message: 'Selecciona una unidad base.' });
+    disabled(path.unidadBaseId, {
+      when: () => this.unitLocked(),
+    });
   });
 
   constructor() {
     void this.loadUnidades();
     effect(() => {
       const product = this.product();
+      const management = this.management();
+      const savedVersion = this.savedVersion();
       untracked(() => {
+        if (management && product?.id === this.previousProductId && savedVersion === this.previousSavedVersion) {
+          return;
+        }
         if (product) {
           this.clearNewImages();
           this.removedImageIds.set([]);
@@ -103,11 +130,13 @@ export class DatosGeneralesStep implements OnDestroy {
           this.editingChange.emit(false);
         }
         this.previousProductId = product?.id ?? null;
+        this.previousSavedVersion = savedVersion;
       });
     });
   }
 
   startEdit(): void {
+    if (this.management() && !this.canEdit()) return;
     this.editing.set(true);
     this.editingChange.emit(true);
   }
@@ -142,6 +171,10 @@ export class DatosGeneralesStep implements OnDestroy {
 
   addImages(event: Event): void {
     const input = event.target as HTMLInputElement;
+    if (this.management() && !this.canEdit()) {
+      input.value = '';
+      return;
+    }
     const files = Array.from(input.files ?? []);
     input.value = '';
     if (!files.length) return;
@@ -167,6 +200,7 @@ export class DatosGeneralesStep implements OnDestroy {
   }
 
   removeImage(index: number): void {
+    if (this.management() && !this.canEdit()) return;
     const image = this.images()[index];
     if (!image) return;
     URL.revokeObjectURL(image.url);
@@ -175,6 +209,7 @@ export class DatosGeneralesStep implements OnDestroy {
   }
 
   removeSavedImage(id: string): void {
+    if (this.management() && !this.canEdit()) return;
     if (!this.editing() || this.saving()) return;
     this.removedImageIds.update((ids) => [...ids, id]);
     this.imageError.set('');
@@ -235,6 +270,7 @@ export class DatosGeneralesStep implements OnDestroy {
     event.preventDefault();
     if (
       this.saving() ||
+      (this.management() && !this.canEdit()) ||
       (this.product() && !this.editing()) ||
       this.loadingUnidades() ||
       this.unitsError() ||
@@ -245,6 +281,7 @@ export class DatosGeneralesStep implements OnDestroy {
       const value = formState().value();
       const dto = { ...value, nombre: value.nombre.trim() };
       if (this.product()) {
+        if (this.unitLocked() && dto.unidadBaseId !== this.product()!.unidadBaseId) return;
         this.update.emit(
           this.removedImageIds().length || this.images().length
             ? {

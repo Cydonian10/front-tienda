@@ -1,5 +1,5 @@
-<form class="space-y-5" (submit)="save($event)" novalidate>
-  <fieldset [disabled]="busy() || !canCreate()" class="space-y-6">
+<form class="min-w-0 space-y-5" (submit)="save($event)" novalidate>
+  <fieldset [disabled]="busy() || !canCreate()" class="min-w-0 space-y-6">
     <div class="border-b border-base-300 pb-4">
       <h3 class="text-base font-bold">Nueva variante</h3>
       <p class="mt-1 text-xs leading-relaxed text-base-content/70">
@@ -97,7 +97,7 @@
           <input
             id="variant-images"
             type="file"
-            class="file-input file-input-sm max-w-full"
+             class="file-input file-input-sm min-h-11 w-full min-w-0 max-w-full sm:w-auto"
             accept="image/jpeg,image/png,image/webp"
             multiple
             [disabled]="busy() || images().length === 10"

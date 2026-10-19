@@ -405,4 +405,26 @@ describe('GestionProductosPage', () => {
     card.setPrice({ target: { value: '11.00' } } as unknown as Event);
     expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
   });
+
+  it('mueve el foco al formulario nuevo y lo devuelve al botón al cancelar', async () => {
+    grantEdit();
+    listAttributes.mockResolvedValue([{ atributoId: 'a1', atributo: 'Color', productoId: productId }]);
+    const { fixture } = await openProduct();
+    const page = fixture.componentInstance;
+    await vi.waitFor(() => expect(page.attributesQuery.isSuccess()).toBe(true));
+    fixture.detectChanges();
+    const trigger = Array.from(fixture.nativeElement.querySelectorAll('button')).find(
+      (button) => (button as HTMLButtonElement).textContent?.includes('Añadir variante'),
+    ) as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('variante-form input[type="text"]'));
+
+    await page.cancelNewVariant();
+    fixture.detectChanges();
+    const addButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find(
+      (button) => (button as HTMLButtonElement).textContent?.includes('Añadir variante'),
+    );
+    expect(document.activeElement).toBe(addButton);
+  });
 });

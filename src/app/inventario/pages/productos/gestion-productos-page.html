@@ -1,4 +1,4 @@
-<section class="mx-auto w-full max-w-6xl space-y-6 pb-10">
+<section class="mx-auto w-full min-w-0 max-w-6xl space-y-6 pb-10">
   <header class="space-y-3">
     <h1 id="admin-section-title" class="text-3xl font-bold tracking-tight sm:text-4xl">
       Gestionar productos
@@ -49,8 +49,8 @@
         } @else if (productQuery.data(); as product) {
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="min-w-0">
-              <h2 class="card-title wrap-break-word">{{ product.nombre }}</h2>
-              <p class="text-sm text-base-content/70">{{ product.descripcion || 'Sin descripción' }}</p>
+              <h2 class="card-title wrap-anywhere">{{ product.nombre }}</h2>
+              <p class="text-sm text-base-content/70 wrap-anywhere">{{ product.descripcion || 'Sin descripción' }}</p>
             </div>
             @if (!product.activo) {
               <span class="badge badge-warning badge-soft">Inactivo</span>
@@ -82,7 +82,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
           <h3 id="product-variants-title" class="text-lg font-bold">Variantes existentes</h3>
           @if (permissions.edit() && !newVariantOpen()) {
-            <button type="button" class="btn btn-primary" [disabled]="!selectedAttributes().length || attributesQuery.isPending() || attributesQuery.isError()" (click)="openNewVariant()">
+            <button #addVariantButton type="button" class="btn btn-primary" [disabled]="!selectedAttributes().length || attributesQuery.isPending() || attributesQuery.isError()" (click)="openNewVariant()">
               Añadir variante
             </button>
           }
@@ -117,7 +117,7 @@
           }
         }
         @if (newVariantOpen()) {
-          <div class="rounded-box border border-base-300 bg-base-100 p-5 sm:p-6">
+          <div class="min-w-0 rounded-box border border-base-300 bg-base-100 p-5 sm:p-6">
             <variante-form
               [attributes]="selectedAttributes()"
               [busy]="createMutation.isPending()"

@@ -1,18 +1,20 @@
-<section class="card card-border bg-base-100" aria-labelledby="selector-title">
-  <div class="card-body gap-4">
+<section class="card card-border min-w-0 bg-base-100" aria-labelledby="selector-title">
+  <div class="card-body min-w-0 gap-4">
     <div>
       <h2 id="selector-title" class="card-title">Buscar producto</h2>
       <label for="buscar-producto" class="mt-2 block text-sm text-base-content/70">
         Nombre del producto
       </label>
       <input
+        #searchField
         id="buscar-producto"
-        class="input mt-2 w-full"
+        class="input mt-2 w-full min-w-0"
         type="search"
         autocomplete="off"
         placeholder="Escribe al menos 2 caracteres"
         [value]="searchText()"
         (input)="onSearch($event)"
+        (keydown)="moveFocus($event, -1)"
       />
     </div>
 
@@ -24,13 +26,15 @@
           @for (product of results(); track product.id) {
             <li class="list-row p-0">
               <button
+                #productOption
                 type="button"
-                class="btn btn-ghost h-auto min-h-11 w-full justify-between whitespace-normal text-left"
+                class="btn btn-ghost h-auto min-h-11 w-full min-w-0 justify-between whitespace-normal text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 [class.btn-active]="selectedId() === product.id"
                 [attr.aria-current]="selectedId() === product.id ? 'true' : null"
                 (click)="selected.emit(product)"
+                (keydown)="moveFocus($event, $index)"
               >
-                <span class="min-w-0 wrap-break-word">{{ product.nombre }}</span>
+                <span class="min-w-0 wrap-anywhere">{{ product.nombre }}</span>
                 @if (!product.activo) {
                   <span class="badge badge-warning badge-soft shrink-0">Inactivo</span>
                 }

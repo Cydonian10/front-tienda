@@ -29,7 +29,7 @@ interface SelectedImage {
   selector: 'datos-generales-step',
   imports: [Icon, FormField, FieldErrors],
   templateUrl: './datos-generales-step.html',
-  host: { class: 'block' },
+  host: { class: 'block min-w-0' },
 })
 export class DatosGeneralesStep implements OnDestroy {
   private readonly api = inject(ProductoApi);

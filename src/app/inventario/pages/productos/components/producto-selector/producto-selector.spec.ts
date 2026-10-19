@@ -62,6 +62,12 @@ describe('ProductoSelector', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Inactivo');
     const productButton = fixture.nativeElement.querySelector('li button') as HTMLButtonElement;
+    const searchInput = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    searchInput.focus();
+    searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(productButton);
+    productButton.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(document.activeElement).toBe(searchInput);
     productButton.focus();
     expect(document.activeElement).toBe(productButton);
     productButton.click();

@@ -1,4 +1,4 @@
-import { Component, computed, effect, input, OnDestroy, output, signal, untracked } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, input, OnDestroy, output, signal, untracked } from '@angular/core';
 import { form, FormField, maxLength, submit, validate } from '@angular/forms/signals';
 import type { AtributoProducto } from '../../../../../api/interfaces/inventario/producto.interface';
 import type { CreateVarianteDto } from '../../../../../api/interfaces/inventario/variante.interface';
@@ -14,6 +14,7 @@ interface Preview {
   templateUrl: './variante-form.html',
 })
 export class VarianteForm implements OnDestroy {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly attributes = input.required<readonly AtributoProducto[]>();
   readonly busy = input(false);
   readonly canCreate = input(true);
@@ -122,6 +123,10 @@ export class VarianteForm implements OnDestroy {
 
   ngOnDestroy(): void {
     this.clearImages();
+  }
+
+  focusFirstField(): void {
+    this.host.nativeElement.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
   }
 
   async save(event: Event): Promise<void> {

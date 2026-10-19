@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, effect, HostListener, inject, signal, untracked, viewChild, viewChildren } from '@angular/core';
+import { Component, computed, DestroyRef, effect, ElementRef, HostListener, inject, signal, untracked, viewChild, viewChildren } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -54,8 +54,10 @@ export default class GestionProductosPage {
     this.attributesQuery.data()?.filter((attribute) => !!attribute.productoId) ?? [],
   );
   readonly newVariantOpen = signal(false);
+  private readonly addVariantButton = viewChild<ElementRef<HTMLButtonElement>>('addVariantButton');
   readonly variantCards = viewChildren(VarianteCard);
   readonly variantForm = viewChild(VarianteForm);
+  private restoreVariantFocus = false;
   readonly hasUnsavedChanges = computed(() =>
     !!this.generalData()?.dirty() || (this.newVariantOpen() && !!this.variantForm()?.dirty()) ||
     this.variantCards().some((card) => card.dirty()),
@@ -87,6 +89,20 @@ export default class GestionProductosPage {
         this.updateMutation.reset();
         this.createMutation.reset();
         this.newVariantOpen.set(false);
+      });
+    });
+    effect(() => {
+      const open = this.newVariantOpen();
+      const form = this.variantForm();
+      const trigger = this.addVariantButton();
+      untracked(() => {
+        if (open) {
+          this.restoreVariantFocus = true;
+          form?.focusFirstField();
+        } else if (this.restoreVariantFocus && trigger) {
+          trigger.nativeElement.focus();
+          this.restoreVariantFocus = false;
+        }
       });
     });
   }

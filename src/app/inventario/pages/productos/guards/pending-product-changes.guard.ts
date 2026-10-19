@@ -33,8 +33,10 @@ export class PendingProductChanges {
   }
 }
 
-export const confirmLeavingProduct: CanDeactivateFn<unknown> = () =>
-  inject(PendingProductChanges).confirmLeave();
+export const confirmLeavingProduct: CanDeactivateFn<unknown> = (_, __, currentState, nextState) => {
+  if (nextState && currentState.url.split('?')[0] === nextState.url.split('?')[0]) return true;
+  return inject(PendingProductChanges).confirmLeave();
+};
 
 export const confirmChangingProduct: CanActivateFn = (_, nextState) => {
   const router = inject(Router);

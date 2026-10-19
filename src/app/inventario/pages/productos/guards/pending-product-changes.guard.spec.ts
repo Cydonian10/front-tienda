@@ -47,7 +47,9 @@ describe('protección de cambios del producto', () => {
     ));
     expect(await firstValueFrom(decision as Observable<boolean>)).toBe(false);
     const exit = TestBed.runInInjectionContext(() => confirmLeavingProduct(
-      {} as never, {} as never, {} as never, {} as never,
+      {} as never, {} as never,
+      { url: '/admin/inventario/productos/gestion?productoId=p1' } as RouterStateSnapshot,
+      { url: '/admin' } as RouterStateSnapshot,
     ));
     expect(await firstValueFrom(exit as Observable<boolean>)).toBe(true);
     expect(confirm).toHaveBeenCalledTimes(2);

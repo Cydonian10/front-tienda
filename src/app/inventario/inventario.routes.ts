@@ -20,7 +20,10 @@ const inventarioRoutes: Routes = [
   {
     path: 'productos/gestion',
     loadComponent: () => import('./pages/productos/gestion-productos-page'),
-    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ), confirmChangingProduct],
+    canActivate: [
+      permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ),
+      confirmChangingProduct,
+    ],
     canDeactivate: [confirmLeavingProduct],
     runGuardsAndResolvers: 'paramsOrQueryParamsChange',
   },
@@ -53,11 +56,6 @@ const inventarioRoutes: Routes = [
     path: 'compras/:id',
     loadComponent: () => import('./pages/compras/compra-detalle-page'),
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.COMPRAS_READ)],
-  },
-  {
-    path: 'producto-prueba',
-    loadComponent: () => import('./pages/producto-prueba/producto-prueba-page'),
-    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ)],
   },
 ];
 

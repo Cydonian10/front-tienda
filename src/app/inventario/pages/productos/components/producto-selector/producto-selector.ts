@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, output, viewChild, viewChildren } from '@angular/core';
 import { QueryClient } from '@tanstack/angular-query-experimental';
 import type {
   ProductoSeleccion,
@@ -15,6 +15,8 @@ const PAGE_SIZE = 20;
 })
 export class ProductoSelector {
   private readonly client = inject(QueryClient);
+  private readonly searchField = viewChild<ElementRef<HTMLInputElement>>('searchField');
+  private readonly options = viewChildren<ElementRef<HTMLButtonElement>>('productOption');
   readonly selectedId = input('');
   readonly selected = output<ProductoSeleccion>();
   readonly searchText = input('');
@@ -49,6 +51,21 @@ export class ProductoSelector {
 
   onSearch(event: Event): void {
     this.searchChanged.emit((event.target as HTMLInputElement).value);
+  }
+
+  moveFocus(event: KeyboardEvent, position: number): void {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Escape') return;
+    const options = this.options();
+    if (!options.length) return;
+    event.preventDefault();
+    if (event.key === 'Escape' || (event.key === 'ArrowUp' && position === 0)) {
+      this.searchField()?.nativeElement.focus();
+      return;
+    }
+    const next = event.key === 'ArrowDown'
+      ? Math.min(position + 1, options.length - 1)
+      : Math.max(position - 1, 0);
+    options[next]?.nativeElement.focus();
   }
 
   loadMore(): void {

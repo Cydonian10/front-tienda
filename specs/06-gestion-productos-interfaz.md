@@ -1,6 +1,6 @@
 # SPEC 06 — Interfaz móvil para gestionar productos existentes
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05
 > **Date:** 2026-10-18
 > **Objective:** Buscar y gestionar productos existentes y sus variantes desde una pantalla adaptable que guarde los cambios en la API.
@@ -47,17 +47,17 @@ En `src/app/inventario/pages/productos/productos-page.ts`, el botón «Gestionar
 
 ## Acceptance criteria
 
-- [ ] El botón «Gestionar producto existente» abre `/admin/inventario/productos/gestion`; el asistente de creación y sus enlaces `?productoId=...` siguen funcionando igual.
-- [ ] La ruta de gestión sin `productoId` muestra selector vacío; un enlace con UUID válido selecciona ese producto y uno inválido muestra error y permite buscar otro.
-- [ ] Buscar por nombre con menos de dos caracteres no dispara la consulta; desde dos caracteres se muestran hasta 20 resultados por página, se pueden cargar más, aparecen inactivos señalados y no se filtra solo la primera página en el cliente.
-- [ ] Selector y detalle diferencian carga, sin resultados, fallo recuperable y producto seleccionado; búsqueda y selección se pueden usar con teclado.
-- [ ] Con `PRODUCTOS_EDITAR`, se guardan datos generales, activo y hasta ocho imágenes del producto mediante el PATCH existente; cambiar una unidad base bloqueada está deshabilitado y explicado, y un rechazo del servidor conserva el formulario.
-- [ ] Cada variante existente muestra SKU/atributos no editables y permite guardar precio, código anulable, estado y fotos propias con un botón independiente; un fallo no confirma ni pierde los cambios pendientes.
-- [ ] Al crear una variante desde gestión se usan los atributos existentes y se actualizan solo las consultas del producto afectado; no se puede cambiar SKU ni valores de atributos de variantes ya creadas.
-- [ ] Las fotos heredadas están identificadas y no ofrecen «Quitar»; añadir fotos propias reemplaza su visualización, quitar la última propia vuelve a mostrar la galería del producto y el límite de diez se respeta.
-- [ ] Con solo `PRODUCTOS_LEER` se puede consultar y seleccionar, pero no ejecutar actualizaciones ni altas aunque se invoque el manejador sin usar los botones.
-- [ ] Cambiar de producto o salir con cambios locales muestra confirmación; cancelar conserva selección/formularios y aceptar descarta únicamente cambios no guardados. No se restaura búsqueda o borrador tras una nueva sesión.
-- [ ] A 390 px y en escritorio, formulario y variantes se usan sin desbordamiento horizontal de la página; foco y controles son accesibles, temas `ferreteria`/`light` funcionan, y `npm test -- --watch=false` y `npm run build` pasan en `front-tienda`.
+- [x] El botón «Gestionar producto existente» abre `/admin/inventario/productos/gestion`; el asistente de creación y sus enlaces `?productoId=...` siguen funcionando igual.
+- [x] La ruta de gestión sin `productoId` muestra selector vacío; un enlace con UUID válido selecciona ese producto y uno inválido muestra error y permite buscar otro.
+- [x] Buscar por nombre con menos de dos caracteres no dispara la consulta; desde dos caracteres se muestran hasta 20 resultados por página, se pueden cargar más, aparecen inactivos señalados y no se filtra solo la primera página en el cliente.
+- [x] Selector y detalle diferencian carga, sin resultados, fallo recuperable y producto seleccionado; búsqueda y selección se pueden usar con teclado.
+- [x] Con `PRODUCTOS_EDITAR`, se guardan datos generales, activo y hasta ocho imágenes del producto mediante el PATCH existente; cambiar una unidad base bloqueada está deshabilitado y explicado, y un rechazo del servidor conserva el formulario.
+- [x] Cada variante existente muestra SKU/atributos no editables y permite guardar precio, código anulable, estado y fotos propias con un botón independiente; un fallo no confirma ni pierde los cambios pendientes.
+- [x] Al crear una variante desde gestión se usan los atributos existentes y se actualizan solo las consultas del producto afectado; no se puede cambiar SKU ni valores de atributos de variantes ya creadas.
+- [x] Las fotos heredadas están identificadas y no ofrecen «Quitar»; añadir fotos propias reemplaza su visualización, quitar la última propia vuelve a mostrar la galería del producto y el límite de diez se respeta.
+- [x] Con solo `PRODUCTOS_LEER` se puede consultar y seleccionar, pero no ejecutar actualizaciones ni altas aunque se invoque el manejador sin usar los botones.
+- [x] Cambiar de producto o salir con cambios locales muestra confirmación; cancelar conserva selección/formularios y aceptar descarta únicamente cambios no guardados. No se restaura búsqueda o borrador tras una nueva sesión.
+- [x] A 390 px y en escritorio, formulario y variantes se usan sin desbordamiento horizontal de la página; foco y controles son accesibles, temas `ferreteria`/`light` funcionan, y `npm test -- --watch=false` y `npm run build` pasan en `front-tienda`.
 
 ## Decisions
 

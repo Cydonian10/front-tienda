@@ -1,4 +1,4 @@
-import { Component, effect, input, OnDestroy, output, signal, untracked } from '@angular/core';
+import { Component, computed, effect, input, OnDestroy, output, signal, untracked } from '@angular/core';
 import { form, FormField, maxLength, submit, validate } from '@angular/forms/signals';
 import type { AtributoProducto } from '../../../../../api/interfaces/inventario/producto.interface';
 import type { CreateVarianteDto } from '../../../../../api/interfaces/inventario/variante.interface';
@@ -16,6 +16,7 @@ interface Preview {
 export class VarianteForm implements OnDestroy {
   readonly attributes = input.required<readonly AtributoProducto[]>();
   readonly busy = input(false);
+  readonly canCreate = input(true);
   readonly savedVersion = input(0);
   readonly create = output<CreateVarianteDto>();
   readonly images = signal<Preview[]>([]);
@@ -25,6 +26,11 @@ export class VarianteForm implements OnDestroy {
     precio: '',
     codigoBarras: '',
     valores: {} as Record<string, string>,
+  });
+  readonly dirty = computed(() => {
+    const model = this.model();
+    return !!(model.sku.trim() || model.precio.trim() || model.codigoBarras.trim() ||
+      Object.values(model.valores).some((value) => value.trim()) || this.images().length);
   });
   readonly variantForm = form(this.model, (path) => {
     maxLength(path.sku, 100, { message: 'Máximo 100 caracteres.' });
@@ -73,6 +79,10 @@ export class VarianteForm implements OnDestroy {
 
   addImages(event: Event): void {
     const input = event.target as HTMLInputElement;
+    if (!this.canCreate() || this.busy()) {
+      input.value = '';
+      return;
+    }
     const files = Array.from(input.files ?? []);
     input.value = '';
     if (!files.length) return;
@@ -96,6 +106,7 @@ export class VarianteForm implements OnDestroy {
   }
 
   removeImage(index: number): void {
+    if (!this.canCreate() || this.busy()) return;
     const image = this.images()[index];
     if (!image) return;
     URL.revokeObjectURL(image.url);
@@ -115,7 +126,7 @@ export class VarianteForm implements OnDestroy {
 
   async save(event: Event): Promise<void> {
     event.preventDefault();
-    if (this.busy() || !this.attributes().length || this.imageError()) return;
+    if (this.busy() || !this.canCreate() || !this.attributes().length || this.imageError()) return;
     await submit(this.variantForm, async (state) => {
       const value = state().value();
       this.create.emit({

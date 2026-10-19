@@ -4,10 +4,12 @@ import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angul
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { BehaviorSubject, of } from 'rxjs';
 import { ProductoApi } from '../../../api/inventario/product-api';
+import { VarianteApi } from '../../../api/inventario/variante-api';
 import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
 import { ToastService } from '../../../shared/services/toast/toast.service';
 import { AuthStore } from '../../../store/auth/auth.store';
+import { variantesQueryKey } from '../../actions/use-variante-action';
 import GestionProductosPage from './gestion-productos-page';
 
 describe('GestionProductosPage', () => {
@@ -15,6 +17,11 @@ describe('GestionProductosPage', () => {
   const search = vi.fn();
   const getById = vi.fn();
   const getImage = vi.fn();
+  const listAttributes = vi.fn();
+  const listVariants = vi.fn();
+  const listVariantImages = vi.fn();
+  const createVariant = vi.fn();
+  const updateVariant = vi.fn();
   const update = vi.fn();
   const confirm = vi.fn();
   const params = new BehaviorSubject(convertToParamMap({}));
@@ -28,6 +35,9 @@ describe('GestionProductosPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    listAttributes.mockResolvedValue([]);
+    listVariants.mockResolvedValue([]);
+    listVariantImages.mockResolvedValue([]);
     params.next(convertToParamMap({}));
     client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     TestBed.configureTestingModule({
@@ -36,8 +46,13 @@ describe('GestionProductosPage', () => {
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: params.value }, queryParamMap: params } },
         { provide: ProductoApi, useValue: {
-          search, getById, listUnidades: vi.fn().mockResolvedValue([{ id: 'u1', nombre: 'Unidad', simbolo: 'u' }]),
+          search, getById, listAttributes,
+          listUnidades: vi.fn().mockResolvedValue([{ id: 'u1', nombre: 'Unidad', simbolo: 'u' }]),
           getImage, update,
+        } },
+        { provide: VarianteApi, useValue: {
+          list: listVariants, listImages: listVariantImages,
+          create: createVariant, update: updateVariant, getImage: vi.fn(),
         } },
         { provide: ConfirmDialogService, useValue: { confirm } },
         { provide: ToastService, useValue: { success: vi.fn() } },
@@ -277,5 +292,117 @@ describe('GestionProductosPage', () => {
       if (originalRevoke) Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: originalRevoke });
       else delete (URL as unknown as Record<string, unknown>)['revokeObjectURL'];
     }
+  });
+
+  it('muestra variantes existentes y solo permite añadirlas con permiso de edición', async () => {
+    listAttributes.mockResolvedValue([{ atributoId: 'a1', atributo: 'Color', productoId: productId }]);
+    listVariants.mockResolvedValue([{
+      id: 'v1', productoId: productId, sku: 'SKU-1', precio: '10.00', codigoBarras: null,
+      activo: true, valores: [{ atributoId: 'a1', valor: 'Negro' }], imagenes: [],
+    }]);
+    const { fixture } = await openProduct();
+    await vi.waitFor(() => expect(fixture.componentInstance.variantsQuery.isSuccess()).toBe(true));
+    await vi.waitFor(() => expect(fixture.componentInstance.attributesQuery.isSuccess()).toBe(true));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('SKU-1');
+    expect(fixture.nativeElement.querySelector('button[aria-label="Quitar foto propia 1"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('variante-form')).toBeNull();
+    fixture.componentInstance.openNewVariant();
+    await fixture.componentInstance.createVariant({ precio: '20.00', valores: [], imagenes: [] });
+    expect(createVariant).not.toHaveBeenCalled();
+
+    grantEdit();
+    fixture.componentInstance.openNewVariant();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('variante-form')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('SKU (opcional)');
+  });
+
+  it('da de alta con los atributos existentes e invalida solo el listado de este producto', async () => {
+    grantEdit();
+    listAttributes.mockResolvedValue([{ atributoId: 'a1', atributo: 'Color', productoId: productId }]);
+    client.setQueryData(variantesQueryKey('otro-producto'), []);
+    listVariants.mockResolvedValueOnce([]).mockResolvedValue([{
+      id: 'v2', productoId: productId, sku: 'SKU-2', precio: '20.00', codigoBarras: null,
+      activo: true, valores: [{ atributoId: 'a1', valor: 'Rojo' }], imagenes: [],
+    }]);
+    const { fixture } = await openProduct();
+    const page = fixture.componentInstance;
+    await vi.waitFor(() => expect(page.attributesQuery.isSuccess()).toBe(true));
+    page.openNewVariant();
+    fixture.detectChanges();
+    const form = page.variantForm()!;
+    form.model.set({ sku: 'SKU-2', precio: '20.00', codigoBarras: '', valores: { a1: 'Rojo' } });
+    expect(page.hasUnsavedChanges()).toBe(true);
+    const dto = {
+      sku: 'SKU-2', precio: '20.00', codigoBarras: undefined,
+      valores: [{ atributoId: 'a1', valor: 'Rojo' }], imagenes: [],
+    };
+    createVariant.mockResolvedValue({
+      id: 'v2', productoId: productId, sku: 'SKU-2', precio: '20.00', codigoBarras: null,
+      activo: true, valores: dto.valores, imagenes: [],
+    });
+    await page.createVariant(dto);
+    expect(createVariant).toHaveBeenCalledWith(productId, dto);
+    expect(page.newVariantOpen()).toBe(false);
+    expect(page.hasUnsavedChanges()).toBe(false);
+    await vi.waitFor(() => expect(page.variantsQuery.data()?.some((variant) => variant.id === 'v2')).toBe(true));
+    expect(client.getQueryState(variantesQueryKey('otro-producto'))?.isInvalidated).toBe(false);
+  });
+
+  it('incluye formularios de variantes pendientes en la confirmación de salida', async () => {
+    grantEdit();
+    listAttributes.mockResolvedValue([{ atributoId: 'a1', atributo: 'Color', productoId: productId }]);
+    const { fixture } = await openProduct();
+    await vi.waitFor(() => expect(fixture.componentInstance.attributesQuery.isSuccess()).toBe(true));
+    fixture.componentInstance.openNewVariant();
+    fixture.detectChanges();
+    fixture.componentInstance.variantForm()?.model.update((value) => ({ ...value, precio: '9.90' }));
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    confirm.mockReturnValueOnce(of(false)).mockReturnValueOnce(of(true));
+    await fixture.componentInstance.cancelNewVariant();
+    expect(fixture.componentInstance.newVariantOpen()).toBe(true);
+    await fixture.componentInstance.cancelNewVariant();
+    expect(fixture.componentInstance.newVariantOpen()).toBe(false);
+  });
+
+  it('no pierde el borrador al fallar el alta y bloquea el manejador si se revoca el permiso', async () => {
+    grantEdit();
+    listAttributes.mockResolvedValue([{ atributoId: 'a1', atributo: 'Color', productoId: productId }]);
+    const { fixture } = await openProduct();
+    const page = fixture.componentInstance;
+    await vi.waitFor(() => expect(page.attributesQuery.isSuccess()).toBe(true));
+    page.openNewVariant();
+    fixture.detectChanges();
+    page.variantForm()!.model.set({
+      sku: 'SKU-3', precio: '15.00', codigoBarras: '', valores: { a1: 'Azul' },
+    });
+    const dto = {
+      sku: 'SKU-3', precio: '15.00', valores: [{ atributoId: 'a1', valor: 'Azul' }], imagenes: [],
+    };
+    createVariant.mockRejectedValue(new HttpErrorResponse({ status: 409 }));
+    await page.createVariant(dto);
+    expect(page.newVariantOpen()).toBe(true);
+    expect(page.variantForm()?.model().precio).toBe('15.00');
+    expect(page.hasUnsavedChanges()).toBe(true);
+
+    TestBed.inject(AuthStore).setProfile({ isSuperAdmin: false, permissions: [] } as never);
+    fixture.detectChanges();
+    await page.createVariant(dto);
+    expect(createVariant).toHaveBeenCalledOnce();
+    expect(page.variantForm()?.model().precio).toBe('15.00');
+  });
+
+  it('incluye la tarjeta de una variante modificada entre los cambios sin guardar', async () => {
+    listVariants.mockResolvedValue([{
+      id: 'v1', productoId: productId, sku: 'SKU-1', precio: '10.00', codigoBarras: null,
+      activo: true, valores: [], imagenes: [],
+    }]);
+    const { fixture } = await openProduct();
+    await vi.waitFor(() => expect(fixture.componentInstance.variantsQuery.isSuccess()).toBe(true));
+    fixture.detectChanges();
+    const card = fixture.componentInstance.variantCards()[0];
+    card.setPrice({ target: { value: '11.00' } } as unknown as Event);
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
   });
 });

@@ -47,6 +47,28 @@ export function useVarianteImagen(
   });
 }
 
+export function useActualizarVariante() {
+  const api = inject(VarianteApi);
+  const queryClient = inject(QueryClient);
+  const toast = inject(ToastService);
+  return injectMutation(() => ({
+    mutationFn: ({ id, variantId, dto }: { id: string; variantId: string; dto: UpdateVarianteDto }) =>
+      api.update(id, variantId, dto),
+    onSuccess: async (variant, { id, variantId, dto }) => {
+      queryClient.setQueryData<VarianteResponse[]>(variantesQueryKey(id), (variants) =>
+        variants?.map((item) => (item.id === variantId ? variant : item)),
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: variantesQueryKey(id), exact: true }),
+        ...(dto.imagenesConservarIds !== undefined || dto.imagenes?.length
+          ? [queryClient.invalidateQueries({ queryKey: varianteImagenesKey(id, variantId) })]
+          : []),
+      ]);
+      toast.success('Variante actualizada correctamente.');
+    },
+  }));
+}
+
 export function useVarianteApi(productId: () => string) {
   const api = inject(VarianteApi);
   const queryClient = inject(QueryClient);
@@ -75,22 +97,7 @@ export function useVarianteApi(productId: () => string) {
     },
   }));
 
-  const updateMutation = injectMutation(() => ({
-    mutationFn: ({ id, variantId, dto }: { id: string; variantId: string; dto: UpdateVarianteDto }) =>
-      api.update(id, variantId, dto),
-    onSuccess: async (variant, { id, variantId, dto }) => {
-      queryClient.setQueryData<VarianteResponse[]>(variantesQueryKey(id), (variants) =>
-        variants?.map((item) => (item.id === variantId ? variant : item)),
-      );
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: variantesQueryKey(id), exact: true }),
-        ...(dto.imagenesConservarIds !== undefined || dto.imagenes?.length
-          ? [queryClient.invalidateQueries({ queryKey: varianteImagenesKey(id, variantId) })]
-          : []),
-      ]);
-      toast.success('Variante actualizada correctamente.');
-    },
-  }));
+  const updateMutation = useActualizarVariante();
 
   return { variantsQuery, createMutation, updateMutation };
 }

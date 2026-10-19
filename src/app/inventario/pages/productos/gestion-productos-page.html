@@ -21,6 +21,7 @@
       (selected)="selectProduct($event)"
     />
 
+    <div class="min-w-0 space-y-6">
     <section class="card card-border min-w-0 bg-base-100" aria-label="Detalle del producto">
       <div class="card-body gap-5">
         @if (!selectedId()) {
@@ -76,5 +77,65 @@
         }
       </div>
     </section>
+    @if (productQuery.data(); as product) {
+      <section class="min-w-0 space-y-4" aria-labelledby="product-variants-title">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 id="product-variants-title" class="text-lg font-bold">Variantes existentes</h3>
+          @if (permissions.edit() && !newVariantOpen()) {
+            <button type="button" class="btn btn-primary" [disabled]="!selectedAttributes().length || attributesQuery.isPending() || attributesQuery.isError()" (click)="openNewVariant()">
+              Añadir variante
+            </button>
+          }
+        </div>
+        @if ((variantsQuery.isPending() && !variantsQuery.data()) || (attributesQuery.isPending() && !attributesQuery.data())) {
+          <p role="status">Cargando variantes y atributos…</p>
+        } @else {
+          @if (variantsQuery.isError() || attributesQuery.isError()) {
+            <div role="alert" class="alert alert-error alert-soft">
+              No se pudieron actualizar las variantes o los atributos del producto.
+            </div>
+            <button type="button" class="btn" (click)="variantsQuery.refetch(); attributesQuery.refetch()">
+              Reintentar
+            </button>
+          }
+          @if (variantsQuery.isSuccess() && !selectedAttributes().length && permissions.edit()) {
+            <p class="text-sm text-base-content/70">Este producto no tiene atributos configurados para crear variantes.</p>
+          }
+          @if (variantsQuery.isSuccess() && !variantsQuery.data()?.length) {
+            <p class="rounded-box border border-base-300 bg-base-100 p-5 text-sm text-base-content/70">
+              Este producto aún no tiene variantes.
+            </p>
+          }
+          @for (variant of variantsQuery.data() ?? []; track variant.id) {
+            <variante-card
+              [productId]="product.id"
+              [variant]="variant"
+              [productImages]="product.imagenes"
+              [attributes]="selectedAttributes()"
+              [canEdit]="permissions.edit()"
+            />
+          }
+        }
+        @if (newVariantOpen()) {
+          <div class="rounded-box border border-base-300 bg-base-100 p-5 sm:p-6">
+            <variante-form
+              [attributes]="selectedAttributes()"
+              [busy]="createMutation.isPending()"
+              [canCreate]="permissions.edit()"
+              (create)="createVariant($event)"
+            />
+            @if (createMutation.isError()) {
+              <p role="alert" class="mt-4 text-sm text-error">
+                No se pudo crear la variante. Revisa los datos e inténtalo de nuevo.
+              </p>
+            }
+            <button type="button" class="btn mt-4" [disabled]="createMutation.isPending()" (click)="cancelNewVariant()">
+              Cancelar nueva variante
+            </button>
+          </div>
+        }
+      </section>
+    }
+    </div>
   </div>
 </section>

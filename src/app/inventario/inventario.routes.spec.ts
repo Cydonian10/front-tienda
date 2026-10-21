@@ -14,6 +14,7 @@ import { ProductoApi } from '../api/inventario/product-api';
 import { ConfirmDialogService } from '../shared/services/confirm-dialog/confirm-dialog.service';
 import { ToastService } from '../shared/services/toast/toast.service';
 import GestionProductosPage from './pages/productos/gestion-productos-page';
+import MovimientosPage from './pages/movimientos/movimientos-page';
 import inventarioRoutes from './inventario.routes';
 
 @Component({ template: '' })
@@ -30,11 +31,15 @@ describe('rutas de inventario', () => {
     TestBed.configureTestingModule({
       providers: [
         provideTanStackQuery(client),
-        { provide: ProductoApi, useValue: {
-          getById: getProduct,
-          listUnidades: vi.fn().mockResolvedValue([{ id: 'u1', nombre: 'Unidad', simbolo: 'u' }]),
-          listAttributes: vi.fn().mockResolvedValue([]), getImage: vi.fn(),
-        } },
+        {
+          provide: ProductoApi,
+          useValue: {
+            getById: getProduct,
+            listUnidades: vi.fn().mockResolvedValue([{ id: 'u1', nombre: 'Unidad', simbolo: 'u' }]),
+            listAttributes: vi.fn().mockResolvedValue([]),
+            getImage: vi.fn(),
+          },
+        },
         { provide: VarianteApi, useValue: { list: listVariants } },
         { provide: ConfirmDialogService, useValue: { confirm } },
         { provide: ToastService, useValue: { success: vi.fn() } },
@@ -93,6 +98,44 @@ describe('rutas de inventario', () => {
     expect(TestBed.inject(Router).url).toBe('/admin');
   });
 
+  it('redirige Movimientos a Salida y permite navegar entre las tres vistas con EXISTENCIAS_LEER', async () => {
+    setPermissions([{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create('/admin/inventario/movimientos');
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/movimientos/salida');
+    expect(harness.routeNativeElement?.textContent).toContain('Nueva salida');
+    await TestBed.inject(Router).navigateByUrl('/admin/inventario/movimientos/traslado');
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('Nuevo traslado');
+    await TestBed.inject(Router).navigateByUrl('/admin/inventario/movimientos/ajuste');
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('Nuevo ajuste');
+  });
+
+  it('protege la simulación de movimientos con EXISTENCIAS_LEER', async () => {
+    setPermissions([{ code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' }]);
+    await RouterTestingHarness.create('/admin/inventario/movimientos/traslado');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+  });
+
+  it('valida el formulario de prueba y confirma sin enviar datos al servidor', async () => {
+    setPermissions([{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create();
+    const page = await harness.navigateByUrl(
+      '/admin/inventario/movimientos/traslado',
+      MovimientosPage,
+    );
+    page.confirmar(new Event('submit'));
+    expect(page.error()).toContain('almacén');
+
+    page.actualizarOrigen('principal');
+    page.actualizarDestino('centro');
+    page.actualizarFila({ ...page.filas()[0], varianteId: 'martillo', cantidad: '2' });
+    page.confirmar(new Event('submit'));
+    harness.detectChanges();
+    expect(page.confirmacion()).toBe(true);
+    expect(harness.routeNativeElement?.textContent).toContain('Ningún dato se guardó');
+  });
+
   it('permite gestionar productos con PRODUCTOS_LEER sin requerir PRODUCTOS_EDITAR', async () => {
     setPermissions([{ code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' }]);
 
@@ -121,8 +164,13 @@ describe('rutas de inventario', () => {
     const firstId = 'c5319711-9d10-48e5-8493-9810facd686c';
     const secondId = '1438642a-e762-4302-9a86-4885f73a260e';
     getProduct.mockImplementation(async (id: string) => ({
-      id, nombre: id === firstId ? 'Martillo' : 'Clavos', descripcion: null,
-      unidadBaseId: 'u1', activo: true, imagenes: [], puedeCambiarUnidadBase: true,
+      id,
+      nombre: id === firstId ? 'Martillo' : 'Clavos',
+      descripcion: null,
+      unidadBaseId: 'u1',
+      activo: true,
+      imagenes: [],
+      puedeCambiarUnidadBase: true,
     }));
     const firstUrl = `/admin/inventario/productos/gestion?productoId=${firstId}`;
     const secondUrl = `/admin/inventario/productos/gestion?productoId=${secondId}`;
@@ -148,15 +196,31 @@ describe('rutas de inventario', () => {
     setPermissions([{ code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' }]);
     const id = 'c5319711-9d10-48e5-8493-9810facd686c';
     getProduct.mockResolvedValue({
-      id, nombre: 'Martillo', descripcion: null, unidadBaseId: 'u1', activo: true,
-      imagenes: [], puedeCambiarUnidadBase: true,
+      id,
+      nombre: 'Martillo',
+      descripcion: null,
+      unidadBaseId: 'u1',
+      activo: true,
+      imagenes: [],
+      puedeCambiarUnidadBase: true,
     });
-    listVariants.mockResolvedValue([{
-      id: 'v1', productoId: id, sku: 'SKU-1', precio: '10.00', codigoBarras: null,
-      activo: true, valores: [], imagenes: [],
-    }]);
+    listVariants.mockResolvedValue([
+      {
+        id: 'v1',
+        productoId: id,
+        sku: 'SKU-1',
+        precio: '10.00',
+        codigoBarras: null,
+        activo: true,
+        valores: [],
+        imagenes: [],
+      },
+    ]);
     const harness = await RouterTestingHarness.create();
-    const page = await harness.navigateByUrl(`/admin/inventario/productos/gestion?productoId=${id}`, GestionProductosPage);
+    const page = await harness.navigateByUrl(
+      `/admin/inventario/productos/gestion?productoId=${id}`,
+      GestionProductosPage,
+    );
     await vi.waitFor(() => expect(page.variantsQuery.data()?.length).toBe(1));
     harness.detectChanges();
     page.variantCards()[0].setPrice({ target: { value: '12.00' } } as unknown as Event);

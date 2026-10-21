@@ -1,0 +1,61 @@
+<section class="card card-border bg-base-100" aria-labelledby="datos-movimiento-title">
+  <div class="card-body gap-5 p-5 sm:p-6">
+    <div>
+      <h3 id="datos-movimiento-title" class="text-lg font-semibold">{{ titulo() }}</h3>
+      <p class="mt-1 text-sm text-base-content/70">Selecciona los almacenes de esta operación.</p>
+    </div>
+    <div class="grid min-w-0 gap-4 sm:grid-cols-2">
+      <div class="min-w-0 space-y-2">
+        <label class="block text-sm font-semibold" for="movimiento-origen"
+          >{{ tipo() === 'ajuste' ? 'Almacén ajustado' : 'Almacén de origen' }} *</label
+        >
+        <select
+          id="movimiento-origen"
+          class="select h-11 w-full"
+          [value]="origen()"
+          (change)="origenChange.emit($any($event.target).value)"
+        >
+          <option value="">Selecciona un almacén</option>
+          @for (almacen of almacenes; track almacen.id) {
+            <option [value]="almacen.id">{{ almacen.nombre }}</option>
+          }
+        </select>
+      </div>
+      @if (tipo() === 'traslado') {
+        <div class="min-w-0 space-y-2">
+          <label class="block text-sm font-semibold" for="movimiento-destino"
+            >Almacén de destino *</label
+          >
+          <select
+            id="movimiento-destino"
+            class="select h-11 w-full"
+            [value]="destino()"
+            (change)="destinoChange.emit($any($event.target).value)"
+          >
+            <option value="">Selecciona un almacén</option>
+            @for (almacen of almacenes; track almacen.id) {
+              <option [value]="almacen.id">{{ almacen.nombre }}</option>
+            }
+          </select>
+        </div>
+      }
+      <div class="min-w-0 space-y-2" [class]="tipo() === 'traslado' ? 'sm:col-span-2' : ''">
+        <label class="block text-sm font-semibold" for="movimiento-motivo">{{
+          tipo() === 'ajuste' ? 'Motivo del ajuste *' : 'Motivo u observaciones'
+        }}</label>
+        <textarea
+          id="movimiento-motivo"
+          class="textarea min-h-24 w-full"
+          maxlength="300"
+          [placeholder]="tipo() === 'ajuste' ? 'Ej. Diferencia en conteo físico' : 'Opcional'"
+          [value]="motivo()"
+          (input)="motivoChange.emit($any($event.target).value)"
+        ></textarea>
+      </div>
+    </div>
+    <p class="text-xs text-base-content/70">
+      Los almacenes, saldos y costos que ves aquí son ficticios. No se enviará información al
+      servidor.
+    </p>
+  </div>
+</section>

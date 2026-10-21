@@ -23,6 +23,7 @@ export const ICONS = {
     },
   ],
   warehouse: [{ type: 'path', d: 'M3 10 12 4l9 6v11H3V10Zm0 0h18M8 21v-7h8v7' }],
+  'arrows-left-right': [{ type: 'path', d: 'M3 7h17m0 0-4-4m4 4-4 4M21 17H4m0 0 4-4m-4 4 4 4' }],
   'chart-line': [{ type: 'path', d: 'M3 3v18h18m-14-7 4-4 4 3 6-8' }],
   check: [{ type: 'path', d: 'm5 12 4 4L19 6' }],
   user: [

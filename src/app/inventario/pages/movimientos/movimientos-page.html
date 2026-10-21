@@ -1,0 +1,137 @@
+<section class="mx-auto w-full max-w-6xl space-y-6 pb-10" aria-labelledby="movimientos-title">
+  <header class="space-y-2">
+    <div class="flex flex-wrap items-center gap-3">
+      <h1 id="movimientos-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">
+        Movimientos de inventario
+      </h1>
+      <span class="badge badge-info badge-soft">Datos de prueba</span>
+    </div>
+    <p class="text-sm text-base-content/70">
+      Explora salidas, traslados y ajustes sin modificar las existencias reales.
+    </p>
+  </header>
+
+  <div
+    role="note"
+    class="alert alert-info alert-soft flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <p class="text-sm">
+      <strong>¿Llegó mercadería de un proveedor?</strong> Registra el comprobante y los precios en
+      Compras; allí se genera el ingreso real.
+    </p>
+    @if (permissions.compras()) {
+      <a routerLink="/admin/inventario/compras" class="btn btn-sm min-h-11 shrink-0"
+        >Ir a Compras <app-icon name="chevron-right" size="16"
+      /></a>
+    }
+  </div>
+
+  <nav aria-label="Tipos de movimiento" class="flex flex-wrap gap-2 border-b border-base-300 pb-3">
+    <a
+      routerLink="/admin/inventario/movimientos/salida"
+      routerLinkActive="btn-primary"
+      [attr.aria-current]="tipo === 'salida' ? 'page' : null"
+      class="btn min-h-11"
+      >Salida</a
+    >
+    <a
+      routerLink="/admin/inventario/movimientos/traslado"
+      routerLinkActive="btn-primary"
+      [attr.aria-current]="tipo === 'traslado' ? 'page' : null"
+      class="btn min-h-11"
+      >Traslado</a
+    >
+    <a
+      routerLink="/admin/inventario/movimientos/ajuste"
+      routerLinkActive="btn-primary"
+      [attr.aria-current]="tipo === 'ajuste' ? 'page' : null"
+      class="btn min-h-11"
+      >Ajuste</a
+    >
+  </nav>
+
+  <div class="flex items-start gap-3">
+    <span class="rounded-field bg-base-200 p-3 text-primary"
+      ><app-icon name="arrows-left-right" size="24"
+    /></span>
+    <div>
+      <h2 class="text-xl font-semibold tracking-tight">{{ contenido.titulo }}</h2>
+      <p class="mt-1 text-sm text-base-content/70">{{ contenido.subtitulo }}</p>
+    </div>
+  </div>
+
+  <form class="space-y-6" novalidate (submit)="confirmar($event)">
+    <app-datos-movimiento
+      [tipo]="tipo"
+      [titulo]="contenido.seccion"
+      [origen]="origen()"
+      [destino]="destino()"
+      [motivo]="motivo()"
+      (origenChange)="actualizarOrigen($event)"
+      (destinoChange)="actualizarDestino($event)"
+      (motivoChange)="actualizarMotivo($event)"
+    />
+
+    <section class="card card-border bg-base-100" aria-labelledby="detalle-movimiento-title">
+      <div class="card-body gap-5 p-5 sm:p-6">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 id="detalle-movimiento-title" class="text-lg font-semibold">
+              Variantes y cantidades
+            </h3>
+            <p class="mt-1 text-sm text-base-content/70">
+              {{
+                tipo === 'ajuste'
+                  ? 'Una cantidad positiva aumenta el stock; una negativa lo reduce.'
+                  : 'Puedes agregar varias variantes en una sola operación.'
+              }}
+            </p>
+          </div>
+          <button type="button" class="btn min-h-11 self-start" (click)="agregar()">
+            <app-icon name="plus" size="18" /> Añadir variante
+          </button>
+        </div>
+        @for (fila of filas(); track fila.id; let indice = $index) {
+          <app-detalle-movimiento
+            [fila]="fila"
+            [indice]="indice"
+            [tipo]="tipo"
+            [origen]="origen()"
+            (cambio)="actualizarFila($event)"
+            (quitar)="quitarFila(fila.id)"
+          />
+        } @empty {
+          <p
+            class="rounded-box border border-dashed border-base-300 p-5 text-sm text-base-content/70"
+          >
+            No hay variantes. Usa «Añadir variante» para comenzar.
+          </p>
+        }
+        <p class="text-xs text-base-content/70">
+          {{ resumen() }} variantes con cantidad · La conversión a unidad base se muestra en cada
+          fila.
+        </p>
+      </div>
+    </section>
+
+    <div
+      class="flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+    >
+      <p class="text-sm text-base-content/70">
+        Esta confirmación solo comprueba el formulario de prueba. No crea un movimiento ni cambia el
+        stock.
+      </p>
+      <button type="submit" class="btn btn-primary min-h-11 shrink-0">
+        Simular {{ tipo }} <app-icon name="chevron-right" size="18" />
+      </button>
+    </div>
+    @if (error()) {
+      <div role="alert" class="alert alert-error alert-soft">{{ error() }}</div>
+    }
+    @if (confirmacion()) {
+      <div role="status" class="alert alert-success alert-soft">
+        Simulación válida. Ningún dato se guardó y las existencias reales no cambiaron.
+      </div>
+    }
+  </form>
+</section>

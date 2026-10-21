@@ -53,6 +53,17 @@ const inventarioRoutes: Routes = [
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.EXISTENCIAS_READ)],
   },
   {
+    path: 'movimientos',
+    pathMatch: 'full',
+    redirectTo: 'movimientos/salida',
+  },
+  ...(['salida', 'traslado', 'ajuste'] as const).map((tipo) => ({
+    path: `movimientos/${tipo}`,
+    loadComponent: () => import('./pages/movimientos/movimientos-page'),
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.EXISTENCIAS_READ)],
+    data: { tipo },
+  })),
+  {
     path: 'compras/:id',
     loadComponent: () => import('./pages/compras/compra-detalle-page'),
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.COMPRAS_READ)],

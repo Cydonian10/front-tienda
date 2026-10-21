@@ -168,6 +168,11 @@ describe('SystemMenuService', () => {
             url: '/admin/inventario/existencias',
             permission: PERMISSION_CODES.EXISTENCIAS_READ,
           }),
+          expect.objectContaining({
+            label: 'Movimientos',
+            url: '/admin/inventario/movimientos',
+            permission: PERMISSION_CODES.EXISTENCIAS_READ,
+          }),
         ],
       }),
     ]);

@@ -4,10 +4,9 @@
       <h1 id="movimientos-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">
         Movimientos de inventario
       </h1>
-      <span class="badge badge-info badge-soft">Datos de prueba</span>
     </div>
     <p class="text-sm text-base-content/70">
-      Explora salidas, traslados y ajustes sin modificar las existencias reales.
+      Registra salidas, traslados y ajustes de inventario en tus almacenes.
     </p>
   </header>
 
@@ -31,6 +30,8 @@
       routerLink="/admin/inventario/movimientos/salida"
       routerLinkActive="btn-primary"
       [attr.aria-current]="tipo === 'salida' ? 'page' : null"
+      [attr.aria-disabled]="bloqueado()"
+      (click)="bloqueado() && $event.preventDefault()"
       class="btn min-h-11"
       >Salida</a
     >
@@ -38,6 +39,8 @@
       routerLink="/admin/inventario/movimientos/traslado"
       routerLinkActive="btn-primary"
       [attr.aria-current]="tipo === 'traslado' ? 'page' : null"
+      [attr.aria-disabled]="bloqueado()"
+      (click)="bloqueado() && $event.preventDefault()"
       class="btn min-h-11"
       >Traslado</a
     >
@@ -45,6 +48,8 @@
       routerLink="/admin/inventario/movimientos/ajuste"
       routerLinkActive="btn-primary"
       [attr.aria-current]="tipo === 'ajuste' ? 'page' : null"
+      [attr.aria-disabled]="bloqueado()"
+      (click)="bloqueado() && $event.preventDefault()"
       class="btn min-h-11"
       >Ajuste</a
     >
@@ -61,81 +66,123 @@
   </div>
 
   <form class="space-y-6" novalidate (submit)="confirmar($event)">
-    <app-datos-movimiento
-      [tipo]="tipo"
-      [titulo]="contenido.seccion"
-      [origen]="origen()"
-      [destino]="destino()"
-      [motivo]="motivo()"
-      [almacenes]="almacenes.data() ?? []"
-      [cargandoAlmacenes]="almacenes.isFetching()"
-      [errorAlmacenes]="almacenes.isError()"
-      (origenChange)="actualizarOrigen($event)"
-      (destinoChange)="actualizarDestino($event)"
-      (motivoChange)="actualizarMotivo($event)"
-      (reintentarAlmacenes)="almacenes.refetch()"
-    />
+    <fieldset class="m-0 min-w-0 space-y-6 border-0 p-0" [disabled]="bloqueado()">
+      <app-datos-movimiento
+        [tipo]="tipo"
+        [titulo]="contenido.seccion"
+        [origen]="origen()"
+        [destino]="destino()"
+        [motivo]="motivo()"
+        [almacenes]="almacenes.data() ?? []"
+        [cargandoAlmacenes]="almacenes.isFetching()"
+        [errorAlmacenes]="almacenes.isError()"
+        (origenChange)="actualizarOrigen($event)"
+        (destinoChange)="actualizarDestino($event)"
+        (motivoChange)="actualizarMotivo($event)"
+        (reintentarAlmacenes)="almacenes.refetch()"
+      />
 
-    <section class="card card-border bg-base-100" aria-labelledby="detalle-movimiento-title">
-      <div class="card-body gap-5 p-5 sm:p-6">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h3 id="detalle-movimiento-title" class="text-lg font-semibold">
-              Variantes y cantidades
-            </h3>
-            <p class="mt-1 text-sm text-base-content/70">
-              {{
-                tipo === 'ajuste'
-                  ? 'Una cantidad positiva aumenta el stock; una negativa lo reduce.'
-                  : 'Puedes agregar varias variantes en una sola operación.'
-              }}
-            </p>
+      <section class="card card-border bg-base-100" aria-labelledby="detalle-movimiento-title">
+        <div class="card-body gap-5 p-5 sm:p-6">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 id="detalle-movimiento-title" class="text-lg font-semibold">
+                Variantes y cantidades
+              </h3>
+              <p class="mt-1 text-sm text-base-content/70">
+                {{
+                  tipo === 'ajuste'
+                    ? 'Una cantidad positiva aumenta el stock; una negativa lo reduce.'
+                    : 'Puedes agregar varias variantes en una sola operación.'
+                }}
+              </p>
+            </div>
+            <button type="button" class="btn min-h-11 self-start" (click)="agregar()">
+              <app-icon name="plus" size="18" /> Añadir variante
+            </button>
           </div>
-          <button type="button" class="btn min-h-11 self-start" (click)="agregar()">
-            <app-icon name="plus" size="18" /> Añadir variante
-          </button>
-        </div>
-        @for (fila of filas(); track fila.id; let indice = $index) {
-          <app-detalle-movimiento
-            [fila]="fila"
-            [indice]="indice"
-            [tipo]="tipo"
-            [origen]="origen()"
-            [variantesSeleccionadas]="filas().filter((otra) => otra.id !== fila.id).map((otra) => otra.varianteId)"
-            (cambio)="actualizarFila($event)"
-            (quitar)="quitarFila(fila.id)"
-          />
-        } @empty {
-          <p
-            class="rounded-box border border-dashed border-base-300 p-5 text-sm text-base-content/70"
-          >
-            No hay variantes. Usa «Añadir variante» para comenzar.
+          @for (fila of filas(); track fila.id; let indice = $index) {
+            <app-detalle-movimiento
+              [fila]="fila"
+              [indice]="indice"
+              [tipo]="tipo"
+              [origen]="origen()"
+              [variantesSeleccionadas]="
+                filas()
+                  .filter((otra) => otra.id !== fila.id)
+                  .map((otra) => otra.varianteId)
+              "
+              (cambio)="actualizarFila($event)"
+              (quitar)="quitarFila(fila.id)"
+            />
+          } @empty {
+            <p
+              class="rounded-box border border-dashed border-base-300 p-5 text-sm text-base-content/70"
+            >
+              No hay variantes. Usa «Añadir variante» para comenzar.
+            </p>
+          }
+          <p class="text-xs text-base-content/70">
+            {{ resumen() }} variantes con cantidad · La conversión a unidad base se muestra en cada
+            fila.
           </p>
-        }
-        <p class="text-xs text-base-content/70">
-          {{ resumen() }} variantes con cantidad · La conversión a unidad base se muestra en cada
-          fila.
-        </p>
-      </div>
-    </section>
+        </div>
+      </section>
+    </fieldset>
 
     <div
       class="flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
     >
       <p class="text-sm text-base-content/70">
-        Esta confirmación solo comprueba el formulario de prueba. No crea un movimiento ni cambia el
-        stock.
+        @if (pendiente()) {
+          Resultado incierto: el formulario está bloqueado. Reintenta con la misma clave para
+          conocer el resultado.
+        } @else {
+          El servidor comprobará los almacenes, las unidades y los saldos antes de registrar.
+        }
       </p>
-      <button type="submit" class="btn btn-primary min-h-11 shrink-0">
-        Simular {{ tipo }} <app-icon name="chevron-right" size="18" />
-      </button>
+      @if (puedeRegistrar()) {
+        @if (pendiente()) {
+          <button
+            type="button"
+            class="btn btn-primary min-h-11 shrink-0"
+            [disabled]="registro.isPending() || enviando()"
+            (click)="reintentar()"
+          >
+            {{
+              registro.isPending() || enviando() ? 'Consultando resultado…' : 'Reintentar registro'
+            }}
+          </button>
+        } @else {
+          <button
+            type="submit"
+            class="btn btn-primary min-h-11 shrink-0"
+            [disabled]="
+              enviando() ||
+              registro.isPending() ||
+              almacenes.isPending() ||
+              almacenes.isError() ||
+              !almacenes.data()?.length
+            "
+          >
+            {{ enviando() || registro.isPending() ? 'Registrando…' : 'Registrar ' + tipo }}
+            @if (!enviando() && !registro.isPending()) {
+              <app-icon name="chevron-right" size="18" />
+            }
+          </button>
+        }
+      } @else {
+        <p class="text-sm text-base-content/70">
+          No tienes permiso para registrar este tipo de movimiento.
+        </p>
+      }
     </div>
     @if (error()) {
       <div role="alert" class="alert alert-error alert-soft">{{ error() }}</div>
     }
-    @if (confirmacion()) {
+    @if (confirmacion(); as id) {
       <div role="status" class="alert alert-success alert-soft">
-        Simulación válida. Ningún dato se guardó y las existencias reales no cambiaron.
+        Movimiento registrado correctamente. ID: {{ id }}.
       </div>
     }
   </form>

@@ -5,6 +5,7 @@ import {
   confirmChangingProduct,
   confirmLeavingProduct,
 } from './pages/productos/guards/pending-product-changes.guard';
+import { canLeaveMovimiento } from './pages/movimientos/guards/pending-movimiento.guard';
 
 const inventarioRoutes: Routes = [
   {
@@ -61,6 +62,7 @@ const inventarioRoutes: Routes = [
     path: `movimientos/${tipo}`,
     loadComponent: () => import('./pages/movimientos/movimientos-page'),
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.MOVIMIENTOS_READ)],
+    canDeactivate: [canLeaveMovimiento],
     data: { tipo },
   })),
   {

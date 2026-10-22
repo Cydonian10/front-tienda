@@ -6,7 +6,8 @@ import { useAlmacenesMovimiento } from '../../actions/use-movimientos-action';
 import { Icon } from '../../../shared/components/icon/icon';
 import { DatosMovimiento } from './components/datos-movimiento';
 import { DetalleMovimiento } from './components/detalle-movimiento';
-import { DetalleDemo, TipoMovimiento, validarMovimiento } from './movimiento-demo.model';
+import type { TipoMovimiento } from '../../../api/interfaces/inventario/movimiento.interface';
+import { FilaMovimiento, nuevaFilaMovimiento } from './movimiento-form.model';
 
 const TITULOS: Record<TipoMovimiento, { titulo: string; subtitulo: string; seccion: string }> = {
   salida: {
@@ -41,9 +42,7 @@ export default class MovimientosPage {
   readonly origen = signal('');
   readonly destino = signal('');
   readonly motivo = signal('');
-  readonly filas = signal<DetalleDemo[]>([
-    { id: 1, varianteId: '', cantidad: '', unidad: 'base', costo: '' },
-  ]);
+  readonly filas = signal<FilaMovimiento[]>([nuevaFilaMovimiento(1)]);
   readonly error = signal('');
   readonly confirmacion = signal(false);
   readonly resumen = computed(
@@ -53,6 +52,7 @@ export default class MovimientosPage {
 
   actualizarOrigen(valor: string): void {
     this.origen.set(valor);
+    this.filas.update((filas) => filas.map((fila) => ({ ...fila, varianteId: '', unidadId: '' })));
     this.limpiarAviso();
   }
   actualizarDestino(valor: string): void {
@@ -65,14 +65,12 @@ export default class MovimientosPage {
   }
 
   agregar(): void {
-    this.filas.update((filas) => [
-      ...filas,
-      { id: this.siguienteId++, varianteId: '', cantidad: '', unidad: 'base', costo: '' },
-    ]);
+    this.filas.update((filas) => [...filas, nuevaFilaMovimiento(this.siguienteId++)]);
     this.limpiarAviso();
   }
 
-  actualizarFila(detalle: DetalleDemo): void {
+  actualizarFila(detalle: FilaMovimiento): void {
+    if (detalle.varianteId && this.filas().some((fila) => fila.id !== detalle.id && fila.varianteId === detalle.varianteId)) return;
     this.filas.update((filas) => filas.map((fila) => (fila.id === detalle.id ? detalle : fila)));
     this.limpiarAviso();
   }
@@ -84,15 +82,8 @@ export default class MovimientosPage {
 
   confirmar(event: Event): void {
     event.preventDefault();
-    const error = validarMovimiento(
-      this.tipo,
-      this.origen(),
-      this.destino(),
-      this.motivo(),
-      this.filas(),
-    );
-    this.error.set(error ?? '');
-    this.confirmacion.set(!error);
+    this.error.set('El registro de movimientos todavía no está disponible.');
+    this.confirmacion.set(false);
   }
 
   private limpiarAviso(): void {

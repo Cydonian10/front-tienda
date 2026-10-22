@@ -154,7 +154,7 @@ describe('rutas de inventario', () => {
     expect(listarAlmacenesMovimiento).toHaveBeenCalledTimes(2);
   });
 
-  it('valida el formulario de prueba y confirma sin enviar datos al servidor', async () => {
+  it('mantiene deshabilitado el registro durante la adaptación del formulario', async () => {
     setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
     const harness = await RouterTestingHarness.create();
     const page = await harness.navigateByUrl(
@@ -162,15 +162,23 @@ describe('rutas de inventario', () => {
       MovimientosPage,
     );
     page.confirmar(new Event('submit'));
-    expect(page.error()).toContain('almacén');
-
-    page.actualizarOrigen('principal');
-    page.actualizarDestino('centro');
-    page.actualizarFila({ ...page.filas()[0], varianteId: 'martillo', cantidad: '2' });
-    page.confirmar(new Event('submit'));
+    expect(page.error()).toContain('todavía no está disponible');
     harness.detectChanges();
-    expect(page.confirmacion()).toBe(true);
-    expect(harness.routeNativeElement?.textContent).toContain('Ningún dato se guardó');
+    expect(page.confirmacion()).toBe(false);
+  });
+
+  it('no acepta filas duplicadas y limpia variantes al cambiar de almacén', async () => {
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create();
+    const page = await harness.navigateByUrl('/admin/inventario/movimientos/salida', MovimientosPage);
+    page.agregar();
+    page.actualizarFila({ ...page.filas()[0], varianteId: 'v1', unidadId: 'u1' });
+    page.actualizarFila({ ...page.filas()[1], varianteId: 'v1', unidadId: 'u1' });
+    expect(page.filas()[1].varianteId).toBe('');
+
+    page.actualizarOrigen('almacen-nuevo');
+    expect(page.filas()[0].varianteId).toBe('');
+    expect(page.filas()[0].unidadId).toBe('');
   });
 
   it('permite gestionar productos con PRODUCTOS_LEER sin requerir PRODUCTOS_EDITAR', async () => {

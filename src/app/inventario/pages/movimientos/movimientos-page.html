@@ -101,6 +101,7 @@
             [indice]="indice"
             [tipo]="tipo"
             [origen]="origen()"
+            [variantesSeleccionadas]="filas().filter((otra) => otra.id !== fila.id).map((otra) => otra.varianteId)"
             (cambio)="actualizarFila($event)"
             (quitar)="quitarFila(fila.id)"
           />

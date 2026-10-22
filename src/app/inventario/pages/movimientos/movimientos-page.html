@@ -67,9 +67,13 @@
       [origen]="origen()"
       [destino]="destino()"
       [motivo]="motivo()"
+      [almacenes]="almacenes.data() ?? []"
+      [cargandoAlmacenes]="almacenes.isFetching()"
+      [errorAlmacenes]="almacenes.isError()"
       (origenChange)="actualizarOrigen($event)"
       (destinoChange)="actualizarDestino($event)"
       (motivoChange)="actualizarMotivo($event)"
+      (reintentarAlmacenes)="almacenes.refetch()"
     />
 
     <section class="card card-border bg-base-100" aria-labelledby="detalle-movimiento-title">

@@ -4,6 +4,23 @@
       <h3 id="datos-movimiento-title" class="text-lg font-semibold">{{ titulo() }}</h3>
       <p class="mt-1 text-sm text-base-content/70">Selecciona los almacenes de esta operación.</p>
     </div>
+    @if (cargandoAlmacenes()) {
+      <p role="status" class="flex items-center gap-2 text-sm text-base-content/70">
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+        Cargando almacenes…
+      </p>
+    } @else if (errorAlmacenes()) {
+      <div role="alert" class="alert alert-error alert-soft flex-wrap justify-between gap-3">
+        <span>No se pudieron cargar los almacenes. Comprueba la conexión y vuelve a intentarlo.</span>
+        <button type="button" class="btn min-h-11" (click)="reintentarAlmacenes.emit()">
+          Reintentar
+        </button>
+      </div>
+    } @else if (!almacenes().length) {
+      <p role="status" class="text-sm text-base-content/70">
+        No hay almacenes activos disponibles para este movimiento.
+      </p>
+    }
     <div class="grid min-w-0 gap-4 sm:grid-cols-2">
       <div class="min-w-0 space-y-2">
         <label class="block text-sm font-semibold" for="movimiento-origen"
@@ -13,10 +30,11 @@
           id="movimiento-origen"
           class="select h-11 w-full"
           [value]="origen()"
+          [disabled]="cargandoAlmacenes() || errorAlmacenes() || !almacenes().length"
           (change)="origenChange.emit($any($event.target).value)"
         >
           <option value="">Selecciona un almacén</option>
-          @for (almacen of almacenes; track almacen.id) {
+          @for (almacen of almacenes(); track almacen.id) {
             <option [value]="almacen.id">{{ almacen.nombre }}</option>
           }
         </select>
@@ -27,13 +45,14 @@
             >Almacén de destino *</label
           >
           <select
-            id="movimiento-destino"
-            class="select h-11 w-full"
-            [value]="destino()"
-            (change)="destinoChange.emit($any($event.target).value)"
-          >
-            <option value="">Selecciona un almacén</option>
-            @for (almacen of almacenes; track almacen.id) {
+              id="movimiento-destino"
+              class="select h-11 w-full"
+              [value]="destino()"
+              [disabled]="cargandoAlmacenes() || errorAlmacenes() || !almacenes().length"
+              (change)="destinoChange.emit($any($event.target).value)"
+            >
+              <option value="">Selecciona un almacén</option>
+              @for (almacen of almacenes(); track almacen.id) {
               <option [value]="almacen.id">{{ almacen.nombre }}</option>
             }
           </select>
@@ -53,9 +72,5 @@
         ></textarea>
       </div>
     </div>
-    <p class="text-xs text-base-content/70">
-      Los almacenes, saldos y costos que ves aquí son ficticios. No se enviará información al
-      servidor.
-    </p>
   </div>
 </section>

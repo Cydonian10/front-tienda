@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
 import { usePermissions } from '../../../auth/services/use-permissions';
+import { useAlmacenesMovimiento } from '../../actions/use-movimientos-action';
 import { Icon } from '../../../shared/components/icon/icon';
 import { DatosMovimiento } from './components/datos-movimiento';
 import { DetalleMovimiento } from './components/detalle-movimiento';
@@ -36,6 +37,7 @@ export default class MovimientosPage {
   readonly tipo = inject(ActivatedRoute).snapshot.data['tipo'] as TipoMovimiento;
   readonly contenido = TITULOS[this.tipo];
   readonly permissions = usePermissions('INVENTARIO', { compras: PERMISSION_CODES.COMPRAS_READ });
+  readonly almacenes = useAlmacenesMovimiento();
   readonly origen = signal('');
   readonly destino = signal('');
   readonly motivo = signal('');

@@ -5,6 +5,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import { of } from 'rxjs';
 import { ExistenciaApi } from '../api/inventario/existencia-api';
+import { MovimientoApi } from '../api/inventario/movimiento-api';
 import { VarianteApi } from '../api/inventario/variante-api';
 import { PERMISSION_CODES } from '../api/interfaces/access-control/permision.interface';
 import { AuthStore } from '../store/auth/auth.store';
@@ -24,9 +25,11 @@ describe('rutas de inventario', () => {
   const getProduct = vi.fn();
   const confirm = vi.fn();
   const listVariants = vi.fn().mockResolvedValue([]);
+  const listarAlmacenesMovimiento = vi.fn();
   let client: QueryClient;
   beforeEach(() => {
     vi.clearAllMocks();
+    listarAlmacenesMovimiento.mockResolvedValue([]);
     client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     TestBed.configureTestingModule({
       providers: [
@@ -46,6 +49,10 @@ describe('rutas de inventario', () => {
         {
           provide: ExistenciaApi,
           useValue: { listarAlmacenes: vi.fn().mockResolvedValue([]), listar: vi.fn() },
+        },
+        {
+          provide: MovimientoApi,
+          useValue: { listarAlmacenes: listarAlmacenesMovimiento },
         },
         provideRouter([
           {
@@ -124,6 +131,27 @@ describe('rutas de inventario', () => {
     setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'ACCESS_CONTROL' }]);
     await RouterTestingHarness.create('/admin/inventario/movimientos/salida');
     expect(TestBed.inject(Router).url).toBe('/admin');
+  });
+
+  it('muestra almacenes consultados por la API y reintenta una consulta fallida', async () => {
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
+    listarAlmacenesMovimiento.mockRejectedValueOnce(new Error('Sin conexión')).mockResolvedValueOnce([
+      { id: 'almacen-real', nombre: 'Depósito central' },
+    ]);
+    const harness = await RouterTestingHarness.create();
+    const page = await harness.navigateByUrl('/admin/inventario/movimientos/traslado', MovimientosPage);
+    await vi.waitFor(() => expect(page.almacenes.isError()).toBe(true));
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.querySelector('[role="alert"]')?.textContent).toContain('No se pudieron cargar');
+
+    (harness.routeNativeElement?.querySelector('app-datos-movimiento button') as HTMLButtonElement).click();
+    await vi.waitFor(() => expect(page.almacenes.data()).toEqual([
+      { id: 'almacen-real', nombre: 'Depósito central' },
+    ]));
+    harness.detectChanges();
+    const options = harness.routeNativeElement?.querySelectorAll('#movimiento-origen option');
+    expect(options?.[1]?.textContent).toContain('Depósito central');
+    expect(listarAlmacenesMovimiento).toHaveBeenCalledTimes(2);
   });
 
   it('valida el formulario de prueba y confirma sin enviar datos al servidor', async () => {

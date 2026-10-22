@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { ALMACENES_DEMO, TipoMovimiento } from '../movimiento-demo.model';
+import type { AlmacenMovimiento, TipoMovimiento } from '../../../../api/interfaces/inventario/movimiento.interface';
 
 @Component({
   selector: 'app-datos-movimiento',
@@ -13,8 +13,11 @@ export class DatosMovimiento {
   readonly origen = input.required<string>();
   readonly destino = input.required<string>();
   readonly motivo = input.required<string>();
+  readonly almacenes = input.required<readonly AlmacenMovimiento[]>();
+  readonly cargandoAlmacenes = input.required<boolean>();
+  readonly errorAlmacenes = input.required<boolean>();
   readonly origenChange = output<string>();
   readonly destinoChange = output<string>();
   readonly motivoChange = output<string>();
-  readonly almacenes = ALMACENES_DEMO;
+  readonly reintentarAlmacenes = output<void>();
 }

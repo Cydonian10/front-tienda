@@ -168,11 +168,6 @@ describe('SystemMenuService', () => {
             url: '/admin/inventario/existencias',
             permission: PERMISSION_CODES.EXISTENCIAS_READ,
           }),
-          expect.objectContaining({
-            label: 'Movimientos',
-            url: '/admin/inventario/movimientos',
-            permission: PERMISSION_CODES.EXISTENCIAS_READ,
-          }),
         ],
       }),
     ]);
@@ -180,7 +175,25 @@ describe('SystemMenuService', () => {
 
     store.setProfile({
       isSuperAdmin: false,
-      permissions: [{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'ACCESS_CONTROL' }],
+      permissions: [{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }],
+    } as never);
+    expect(service.menuFor('INVENTARIO')).toEqual([
+      expect.objectContaining({
+        label: 'Operaciones',
+        items: [
+          expect.objectContaining({
+            label: 'Movimientos',
+            url: '/admin/inventario/movimientos',
+            permission: PERMISSION_CODES.MOVIMIENTOS_READ,
+          }),
+        ],
+      }),
+    ]);
+    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/movimientos');
+
+    store.setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'ACCESS_CONTROL' }],
     } as never);
     expect(service.menuFor('INVENTARIO')).toEqual([]);
   });

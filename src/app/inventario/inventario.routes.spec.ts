@@ -98,8 +98,8 @@ describe('rutas de inventario', () => {
     expect(TestBed.inject(Router).url).toBe('/admin');
   });
 
-  it('redirige Movimientos a Salida y permite navegar entre las tres vistas con EXISTENCIAS_LEER', async () => {
-    setPermissions([{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'INVENTARIO' }]);
+  it('redirige Movimientos a Salida y permite navegar entre las tres vistas con MOVIMIENTOS_LEER', async () => {
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
     const harness = await RouterTestingHarness.create('/admin/inventario/movimientos');
     expect(TestBed.inject(Router).url).toBe('/admin/inventario/movimientos/salida');
     expect(harness.routeNativeElement?.textContent).toContain('Nueva salida');
@@ -111,14 +111,23 @@ describe('rutas de inventario', () => {
     expect(harness.routeNativeElement?.textContent).toContain('Nuevo ajuste');
   });
 
-  it('protege la simulación de movimientos con EXISTENCIAS_LEER', async () => {
-    setPermissions([{ code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' }]);
-    await RouterTestingHarness.create('/admin/inventario/movimientos/traslado');
+  it('deniega las tres rutas con solo EXISTENCIAS_LEER', async () => {
+    setPermissions([{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create();
+    for (const tipo of ['salida', 'traslado', 'ajuste']) {
+      await harness.navigateByUrl(`/admin/inventario/movimientos/${tipo}`);
+      expect(TestBed.inject(Router).url).toBe('/admin');
+    }
+  });
+
+  it('no acepta MOVIMIENTOS_LEER de otro sistema', async () => {
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'ACCESS_CONTROL' }]);
+    await RouterTestingHarness.create('/admin/inventario/movimientos/salida');
     expect(TestBed.inject(Router).url).toBe('/admin');
   });
 
   it('valida el formulario de prueba y confirma sin enviar datos al servidor', async () => {
-    setPermissions([{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'INVENTARIO' }]);
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
     const harness = await RouterTestingHarness.create();
     const page = await harness.navigateByUrl(
       '/admin/inventario/movimientos/traslado',

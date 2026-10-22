@@ -60,7 +60,7 @@ const inventarioRoutes: Routes = [
   ...(['salida', 'traslado', 'ajuste'] as const).map((tipo) => ({
     path: `movimientos/${tipo}`,
     loadComponent: () => import('./pages/movimientos/movimientos-page'),
-    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.EXISTENCIAS_READ)],
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.MOVIMIENTOS_READ)],
     data: { tipo },
   })),
   {

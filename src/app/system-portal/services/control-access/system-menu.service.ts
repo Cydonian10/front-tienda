@@ -88,7 +88,7 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             label: 'Movimientos',
             url: '/admin/inventario/movimientos',
             icon: 'arrows-left-right',
-            permission: PERMISSION_CODES.EXISTENCIAS_READ,
+            permission: PERMISSION_CODES.MOVIMIENTOS_READ,
           },
         ],
       },

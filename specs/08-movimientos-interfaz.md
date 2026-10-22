@@ -1,6 +1,6 @@
 # SPEC 08 — Interfaz real de movimientos de inventario
 
-> **Status:** Draft
+> **Status:** Aprobado
 > **Depends on:** SPEC 07
 > **Date:** 2026-10-21
 > **Objective:** Sustituir la simulación de movimientos por formularios que registren salidas, traslados y ajustes reales en la API.
@@ -64,10 +64,10 @@
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| Cambiar almacén deja seleccionada una variante con saldo obsoleto. | Reconsultar opciones y saldo, y volver a validar en el servidor al registrar. |
-| La respuesta de red se pierde después de confirmar el movimiento. | Mantener clave y contenido inmutables hasta reintentar y recibir la confirmación del mismo movimiento. |
+| Risk                                                               | Mitigation                                                                                             |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Cambiar almacén deja seleccionada una variante con saldo obsoleto. | Reconsultar opciones y saldo, y volver a validar en el servidor al registrar.                          |
+| La respuesta de red se pierde después de confirmar el movimiento.  | Mantener clave y contenido inmutables hasta reintentar y recibir la confirmación del mismo movimiento. |
 
 ## What is **not** in this spec
 

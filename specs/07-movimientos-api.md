@@ -1,6 +1,6 @@
 # SPEC 07 — API de salidas, traslados y ajustes de stock
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01, SPEC 03
 > **Date:** 2026-10-21
 > **Objective:** Registrar salidas, traslados y ajustes confirmados mediante una API transaccional que conserve cantidades, valoración e historial de inventario.
@@ -48,15 +48,15 @@
 
 ## Acceptance criteria
 
-- [ ] Un POST válido crea exactamente un `MovimientoInventario` confirmado y sus detalles, y actualiza las existencias del almacén o almacenes correctos.
-- [ ] Un traslado conserva la suma de cantidades y la suma de `valorCosto` entre origen y destino; una salida reduce ambos y un ajuste aplica el signo de cada detalle.
-- [ ] Los detalles conservan unidad, factor, cantidad base y costo aplicado; al agotar una existencia, cantidad y valor restantes son cero.
-- [ ] Un ajuste positivo exige costo por unidad base explícito, admite cero y no lo infiere del precio de venta ni de una compra anterior.
-- [ ] Se rechazan sin cambios parciales almacenes inválidos o inactivos, origen igual a destino, stock insuficiente, unidad ajena al producto, cantidades no representables a seis decimales, variantes repetidas y aumentos de catálogo inactivo.
-- [ ] `MOVIMIENTOS_LEER` habilita solo ambas consultas; cada tipo de POST exige su permiso específico y no admite que el cliente suplante al usuario.
-- [ ] La búsqueda filtra por nombre o SKU desde dos caracteres, pagina resultados y permite localizar stock inactivo para salida o ajuste negativo sin ofrecerlo para traslado.
-- [ ] Reenviar el mismo contenido con la misma clave y usuario devuelve el mismo ID y afecta el stock una sola vez, incluso ante envíos simultáneos; reutilizar la clave con otro contenido devuelve `409`.
-- [ ] Pasan las pruebas específicas y `npm run build` en `api-tienda`.
+- [x] Un POST válido crea exactamente un `MovimientoInventario` confirmado y sus detalles, y actualiza las existencias del almacén o almacenes correctos.
+- [x] Un traslado conserva la suma de cantidades y la suma de `valorCosto` entre origen y destino; una salida reduce ambos y un ajuste aplica el signo de cada detalle.
+- [x] Los detalles conservan unidad, factor, cantidad base y costo aplicado; al agotar una existencia, cantidad y valor restantes son cero.
+- [x] Un ajuste positivo exige costo por unidad base explícito, admite cero y no lo infiere del precio de venta ni de una compra anterior.
+- [x] Se rechazan sin cambios parciales almacenes inválidos o inactivos, origen igual a destino, stock insuficiente, unidad ajena al producto, cantidades no representables a seis decimales, variantes repetidas y aumentos de catálogo inactivo.
+- [x] `MOVIMIENTOS_LEER` habilita solo ambas consultas; cada tipo de POST exige su permiso específico y no admite que el cliente suplante al usuario.
+- [x] La búsqueda filtra por nombre o SKU desde dos caracteres, pagina resultados y permite localizar stock inactivo para salida o ajuste negativo sin ofrecerlo para traslado.
+- [x] Reenviar el mismo contenido con la misma clave y usuario devuelve el mismo ID y afecta el stock una sola vez, incluso ante envíos simultáneos; reutilizar la clave con otro contenido devuelve `409`.
+- [x] Pasan las pruebas específicas y `npm run build` en `api-tienda`.
 
 ## Decisions
 

@@ -1,0 +1,26 @@
+<section class="mx-auto w-full max-w-6xl space-y-6 pb-10" aria-labelledby="historial-title">
+  <header class="space-y-2">
+    <h1 id="historial-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">
+      Historial de movimientos
+    </h1>
+    <p class="text-sm text-base-content/70">
+      Revisa operaciones confirmadas por tipo, producto o almacén.
+    </p>
+  </header>
+
+  <div role="note" class="alert alert-info alert-soft text-sm">
+    <span
+      ><strong>Datos de demostración.</strong> Estos movimientos no corresponden a operaciones
+      reales.</span
+    >
+  </div>
+
+  <app-historial-filtros
+    [busqueda]="busqueda()"
+    [tipo]="tipo()"
+    (busquedaChange)="busqueda.set($event)"
+    (tipoChange)="tipo.set($event)"
+  />
+
+  <app-historial-resultados [movimientos]="movimientos()" (limpiar)="limpiarFiltros()" />
+</section>

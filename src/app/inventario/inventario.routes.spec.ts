@@ -133,6 +133,71 @@ describe('rutas de inventario', () => {
     expect(TestBed.inject(Router).url).toBe('/admin');
   });
 
+  it('abre Historial solo con MOVIMIENTOS_LEER de INVENTARIO sin alterar Movimientos', async () => {
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create('/admin/inventario/historial');
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/historial');
+    expect(harness.routeNativeElement?.textContent).toContain('Datos de demostración');
+    expect(harness.routeNativeElement?.textContent).toContain('10 resultados');
+    await TestBed.inject(Router).navigateByUrl('/admin/inventario/movimientos/salida');
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('Nueva salida');
+  });
+
+  it('deniega Historial sin permiso o con MOVIMIENTOS_LEER de otro sistema', async () => {
+    setPermissions([{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create('/admin/inventario/historial');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'ACCESS_CONTROL' }]);
+    await harness.navigateByUrl('/admin/inventario/historial');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+  });
+
+  it('abre el detalle por ID, mantiene el regreso y muestra el estado de ID inexistente', async () => {
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create('/admin/inventario/historial/MOV-2026-010');
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/historial/MOV-2026-010');
+    expect(harness.routeNativeElement?.textContent).toContain('Datos de demostración');
+    expect(harness.routeNativeElement?.textContent).toContain('Taladro percutor 650 W');
+    expect(harness.routeNativeElement?.textContent).toContain('Almacén principal');
+    expect(harness.routeNativeElement?.textContent).toContain('Sucursal norte');
+    expect(harness.routeNativeElement?.textContent).toContain('Reposición de stock en sucursal');
+    expect(harness.routeNativeElement?.querySelector('a')?.getAttribute('href')).toBe(
+      '/admin/inventario/historial',
+    );
+
+    await TestBed.inject(Router).navigateByUrl('/admin/inventario/historial/desconocido');
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('Movimiento no encontrado');
+    expect(harness.routeNativeElement?.textContent).not.toContain('Taladro percutor 650 W');
+    expect(harness.routeNativeElement?.querySelector('a')?.getAttribute('href')).toBe(
+      '/admin/inventario/historial',
+    );
+  });
+
+  it('protege también la ruta directa de detalle con MOVIMIENTOS_LEER de INVENTARIO', async () => {
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'ACCESS_CONTROL' }]);
+    await RouterTestingHarness.create('/admin/inventario/historial/MOV-2026-010');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+  });
+
+  it('navega mediante Ver detalle y vuelve al listado mediante el enlace', async () => {
+    setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create('/admin/inventario/historial');
+
+    (harness.routeNativeElement?.querySelector('table tbody a') as HTMLAnchorElement).click();
+    await harness.fixture.whenStable();
+    harness.detectChanges();
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/historial/MOV-2026-010');
+    expect(harness.routeNativeElement?.textContent).toContain('Variantes incluidas');
+
+    (harness.routeNativeElement?.querySelector('a') as HTMLAnchorElement).click();
+    await harness.fixture.whenStable();
+    harness.detectChanges();
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/historial');
+  });
+
   it('muestra almacenes consultados por la API y reintenta una consulta fallida', async () => {
     setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
     listarAlmacenesMovimiento

@@ -1,0 +1,68 @@
+<section
+  class="card card-border min-w-0 overflow-hidden bg-base-100"
+  aria-labelledby="variantes-historial-title"
+>
+  <div class="border-b border-base-300 p-5 sm:px-6">
+    <h2 id="variantes-historial-title" class="text-lg font-semibold">Variantes incluidas</h2>
+    <p class="mt-1 text-sm text-base-content/70">
+      Cantidades y costo aplicado conservados en este ejemplo.
+    </p>
+  </div>
+  <div class="hidden overflow-x-auto md:block">
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th scope="col">Producto / variante</th>
+          <th scope="col" class="text-right">Cantidad</th>
+          <th scope="col">Unidad</th>
+          <th scope="col" class="text-right">Factor</th>
+          <th scope="col" class="text-right">Cantidad base</th>
+          <th scope="col" class="text-right">Costo / unidad base</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (detalle of detalles(); track detalle.sku) {
+          <tr>
+            <td>
+              <strong class="block font-semibold">{{ detalle.producto }}</strong
+              ><span class="text-xs text-base-content/70">{{ detalle.sku }}</span>
+            </td>
+            <td class="text-right tabular-nums">{{ detalle.cantidad }}</td>
+            <td>{{ detalle.unidad }}</td>
+            <td class="text-right tabular-nums">× {{ detalle.factorABase }}</td>
+            <td class="text-right tabular-nums">{{ detalle.cantidadBase }}</td>
+            <td class="text-right font-semibold tabular-nums">S/ {{ detalle.costoAplicado }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <ul class="divide-y divide-base-300 md:hidden" aria-label="Variantes incluidas en el movimiento">
+    @for (detalle of detalles(); track detalle.sku) {
+      <li class="space-y-3 p-5">
+        <div class="min-w-0">
+          <strong class="block break-words font-semibold">{{ detalle.producto }}</strong>
+          <span class="text-xs text-base-content/70">{{ detalle.sku }}</span>
+        </div>
+        <dl class="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <dt class="text-xs text-base-content/70">Cantidad</dt>
+            <dd class="tabular-nums">{{ detalle.cantidad }} {{ detalle.unidad }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-base-content/70">Factor</dt>
+            <dd class="tabular-nums">× {{ detalle.factorABase }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-base-content/70">Cantidad base</dt>
+            <dd class="tabular-nums">{{ detalle.cantidadBase }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-base-content/70">Costo / unidad base</dt>
+            <dd class="font-semibold tabular-nums">S/ {{ detalle.costoAplicado }}</dd>
+          </div>
+        </dl>
+      </li>
+    }
+  </ul>
+</section>

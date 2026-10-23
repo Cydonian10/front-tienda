@@ -1,0 +1,49 @@
+<section class="card card-border min-w-0 bg-base-100" aria-labelledby="resumen-historial-title">
+  <div class="card-body gap-6 p-5 sm:p-6">
+    <div class="flex flex-wrap items-start justify-between gap-3 border-b border-base-300 pb-5">
+      <div class="min-w-0">
+        <h2 id="resumen-historial-title" class="text-xl font-semibold tracking-tight">
+          {{ etiqueta(movimiento().tipo) }} de inventario
+        </h2>
+        <p class="mt-1 break-all text-sm tabular-nums text-base-content/70">
+          {{ movimiento().id }}
+        </p>
+      </div>
+      <span class="badge badge-success badge-soft">Confirmado</span>
+    </div>
+    <dl class="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div>
+        <dt class="text-xs font-semibold text-base-content/70">Fecha y hora</dt>
+        <dd class="mt-1 font-semibold tabular-nums">
+          {{ movimiento().fecha | date: 'dd/MM/yyyy HH:mm' : '-0500' }}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-xs font-semibold text-base-content/70">Registrado por</dt>
+        <dd class="mt-1 font-semibold">{{ movimiento().usuario }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-semibold text-base-content/70">Valor del movimiento a costo</dt>
+        <dd class="mt-1 text-lg font-semibold tabular-nums">S/ {{ movimiento().valorCosto }}</dd>
+      </div>
+      @if (movimiento().almacenOrigen; as origen) {
+        <div>
+          <dt class="text-xs font-semibold text-base-content/70">Almacén de origen</dt>
+          <dd class="mt-1 font-semibold">{{ origen }}</dd>
+        </div>
+      }
+      @if (movimiento().almacenDestino; as destino) {
+        <div>
+          <dt class="text-xs font-semibold text-base-content/70">
+            {{ movimiento().tipo === 'ajuste' ? 'Almacén ajustado' : 'Almacén de destino' }}
+          </dt>
+          <dd class="mt-1 font-semibold">{{ destino }}</dd>
+        </div>
+      }
+      <div class="sm:col-span-2 lg:col-span-3">
+        <dt class="text-xs font-semibold text-base-content/70">Motivo</dt>
+        <dd class="mt-1 break-words">{{ movimiento().motivo }}</dd>
+      </div>
+    </dl>
+  </div>
+</section>

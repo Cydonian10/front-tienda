@@ -1,6 +1,6 @@
 # SPEC 09 — Historial de inventario con datos de demostración
 
-> **Status:** Borrador
+> **Status:** Implementado
 > **Depends on:** SPEC 07
 > **Date:** 2026-10-22
 > **Objective:** Añadir al módulo de inventario un historial navegable de movimientos, con filtros y detalle, alimentado exclusivamente por datos ficticios locales.
@@ -63,10 +63,10 @@ SPEC 07 registra movimientos reales, pero no ofrece un listado ni un detalle his
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| El usuario interpreta los ejemplos como operaciones reales. | Mostrar «Datos de demostración» en listado y detalle, sin mezclar respuestas de la API ni ofrecer enlaces ficticios a compras reales. |
-| El esquema ficticio se confunde con el contrato futuro del historial real. | Mantener tipos y fixture locales a `pages/historial/` y documentar explícitamente que la integración real está fuera de alcance. |
+| Risk                                                                       | Mitigation                                                                                                                            |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| El usuario interpreta los ejemplos como operaciones reales.                | Mostrar «Datos de demostración» en listado y detalle, sin mezclar respuestas de la API ni ofrecer enlaces ficticios a compras reales. |
+| El esquema ficticio se confunde con el contrato futuro del historial real. | Mantener tipos y fixture locales a `pages/historial/` y documentar explícitamente que la integración real está fuera de alcance.      |
 
 ## What is **not** in this spec
 

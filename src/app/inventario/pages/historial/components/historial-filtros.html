@@ -1,0 +1,40 @@
+<section class="card card-border bg-base-100" aria-labelledby="filtros-historial-title">
+  <div class="card-body gap-4 p-5 sm:p-6">
+    <div>
+      <h2 id="filtros-historial-title" class="text-lg font-semibold">Buscar movimientos</h2>
+      <p class="mt-1 text-sm text-base-content/70">
+        Filtra los ejemplos sin modificar ningún registro.
+      </p>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,16rem)]">
+      <div class="min-w-0 space-y-2">
+        <label for="historial-busqueda" class="block text-sm font-semibold"
+          >Código, SKU, producto o almacén</label
+        >
+        <input
+          id="historial-busqueda"
+          type="search"
+          class="input h-11 w-full min-w-0"
+          placeholder="Ej. TAL-650 o Almacén principal"
+          [value]="busqueda()"
+          (input)="busquedaChange.emit($any($event.target).value)"
+        />
+      </div>
+      <div class="min-w-0 space-y-2">
+        <label for="historial-tipo" class="block text-sm font-semibold">Tipo de operación</label>
+        <select
+          id="historial-tipo"
+          class="select h-11 w-full"
+          [value]="tipo()"
+          (change)="elegirTipo($any($event.target).value)"
+        >
+          <option value="todos">Todos los tipos</option>
+          <option value="ingreso">Ingreso</option>
+          <option value="salida">Salida</option>
+          <option value="traslado">Traslado</option>
+          <option value="ajuste">Ajuste</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</section>

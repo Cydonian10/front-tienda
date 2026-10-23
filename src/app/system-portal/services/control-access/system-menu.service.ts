@@ -90,6 +90,12 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             icon: 'arrows-left-right',
             permission: PERMISSION_CODES.MOVIMIENTOS_READ,
           },
+          {
+            label: 'Historial',
+            url: '/admin/inventario/historial',
+            icon: 'file',
+            permission: PERMISSION_CODES.MOVIMIENTOS_READ,
+          },
         ],
       },
       {

@@ -186,6 +186,11 @@ describe('SystemMenuService', () => {
             url: '/admin/inventario/movimientos',
             permission: PERMISSION_CODES.MOVIMIENTOS_READ,
           }),
+          expect.objectContaining({
+            label: 'Historial',
+            url: '/admin/inventario/historial',
+            permission: PERMISSION_CODES.MOVIMIENTOS_READ,
+          }),
         ],
       }),
     ]);

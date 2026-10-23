@@ -54,6 +54,16 @@ const inventarioRoutes: Routes = [
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.EXISTENCIAS_READ)],
   },
   {
+    path: 'historial',
+    loadComponent: () => import('./pages/historial/historial-page'),
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.MOVIMIENTOS_READ)],
+  },
+  {
+    path: 'historial/:id',
+    loadComponent: () => import('./pages/historial/historial-detalle-page'),
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.MOVIMIENTOS_READ)],
+  },
+  {
     path: 'movimientos',
     pathMatch: 'full',
     redirectTo: 'movimientos/salida',

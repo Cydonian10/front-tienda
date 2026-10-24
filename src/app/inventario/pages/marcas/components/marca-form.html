@@ -1,40 +1,57 @@
-<form class="card card-border bg-base-100" (submit)="save($event)" novalidate aria-labelledby="marca-form-title">
-  <div class="card-body gap-5">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <h2 id="marca-form-title" class="card-title">{{ brand() ? 'Editar marca' : 'Nueva marca' }}</h2>
-      <button type="button" class="btn btn-ghost min-h-11" [disabled]="saving()" (click)="cancelled.emit()">Cerrar</button>
-    </div>
-    <div>
-      <label class="label" for="brand-name">Nombre <span class="text-error">*</span></label>
-      <input id="brand-name" type="text" class="input w-full" autocomplete="off" maxlength="201"
-        [value]="name()" [attr.aria-invalid]="!!validation()" [attr.aria-describedby]="validation() ? 'brand-validation' : null"
-        (input)="name.set($any($event.target).value)" />
-    </div>
-    <div class="space-y-3">
-      <p class="label">Imagen (opcional)</p>
-      @if (preview()) {
-        <img [src]="preview()" alt="Vista previa de imagen nueva" class="size-28 rounded-field object-cover" />
-      } @else if (brand()?.imagenId && !removeImage()) {
-        <marca-imagen [id]="brand()!.id" [imagenId]="brand()!.imagenId" [nombre]="brand()!.nombre" />
-      } @else { <p class="text-sm text-base-content/70">Sin imagen</p> }
-      <div class="flex flex-wrap items-end gap-3">
-        <div class="min-w-0 flex-1 sm:max-w-sm">
+<form class="min-w-0" (submit)="save($event)" novalidate aria-labelledby="marca-form-title">
+  <header class="flex items-center justify-between gap-3 border-b border-base-300 px-5 py-4 sm:px-6">
+    <h2 id="marca-form-title" class="text-lg font-semibold tracking-tight">
+      {{ brand() ? 'Editar marca' : 'Nueva marca' }}
+    </h2>
+    <button type="button" class="btn btn-ghost btn-square min-h-11 min-w-11" [disabled]="saving()"
+      aria-label="Cerrar" (click)="cancelled.emit()">
+      <app-icon name="close" size="18" />
+    </button>
+  </header>
+
+  <div class="space-y-5 px-5 py-5 sm:px-6">
+    <fieldset class="fieldset min-w-0">
+      <legend class="fieldset-legend">Nombre <span class="text-error">*</span></legend>
+      <div class="input min-h-11 w-full" [class.input-error]="nameInvalid()">
+        <input id="brand-name" type="text" class="min-w-0 grow" autocomplete="off" maxlength="201"
+          aria-label="Nombre" cdkFocusInitial [value]="name()" [attr.aria-invalid]="nameInvalid()"
+          [attr.aria-describedby]="nameInvalid() ? 'brand-validation' : null"
+          (input)="name.set($any($event.target).value)" />
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset min-w-0 grid-cols-[minmax(0,1fr)]">
+      <legend class="fieldset-legend">Imagen (opcional)</legend>
+      <div class="flex min-h-24 items-center gap-4 rounded-field border border-base-300 bg-base-200/50 p-3">
+        @if (preview()) {
+          <img [src]="preview()" alt="Vista previa de imagen nueva" class="size-20 shrink-0 rounded-field object-cover" />
+        } @else if (brand()?.imagenId && !removeImage()) {
+          <marca-imagen [id]="brand()!.id" [imagenId]="brand()!.imagenId" [nombre]="brand()!.nombre" />
+        } @else { <p class="text-sm text-base-content/70">Sin imagen</p> }
+      </div>
+      <div class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="min-w-0 flex-1">
           <label class="label" for="brand-image">Subir o reemplazar imagen</label>
-          <input id="brand-image" type="file" class="file-input w-full min-h-11" accept="image/jpeg,image/png,image/webp"
-            [disabled]="saving()" (change)="chooseImage($event)" />
+          <input id="brand-image" type="file" class="file-input min-h-11 w-full min-w-0 max-w-full" accept="image/jpeg,image/png,image/webp"
+            [disabled]="saving()" [attr.aria-invalid]="imageInvalid()"
+            [attr.aria-describedby]="imageInvalid() ? 'brand-validation brand-image-help' : 'brand-image-help'"
+            (change)="chooseImage($event)" />
         </div>
         @if (preview() || (brand()?.imagenId && !removeImage())) {
-          <button type="button" class="btn btn-ghost min-h-11" [disabled]="saving()" (click)="remove()">Quitar imagen</button>
+          <button type="button" class="btn min-h-11 sm:shrink-0" [disabled]="saving()" (click)="remove()">Quitar imagen</button>
         }
       </div>
-      <p class="text-xs text-base-content/70">JPEG, PNG o WebP; máximo 5 MB. La imagen solo cambia al guardar.</p>
-    </div>
+      <p id="brand-image-help" class="text-sm text-base-content/70">JPEG, PNG o WebP; máximo 5 MB. La imagen solo cambia al guardar.</p>
+    </fieldset>
+
     @if (validation()) { <p id="brand-validation" class="text-sm text-error" role="alert">{{ validation() }}</p> }
     @if (serverError()) { <div class="alert alert-error alert-soft" role="alert">{{ serverError() }}</div> }
-    <div class="card-actions justify-end">
-      <button type="submit" class="btn btn-primary min-h-11" [disabled]="saving()">
-        {{ saving() ? 'Guardando…' : brand() ? 'Guardar cambios' : 'Crear marca' }}
-      </button>
-    </div>
   </div>
+
+  <footer class="modal-action mt-0 flex flex-col-reverse gap-2 border-t border-base-300 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+    <button type="button" class="btn min-h-11 w-full sm:w-auto" [disabled]="saving()" (click)="cancelled.emit()">Cancelar</button>
+    <button type="submit" class="btn btn-primary min-h-11 w-full sm:w-auto" [disabled]="saving()">
+      {{ saving() ? 'Guardando…' : brand() ? 'Guardar cambios' : 'Crear marca' }}
+    </button>
+  </footer>
 </form>

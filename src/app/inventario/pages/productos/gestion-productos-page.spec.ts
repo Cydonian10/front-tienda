@@ -4,8 +4,11 @@ import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angul
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { BehaviorSubject, of } from 'rxjs';
 import { ProductoApi } from '../../../api/inventario/product-api';
+import { MarcaApi } from '../../../api/inventario/marca-api';
+import { CategoriaApi } from '../../../api/inventario/categoria-api';
 import { VarianteApi } from '../../../api/inventario/variante-api';
 import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
+import type { ProductResponse } from '../../../api/interfaces/inventario/producto.interface';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
 import { ToastService } from '../../../shared/services/toast/toast.service';
 import { AuthStore } from '../../../store/auth/auth.store';
@@ -23,6 +26,8 @@ describe('GestionProductosPage', () => {
   const createVariant = vi.fn();
   const updateVariant = vi.fn();
   const update = vi.fn();
+  const listBrands = vi.fn();
+  const listCategories = vi.fn();
   const confirm = vi.fn();
   const params = new BehaviorSubject(convertToParamMap({}));
   const navigate = vi.fn().mockImplementation(async (_, options) => {
@@ -34,10 +39,24 @@ describe('GestionProductosPage', () => {
   let client: QueryClient;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    navigate.mockImplementation(async (_, options) => {
+      params.next(convertToParamMap(options.queryParams.productoId
+        ? { productoId: options.queryParams.productoId }
+        : {}));
+      return true;
+    });
     listAttributes.mockResolvedValue([]);
     listVariants.mockResolvedValue([]);
     listVariantImages.mockResolvedValue([]);
+    listBrands.mockResolvedValue({ items: [
+      { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
+      { id: 'm2', nombre: 'Norte', activo: true, imagenId: null },
+    ], page: 1, limit: 20, totalItems: 2 });
+    listCategories.mockResolvedValue({ items: [
+      { id: 'c1', nombre: 'Herramientas', activo: true },
+      { id: 'c2', nombre: 'Jardín', activo: true },
+    ], page: 1, limit: 20, totalItems: 2 });
     params.next(convertToParamMap({}));
     client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     TestBed.configureTestingModule({
@@ -50,6 +69,8 @@ describe('GestionProductosPage', () => {
           listUnidades: vi.fn().mockResolvedValue([{ id: 'u1', nombre: 'Unidad', simbolo: 'u' }]),
           getImage, update,
         } },
+        { provide: MarcaApi, useValue: { list: listBrands } },
+        { provide: CategoriaApi, useValue: { list: listCategories } },
         { provide: VarianteApi, useValue: {
           list: listVariants, listImages: listVariantImages,
           create: createVariant, update: updateVariant, getImage: vi.fn(),
@@ -72,13 +93,14 @@ describe('GestionProductosPage', () => {
     ] } as never);
   }
 
-  async function openProduct(locked = false) {
+  async function openProduct(locked = false, relations: Partial<Pick<ProductResponse, 'marca' | 'categorias'>> = {}) {
     params.next(convertToParamMap({ productoId: productId }));
     const product = {
       id: productId, nombre: 'Martillo', descripcion: 'Acero', activo: true,
       unidadBaseId: 'u1', imagenes: [], puedeCambiarUnidadBase: !locked,
       marca: { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
       categorias: [{ id: 'c1', nombre: 'Herramientas', activo: true }],
+      ...relations,
     };
     getById.mockResolvedValue(product);
     const fixture = TestBed.createComponent(GestionProductosPage);
@@ -256,6 +278,211 @@ describe('GestionProductosPage', () => {
     })));
   });
 
+  it('muestra asociaciones inactivas en consulta sin ofrecer cambios ni consultar opciones', async () => {
+    const { fixture } = await openProduct(false, {
+      marca: { id: 'm1', nombre: 'Atlas', activo: false, imagenId: null },
+      categorias: [{ id: 'c1', nombre: 'Herramientas', activo: false }],
+    });
+    expect(fixture.nativeElement.textContent).toContain('Atlas');
+    expect(fixture.nativeElement.textContent).toContain('Herramientas');
+    expect(fixture.nativeElement.querySelectorAll('catalogo-producto-selector .badge-warning')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelector('#search-brand-product')).toBeNull();
+    expect(fixture.nativeElement.querySelector('#search-category-product')).toBeNull();
+    expect(listBrands).not.toHaveBeenCalled();
+    expect(listCategories).not.toHaveBeenCalled();
+    const form = fixture.componentInstance.generalData()!;
+    form.startEdit();
+    form.setBrand([{ id: 'm2', nombre: 'Norte', activo: true }]);
+    form.setCategories([{ id: 'c2', nombre: 'Jardín', activo: true }]);
+    expect(form.model().marcaId).toBe('m1');
+    expect(form.model().categoriasIds).toEqual(['c1']);
+  });
+
+  it('guarda otros datos sin reenviar relaciones inactivas y mantiene el estado de lectura al finalizar', async () => {
+    grantEdit();
+    const { fixture, product } = await openProduct(false, {
+      marca: { id: 'm1', nombre: 'Atlas', activo: false, imagenId: null },
+      categorias: [{ id: 'c1', nombre: 'Herramientas', activo: false }],
+    });
+    const page = fixture.componentInstance;
+    const form = page.generalData()!;
+    form.startEdit();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('catalogo-producto-selector .badge-warning')).toHaveLength(2);
+    form.model.update((value) => ({ ...value, nombre: 'Martillo reforzado' }));
+    expect(page.hasUnsavedChanges()).toBe(true);
+    update.mockResolvedValue({ ...product, nombre: 'Martillo reforzado' });
+    await form.save(new Event('submit'));
+    await vi.waitFor(() => expect(form.editing()).toBe(false));
+    const dto = update.mock.calls[0][1];
+    expect(dto).toMatchObject({ nombre: 'Martillo reforzado', unidadBaseId: 'u1' });
+    expect(dto).not.toHaveProperty('marcaId');
+    expect(dto).not.toHaveProperty('categoriasIds');
+    fixture.detectChanges();
+    expect(page.hasUnsavedChanges()).toBe(false);
+    expect(form.editing()).toBe(false);
+    expect(fixture.nativeElement.querySelectorAll('catalogo-producto-selector .badge-warning')).toHaveLength(2);
+  });
+
+  it('explica que no se pueden quitar todas las categorías al editar', async () => {
+    grantEdit();
+    const { fixture } = await openProduct();
+    const form = fixture.componentInstance.generalData()!;
+    form.startEdit();
+    form.setCategories([]);
+    await form.save(new Event('submit'));
+    fixture.detectChanges();
+    expect(form.relationsError()).toContain('al menos una categoría');
+    expect(fixture.nativeElement.querySelector('[aria-label="Clasificación del producto"] [role="alert"]')?.textContent)
+      .toContain('al menos una categoría');
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('guarda cambios de marca y categorías junto a los otros datos generales', async () => {
+    grantEdit();
+    const { fixture, product } = await openProduct();
+    const page = fixture.componentInstance;
+    const form = page.generalData()!;
+    form.startEdit();
+    fixture.detectChanges();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(listBrands).toHaveBeenCalledWith({ activo: true, page: 1, limit: 20 });
+      expect(listCategories).toHaveBeenCalledWith({ activo: true, page: 1, limit: 20 });
+    });
+    const newBrand = { id: 'm2', nombre: 'Norte', activo: true, imagenId: null };
+    const newCategory = { id: 'c2', nombre: 'Jardín', activo: true };
+    form.setBrand([newBrand]);
+    form.setCategories([...product.categorias, newCategory]);
+    form.model.update((value) => ({ ...value, nombre: 'Martillo nuevo' }));
+    expect(page.hasUnsavedChanges()).toBe(true);
+    const updated = { ...product, nombre: 'Martillo nuevo', marca: newBrand, categorias: [...product.categorias, newCategory] };
+    getById.mockResolvedValue(updated);
+    update.mockResolvedValue(updated);
+    await form.save(new Event('submit'));
+    await vi.waitFor(() => expect(form.editing()).toBe(false));
+    expect(update).toHaveBeenCalledWith(productId, expect.objectContaining({
+      nombre: 'Martillo nuevo', marcaId: 'm2', categoriasIds: ['c1', 'c2'],
+    }));
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(page.productQuery.data()?.marca.nombre).toBe('Norte');
+      expect(form.brandSelected()[0].nombre).toBe('Norte');
+      expect(page.hasUnsavedChanges()).toBe(false);
+    });
+  });
+
+  it('permite mantener categorías inactivas existentes al agregar otra y no marca un mero reordenamiento', async () => {
+    grantEdit();
+    const originalCategories = [
+      { id: 'c1', nombre: 'Herramientas', activo: false },
+      { id: 'c2', nombre: 'Jardín', activo: true },
+    ];
+    const { fixture, product } = await openProduct(false, { categorias: originalCategories });
+    const form = fixture.componentInstance.generalData()!;
+    form.startEdit();
+    form.setCategories([...originalCategories].reverse());
+    expect(form.dirty()).toBe(false);
+    const extra = { id: 'c3', nombre: 'Pinturas', activo: true };
+    form.setCategories([...originalCategories, extra]);
+    expect(form.dirty()).toBe(true);
+    update.mockResolvedValue({ ...product, categorias: [...originalCategories, extra] });
+    await form.save(new Event('submit'));
+    await vi.waitFor(() => expect(update).toHaveBeenCalledWith(productId, expect.objectContaining({
+      categoriasIds: ['c1', 'c2', 'c3'],
+    })));
+    expect(update.mock.calls[0][1]).not.toHaveProperty('marcaId');
+  });
+
+  it('incluye solo asociaciones cambiadas en el mismo guardado que las fotos', async () => {
+    const originalCreate = Object.getOwnPropertyDescriptor(URL, 'createObjectURL');
+    const originalRevoke = Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL');
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:foto-nueva') });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() });
+    try {
+      grantEdit();
+      const { fixture, product } = await openProduct(false, {
+        marca: { id: 'm1', nombre: 'Atlas', activo: false, imagenId: null },
+      });
+      const form = fixture.componentInstance.generalData()!;
+      form.startEdit();
+      form.setCategories([...product.categorias, { id: 'c2', nombre: 'Jardín', activo: true }]);
+      const file = new File(['nueva'], 'nueva.png', { type: 'image/png' });
+      const input = document.createElement('input');
+      Object.defineProperty(input, 'files', { value: [file] });
+      form.addImages({ target: input } as unknown as Event);
+      update.mockResolvedValue({ ...product, categorias: form.categoriesSelected() });
+
+      await form.save(new Event('submit'));
+      await vi.waitFor(() => expect(update).toHaveBeenCalledOnce());
+      expect(update.mock.calls[0][1]).toMatchObject({
+        categoriasIds: ['c1', 'c2'], imagenesConservarIds: [], imagenes: [file],
+      });
+      expect(update.mock.calls[0][1]).not.toHaveProperty('marcaId');
+      await vi.waitFor(() => expect(form.editing()).toBe(false));
+    } finally {
+      if (originalCreate) Object.defineProperty(URL, 'createObjectURL', originalCreate);
+      else delete (URL as unknown as Record<string, unknown>)['createObjectURL'];
+      if (originalRevoke) Object.defineProperty(URL, 'revokeObjectURL', originalRevoke);
+      else delete (URL as unknown as Record<string, unknown>)['revokeObjectURL'];
+    }
+  });
+
+  it('conserva asociaciones elegidas tras error, confirma descarte y permite reintentar', async () => {
+    grantEdit();
+    const { fixture, product } = await openProduct();
+    const page = fixture.componentInstance;
+    const form = page.generalData()!;
+    const newBrand = { id: 'm2', nombre: 'Norte', activo: true, imagenId: null };
+    form.startEdit();
+    form.setBrand([newBrand]);
+    getById.mockResolvedValue({ ...product, marca: newBrand });
+    update.mockRejectedValueOnce(new HttpErrorResponse({
+      status: 400, error: { message: 'La marca está inactiva' },
+    })).mockResolvedValueOnce({ ...product, marca: newBrand });
+    await form.save(new Event('submit'));
+    await vi.waitFor(() => expect(page.updateMutation.isError()).toBe(true));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('La marca está inactiva');
+    expect(form.brandSelected()).toEqual([newBrand]);
+    expect(page.hasUnsavedChanges()).toBe(true);
+    confirm.mockReturnValueOnce(of(false)).mockReturnValueOnce(of(true));
+    await page.discardEdit();
+    expect(form.brandSelected()).toEqual([newBrand]);
+    expect(page.hasUnsavedChanges()).toBe(true);
+    await form.save(new Event('submit'));
+    await vi.waitFor(() => expect(form.editing()).toBe(false));
+    expect(update).toHaveBeenCalledTimes(2);
+    fixture.detectChanges();
+    expect(page.hasUnsavedChanges()).toBe(false);
+    form.startEdit();
+    form.setBrand([product.marca]);
+    await page.discardEdit();
+    expect(form.brandSelected()).toEqual([newBrand]);
+    expect(page.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('impide guardar o cambiar asociaciones si se revoca el permiso durante la edición', async () => {
+    grantEdit();
+    const { fixture } = await openProduct();
+    const page = fixture.componentInstance;
+    const form = page.generalData()!;
+    form.startEdit();
+    form.setBrand([{ id: 'm2', nombre: 'Norte', activo: true }]);
+    expect(page.hasUnsavedChanges()).toBe(true);
+    TestBed.inject(AuthStore).setProfile({ isSuperAdmin: false, permissions: [
+      { code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' },
+    ] } as never);
+    fixture.detectChanges();
+    form.setCategories([{ id: 'c2', nombre: 'Jardín', activo: true }]);
+    expect(form.model().categoriasIds).toEqual(['c1']);
+    await form.save(new Event('submit'));
+    await page.saveProduct({ nombre: 'Cambio indebido', descripcion: 'Acero', unidadBaseId: 'u1', activo: true, marcaId: 'm2' });
+    expect(update).not.toHaveBeenCalled();
+    expect(form.brandSelected()[0].id).toBe('m2');
+    expect(page.hasUnsavedChanges()).toBe(true);
+  });
+
   it('mantiene las fotos pendientes tras un rechazo y envía las asociaciones conservadas', async () => {
     const originalCreate = URL.createObjectURL;
     const originalRevoke = URL.revokeObjectURL;
@@ -290,6 +517,8 @@ describe('GestionProductosPage', () => {
       await vi.waitFor(() => expect(update).toHaveBeenCalledWith(productId, expect.objectContaining({
         imagenesConservarIds: [], imagenes: [file],
       })));
+      expect(update.mock.calls[0][1]).not.toHaveProperty('marcaId');
+      expect(update.mock.calls[0][1]).not.toHaveProperty('categoriasIds');
       expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
       expect(form.images()).toHaveLength(1);
     } finally {

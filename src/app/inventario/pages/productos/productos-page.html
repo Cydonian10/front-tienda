@@ -89,7 +89,7 @@
                   />
                   @if (createMutation.isError()) {
                     <p class="mt-4 text-sm text-error" role="alert">
-                      No se pudo crear el producto. Comprueba los datos e inténtalo de nuevo.
+                      {{ createError() }}
                     </p>
                   }
                   @if (updateMutation.isError()) {

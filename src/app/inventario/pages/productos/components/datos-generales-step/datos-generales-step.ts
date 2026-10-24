@@ -38,7 +38,6 @@ export class DatosGeneralesStep implements OnDestroy {
   readonly product = input<ProductResponse | null>(null);
   readonly management = input(false);
   readonly canEdit = input(true);
-  readonly savedVersion = input(0);
   readonly unitLocked = computed(() => this.management() && this.product()?.puedeCambiarUnidadBase === false);
   readonly create = output<CreateProductDto>();
   readonly update = output<UpdateProductDto>();
@@ -46,7 +45,6 @@ export class DatosGeneralesStep implements OnDestroy {
   readonly discardRequested = output<void>();
   readonly editing = signal(false);
   private previousProductId: string | null = null;
-  private previousSavedVersion = 0;
   readonly unidades = signal<Unidad[]>([]);
   readonly loadingUnidades = signal(true);
   readonly unitsError = signal(false);
@@ -59,6 +57,9 @@ export class DatosGeneralesStep implements OnDestroy {
   readonly brandSelected = signal<OpcionCatalogo[]>([]);
   readonly categoriesSelected = signal<OpcionCatalogo[]>([]);
   readonly relationsError = signal('');
+  readonly catalogReadOnly = computed(() =>
+    (!!this.product() && !this.editing()) || this.saving() || (this.management() && !this.canEdit()),
+  );
   readonly existingImages = computed(() =>
     (this.product()?.imagenes ?? [])
       .filter((image) => !this.removedImageIds().includes(image.id))
@@ -75,7 +76,7 @@ export class DatosGeneralesStep implements OnDestroy {
       model.unidadBaseId !== product.unidadBaseId ||
       model.activo !== product.activo ||
       model.marcaId !== product.marca.id ||
-      model.categoriasIds.join(',') !== product.categorias.map((category) => category.id).join(',') ||
+      !this.sameCategories(model.categoriasIds, product.categorias.map((category) => category.id)) ||
       this.images().length > 0 ||
       this.removedImageIds().length > 0
     );
@@ -114,29 +115,12 @@ export class DatosGeneralesStep implements OnDestroy {
     effect(() => {
       const product = this.product();
       const management = this.management();
-      const savedVersion = this.savedVersion();
       untracked(() => {
-        if (management && product?.id === this.previousProductId && savedVersion === this.previousSavedVersion) {
+        if (management && product?.id === this.previousProductId) {
           return;
         }
         if (product) {
-          this.clearNewImages();
-          this.removedImageIds.set([]);
-          this.imageError.set('');
-          this.model.set({
-            nombre: product.nombre,
-            descripcion: product.descripcion ?? '',
-            unidadBaseId: product.unidadBaseId,
-            activo: product.activo,
-            marcaId: product.marca.id,
-            categoriasIds: product.categorias.map((category) => category.id),
-          });
-          this.brandSelected.set([product.marca]);
-          this.categoriesSelected.set(product.categorias);
-          this.relationsError.set('');
-          this.editing.set(false);
-          this.editingChange.emit(false);
-          void this.loadSavedImages(product.id, product.imagenes);
+          this.acceptSavedProduct(product);
         } else if (this.previousProductId) {
           this.clearNewImages();
           this.removedImageIds.set([]);
@@ -149,9 +133,28 @@ export class DatosGeneralesStep implements OnDestroy {
           this.editingChange.emit(false);
         }
         this.previousProductId = product?.id ?? null;
-        this.previousSavedVersion = savedVersion;
       });
     });
+  }
+
+  acceptSavedProduct(product: ProductResponse): void {
+    this.clearNewImages();
+    this.removedImageIds.set([]);
+    this.imageError.set('');
+    this.model.set({
+      nombre: product.nombre,
+      descripcion: product.descripcion ?? '',
+      unidadBaseId: product.unidadBaseId,
+      activo: product.activo,
+      marcaId: product.marca.id,
+      categoriasIds: product.categorias.map((category) => category.id),
+    });
+    this.brandSelected.set([product.marca]);
+    this.categoriesSelected.set(product.categorias);
+    this.relationsError.set('');
+    this.editing.set(false);
+    this.editingChange.emit(false);
+    void this.loadSavedImages(product.id, product.imagenes);
   }
 
   startEdit(): void {
@@ -194,17 +197,23 @@ export class DatosGeneralesStep implements OnDestroy {
   }
 
   setBrand(options: OpcionCatalogo[]): void {
-    if (this.management() && !this.canEdit()) return;
+    if (this.catalogReadOnly() || options.length > 1 || options.some((option) => !option.activo)) return;
     this.brandSelected.set(options);
     this.model.update((value) => ({ ...value, marcaId: options[0]?.id ?? '' }));
     this.relationsError.set('');
   }
 
   setCategories(options: OpcionCatalogo[]): void {
-    if (this.management() && !this.canEdit()) return;
+    if (this.catalogReadOnly() || new Set(options.map((option) => option.id)).size !== options.length ||
+        options.some((option) => !option.activo && !this.product()?.categorias.some((existing) => existing.id === option.id))) return;
     this.categoriesSelected.set(options);
     this.model.update((value) => ({ ...value, categoriasIds: options.map((option) => option.id) }));
     this.relationsError.set('');
+  }
+
+  private sameCategories(ids: readonly string[], original: readonly string[]): boolean {
+    return ids.length === original.length && new Set(ids).size === ids.length &&
+      ids.every((id) => original.includes(id));
   }
 
   addImages(event: Event): void {
@@ -315,7 +324,11 @@ export class DatosGeneralesStep implements OnDestroy {
       this.imageError()
     )
       return;
-    if (!this.product() && (!this.brandSelected()[0]?.activo || !this.categoriesSelected().length ||
+    if (!this.brandSelected().length || !this.categoriesSelected().length) {
+      this.relationsError.set('Selecciona una marca y al menos una categoría.');
+      return;
+    }
+    if (!this.product() && (!this.brandSelected()[0].activo ||
         this.categoriesSelected().some((category) => !category.activo))) {
       this.relationsError.set('Selecciona una marca y al menos una categoría activas.');
       return;
@@ -329,7 +342,7 @@ export class DatosGeneralesStep implements OnDestroy {
         const { marcaId, categoriasIds, ...otherFields } = dto;
         const relations = {
           ...(marcaId !== this.product()!.marca.id ? { marcaId } : {}),
-          ...(categoriasIds.join(',') !== this.product()!.categorias.map((category) => category.id).join(',')
+          ...(!this.sameCategories(categoriasIds, this.product()!.categorias.map((category) => category.id))
             ? { categoriasIds } : {}),
         };
         const updateDto = { ...otherFields, ...relations };

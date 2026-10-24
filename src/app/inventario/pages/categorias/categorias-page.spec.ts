@@ -136,4 +136,22 @@ describe('CategoriasPage', () => {
     await page.toggleStatus(categoria);
     expect(changeStatus).toHaveBeenCalledWith('c1', false);
   });
+
+  it('no ejecuta mutaciones si se revoca PRODUCTOS_EDITAR con cambios pendientes', async () => {
+    grant(true);
+    const fixture = TestBed.createComponent(CategoriasPage);
+    const page = fixture.componentInstance;
+    await vi.waitFor(() => expect(page.query.data()).toBeDefined());
+    await page.openEdit(categoria);
+    fixture.detectChanges();
+    page.form()!.name.set('Pendiente');
+    grant();
+    fixture.detectChanges();
+    await page.save({ nombre: 'Pendiente', descripcion: null });
+    await page.toggleStatus(categoria);
+    await page.openCreate();
+    expect(update).not.toHaveBeenCalled();
+    expect(changeStatus).not.toHaveBeenCalled();
+    expect(page.form()?.name()).toBe('Pendiente');
+  });
 });

@@ -1,10 +1,11 @@
 import { Component, computed, effect, input, OnDestroy, output, signal, untracked } from '@angular/core';
 import type { CrearMarcaDto, EditarMarcaDto, Marca } from '../../../../api/interfaces/inventario/marca.interface';
 import { MarcaImagen } from './marca-imagen';
+import { Icon } from '../../../../shared/components/icon/icon';
 
 @Component({
   selector: 'marca-form',
-  imports: [MarcaImagen],
+  imports: [MarcaImagen, Icon],
   templateUrl: './marca-form.html',
   host: { class: 'block min-w-0' },
 })
@@ -19,6 +20,8 @@ export class MarcaForm implements OnDestroy {
   readonly preview = signal('');
   readonly removeImage = signal(false);
   readonly validation = signal('');
+  readonly nameInvalid = computed(() => this.validation().startsWith('El nombre'));
+  readonly imageInvalid = computed(() => !!this.validation() && !this.nameInvalid());
   readonly dirty = computed(() => this.name() !== (this.brand()?.nombre ?? '') || !!this.image() || this.removeImage());
 
   constructor() {

@@ -3,13 +3,15 @@ import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permisi
 import type { Categoria } from '../../../api/interfaces/inventario/categoria.interface';
 import { usePermissions } from '../../../auth/services/use-permissions';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
+import { Icon } from '../../../shared/components/icon/icon';
+import { CatalogoFormDialog } from '../../components/catalogo-form-dialog';
 import { firstValueFrom, of } from 'rxjs';
 import { useCategoriasApi, useCategoriasListado } from '../../actions/use-categorias-action';
 import { CategoriaForm } from './components/categoria-form';
 
 @Component({
   selector: 'categorias-page',
-  imports: [CategoriaForm],
+  imports: [CategoriaForm, CatalogoFormDialog, Icon],
   templateUrl: './categorias-page.html',
   host: { class: 'block min-w-0' },
 })

@@ -4,13 +4,15 @@ import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permisi
 import type { CrearMarcaDto, EditarMarcaDto, Marca } from '../../../api/interfaces/inventario/marca.interface';
 import { usePermissions } from '../../../auth/services/use-permissions';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
+import { Icon } from '../../../shared/components/icon/icon';
+import { CatalogoFormDialog } from '../../components/catalogo-form-dialog';
 import { useMarcasApi, useMarcasListado } from '../../actions/use-marcas-action';
 import { MarcaForm } from './components/marca-form';
 import { MarcaImagen } from './components/marca-imagen';
 
 @Component({
   selector: 'marcas-page',
-  imports: [MarcaForm, MarcaImagen],
+  imports: [MarcaForm, MarcaImagen, CatalogoFormDialog, Icon],
   templateUrl: './marcas-page.html',
   host: { class: 'block min-w-0' },
 })

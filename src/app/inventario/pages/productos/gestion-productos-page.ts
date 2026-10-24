@@ -43,7 +43,6 @@ export default class GestionProductosPage {
   readonly permissions = usePermissions('INVENTARIO', { edit: PERMISSION_CODES.PRODUCTS_UPDATE });
   private readonly actions = useProductoApi();
   readonly updateMutation = this.actions.actualizarMutation;
-  readonly savedVersion = signal(0);
   readonly generalData = viewChild(DatosGeneralesStep);
   private readonly variantActions = useVarianteApi(this.validId);
   readonly variantsQuery = this.variantActions.variantsQuery;
@@ -117,8 +116,8 @@ export default class GestionProductosPage {
     if (!this.permissions.edit() || !product || this.updateMutation.isPending()) return;
     if (!product.puedeCambiarUnidadBase && dto.unidadBaseId !== product.unidadBaseId) return;
     try {
-      await this.updateMutation.mutateAsync({ id: product.id, dto });
-      this.savedVersion.update((version) => version + 1);
+      const saved = await this.updateMutation.mutateAsync({ id: product.id, dto });
+      if (this.selectedId() === product.id) this.generalData()?.acceptSavedProduct(saved);
     } catch {
       // La mutación muestra el error y el formulario conserva los cambios.
     }

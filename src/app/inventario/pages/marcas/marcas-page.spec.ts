@@ -175,4 +175,23 @@ describe('MarcasPage', () => {
     await page.toggleStatus(brand);
     expect(changeStatus).toHaveBeenCalledWith('m1', false);
   });
+
+  it('no guarda imágenes ni cambia estado si se revoca PRODUCTOS_EDITAR con el formulario abierto', async () => {
+    grant(true);
+    const fixture = TestBed.createComponent(MarcasPage);
+    const page = fixture.componentInstance;
+    await vi.waitFor(() => expect(page.query.data()).toBeDefined());
+    await page.openEdit(brand);
+    fixture.detectChanges();
+    page.form()!.name.set('Pendiente');
+    grant();
+    fixture.detectChanges();
+    const file = new File(['nueva'], 'nueva.png', { type: 'image/png' });
+    await page.save({ nombre: 'Pendiente', imagen: file });
+    await page.toggleStatus(brand);
+    await page.openCreate();
+    expect(update).not.toHaveBeenCalled();
+    expect(changeStatus).not.toHaveBeenCalled();
+    expect(page.form()?.name()).toBe('Pendiente');
+  });
 });

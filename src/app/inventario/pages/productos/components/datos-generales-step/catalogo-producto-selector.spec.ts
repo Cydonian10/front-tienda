@@ -78,4 +78,27 @@ describe('CatalogoProductoSelector', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Reintentar');
   });
+
+  it('ofrece controles nativos enfocables con etiquetas y estado de selección accesible', async () => {
+    const fixture = TestBed.createComponent(CatalogoProductoSelector);
+    fixture.componentRef.setInput('kind', 'categoria');
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.options()).toEqual([category]));
+    fixture.detectChanges();
+    const search = fixture.nativeElement.querySelector('#search-category-product') as HTMLInputElement;
+    expect(search.labels?.[0]?.textContent).toContain('Buscar categoría');
+    search.focus();
+    expect(document.activeElement).toBe(search);
+    const option = fixture.nativeElement.querySelector('[aria-label="Categorías disponibles"] button') as HTMLButtonElement;
+    expect(option.type).toBe('button');
+    expect(option.tabIndex).toBe(0);
+    option.focus();
+    expect(document.activeElement).toBe(option);
+    expect(option.getAttribute('aria-pressed')).toBe('false');
+    fixture.componentRef.setInput('selected', [category]);
+    fixture.detectChanges();
+    expect(option.getAttribute('aria-pressed')).toBe('true');
+    expect(option.disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('[aria-label="Quitar Herramientas"]')).not.toBeNull();
+  });
 });

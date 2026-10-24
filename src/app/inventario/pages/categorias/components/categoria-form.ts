@@ -1,8 +1,10 @@
 import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 import type { Categoria } from '../../../../api/interfaces/inventario/categoria.interface';
+import { Icon } from '../../../../shared/components/icon/icon';
 
 @Component({
   selector: 'categoria-form',
+  imports: [Icon],
   templateUrl: './categoria-form.html',
   host: { class: 'block min-w-0' },
 })

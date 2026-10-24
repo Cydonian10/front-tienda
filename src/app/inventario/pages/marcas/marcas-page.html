@@ -8,8 +8,10 @@
   </header>
 
   @if (selection()) {
-    <marca-form [brand]="selection() === 'new' ? null : $any(selection())" [saving]="saving()" [serverError]="formError()"
-      (saved)="save($event)" (cancelled)="closeForm()" />
+    <catalogo-form-dialog titleId="marca-form-title" [busy]="saving()" (closeRequested)="closeForm()">
+      <marca-form [brand]="selection() === 'new' ? null : $any(selection())" [saving]="saving()" [serverError]="formError()"
+        (saved)="save($event)" (cancelled)="closeForm()" />
+    </catalogo-form-dialog>
   }
 
   <section class="card card-border min-w-0 bg-base-100" aria-labelledby="marcas-list-title">
@@ -21,8 +23,11 @@
       <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div class="w-full sm:max-w-sm">
           <label class="label" for="brands-search">Buscar por nombre</label>
-          <input id="brands-search" type="search" class="input min-h-11 w-full" maxlength="200"
-            [value]="search()" (input)="searchBrands($any($event.target).value)" />
+          <div class="input min-h-11 w-full gap-2">
+            <app-icon name="search" size="18" class="text-base-content/60" />
+            <input id="brands-search" type="search" class="min-w-0 grow" maxlength="200"
+              [value]="search()" (input)="searchBrands($any($event.target).value)" />
+          </div>
         </div>
         <div class="w-full sm:w-48">
           <label class="label" for="brands-status">Estado</label>

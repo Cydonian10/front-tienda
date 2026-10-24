@@ -1,5 +1,6 @@
 import { convertToParamMap, ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { ProductoApi } from '../../../api/inventario/product-api';
 import { UnidadProductoApi } from '../../../api/inventario/unidad-producto-api';
@@ -204,5 +205,29 @@ describe('ProductosPage: terminar revisión', () => {
       marcaId: 'm1', categoriasIds: ['c1'], imagenes: [],
     });
     expect(fixture.componentInstance.product()?.marca.nombre).toBe('Atlas');
+  });
+
+  it('conserva las elecciones y muestra el motivo de la API si una categoría se desactiva antes de crear', async () => {
+    create.mockRejectedValue(new HttpErrorResponse({
+      status: 400, error: { message: 'Alguna categoría está inactiva' },
+    }));
+    const fixture = TestBed.createComponent(ProductosPage);
+    fixture.detectChanges();
+    const page = fixture.componentInstance;
+    const step = fixture.debugElement.query((element) => element.componentInstance instanceof DatosGeneralesStep)
+      .componentInstance as DatosGeneralesStep;
+    await vi.waitFor(() => expect(step.loadingUnidades()).toBe(false));
+    step.model.update((value) => ({ ...value, nombre: 'Martillo', unidadBaseId: 'u1' }));
+    step.setBrand([product.marca]);
+    step.setCategories(product.categorias);
+    await step.save(new Event('submit'));
+    await vi.waitFor(() => expect(page.createMutation.isError()).toBe(true));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain('Alguna categoría está inactiva');
+    expect(page.step()).toBe(0);
+    expect(page.product()).toBeNull();
+    expect(step.brandSelected()).toEqual([product.marca]);
+    expect(step.categoriesSelected()).toEqual(product.categorias);
+    expect(step.model().nombre).toBe('Martillo');
   });
 });

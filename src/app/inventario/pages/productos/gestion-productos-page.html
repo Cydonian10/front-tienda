@@ -61,12 +61,11 @@
               }
             </div>
             <div class="border-t border-base-300 pt-5">
-              <h3 class="mb-4 text-lg font-bold">Datos generales y galería</h3>
+              <h3 class="mb-4 text-lg font-bold">Datos generales, clasificación y galería</h3>
               <datos-generales-step
                 [product]="product"
                 [management]="true"
                 [canEdit]="permissions.edit()"
-                [savedVersion]="savedVersion()"
                 [saving]="updateMutation.isPending()"
                 (update)="saveProduct($event)"
                 (discardRequested)="discardEdit()"

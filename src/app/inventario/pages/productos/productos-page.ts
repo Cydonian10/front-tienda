@@ -1,4 +1,5 @@
-import { Component, inject, signal, viewChild } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatosGeneralesStep } from './components/datos-generales-step/datos-generales-step';
 import { ProductosHeader } from './components/productos-header/productos-header';
@@ -47,6 +48,17 @@ export default class ProductosPage {
   private readonly actions = useProductoApi();
   readonly createMutation = this.actions.crearMutation;
   readonly updateMutation = this.actions.actualizarMutation;
+  readonly createError = computed(() => {
+    const error = this.createMutation.error();
+    if (error instanceof HttpErrorResponse) {
+      const message: unknown = error.error?.message;
+      if (typeof message === 'string' && message.trim()) return message;
+      if (Array.isArray(message) && message.every((item) => typeof item === 'string')) {
+        return message.join('. ');
+      }
+    }
+    return 'No se pudo crear el producto. Comprueba los datos e inténtalo de nuevo.';
+  });
   readonly steps: readonly ProductStep[] = [
     { title: 'Datos generales', detail: 'Lo esencial del producto' },
     { title: 'Variantes', detail: 'SKU, precio y atributos' },

@@ -1,6 +1,6 @@
 # SPEC 10 — API de marcas y categorías para productos
 
-> **Status:** Borrador
+> **Status:** Aprobado
 > **Depends on:** SPEC 05
 > **Date:** 2026-10-23
 > **Objective:** Crear catálogos de marcas y categorías en la API y exigir una marca y al menos una categoría al registrar productos.

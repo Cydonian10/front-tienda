@@ -15,9 +15,6 @@
       <label class="block text-sm font-semibold" [for]="'variante-' + fila().id"
         >Producto y variante *</label
       >
-      @if (variante(); as elegida) {
-        <p class="text-sm font-semibold">{{ elegida.producto.nombre }} · {{ elegida.variante.sku }}</p>
-      }
       <input
         class="input h-11 w-full"
         type="search"
@@ -26,7 +23,9 @@
         [id]="'variante-' + fila().id"
         [attr.aria-controls]="'opciones-' + fila().id"
         [attr.aria-expanded]="abierto() && !!filtro()"
-        [attr.aria-activedescendant]="abierto() && indiceActivo() >= 0 ? 'opcion-' + fila().id + '-' + indiceActivo() : null"
+        [attr.aria-activedescendant]="
+          abierto() && indiceActivo() >= 0 ? 'opcion-' + fila().id + '-' + indiceActivo() : null
+        "
         [disabled]="!origen()"
         [placeholder]="origen() ? 'Buscar por nombre o SKU' : 'Selecciona primero un almacén'"
         [value]="busqueda()"
@@ -35,21 +34,33 @@
         (keydown)="tecla($event)"
       />
       @if (abierto() && filtro()) {
-        <div [id]="'opciones-' + fila().id" class="rounded-box border border-base-300 bg-base-100 p-2">
+        <div
+          [id]="'opciones-' + fila().id"
+          class="rounded-box border border-base-300 bg-base-100 p-2"
+        >
           @if (consulta.isPending() || (consulta.isFetching() && !opciones().length)) {
             <p role="status" class="flex items-center gap-2 p-2 text-sm text-base-content/70">
-              <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>Buscando variantes…
+              <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>Buscando
+              variantes…
             </p>
           } @else if (consulta.isError()) {
             <div role="alert" class="space-y-2 p-2 text-sm">
               <p>No se pudo buscar variantes. Comprueba la conexión e inténtalo de nuevo.</p>
-              <button type="button" class="btn min-h-11" (click)="consulta.refetch()">Reintentar búsqueda</button>
+              <button type="button" class="btn min-h-11" (click)="consulta.refetch()">
+                Reintentar búsqueda
+              </button>
             </div>
           } @else if (!opciones().length) {
-            <p role="status" class="p-2 text-sm text-base-content/70">No se encontraron variantes.</p>
+            <p role="status" class="p-2 text-sm text-base-content/70">
+              No se encontraron variantes.
+            </p>
           }
           @if (opciones().length) {
-            <ul class="list max-h-64 overflow-y-auto" role="listbox" [attr.aria-label]="'Variantes para fila ' + (indice() + 1)">
+            <ul
+              class="list max-h-64 overflow-y-auto"
+              role="listbox"
+              [attr.aria-label]="'Variantes para fila ' + (indice() + 1)"
+            >
               @for (item of opciones(); track item.variante.id; let index = $index) {
                 <li
                   class="list-row p-0"
@@ -66,14 +77,22 @@
                     (click)="elegir(item)"
                   >
                     {{ item.producto.nombre }} · {{ item.variante.sku }}
-                    @if (variantesSeleccionadas().includes(item.variante.id)) { · Ya añadida }
-                    @else if (!disponible(item)) { · No disponible para esta operación }
+                    @if (variantesSeleccionadas().includes(item.variante.id)) {
+                      · Ya añadida
+                    } @else if (!disponible(item)) {
+                      · No disponible para esta operación
+                    }
                   </button>
                 </li>
               }
             </ul>
             @if (puedeCargarMas()) {
-              <button type="button" class="btn mt-2 min-h-11 w-full" [disabled]="consulta.isFetching()" (click)="cargarMas()">
+              <button
+                type="button"
+                class="btn mt-2 min-h-11 w-full"
+                [disabled]="consulta.isFetching()"
+                (click)="cargarMas()"
+              >
                 {{ consulta.isFetching() ? 'Cargando más…' : 'Cargar más variantes' }}
               </button>
             }
@@ -83,6 +102,18 @@
         <p class="text-xs text-base-content/70">Selecciona un almacén para buscar variantes.</p>
       } @else if (busqueda().trim().length < 2 && !variante()) {
         <p class="text-xs text-base-content/70">Escribe al menos dos caracteres para buscar.</p>
+      }
+      @if (variante(); as elegida) {
+        @if (!abierto() || !filtro()) {
+          <div class="min-w-0 space-y-0.5" role="status">
+            <p class="wrap-break-word text-sm font-semibold leading-snug">
+              {{ elegida.producto.nombre }}
+            </p>
+            <p class="text-xs text-base-content/70 wrap-anywhere">
+              SKU: {{ elegida.variante.sku }}
+            </p>
+          </div>
+        }
       }
     </div>
     <div class="min-w-0 space-y-2">
@@ -111,13 +142,17 @@
       >
         <option value="">Selecciona una unidad</option>
         @for (unidad of variante()?.unidades ?? []; track unidad.id) {
-          <option [value]="unidad.id">{{ unidad.nombre }} ({{ unidad.simbolo }}) · 1 = {{ unidad.factorABase }} base</option>
+          <option [value]="unidad.id">
+            {{ unidad.nombre }} ({{ unidad.simbolo }}) · 1 = {{ unidad.factorABase }} base
+          </option>
         }
       </select>
     </div>
     @if (tipo() === 'ajuste' && fila().cantidad && !fila().cantidad.trim().startsWith('-')) {
       <div class="min-w-0 space-y-2">
-        <label class="block text-sm font-semibold" [for]="'costo-' + fila().id">Costo por unidad base (S/) *</label>
+        <label class="block text-sm font-semibold" [for]="'costo-' + fila().id"
+          >Costo por unidad base (S/) *</label
+        >
         <input
           class="input h-11 w-full"
           [id]="'costo-' + fila().id"
@@ -134,13 +169,19 @@
   </div>
   @if (variante(); as item) {
     <p class="mt-4 text-xs leading-relaxed text-base-content/70" role="status">
-      {{ item.variante.sku }} · Saldo en origen: {{ item.cantidadBase }} {{ item.unidades[0].simbolo }}
+      Saldo en origen: {{ item.cantidadBase }} {{ item.unidades[0].simbolo }}
       @if (fila().cantidad && unidad()) {
         · Equivalencia: {{ base() ?? 'No exacta' }} {{ item.unidades[0].simbolo }} en unidad base
       }
     </p>
-    @if (tipo() === 'ajuste' && !(item.producto.activo && item.variante.activo) && !fila().cantidad.trim().startsWith('-')) {
-      <p role="alert" class="mt-2 text-sm text-error">Esta variante inactiva solo admite ajustes negativos.</p>
+    @if (
+      tipo() === 'ajuste' &&
+      !(item.producto.activo && item.variante.activo) &&
+      !fila().cantidad.trim().startsWith('-')
+    ) {
+      <p role="alert" class="mt-2 text-sm text-error">
+        Esta variante inactiva solo admite ajustes negativos.
+      </p>
     }
   }
 </div>

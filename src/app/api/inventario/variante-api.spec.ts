@@ -47,10 +47,16 @@ describe('VarianteApi', () => {
   });
 
   it('actualiza campos de variante por JSON sin enviar fotos', async () => {
-    const result = api.update('p1', 'v1', { precio: '23.50', codigoBarras: null, activo: false });
+    const result = api.update('p1', 'v1', {
+      precio: '23.50', codigoBarras: null, activo: false,
+      valores: [{ atributoId: 'a1', valor: 'Azul' }],
+    });
     const request = http.expectOne(`${url}/productos/p1/variantes/v1`);
     expect(request.request.method).toBe('PATCH');
-    expect(request.request.body).toEqual({ precio: '23.50', codigoBarras: null, activo: false });
+    expect(request.request.body).toEqual({
+      precio: '23.50', codigoBarras: null, activo: false,
+      valores: [{ atributoId: 'a1', valor: 'Azul' }],
+    });
     request.flush({ id: 'v1', precio: '23.50', codigoBarras: null, activo: false });
     expect((await result).precio).toBe('23.50');
   });
@@ -61,6 +67,7 @@ describe('VarianteApi', () => {
       precio: '25.00',
       codigoBarras: null,
       activo: false,
+      valores: [{ atributoId: 'a1', valor: 'Azul' }],
       imagenesConservarIds: ['asociacion-propia'],
       imagenes: [image],
     });
@@ -70,6 +77,7 @@ describe('VarianteApi', () => {
     expect(body.get('precio')).toBe('25.00');
     expect(body.get('codigoBarras')).toBe('');
     expect(body.get('activo')).toBe('false');
+    expect(body.get('valores')).toBe('[{"atributoId":"a1","valor":"Azul"}]');
     expect(body.get('imagenesConservarIds')).toBe('["asociacion-propia"]');
     expect(body.getAll('imagenes')).toEqual([image]);
     request.flush({ id: 'v1' });

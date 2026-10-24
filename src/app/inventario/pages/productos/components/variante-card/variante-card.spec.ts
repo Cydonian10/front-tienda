@@ -118,6 +118,7 @@ describe('VarianteCard', () => {
     card.setPrice({ target: { value: '25.00' } } as unknown as Event);
     card.setBarcode({ target: { value: '' } } as unknown as Event);
     card.setActive({ target: { checked: false } } as unknown as Event);
+    card.setValue('a1', { target: { value: 'Azul' } } as unknown as Event);
     const file = new File(['foto'], 'foto.png', { type: 'image/png' });
     const input = document.createElement('input');
     Object.defineProperty(input, 'files', { value: [file] });
@@ -128,12 +129,46 @@ describe('VarianteCard', () => {
     await vi.waitFor(() => expect(card.updateMutation.isError()).toBe(true));
     expect(update).toHaveBeenCalledWith('p1', 'v1', {
       precio: '25.00', codigoBarras: null, activo: false,
+      valores: [{ atributoId: 'a1', valor: 'Azul' }],
       imagenesConservarIds: [ownImage.id], imagenes: [file],
     });
     expect(card.dirty()).toBe(true);
     expect(card.newImages()).toHaveLength(1);
+    expect(card.model().valores['a1']).toBe('Azul');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('SKU no disponible');
+  });
+
+  it('edita un atributo sin modificar el SKU y limpia el borrador tras guardar', async () => {
+    update.mockResolvedValue({ ...variant, valores: [{ atributoId: 'a1', valor: 'Azul' }] });
+    const fixture = setup(variant, true);
+    const input = fixture.nativeElement.querySelector('input[id^="value-"]') as HTMLInputElement;
+    expect(input.value).toBe('Negro');
+    input.value = ' Azul ';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.dirty()).toBe(true);
+    await fixture.componentInstance.save(new Event('submit'));
+    expect(update).toHaveBeenCalledWith('p1', 'v1', expect.objectContaining({
+      valores: [{ atributoId: 'a1', valor: 'Azul' }],
+    }));
+    fixture.componentRef.setInput('variant', { ...variant, valores: [{ atributoId: 'a1', valor: 'Azul' }] });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.dirty()).toBe(false);
+    expect(fixture.componentInstance.model().valores['a1']).toBe('Azul');
+  });
+
+  it('impide guardar valores vacíos o de más de 150 caracteres', async () => {
+    const fixture = setup(variant, true);
+    const card = fixture.componentInstance;
+    for (const invalid of ['   ', 'x'.repeat(151)]) {
+      card.setValue('a1', { target: { value: invalid } } as unknown as Event);
+      fixture.detectChanges();
+      expect(card.valuesError()).toBe(true);
+      expect((fixture.nativeElement.querySelector('button[type=submit]') as HTMLButtonElement).disabled).toBe(true);
+      await card.save(new Event('submit'));
+    }
+    expect(update).not.toHaveBeenCalled();
   });
 
   it('no admite más de diez fotos propias', () => {

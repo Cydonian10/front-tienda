@@ -17,6 +17,7 @@ export interface UpdateVarianteDto {
   precio?: string;
   codigoBarras?: string | null;
   activo?: boolean;
+  valores?: ValorVariante[];
   imagenesConservarIds?: string[];
   imagenes?: File[];
 }

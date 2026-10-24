@@ -10,7 +10,7 @@
       </span>
     </header>
 
-    @if (variant().valores.length) {
+    @if (!canEdit() && variant().valores.length) {
       <dl class="grid min-w-0 gap-2 sm:grid-cols-2" aria-label="Atributos de la variante (solo lectura)">
         @for (item of variant().valores; track item.atributoId) {
           <div class="min-w-0 rounded-field bg-base-200 px-3 py-2 text-sm">
@@ -23,6 +23,29 @@
 
     <form class="min-w-0 space-y-5 border-t border-base-300 pt-5" (submit)="save($event)" novalidate>
       <fieldset [disabled]="!canEdit() || updateMutation.isPending()" class="min-w-0 space-y-5">
+        @if (canEdit() && variant().valores.length) {
+          <div class="grid min-w-0 gap-4 sm:grid-cols-2" aria-label="Valores de atributos">
+            @for (item of variant().valores; track item.atributoId) {
+              <fieldset class="fieldset min-w-0">
+                <label class="label" [for]="'value-' + variant().id + '-' + item.atributoId">
+                  {{ attributeName(item.atributoId) }}
+                </label>
+                <input
+                  class="input w-full min-w-0"
+                  [id]="'value-' + variant().id + '-' + item.atributoId"
+                  type="text"
+                  maxlength="150"
+                  [value]="model().valores[item.atributoId] ?? ''"
+                  [attr.aria-invalid]="!model().valores[item.atributoId]?.trim() || model().valores[item.atributoId].trim().length > 150"
+                  (input)="setValue(item.atributoId, $event)"
+                />
+                @if (!model().valores[item.atributoId]?.trim() || model().valores[item.atributoId].trim().length > 150) {
+                  <p class="text-xs text-error" role="alert">Ingresa un valor de hasta 150 caracteres.</p>
+                }
+              </fieldset>
+            }
+          </div>
+        }
         <div class="grid gap-4 sm:grid-cols-2">
           <fieldset class="fieldset min-w-0">
             <label class="label" [for]="'precio-' + variant().id">Precio (S/)</label>
@@ -143,7 +166,7 @@
       </section>
 
       @if (canEdit()) {
-        <button type="submit" class="btn btn-primary" [disabled]="!dirty() || priceError() || !!imageError() || updateMutation.isPending()">
+        <button type="submit" class="btn btn-primary" [disabled]="!dirty() || priceError() || valuesError() || !!imageError() || updateMutation.isPending()">
           {{ updateMutation.isPending() ? 'Guardando…' : 'Guardar variante' }}
         </button>
       }

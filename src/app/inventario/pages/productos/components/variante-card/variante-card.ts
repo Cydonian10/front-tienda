@@ -35,7 +35,7 @@ export class VarianteCard implements OnDestroy {
   readonly canEdit = input(false);
   readonly galleryQuery = useVarianteImagenes(this.productId, () => this.variant().id);
   readonly updateMutation = useActualizarVariante();
-  readonly model = signal({ precio: '', codigoBarras: '', activo: true });
+  readonly model = signal({ precio: '', codigoBarras: '', activo: true, valores: {} as Record<string, string> });
   readonly removedIds = signal<string[]>([]);
   readonly newImages = signal<NewImage[]>([]);
   readonly imageError = signal('');
@@ -56,11 +56,23 @@ export class VarianteCard implements OnDestroy {
     }
     return this.galleryQuery.data() ?? [];
   });
+  readonly valuesDirty = computed(() =>
+    this.variant().valores.some((item) =>
+      this.model().valores[item.atributoId] !== item.valor,
+    ),
+  );
+  readonly valuesError = computed(() =>
+    this.variant().valores.some((item) => {
+      const value = this.model().valores[item.atributoId]?.trim() ?? '';
+      return !value || value.length > 150;
+    }),
+  );
   readonly dirty = computed(() => {
     const model = this.model();
     const variant = this.variant();
     return model.precio !== variant.precio || model.codigoBarras !== (variant.codigoBarras ?? '') ||
-      model.activo !== variant.activo || !!this.removedIds().length || !!this.newImages().length;
+      model.activo !== variant.activo || this.valuesDirty() ||
+      !!this.removedIds().length || !!this.newImages().length;
   });
   readonly priceError = computed(() => !PRICE_PATTERN.test(this.model().precio.trim()));
   readonly apiError = computed(() => {
@@ -84,6 +96,7 @@ export class VarianteCard implements OnDestroy {
           precio: variant.precio,
           codigoBarras: variant.codigoBarras ?? '',
           activo: variant.activo,
+          valores: Object.fromEntries(variant.valores.map((item) => [item.atributoId, item.valor])),
         });
         this.previousVariantId = variant.id;
         this.previousSavedVersion = version;
@@ -105,6 +118,14 @@ export class VarianteCard implements OnDestroy {
 
   setActive(event: Event): void {
     this.model.update((value) => ({ ...value, activo: (event.target as HTMLInputElement).checked }));
+  }
+
+  setValue(attributeId: string, event: Event): void {
+    const text = (event.target as HTMLInputElement).value;
+    this.model.update((current) => ({
+      ...current,
+      valores: { ...current.valores, [attributeId]: text },
+    }));
   }
 
   addImages(event: Event): void {
@@ -159,13 +180,20 @@ export class VarianteCard implements OnDestroy {
   async save(event: Event): Promise<void> {
     event.preventDefault();
     if (!this.canEdit() || !this.dirty() || this.updateMutation.isPending() ||
-        this.priceError() || this.model().codigoBarras.trim().length > 100 || this.imageError()) return;
+        this.priceError() || this.valuesError() ||
+        this.model().codigoBarras.trim().length > 100 || this.imageError()) return;
     const value = this.model();
     const dto: UpdateVarianteDto = {
       precio: value.precio.trim(),
       codigoBarras: value.codigoBarras.trim() || null,
       activo: value.activo,
     };
+    if (this.valuesDirty()) {
+      dto.valores = this.variant().valores.map((item) => ({
+        atributoId: item.atributoId,
+        valor: value.valores[item.atributoId].trim(),
+      }));
+    }
     if (this.removedIds().length || this.newImages().length) {
       dto.imagenesConservarIds = this.ownImages().map((image) => image.id);
       dto.imagenes = this.newImages().map((image) => image.file);

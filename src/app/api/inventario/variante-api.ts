@@ -39,6 +39,7 @@ export class VarianteApi {
       if (dto.precio !== undefined) body.append('precio', dto.precio);
       if (dto.codigoBarras !== undefined) body.append('codigoBarras', dto.codigoBarras ?? '');
       if (dto.activo !== undefined) body.append('activo', String(dto.activo));
+      if (dto.valores !== undefined) body.append('valores', JSON.stringify(dto.valores));
       if (dto.imagenesConservarIds !== undefined) {
         body.append('imagenesConservarIds', JSON.stringify(dto.imagenesConservarIds));
       }

@@ -1,0 +1,94 @@
+<section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="categorias-title">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 id="categorias-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">Categorías</h1>
+      <p class="mt-2 max-w-prose text-sm text-base-content/70">Organiza los productos sin perder las asociaciones existentes al desactivar una categoría.</p>
+    </div>
+    @if (access.edit()) {
+      <button type="button" class="btn btn-primary min-h-11" (click)="openCreate()">Nueva categoría</button>
+    }
+  </header>
+
+  @if (selection()) {
+    <categoria-form [category]="selection() === 'new' ? null : $any(selection())" [saving]="saving()"
+      [serverError]="formError()" (saved)="save($event)" (cancelled)="closeForm()" />
+  }
+
+  <section class="card card-border min-w-0 bg-base-100" aria-labelledby="categorias-list-title">
+    <div class="card-body gap-5">
+      <div>
+        <h2 id="categorias-list-title" class="card-title">Listado de categorías</h2>
+        <p class="text-sm text-base-content/70">Busca por nombre y revisa su disponibilidad para nuevos productos.</p>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="w-full sm:max-w-sm">
+          <label class="label" for="categories-search">Buscar por nombre</label>
+          <input id="categories-search" type="search" class="input min-h-11 w-full" maxlength="200"
+            [value]="search()" (input)="searchCategories($any($event.target).value)" />
+        </div>
+        <div class="w-full sm:w-48">
+          <label class="label" for="categories-status">Estado</label>
+          <select id="categories-status" class="select min-h-11 w-full" [value]="status()" (change)="changeStatus($any($event.target).value)">
+            <option value="todos">Todos</option><option value="activos">Activos</option><option value="inactivos">Inactivos</option>
+          </select>
+        </div>
+        @if (search() || status() !== 'todos') {
+          <button type="button" class="btn btn-ghost min-h-11" (click)="clearFilters()">Limpiar filtros</button>
+        }
+      </div>
+      @if (actionError()) { <div class="alert alert-error alert-soft" role="alert">{{ actionError() }}</div> }
+
+      @if (query.isPending()) {
+        <p class="py-8 text-sm text-base-content/70" role="status">Cargando categorías…</p>
+      } @else if (query.isError()) {
+        <div class="alert alert-error alert-soft" role="alert">
+          No se pudieron cargar las categorías.
+          <button type="button" class="btn btn-sm min-h-11" (click)="query.refetch()">Reintentar</button>
+        </div>
+      } @else if (query.data(); as response) {
+        @if (response.items.length) {
+          <ul class="divide-y divide-base-300" aria-label="Categorías registradas">
+            @for (category of response.items; track category.id) {
+              <li class="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="min-w-0 space-y-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h3 class="font-semibold break-words">{{ category.nombre }}</h3>
+                    <span class="badge badge-outline" [class.badge-success]="category.activo">
+                      {{ category.activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </div>
+                  @if (category.descripcion) { <p class="text-sm text-base-content/70 break-words">{{ category.descripcion }}</p> }
+                  @else { <p class="text-sm text-base-content/60">Sin descripción</p> }
+                </div>
+                @if (access.edit()) {
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline min-h-11" [disabled]="saving()" (click)="openEdit(category)"
+                      [attr.aria-label]="'Editar ' + category.nombre">Editar</button>
+                    <button type="button" class="btn btn-ghost min-h-11" [disabled]="statusMutation.isPending()"
+                      (click)="toggleStatus(category)" [attr.aria-label]="(category.activo ? 'Desactivar ' : 'Activar ') + category.nombre">
+                      {{ category.activo ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        } @else if (search().trim().length >= 2 || status() !== 'todos') {
+          <div role="status" class="space-y-3 py-6">
+            <p>No hay categorías que coincidan con los filtros.</p>
+            <button type="button" class="btn min-h-11" (click)="clearFilters()">Limpiar filtros</button>
+          </div>
+        } @else {
+          <p role="status" class="py-6 text-base-content/70">Todavía no hay categorías registradas.</p>
+        }
+        <footer class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 pt-4 text-sm">
+          <p role="status" class="tabular-nums">{{ response.totalItems }} resultados · Página {{ page() }} de {{ totalPages() }}</p>
+          <div class="flex gap-2">
+            <button type="button" class="btn min-h-11" [disabled]="page() <= 1 || query.isFetching()" (click)="page.update(value => value - 1)">Anterior</button>
+            <button type="button" class="btn min-h-11" [disabled]="page() >= totalPages() || query.isFetching()" (click)="page.update(value => value + 1)">Siguiente</button>
+          </div>
+        </footer>
+      }
+    </div>
+  </section>
+</section>

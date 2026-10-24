@@ -1,0 +1,87 @@
+<section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="marcas-title">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 id="marcas-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">Marcas</h1>
+      <p class="mt-2 max-w-prose text-sm text-base-content/70">Identifica cada producto con su marca y conserva sus vínculos si se desactiva.</p>
+    </div>
+    @if (access.edit()) { <button type="button" class="btn btn-primary min-h-11" (click)="openCreate()">Nueva marca</button> }
+  </header>
+
+  @if (selection()) {
+    <marca-form [brand]="selection() === 'new' ? null : $any(selection())" [saving]="saving()" [serverError]="formError()"
+      (saved)="save($event)" (cancelled)="closeForm()" />
+  }
+
+  <section class="card card-border min-w-0 bg-base-100" aria-labelledby="marcas-list-title">
+    <div class="card-body gap-5">
+      <div>
+        <h2 id="marcas-list-title" class="card-title">Listado de marcas</h2>
+        <p class="text-sm text-base-content/70">Consulta el estado y la imagen disponible para cada marca.</p>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="w-full sm:max-w-sm">
+          <label class="label" for="brands-search">Buscar por nombre</label>
+          <input id="brands-search" type="search" class="input min-h-11 w-full" maxlength="200"
+            [value]="search()" (input)="searchBrands($any($event.target).value)" />
+        </div>
+        <div class="w-full sm:w-48">
+          <label class="label" for="brands-status">Estado</label>
+          <select id="brands-status" class="select min-h-11 w-full" [value]="status()" (change)="changeStatus($any($event.target).value)">
+            <option value="todos">Todos</option><option value="activos">Activos</option><option value="inactivos">Inactivos</option>
+          </select>
+        </div>
+        @if (search() || status() !== 'todos') {
+          <button type="button" class="btn btn-ghost min-h-11" (click)="clearFilters()">Limpiar filtros</button>
+        }
+      </div>
+      @if (actionError()) { <div class="alert alert-error alert-soft" role="alert">{{ actionError() }}</div> }
+
+      @if (query.isPending()) {
+        <p class="py-8 text-sm text-base-content/70" role="status">Cargando marcas…</p>
+      } @else if (query.isError()) {
+        <div class="alert alert-error alert-soft" role="alert">
+          No se pudieron cargar las marcas.
+          <button type="button" class="btn btn-sm min-h-11" (click)="query.refetch()">Reintentar</button>
+        </div>
+      } @else if (query.data(); as response) {
+        @if (response.items.length) {
+          <ul class="divide-y divide-base-300" aria-label="Marcas registradas">
+            @for (brand of response.items; track brand.id) {
+              <li class="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex min-w-0 items-center gap-3">
+                  <marca-imagen [id]="brand.id" [imagenId]="brand.imagenId" [nombre]="brand.nombre" />
+                  <div class="min-w-0 space-y-1">
+                    <h3 class="font-semibold break-words">{{ brand.nombre }}</h3>
+                    <span class="badge badge-outline" [class.badge-success]="brand.activo">{{ brand.activo ? 'Activo' : 'Inactivo' }}</span>
+                  </div>
+                </div>
+                @if (access.edit()) {
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline min-h-11" [disabled]="saving()" (click)="openEdit(brand)"
+                      [attr.aria-label]="'Editar ' + brand.nombre">Editar</button>
+                    <button type="button" class="btn btn-ghost min-h-11" [disabled]="statusMutation.isPending()"
+                      (click)="toggleStatus(brand)" [attr.aria-label]="(brand.activo ? 'Desactivar ' : 'Activar ') + brand.nombre">
+                      {{ brand.activo ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        } @else if (search().trim().length >= 2 || status() !== 'todos') {
+          <div role="status" class="space-y-3 py-6">
+            <p>No hay marcas que coincidan con los filtros.</p>
+            <button type="button" class="btn min-h-11" (click)="clearFilters()">Limpiar filtros</button>
+          </div>
+        } @else { <p role="status" class="py-6 text-base-content/70">Todavía no hay marcas registradas.</p> }
+        <footer class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 pt-4 text-sm">
+          <p role="status" class="tabular-nums">{{ response.totalItems }} resultados · Página {{ page() }} de {{ totalPages() }}</p>
+          <div class="flex gap-2">
+            <button type="button" class="btn min-h-11" [disabled]="page() <= 1 || query.isFetching()" (click)="page.update(value => value - 1)">Anterior</button>
+            <button type="button" class="btn min-h-11" [disabled]="page() >= totalPages() || query.isFetching()" (click)="page.update(value => value + 1)">Siguiente</button>
+          </div>
+        </footer>
+      }
+    </div>
+  </section>
+</section>

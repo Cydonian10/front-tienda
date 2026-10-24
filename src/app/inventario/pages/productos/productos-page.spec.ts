@@ -23,6 +23,8 @@ describe('ProductosPage: terminar revisión', () => {
     imagenes: [],
     unidadBaseId: 'u1',
     puedeCambiarUnidadBase: true,
+    marca: { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
+    categorias: [{ id: 'c1', nombre: 'Herramientas', activo: true }],
   };
   const navigate = vi.fn().mockResolvedValue(true);
   const create = vi.fn();
@@ -82,6 +84,8 @@ describe('ProductosPage: terminar revisión', () => {
       activo: true,
       unidadBaseId: 'u1',
       imagenes: [],
+      marcaId: 'm1',
+      categoriasIds: ['c1'],
     });
     fixture.componentInstance.product.set(product);
     await fixture.componentInstance.updateProduct({

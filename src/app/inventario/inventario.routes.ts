@@ -29,6 +29,18 @@ const inventarioRoutes: Routes = [
     runGuardsAndResolvers: 'paramsOrQueryParamsChange',
   },
   {
+    path: 'marcas',
+    loadComponent: () => import('./pages/marcas/marcas-page'),
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ)],
+    canDeactivate: [(page: import('./pages/marcas/marcas-page').default) => page.canLeave()],
+  },
+  {
+    path: 'categorias',
+    loadComponent: () => import('./pages/categorias/categorias-page'),
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ)],
+    canDeactivate: [(page: import('./pages/categorias/categorias-page').default) => page.canLeave()],
+  },
+  {
     path: 'unidades',
     loadComponent: () => import('./pages/unidades/unidades-page'),
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.UNIDADES_READ)],

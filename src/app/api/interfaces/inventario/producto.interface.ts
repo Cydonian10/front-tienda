@@ -3,10 +3,14 @@ export interface CreateProductDto {
   descripcion: string;
   unidadBaseId: string;
   activo: boolean;
+  marcaId: string;
+  categoriasIds: string[];
   imagenes: File[];
 }
 
-export interface UpdateProductDto extends Omit<CreateProductDto, 'imagenes'> {
+export interface UpdateProductDto extends Omit<CreateProductDto, 'imagenes' | 'marcaId' | 'categoriasIds'> {
+  marcaId?: string;
+  categoriasIds?: string[];
   imagenesConservarIds?: string[];
   imagenes?: File[];
 }
@@ -26,6 +30,8 @@ export interface ProductResponse {
   activo: boolean;
   puedeCambiarUnidadBase: boolean;
   imagenes: ProductImage[];
+  marca: { id: string; nombre: string; activo: boolean; imagenId: string | null };
+  categorias: { id: string; nombre: string; activo: boolean }[];
 }
 
 export interface ProductoSeleccion {

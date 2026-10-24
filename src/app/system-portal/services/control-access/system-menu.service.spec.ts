@@ -107,7 +107,9 @@ describe('SystemMenuService', () => {
 
     expect(service.isImplemented('INVENTARIO')).toBe(true);
     expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/productos');
-    expect(service.menuFor('INVENTARIO')[0].items.map((item) => item.label)).toEqual(['Productos']);
+    expect(service.menuFor('INVENTARIO')[0].items.map((item) => item.label)).toEqual([
+      'Productos', 'Marcas', 'Categorías',
+    ]);
 
     TestBed.inject(AuthStore).setProfile({
       isSuperAdmin: false,

@@ -25,6 +25,8 @@ describe('UnidadesStep', () => {
     activo: true,
     imagenes: [],
     puedeCambiarUnidadBase: true,
+    marca: { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
+    categorias: [{ id: 'c1', nombre: 'Herramientas', activo: true }],
   };
   const unitsApi = { list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn() };
   const confirmation = { confirm: vi.fn() };

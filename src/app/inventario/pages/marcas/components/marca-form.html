@@ -1,0 +1,40 @@
+<form class="card card-border bg-base-100" (submit)="save($event)" novalidate aria-labelledby="marca-form-title">
+  <div class="card-body gap-5">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <h2 id="marca-form-title" class="card-title">{{ brand() ? 'Editar marca' : 'Nueva marca' }}</h2>
+      <button type="button" class="btn btn-ghost min-h-11" [disabled]="saving()" (click)="cancelled.emit()">Cerrar</button>
+    </div>
+    <div>
+      <label class="label" for="brand-name">Nombre <span class="text-error">*</span></label>
+      <input id="brand-name" type="text" class="input w-full" autocomplete="off" maxlength="201"
+        [value]="name()" [attr.aria-invalid]="!!validation()" [attr.aria-describedby]="validation() ? 'brand-validation' : null"
+        (input)="name.set($any($event.target).value)" />
+    </div>
+    <div class="space-y-3">
+      <p class="label">Imagen (opcional)</p>
+      @if (preview()) {
+        <img [src]="preview()" alt="Vista previa de imagen nueva" class="size-28 rounded-field object-cover" />
+      } @else if (brand()?.imagenId && !removeImage()) {
+        <marca-imagen [id]="brand()!.id" [imagenId]="brand()!.imagenId" [nombre]="brand()!.nombre" />
+      } @else { <p class="text-sm text-base-content/70">Sin imagen</p> }
+      <div class="flex flex-wrap items-end gap-3">
+        <div class="min-w-0 flex-1 sm:max-w-sm">
+          <label class="label" for="brand-image">Subir o reemplazar imagen</label>
+          <input id="brand-image" type="file" class="file-input w-full min-h-11" accept="image/jpeg,image/png,image/webp"
+            [disabled]="saving()" (change)="chooseImage($event)" />
+        </div>
+        @if (preview() || (brand()?.imagenId && !removeImage())) {
+          <button type="button" class="btn btn-ghost min-h-11" [disabled]="saving()" (click)="remove()">Quitar imagen</button>
+        }
+      </div>
+      <p class="text-xs text-base-content/70">JPEG, PNG o WebP; máximo 5 MB. La imagen solo cambia al guardar.</p>
+    </div>
+    @if (validation()) { <p id="brand-validation" class="text-sm text-error" role="alert">{{ validation() }}</p> }
+    @if (serverError()) { <div class="alert alert-error alert-soft" role="alert">{{ serverError() }}</div> }
+    <div class="card-actions justify-end">
+      <button type="submit" class="btn btn-primary min-h-11" [disabled]="saving()">
+        {{ saving() ? 'Guardando…' : brand() ? 'Guardar cambios' : 'Crear marca' }}
+      </button>
+    </div>
+  </div>
+</form>

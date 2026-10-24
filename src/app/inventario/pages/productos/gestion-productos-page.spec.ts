@@ -77,6 +77,8 @@ describe('GestionProductosPage', () => {
     const product = {
       id: productId, nombre: 'Martillo', descripcion: 'Acero', activo: true,
       unidadBaseId: 'u1', imagenes: [], puedeCambiarUnidadBase: !locked,
+      marca: { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
+      categorias: [{ id: 'c1', nombre: 'Herramientas', activo: true }],
     };
     getById.mockResolvedValue(product);
     const fixture = TestBed.createComponent(GestionProductosPage);
@@ -101,6 +103,8 @@ describe('GestionProductosPage', () => {
     getById.mockResolvedValue({
       id: productId, nombre: 'Martillo', descripcion: null, activo: false,
       unidadBaseId: 'u1', imagenes: [], puedeCambiarUnidadBase: true,
+      marca: { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
+      categorias: [{ id: 'c1', nombre: 'Herramientas', activo: true }],
     });
     const fixture = TestBed.createComponent(GestionProductosPage);
     fixture.detectChanges();
@@ -264,6 +268,8 @@ describe('GestionProductosPage', () => {
         id: productId, nombre: 'Martillo', descripcion: null, activo: true,
         unidadBaseId: 'u1', puedeCambiarUnidadBase: true,
         imagenes: [{ id: 'as1', imagenId: 'i1', orden: 0, esPrincipal: true }],
+        marca: { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
+        categorias: [{ id: 'c1', nombre: 'Herramientas', activo: true }],
       };
       getById.mockResolvedValue(product);
       getImage.mockResolvedValue(new Blob(['guardada']));

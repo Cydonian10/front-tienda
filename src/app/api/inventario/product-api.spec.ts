@@ -60,6 +60,8 @@ describe('ProductoApi', () => {
       unidadBaseId: 'unidad-1',
       activo: true,
       imagenes: [portada, otra],
+      marcaId: 'm1',
+      categoriasIds: ['c1'],
     });
     const request = http.expectOne('http://localhost:3000/api/productos');
     expect(request.request.method).toBe('POST');

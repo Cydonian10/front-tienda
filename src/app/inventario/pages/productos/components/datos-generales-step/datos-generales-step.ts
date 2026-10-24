@@ -70,6 +70,8 @@ export class DatosGeneralesStep implements OnDestroy {
       model.descripcion !== (product.descripcion ?? '') ||
       model.unidadBaseId !== product.unidadBaseId ||
       model.activo !== product.activo ||
+      model.marcaId !== product.marca.id ||
+      model.categoriasIds.join(',') !== product.categorias.map((category) => category.id).join(',') ||
       this.images().length > 0 ||
       this.removedImageIds().length > 0
     );
@@ -85,6 +87,8 @@ export class DatosGeneralesStep implements OnDestroy {
     descripcion: '',
     unidadBaseId: '',
     activo: true,
+    marcaId: '',
+    categoriasIds: [],
   });
 
   readonly productForm = form(this.model, (path) => {
@@ -117,6 +121,8 @@ export class DatosGeneralesStep implements OnDestroy {
             descripcion: product.descripcion ?? '',
             unidadBaseId: product.unidadBaseId,
             activo: product.activo,
+            marcaId: product.marca.id,
+            categoriasIds: product.categorias.map((category) => category.id),
           });
           this.editing.set(false);
           this.editingChange.emit(false);
@@ -125,7 +131,7 @@ export class DatosGeneralesStep implements OnDestroy {
           this.clearNewImages();
           this.removedImageIds.set([]);
           this.clearSavedImages();
-          this.model.set({ nombre: '', descripcion: '', unidadBaseId: '', activo: true });
+          this.model.set({ nombre: '', descripcion: '', unidadBaseId: '', activo: true, marcaId: '', categoriasIds: [] });
           this.editing.set(false);
           this.editingChange.emit(false);
         }
@@ -149,6 +155,8 @@ export class DatosGeneralesStep implements OnDestroy {
       descripcion: product.descripcion ?? '',
       unidadBaseId: product.unidadBaseId,
       activo: product.activo,
+      marcaId: product.marca.id,
+      categoriasIds: product.categorias.map((category) => category.id),
     });
     this.clearNewImages();
     this.removedImageIds.set([]);
@@ -282,14 +290,21 @@ export class DatosGeneralesStep implements OnDestroy {
       const dto = { ...value, nombre: value.nombre.trim() };
       if (this.product()) {
         if (this.unitLocked() && dto.unidadBaseId !== this.product()!.unidadBaseId) return;
+        const { marcaId, categoriasIds, ...otherFields } = dto;
+        const relations = {
+          ...(marcaId !== this.product()!.marca.id ? { marcaId } : {}),
+          ...(categoriasIds.join(',') !== this.product()!.categorias.map((category) => category.id).join(',')
+            ? { categoriasIds } : {}),
+        };
+        const updateDto = { ...otherFields, ...relations };
         this.update.emit(
           this.removedImageIds().length || this.images().length
             ? {
-                ...dto,
+                ...updateDto,
                 imagenesConservarIds: this.existingImages().map((image) => image.id),
                 imagenes: this.images().map((image) => image.file),
               }
-            : dto,
+            : updateDto,
         );
       } else {
         this.create.emit({ ...dto, imagenes: this.images().map((image) => image.file) });

@@ -12,6 +12,7 @@ import { AuthStore } from '../store/auth/auth.store';
 import { AuthProfileService } from '../auth/services/auth-profile.service';
 import { AuthSessionService } from '../auth/services/auth-session.service';
 import { ProductoApi } from '../api/inventario/product-api';
+import { CategoriaApi } from '../api/inventario/categoria-api';
 import { ConfirmDialogService } from '../shared/services/confirm-dialog/confirm-dialog.service';
 import { ToastService } from '../shared/services/toast/toast.service';
 import GestionProductosPage from './pages/productos/gestion-productos-page';
@@ -44,6 +45,7 @@ describe('rutas de inventario', () => {
           },
         },
         { provide: VarianteApi, useValue: { list: listVariants } },
+        { provide: CategoriaApi, useValue: { list: vi.fn().mockResolvedValue({ items: [], page: 1, limit: 20, totalItems: 0 }) } },
         { provide: ConfirmDialogService, useValue: { confirm } },
         { provide: ToastService, useValue: { success: vi.fn() } },
         {
@@ -274,6 +276,29 @@ describe('rutas de inventario', () => {
     expect(TestBed.inject(Router).url).toBe('/admin');
   });
 
+  it('permite consultar marcas y categorías con PRODUCTOS_LEER de INVENTARIO', async () => {
+    setPermissions([{ code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create('/admin/inventario/marcas');
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/marcas');
+    expect(harness.routeNativeElement?.textContent).toContain('Marcas');
+    await TestBed.inject(Router).navigateByUrl('/admin/inventario/categorias');
+    harness.detectChanges();
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/categorias');
+    expect(harness.routeNativeElement?.textContent).toContain('Categorías');
+  });
+
+  it('deniega ambas rutas sin PRODUCTOS_LEER de INVENTARIO', async () => {
+    setPermissions([{ code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'ACCESS_CONTROL' }]);
+    const harness = await RouterTestingHarness.create('/admin/inventario/marcas');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+    await harness.navigateByUrl('/admin/inventario/categorias');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+
+    setPermissions([{ code: PERMISSION_CODES.PRODUCTS_UPDATE, systemCode: 'INVENTARIO' }]);
+    await harness.navigateByUrl('/admin/inventario/categorias');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+  });
+
   it('al cambiar de producto cancelar conserva el formulario y aceptar descarta solo el borrador', async () => {
     setPermissions([
       { code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' },
@@ -289,6 +314,8 @@ describe('rutas de inventario', () => {
       activo: true,
       imagenes: [],
       puedeCambiarUnidadBase: true,
+      marca: { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
+      categorias: [{ id: 'c1', nombre: 'Herramientas', activo: true }],
     }));
     const firstUrl = `/admin/inventario/productos/gestion?productoId=${firstId}`;
     const secondUrl = `/admin/inventario/productos/gestion?productoId=${secondId}`;
@@ -321,6 +348,8 @@ describe('rutas de inventario', () => {
       activo: true,
       imagenes: [],
       puedeCambiarUnidadBase: true,
+      marca: { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
+      categorias: [{ id: 'c1', nombre: 'Herramientas', activo: true }],
     });
     listVariants.mockResolvedValue([
       {

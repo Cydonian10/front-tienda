@@ -1,0 +1,27 @@
+<form class="card card-border bg-base-100" (submit)="save($event)" novalidate aria-labelledby="categoria-form-title">
+  <div class="card-body gap-5">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <h2 id="categoria-form-title" class="card-title">{{ category() ? 'Editar categoría' : 'Nueva categoría' }}</h2>
+      <button type="button" class="btn btn-ghost min-h-11" [disabled]="saving()" (click)="cancelled.emit()">Cerrar</button>
+    </div>
+    <div>
+      <label class="label" for="category-name">Nombre <span class="text-error">*</span></label>
+      <input id="category-name" type="text" class="input w-full" autocomplete="off" maxlength="201"
+        [value]="name()" [attr.aria-invalid]="!!validation()" [attr.aria-describedby]="validation() ? 'category-validation' : null"
+        (input)="name.set($any($event.target).value)" />
+    </div>
+    <div>
+      <label class="label" for="category-description">Descripción (opcional)</label>
+      <textarea id="category-description" class="textarea min-h-24 w-full" [value]="description()"
+        (input)="description.set($any($event.target).value)"></textarea>
+      <p class="mt-1 text-xs text-base-content/70">Déjala vacía para quitar la descripción.</p>
+    </div>
+    @if (validation()) { <p id="category-validation" class="text-sm text-error" role="alert">{{ validation() }}</p> }
+    @if (serverError()) { <div class="alert alert-error alert-soft" role="alert">{{ serverError() }}</div> }
+    <div class="card-actions justify-end">
+      <button type="submit" class="btn btn-primary min-h-11" [disabled]="saving()">
+        {{ saving() ? 'Guardando…' : category() ? 'Guardar cambios' : 'Crear categoría' }}
+      </button>
+    </div>
+  </div>
+</form>

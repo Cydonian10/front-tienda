@@ -23,6 +23,8 @@ describe('RevisionStep', () => {
     imagenes: [],
     unidadBaseId: 'u1',
     puedeCambiarUnidadBase: true,
+    marca: { id: 'm1', nombre: 'Atlas', activo: true, imagenId: null },
+    categorias: [{ id: 'c1', nombre: 'Herramientas', activo: true }],
   };
 
   it('reutiliza variantes, atributos y unidades en caché para revisar el producto', () => {

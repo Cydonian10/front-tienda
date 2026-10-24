@@ -53,7 +53,18 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             icon: 'package',
             permission: PERMISSION_CODES.PRODUCTS_READ,
           },
-
+          {
+            label: 'Marcas',
+            url: '/admin/inventario/marcas',
+            icon: 'tag',
+            permission: PERMISSION_CODES.PRODUCTS_READ,
+          },
+          {
+            label: 'Categorías',
+            url: '/admin/inventario/categorias',
+            icon: 'tag',
+            permission: PERMISSION_CODES.PRODUCTS_READ,
+          },
           {
             label: 'Unidades de medida',
             url: '/admin/inventario/unidades',

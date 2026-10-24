@@ -120,6 +120,7 @@ describe('acciones de productos', () => {
     create.mockResolvedValue({ id: 'p3', nombre: 'Creado' });
     await expect(actions.crearMutation.mutateAsync({
       nombre: 'Creado', descripcion: '', unidadBaseId: 'u1', activo: true, imagenes: [],
+      marcaId: 'm1', categoriasIds: ['c1'],
     })).resolves.toMatchObject({ id: 'p3' });
     expect(client.getQueryData(productoDetalleQueryKey('p3'))).toMatchObject({ id: 'p3' });
   });

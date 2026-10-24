@@ -14,6 +14,7 @@ export const marcaImagenQueryKey = (id: string, imageId: string) => [...marcaIma
 
 export function useMarcasListado(
   q: () => string, activo: () => boolean | undefined, page: () => number, limit: () => number,
+  enabled: () => boolean = () => true,
 ) {
   const api = inject(MarcaApi);
   return injectQuery(() => {
@@ -23,6 +24,7 @@ export function useMarcasListado(
     return {
       queryKey: marcasListadoQueryKey(search, status, currentPage, pageSize),
       queryFn: () => api.list({ ...(search ? { q: search } : {}), activo: status, page: currentPage, limit: pageSize }),
+      enabled: enabled(),
       retry: false,
     };
   });

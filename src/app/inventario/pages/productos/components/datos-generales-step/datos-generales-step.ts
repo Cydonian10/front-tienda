@@ -19,6 +19,7 @@ import {
 import { FieldErrors } from '../../../../../shared/components/field-errors/field-errors';
 import { Icon } from '../../../../../shared/components/icon/icon';
 import { ProductoApi } from '../../../../../api/inventario/product-api';
+import { CatalogoProductoSelector, type OpcionCatalogo } from './catalogo-producto-selector';
 
 interface SelectedImage {
   file: File;
@@ -27,7 +28,7 @@ interface SelectedImage {
 
 @Component({
   selector: 'datos-generales-step',
-  imports: [Icon, FormField, FieldErrors],
+  imports: [Icon, FormField, FieldErrors, CatalogoProductoSelector],
   templateUrl: './datos-generales-step.html',
   host: { class: 'block min-w-0' },
 })
@@ -55,6 +56,9 @@ export class DatosGeneralesStep implements OnDestroy {
   readonly loadingImages = signal(false);
   readonly imagesLoadError = signal(false);
   readonly imageError = signal('');
+  readonly brandSelected = signal<OpcionCatalogo[]>([]);
+  readonly categoriesSelected = signal<OpcionCatalogo[]>([]);
+  readonly relationsError = signal('');
   readonly existingImages = computed(() =>
     (this.product()?.imagenes ?? [])
       .filter((image) => !this.removedImageIds().includes(image.id))
@@ -100,6 +104,9 @@ export class DatosGeneralesStep implements OnDestroy {
     disabled(path.unidadBaseId, {
       when: () => this.unitLocked(),
     });
+    required(path.marcaId, { message: 'Selecciona una marca.' });
+    validate(path.categoriasIds, ({ value }) => value().length > 0 ? null :
+      { kind: 'required', message: 'Selecciona al menos una categoría.' });
   });
 
   constructor() {
@@ -124,6 +131,9 @@ export class DatosGeneralesStep implements OnDestroy {
             marcaId: product.marca.id,
             categoriasIds: product.categorias.map((category) => category.id),
           });
+          this.brandSelected.set([product.marca]);
+          this.categoriesSelected.set(product.categorias);
+          this.relationsError.set('');
           this.editing.set(false);
           this.editingChange.emit(false);
           void this.loadSavedImages(product.id, product.imagenes);
@@ -132,6 +142,9 @@ export class DatosGeneralesStep implements OnDestroy {
           this.removedImageIds.set([]);
           this.clearSavedImages();
           this.model.set({ nombre: '', descripcion: '', unidadBaseId: '', activo: true, marcaId: '', categoriasIds: [] });
+          this.brandSelected.set([]);
+          this.categoriesSelected.set([]);
+          this.relationsError.set('');
           this.editing.set(false);
           this.editingChange.emit(false);
         }
@@ -158,6 +171,9 @@ export class DatosGeneralesStep implements OnDestroy {
       marcaId: product.marca.id,
       categoriasIds: product.categorias.map((category) => category.id),
     });
+    this.brandSelected.set([product.marca]);
+    this.categoriesSelected.set(product.categorias);
+    this.relationsError.set('');
     this.clearNewImages();
     this.removedImageIds.set([]);
     this.imageError.set('');
@@ -175,6 +191,20 @@ export class DatosGeneralesStep implements OnDestroy {
     } finally {
       this.loadingUnidades.set(false);
     }
+  }
+
+  setBrand(options: OpcionCatalogo[]): void {
+    if (this.management() && !this.canEdit()) return;
+    this.brandSelected.set(options);
+    this.model.update((value) => ({ ...value, marcaId: options[0]?.id ?? '' }));
+    this.relationsError.set('');
+  }
+
+  setCategories(options: OpcionCatalogo[]): void {
+    if (this.management() && !this.canEdit()) return;
+    this.categoriesSelected.set(options);
+    this.model.update((value) => ({ ...value, categoriasIds: options.map((option) => option.id) }));
+    this.relationsError.set('');
   }
 
   addImages(event: Event): void {
@@ -285,6 +315,12 @@ export class DatosGeneralesStep implements OnDestroy {
       this.imageError()
     )
       return;
+    if (!this.product() && (!this.brandSelected()[0]?.activo || !this.categoriesSelected().length ||
+        this.categoriesSelected().some((category) => !category.activo))) {
+      this.relationsError.set('Selecciona una marca y al menos una categoría activas.');
+      return;
+    }
+    this.relationsError.set('');
     await submit(this.productForm, async (formState) => {
       const value = formState().value();
       const dto = { ...value, nombre: value.nombre.trim() };

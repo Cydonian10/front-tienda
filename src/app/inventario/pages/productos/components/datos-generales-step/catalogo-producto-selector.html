@@ -1,0 +1,70 @@
+<section class="min-w-0 space-y-3 rounded-box border border-base-300 bg-base-200/50 p-4"
+  [attr.aria-label]="kind() === 'marca' ? 'Selección de marca' : 'Selección de categorías'">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <h3 class="font-semibold">{{ kind() === 'marca' ? 'Marca' : 'Categorías' }} <span class="text-error">*</span></h3>
+    @if (!readOnly()) {
+      <a class="link link-primary text-sm" [routerLink]="kind() === 'marca' ? '/admin/inventario/marcas' : '/admin/inventario/categorias'">
+        Administrar {{ kind() === 'marca' ? 'marcas' : 'categorías' }}
+      </a>
+    }
+  </div>
+  @if (selected().length) {
+    <ul class="flex flex-wrap gap-2" [attr.aria-label]="kind() === 'marca' ? 'Marca elegida' : 'Categorías elegidas'">
+      @for (option of selected(); track option.id) {
+        <li class="flex min-w-0 items-center gap-2 rounded-field border border-base-300 bg-base-100 px-3 py-1.5 text-sm">
+          <span class="break-words">{{ option.nombre }}</span>
+          @if (!option.activo) { <span class="badge badge-warning badge-soft">Inactiva</span> }
+          @if (!readOnly()) {
+            <button type="button" class="btn btn-ghost btn-sm min-h-11" (click)="remove(option.id)"
+              [attr.aria-label]="'Quitar ' + option.nombre">Quitar</button>
+          }
+        </li>
+      }
+    </ul>
+  } @else { <p class="text-sm text-base-content/70">{{ kind() === 'marca' ? 'Selecciona una marca.' : 'Selecciona al menos una categoría.' }}</p> }
+
+  @if (!readOnly()) {
+    <label class="label" [for]="kind() === 'marca' ? 'search-brand-product' : 'search-category-product'">
+      Buscar {{ kind() === 'marca' ? 'marca' : 'categoría' }} por nombre
+    </label>
+    <input type="search" class="input w-full min-h-11" [id]="kind() === 'marca' ? 'search-brand-product' : 'search-category-product'"
+      [value]="search()" placeholder="Escribe al menos dos caracteres o explora el catálogo"
+      (input)="searchFor($any($event.target).value)" />
+    @if (pending()) {
+      <p role="status" class="text-sm">Cargando {{ kind() === 'marca' ? 'marcas' : 'categorías' }}…</p>
+    } @else if (failed()) {
+      <div role="alert" class="alert alert-error alert-soft">No se pudo cargar el catálogo.</div>
+      <button type="button" class="btn min-h-11" (click)="retry()">Reintentar</button>
+    } @else {
+      @if (options().length) {
+        <ul class="max-h-52 divide-y divide-base-300 overflow-y-auto" [attr.aria-label]="kind() === 'marca' ? 'Marcas disponibles' : 'Categorías disponibles'">
+          @for (option of options(); track option.id) {
+            <li>
+              <button type="button" class="btn btn-ghost min-h-11 w-full justify-between whitespace-normal text-left"
+                [disabled]="!option.activo || (kind() === 'categoria' && selected().some(item => item.id === option.id))"
+                [attr.aria-pressed]="selected().some(item => item.id === option.id)"
+                (click)="choose(option)">
+                <span class="break-words">{{ option.nombre }}</span>
+                @if (selected().some(item => item.id === option.id)) { <span class="badge badge-soft">Elegida</span> }
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p role="status" class="text-sm text-base-content/70">No hay opciones activas con esa búsqueda.</p>
+        <a class="link link-primary text-sm" [routerLink]="kind() === 'marca' ? '/admin/inventario/marcas' : '/admin/inventario/categorias'">
+          Ir a {{ kind() === 'marca' ? 'Marcas' : 'Categorías' }}
+        </a>
+      }
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-between gap-2 text-sm">
+          <span class="tabular-nums">Página {{ page() }} de {{ totalPages() }}</span>
+          <div class="flex gap-2">
+            <button type="button" class="btn btn-sm min-h-11" [disabled]="page() <= 1 || fetching()" (click)="page.update(value => value - 1)">Anterior</button>
+            <button type="button" class="btn btn-sm min-h-11" [disabled]="page() >= totalPages() || fetching()" (click)="page.update(value => value + 1)">Siguiente</button>
+          </div>
+        </div>
+      }
+    }
+  }
+</section>

@@ -1,4 +1,4 @@
-import { convertToParamMap, ActivatedRoute, Router } from '@angular/router';
+import { convertToParamMap, ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { ProductoApi } from '../../../api/inventario/product-api';
@@ -13,6 +13,9 @@ import {
 import { variantesQueryKey } from '../../actions/use-variante-action';
 import ProductosPage from './productos-page';
 import { AuthStore } from '../../../store/auth/auth.store';
+import { MarcaApi } from '../../../api/inventario/marca-api';
+import { CategoriaApi } from '../../../api/inventario/categoria-api';
+import { DatosGeneralesStep } from './components/datos-generales-step/datos-generales-step';
 
 describe('ProductosPage: terminar revisión', () => {
   const product = {
@@ -39,6 +42,7 @@ describe('ProductosPage: terminar revisión', () => {
     client.setQueryData(productoUnidadesQueryKey('p1'), []);
     TestBed.configureTestingModule({
       providers: [
+        provideRouter([]),
         {
           provide: AuthStore,
           useFactory: () => {
@@ -52,12 +56,16 @@ describe('ProductosPage: terminar revisión', () => {
           provide: ActivatedRoute,
           useValue: { snapshot: { queryParamMap: convertToParamMap({}) } },
         },
-        { provide: Router, useValue: { navigate } },
         {
           provide: ProductoApi,
-          useValue: { create, update, listAttributes: vi.fn(), listUnidades: vi.fn() },
+          useValue: {
+            create, update, listAttributes: vi.fn(),
+            listUnidades: vi.fn().mockResolvedValue([{ id: 'u1', nombre: 'Unidad', simbolo: 'u' }]),
+          },
         },
         { provide: VarianteApi, useValue: { list: vi.fn() } },
+        { provide: MarcaApi, useValue: { list: vi.fn().mockResolvedValue({ items: [product.marca], page: 1, limit: 20, totalItems: 1 }) } },
+        { provide: CategoriaApi, useValue: { list: vi.fn().mockResolvedValue({ items: [product.categorias[0]], page: 1, limit: 20, totalItems: 1 }) } },
         { provide: UnidadProductoApi, useValue: { list: vi.fn() } },
         { provide: ToastService, useValue: { success: vi.fn() } },
       ],
@@ -67,6 +75,7 @@ describe('ProductosPage: terminar revisión', () => {
   afterEach(() => TestBed.resetTestingModule());
 
   it('con solo lectura abre la consulta y bloquea escrituras desde los manejadores', async () => {
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(navigate);
     TestBed.inject(AuthStore).setProfile({
       isSuperAdmin: false,
       permissions: [{ code: 'PRODUCTOS_LEER', systemCode: 'INVENTARIO' }],
@@ -99,6 +108,7 @@ describe('ProductosPage: terminar revisión', () => {
   });
 
   it('muestra la confirmación sin volver a guardar y reinicia solo el asistente al crear otro', () => {
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(navigate);
     const fixture = TestBed.createComponent(ProductosPage);
     const page = fixture.componentInstance;
     page.product.set(product);
@@ -152,6 +162,7 @@ describe('ProductosPage: terminar revisión', () => {
   });
 
   it('abre gestión desde el botón sin trasladar el producto del asistente', () => {
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(navigate);
     const fixture = TestBed.createComponent(ProductosPage);
     fixture.componentInstance.product.set(product);
     fixture.detectChanges();
@@ -165,5 +176,33 @@ describe('ProductosPage: terminar revisión', () => {
     expect(navigate).toHaveBeenCalledExactlyOnceWith(['/admin/inventario/productos/gestion']);
     expect(fixture.componentInstance.product()).toEqual(product);
     expect(fixture.componentInstance.mode()).toBe('create');
+  });
+
+  it('crea y avanza a variantes con marca y categorías seleccionadas', async () => {
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(navigate);
+    create.mockResolvedValue(product);
+    const fixture = TestBed.createComponent(ProductosPage);
+    fixture.detectChanges();
+    const step = fixture.debugElement.query((element) => element.componentInstance instanceof DatosGeneralesStep)
+      .componentInstance as DatosGeneralesStep;
+    await vi.waitFor(() => expect(step.loadingUnidades()).toBe(false));
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelectorAll('[aria-label="Marcas disponibles"] button')).toHaveLength(1);
+      expect(fixture.nativeElement.querySelectorAll('[aria-label="Categorías disponibles"] button')).toHaveLength(1);
+    });
+    step.model.update((value) => ({ ...value, nombre: 'Martillo', unidadBaseId: 'u1' }));
+    (fixture.nativeElement.querySelector('[aria-label="Marcas disponibles"] button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('[aria-label="Categorías disponibles"] button') as HTMLButtonElement).click();
+    expect(step.model().marcaId).toBe('m1');
+    expect(step.model().categoriasIds).toEqual(['c1']);
+    await step.save(new Event('submit'));
+    await vi.waitFor(() => expect(fixture.componentInstance.step()).toBe(1));
+    expect(create).toHaveBeenCalledWith({
+      nombre: 'Martillo', descripcion: '', unidadBaseId: 'u1', activo: true,
+      marcaId: 'm1', categoriasIds: ['c1'], imagenes: [],
+    });
+    expect(fixture.componentInstance.product()?.marca.nombre).toBe('Atlas');
   });
 });

@@ -12,6 +12,7 @@ export const categoriaDetalleQueryKey = (id: string) => ['categorias', id, 'deta
 
 export function useCategoriasListado(
   q: () => string, activo: () => boolean | undefined, page: () => number, limit: () => number,
+  enabled: () => boolean = () => true,
 ) {
   const api = inject(CategoriaApi);
   return injectQuery(() => {
@@ -21,6 +22,7 @@ export function useCategoriasListado(
     return {
       queryKey: categoriasListadoQueryKey(search, status, currentPage, pageSize),
       queryFn: () => api.list({ ...(search ? { q: search } : {}), activo: status, page: currentPage, limit: pageSize }),
+      enabled: enabled(),
       retry: false,
     };
   });

@@ -54,11 +54,16 @@ export class ProductoApi {
   }
 
   create(dto: CreateProductDto): Promise<ProductResponse> {
+    if (!dto.marcaId || !this.validCategories(dto.categoriasIds)) {
+      return Promise.reject(new Error('Selecciona una marca y al menos una categoría distinta.'));
+    }
     const body = new FormData();
     body.append('nombre', dto.nombre);
     body.append('descripcion', dto.descripcion);
     body.append('unidadBaseId', dto.unidadBaseId);
     body.append('activo', String(dto.activo));
+    body.append('marcaId', dto.marcaId);
+    body.append('categoriasIds', JSON.stringify(dto.categoriasIds));
     for (const image of dto.imagenes) body.append('imagenes', image);
 
     return firstValueFrom(
@@ -73,12 +78,18 @@ export class ProductoApi {
   }
 
   update(id: string, dto: UpdateProductDto): Promise<ProductResponse> {
+    if (dto.marcaId === '') return Promise.reject(new Error('Selecciona una marca válida.'));
+    if (dto.categoriasIds !== undefined && !this.validCategories(dto.categoriasIds)) {
+      return Promise.reject(new Error('Selecciona al menos una categoría distinta.'));
+    }
     if (dto.imagenesConservarIds !== undefined || dto.imagenes?.length) {
       const body = new FormData();
       body.append('nombre', dto.nombre);
       body.append('descripcion', dto.descripcion);
       body.append('unidadBaseId', dto.unidadBaseId);
       body.append('activo', String(dto.activo));
+      if (dto.marcaId !== undefined) body.append('marcaId', dto.marcaId);
+      if (dto.categoriasIds !== undefined) body.append('categoriasIds', JSON.stringify(dto.categoriasIds));
       if (dto.imagenesConservarIds !== undefined) {
         body.append('imagenesConservarIds', JSON.stringify(dto.imagenesConservarIds));
       }
@@ -87,8 +98,9 @@ export class ProductoApi {
         this.#http.patch<ProductResponse>(`${this.#apirUrl.apiUrl}/productos/${id}`, body),
       );
     }
+    const { imagenes: _imagenes, ...fields } = dto;
     return firstValueFrom(
-      this.#http.patch<ProductResponse>(`${this.#apirUrl.apiUrl}/productos/${id}`, dto),
+      this.#http.patch<ProductResponse>(`${this.#apirUrl.apiUrl}/productos/${id}`, fields),
     );
   }
 
@@ -98,5 +110,9 @@ export class ProductoApi {
         responseType: 'blob',
       }),
     );
+  }
+
+  private validCategories(ids: string[]): boolean {
+    return ids.length > 0 && ids.every((id) => !!id) && new Set(ids).size === ids.length;
   }
 }

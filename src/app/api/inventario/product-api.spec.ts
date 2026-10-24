@@ -61,7 +61,7 @@ describe('ProductoApi', () => {
       activo: true,
       imagenes: [portada, otra],
       marcaId: 'm1',
-      categoriasIds: ['c1'],
+      categoriasIds: ['c1', 'c2'],
     });
     const request = http.expectOne('http://localhost:3000/api/productos');
     expect(request.request.method).toBe('POST');
@@ -69,6 +69,8 @@ describe('ProductoApi', () => {
     expect(body.get('nombre')).toBe('Martillo');
     expect(body.get('unidadBaseId')).toBe('unidad-1');
     expect(body.get('activo')).toBe('true');
+    expect(body.get('marcaId')).toBe('m1');
+    expect(body.get('categoriasIds')).toBe('["c1","c2"]');
     expect(body.getAll('imagenes')).toEqual([portada, otra]);
     request.flush({ id: 'producto-1' });
     expect(await result).toEqual({ id: 'producto-1' });
@@ -78,8 +80,10 @@ describe('ProductoApi', () => {
     const result = api.getById('producto-1');
     const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
     expect(request.request.method).toBe('GET');
-    request.flush({ id: 'producto-1', nombre: 'Martillo', imagenes: [], puedeCambiarUnidadBase: false });
-    expect((await result).puedeCambiarUnidadBase).toBe(false);
+    const brand = { id: 'm1', nombre: 'Atlas', activo: false, imagenId: null };
+    const categories = [{ id: 'c1', nombre: 'Herramientas', activo: false }];
+    request.flush({ id: 'producto-1', nombre: 'Martillo', imagenes: [], puedeCambiarUnidadBase: false, marca: brand, categorias: categories });
+    expect(await result).toMatchObject({ puedeCambiarUnidadBase: false, marca: brand, categorias: categories });
   });
 
   it('busca por nombre y página con los parámetros de SPEC 05', async () => {
@@ -120,6 +124,8 @@ describe('ProductoApi', () => {
     const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
     expect(request.request.method).toBe('PATCH');
     expect(request.request.body).toEqual(dto);
+    expect(request.request.body).not.toHaveProperty('marcaId');
+    expect(request.request.body).not.toHaveProperty('categoriasIds');
     request.flush({ id: 'producto-1', ...dto, imagenes: [] });
     expect((await result).activo).toBe(false);
   });
@@ -133,6 +139,8 @@ describe('ProductoApi', () => {
       activo: true,
       imagenesConservarIds: [],
       imagenes: [file],
+      marcaId: 'm2',
+      categoriasIds: ['c2', 'c3'],
     });
     const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
     expect(request.request.method).toBe('PATCH');
@@ -140,8 +148,66 @@ describe('ProductoApi', () => {
     expect(body.get('imagenesConservarIds')).toBe('[]');
     expect(body.getAll('imagenes')).toEqual([file]);
     expect(body.get('activo')).toBe('true');
+    expect(body.get('marcaId')).toBe('m2');
+    expect(body.get('categoriasIds')).toBe('["c2","c3"]');
     request.flush({ id: 'producto-1', imagenes: [] });
     expect((await result).id).toBe('producto-1');
+  });
+
+  it('permite sustituir solo marca o categorías en PATCH JSON', async () => {
+    const dto = { nombre: 'Martillo', descripcion: '', unidadBaseId: 'u1', activo: true, marcaId: 'm2' };
+    const result = api.update('producto-1', dto);
+    const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual(dto);
+    expect(request.request.body).not.toHaveProperty('categoriasIds');
+    request.flush({ id: 'producto-1' });
+    await result;
+
+    const categoryOnly = { nombre: 'Martillo', descripcion: '', unidadBaseId: 'u1', activo: true, categoriasIds: ['c2'] };
+    const changed = api.update('producto-1', categoryOnly);
+    const second = http.expectOne('http://localhost:3000/api/productos/producto-1');
+    expect(second.request.body).toEqual(categoryOnly);
+    expect(second.request.body).not.toHaveProperty('marcaId');
+    second.flush({ id: 'producto-1' });
+    await changed;
+  });
+
+  it('en PATCH multipart con fotos conserva relaciones omitidas sin enviar campos vacíos', async () => {
+    const result = api.update('producto-1', {
+      nombre: 'Martillo', descripcion: '', unidadBaseId: 'u1', activo: true,
+      imagenesConservarIds: [],
+    });
+    const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
+    const body = request.request.body as FormData;
+    expect(body.get('imagenesConservarIds')).toBe('[]');
+    expect(body.has('marcaId')).toBe(false);
+    expect(body.has('categoriasIds')).toBe(false);
+    request.flush({ id: 'producto-1' });
+    await result;
+  });
+
+  it('en PATCH JSON sin fotos no incluye imagenes vacías', async () => {
+    const result = api.update('producto-1', {
+      nombre: 'Martillo', descripcion: '', unidadBaseId: 'u1', activo: true, imagenes: [],
+    });
+    const request = http.expectOne('http://localhost:3000/api/productos/producto-1');
+    expect(request.request.body).not.toHaveProperty('imagenes');
+    request.flush({ id: 'producto-1' });
+    await result;
+  });
+
+  it('no envía categorías vacías o repetidas ni productos sin relaciones', async () => {
+    const base = { nombre: 'Martillo', descripcion: '', unidadBaseId: 'u1', activo: true };
+    const file = new File(['imagen'], 'producto.png', { type: 'image/png' });
+    await expect(api.create({ ...base, marcaId: 'm1', categoriasIds: [], imagenes: [file] })).rejects.toThrow();
+    await expect(api.create({ ...base, marcaId: '', categoriasIds: ['c1'], imagenes: [] })).rejects.toThrow();
+    await expect(api.create({ ...base, marcaId: 'm1', categoriasIds: ['c1', 'c1'], imagenes: [] })).rejects.toThrow();
+    await expect(api.update('producto-1', { ...base, categoriasIds: [] })).rejects.toThrow();
+    await expect(api.update('producto-1', { ...base, marcaId: '' })).rejects.toThrow();
+    await expect(api.update('producto-1', { ...base, categoriasIds: ['c1', 'c1'], imagenes: [file] })).rejects.toThrow();
+    http.expectNone('http://localhost:3000/api/productos');
+    http.expectNone('http://localhost:3000/api/productos/producto-1');
   });
 
   it('descarga una imagen usando el ID de imagen, no el de asociación', async () => {

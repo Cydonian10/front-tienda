@@ -95,6 +95,13 @@
           </p>
         </fieldset>
       </div>
+      @if (!management() && !product()) {
+        <section class="space-y-3" aria-label="Clasificación del producto">
+          <catalogo-producto-selector kind="marca" [selected]="brandSelected()" (selectionChange)="setBrand($event)" />
+          <catalogo-producto-selector kind="categoria" [selected]="categoriesSelected()" (selectionChange)="setCategories($event)" />
+          @if (relationsError()) { <p class="text-sm text-error" role="alert">{{ relationsError() }}</p> }
+        </section>
+      }
     </div>
 
     <section

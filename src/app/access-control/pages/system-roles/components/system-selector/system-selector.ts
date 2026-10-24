@@ -38,7 +38,7 @@ import { Icon } from '../../../../../shared/components/icon/icon';
           <span class="min-w-0 flex-1">
             <strong class="block truncate text-sm">{{ system.name }}</strong>
             <small class="block truncate text-xs text-base-content/70">
-              {{ system.code }}
+              {{ system.description || 'Selecciona para configurar sus roles' }}
             </small>
           </span>
           @if (system.code === selectedSystemCode()) {
@@ -48,7 +48,7 @@ import { Icon } from '../../../../../shared/components/icon/icon';
       }
     </div>
     <p class="border-t border-base-300 p-4 text-xs text-base-content/70">
-      Los sistemas son solo lectura
+      Elige dónde trabajará este rol. Sus accesos no se aplican a otros sistemas.
     </p>
   `,
   host: {

@@ -1,144 +1,138 @@
 <div class="flex flex-wrap items-center justify-between gap-3">
   <div>
-    <h3 class="text-lg font-semibold">Permisos del rol</h3>
+    <h3 class="text-lg font-semibold">¿Qué puede hacer este rol?</h3>
     <p class="mt-1 text-sm text-base-content/70">{{ roleName() }} · {{ systemName() }}</p>
   </div>
   <button type="button" class="btn btn-ghost btn-sm" (click)="deselectRole.emit()">
-    Deseleccionar rol
+    Elegir otro rol
   </button>
 </div>
 
-<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_16rem]">
+@if (protectedRole()) {
   <section
-    class="min-w-0 overflow-hidden rounded-box border border-base-300 bg-base-100"
-    aria-label="Permisos del rol"
+    class="rounded-box border border-base-300 bg-base-100 p-5 sm:p-6"
+    aria-label="Acceso del superadministrador"
   >
-    <div class="space-y-4 border-b border-base-300 p-4 sm:p-5">
-      <div class="flex flex-wrap gap-3">
+    <h4 class="font-semibold">Acceso completo a todos los sistemas</h4>
+    <p class="mt-2 max-w-2xl text-sm text-base-content/70">
+      El superadministrador no necesita permisos individuales. Su acceso está protegido y no se
+      modifica desde esta pantalla.
+    </p>
+  </section>
+} @else if (loading()) {
+  <p class="py-8 text-sm text-base-content/70" role="status">Cargando accesos del rol…</p>
+} @else if (error()) {
+  <div class="py-6" role="alert">
+    <p>No se pudieron cargar los accesos del rol.</p>
+    <button type="button" class="btn btn-sm mt-3" (click)="retry.emit()">Reintentar</button>
+  </div>
+} @else if (!permissions().length) {
+  <p class="py-8 text-sm text-base-content/70">
+    No hay acciones configuradas para este sistema. Un administrador debe revisar el catálogo del
+    servidor.
+  </p>
+} @else {
+  <section
+    class="rounded-box border border-base-300 bg-base-100 p-4 sm:p-6"
+    aria-label="Grupos de acceso"
+  >
+    <h4 class="font-semibold">Grupos de acceso</h4>
+    <p class="mt-2 mb-6 max-w-2xl text-sm text-base-content/70">
+      Marca lo que necesita este rol. Los grupos de gestión incluyen las consultas necesarias. Al
+      desmarcar un grupo se retiran las acciones que incluye, también si se comparten con otro
+      grupo.
+    </p>
+    @if (disabled()) {
+      <p class="mb-5 text-sm text-base-content/70">
+        Los accesos no se pueden modificar mientras se guarda o si tu rol es de consulta.
+      </p>
+    }
+    <app-access-group-list
+      [permissions]="permissions()"
+      [selectedIds]="selectedPermissionIds()"
+      [systemCode]="systemCode()"
+      [disabled]="disabled()"
+      (selectionChange)="visiblePermissionsChange.emit($event)"
+    />
+    <p class="mt-6 border-t border-base-300 pt-4 text-sm text-base-content/70" role="status">
+      {{ selectedPermissionIds().size }} de {{ permissions().length }} acciones incluidas. Los
+      cambios se aplican al guardar.
+    </p>
+  </section>
+
+  <details class="collapse collapse-arrow border border-base-300 bg-base-100">
+    <summary class="collapse-title font-semibold">
+      Configuración avanzada · permisos individuales
+    </summary>
+    <div class="collapse-content space-y-4">
+      <p class="text-sm text-base-content/70">
+        Ajusta excepciones sin cambiar el resto del rol. Las selecciones parciales se conservan.
+      </p>
+      <div class="flex flex-col gap-3 sm:flex-row">
         <input
           class="input min-w-0 flex-1"
           type="search"
           aria-label="Buscar permiso"
-          placeholder="Buscar permiso o acción…"
+          placeholder="Buscar una acción…"
           [value]="searchTerm()"
           (input)="onSearch($event)"
         />
-      </div>
-      <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por recurso">
         <button
           type="button"
-          (click)="currentResourceCode.set('')"
-          class="btn btn-sm"
-          [class.btn-primary]="currentResourceCode() === ''"
-          [class.btn-ghost]="currentResourceCode() !== ''"
+          class="btn btn-ghost btn-sm"
+          data-bulk-permissions
+          [disabled]="disabled() || !visiblePermissions().length"
+          (click)="toggleVisiblePermissions()"
         >
-          Todos
+          {{ allVisibleSelected() ? 'Desmarcar visibles' : 'Seleccionar visibles' }}
         </button>
-        @for (code of resourcesCode(); track $index) {
+      </div>
+      <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por sección">
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-active]="currentResourceCode() === ''"
+          (click)="currentResourceCode.set('')"
+        >
+          Todas
+        </button>
+        @for (code of resourcesCode(); track code) {
           <button
-            (click)="currentResourceCode.set(code)"
             type="button"
             class="btn btn-sm"
-            [class.btn-primary]="currentResourceCode() === code"
-            [class.btn-ghost]="currentResourceCode() !== code"
+            [class.btn-active]="currentResourceCode() === code"
+            (click)="currentResourceCode.set(code)"
           >
-            {{ code }}
+            {{ resourceLabel(code) }}
           </button>
         }
       </div>
+      <div class="divide-y divide-base-300">
+        @for (permission of visiblePermissions(); track permission.id) {
+          <label class="flex min-h-14 items-center gap-3 py-3">
+            <input
+              type="checkbox"
+              class="checkbox checkbox-sm shrink-0"
+              data-individual-permission
+              [attr.aria-label]="'Asignado: ' + permission.name"
+              [checked]="selectedPermissionIds().has(permission.id)"
+              [disabled]="disabled()"
+              (change)="onPermissionChange(permission.id, $event)"
+            />
+            <span class="min-w-0">
+              <span class="block text-sm font-semibold">{{ permission.name }}</span>
+              <span class="text-xs text-base-content/70">{{
+                resourceLabel(permission.resourceCode)
+              }}</span>
+            </span>
+          </label>
+        } @empty {
+          <p class="py-6 text-sm text-base-content/70">
+            No hay permisos que coincidan con la búsqueda.
+          </p>
+        }
+      </div>
     </div>
-    <div
-      class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs text-base-content/70 sm:px-5"
-    >
-      <span class="tabular-nums">{{ visiblePermissions().length }} permisos</span>
-      <button
-        type="button"
-        class="btn btn-ghost btn-sm"
-        [disabled]="loading() || error() || !visiblePermissions().length"
-        (click)="toggleVisiblePermissions()"
-      >
-        {{ allVisibleSelected() ? 'Desmarcar visibles' : 'Seleccionar visibles' }}
-      </button>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="table table-sm min-w-140">
-        <thead class="bg-base-200/60">
-          <tr>
-            <th scope="col">Permiso</th>
-            <th scope="col">Recurso</th>
-            <th scope="col">Acción</th>
-            <th scope="col">Asignado</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (loading()) {
-            <tr>
-              <td colspan="4" class="py-8 text-center" role="status">Cargando permisos…</td>
-            </tr>
-          } @else if (error()) {
-            <tr>
-              <td colspan="4" class="py-8 text-center" role="alert">
-                No se pudieron cargar los permisos.
-                <button type="button" class="btn btn-ghost btn-sm" (click)="retry.emit()">
-                  Reintentar
-                </button>
-              </td>
-            </tr>
-          } @else if (!permissions().length) {
-            <tr>
-              <td colspan="4" class="py-8 text-center">Este rol todavía no tiene permisos.</td>
-            </tr>
-          } @else if (!visiblePermissions().length) {
-            <tr>
-              <td colspan="4" class="py-8 text-center">No hay permisos que coincidan con la búsqueda.</td>
-            </tr>
-          } @else {
-            @for (permission of visiblePermissions(); track permission.id) {
-              <tr class="border-base-300">
-                <td class="font-semibold">{{ permission.name }}</td>
-                <td>
-                  <span class="badge badge-ghost badge-sm">{{ permission.resourceCode }}</span>
-                </td>
-                <td class="text-xs text-base-content/70">{{ permission.actionCode }}</td>
-                <td>
-                  <input
-                    type="checkbox"
-                    class="checkbox checkbox-primary checkbox-sm"
-                    [attr.aria-label]="'Asignado: ' + permission.name"
-                    [checked]="selectedPermissionIds().has(permission.id)"
-                    (change)="onPermissionChange(permission.id, $event)"
-                  />
-                </td>
-              </tr>
-            }
-          }
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <aside
-    class="h-fit rounded-box border border-base-300 bg-base-100 p-5"
-    aria-label="Resumen de acceso"
-  >
-    <h3 class="font-semibold">Resumen de acceso</h3>
-    <p class="mt-5 text-3xl font-semibold tabular-nums text-primary">
-      {{ selectedPermissionIds().size }}
-      <span class="text-base text-base-content/60">/ {{ permissions().length }}</span>
-    </p>
-    <p class="mt-1 text-xs text-base-content/70">permisos seleccionados</p>
-    <div class="mt-5 space-y-2 border-t border-base-300 pt-4">
-      @for (resource of resourceSummary(); track resource.code) {
-        <div class="flex justify-between gap-3 text-xs">
-          <span class="truncate text-base-content/70">{{ resource.code }}</span>
-          <strong class="tabular-nums">{{ resource.selected }} / {{ resource.total }}</strong>
-        </div>
-      }
-    </div>
-    <p class="mt-5 rounded-field bg-base-200 p-3 text-xs text-base-content/70">
-      Los cambios se aplican al guardar los permisos.
-    </p>
-  </aside>
-</div>
-
-<ng-content select="[actions]" />
+  </details>
+  <ng-content select="[actions]" />
+}

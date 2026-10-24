@@ -9,6 +9,8 @@ import { UnidadesStep } from './components/unidades-step/unidades-step';
 import { VariantesStep } from './components/variantes-step/variantes-step';
 import { useProductoApi } from '../../actions/use-productos-action';
 import { ProductoApi } from '../../../api/inventario/product-api';
+import { usePermissions } from '../../../auth/services/use-permissions';
+import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
 import type {
   ProductResponse,
   CreateProductDto,
@@ -29,6 +31,7 @@ import type {
   host: { class: 'mx-auto w-full max-w-6xl pb-10' },
 })
 export default class ProductosPage {
+  readonly access = usePermissions('INVENTARIO', { edit: PERMISSION_CODES.PRODUCTS_UPDATE });
   private readonly api = inject(ProductoApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -53,6 +56,13 @@ export default class ProductosPage {
 
   constructor() {
     const id = this.route.snapshot.queryParamMap.get('productoId');
+    if (!this.access.edit()) {
+      void this.router.navigate(['/admin/inventario/productos/gestion'], {
+        queryParams: id ? { productoId: id } : {},
+        replaceUrl: true,
+      });
+      return;
+    }
     if (id) void this.loadProduct(id);
   }
 
@@ -76,6 +86,7 @@ export default class ProductosPage {
   }
 
   showCreate(): void {
+    if (!this.access.edit()) return;
     if (this.createMutation.isPending() || this.updateMutation.isPending()) return;
     // Reinicia solo el asistente y la URL; el producto terminado permanece en el servidor.
     this.loadVersion++;
@@ -123,7 +134,7 @@ export default class ProductosPage {
   }
 
   async createProduct(dto: CreateProductDto): Promise<void> {
-    if (this.createMutation.isPending() || this.product()) return;
+    if (!this.access.edit() || this.createMutation.isPending() || this.product()) return;
     try {
       const product = await this.createMutation.mutateAsync(dto);
       this.product.set(product);
@@ -141,7 +152,7 @@ export default class ProductosPage {
 
   async updateProduct(dto: UpdateProductDto): Promise<void> {
     const id = this.product()?.id;
-    if (!id || this.updateMutation.isPending()) return;
+    if (!this.access.edit() || !id || this.updateMutation.isPending()) return;
     try {
       this.product.set(await this.updateMutation.mutateAsync({ id, dto }));
     } catch {

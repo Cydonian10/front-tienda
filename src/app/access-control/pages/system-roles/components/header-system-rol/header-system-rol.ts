@@ -35,7 +35,7 @@ export type StepActiveProps = 'system' | 'roles' | 'permisos';
       [disabled]="!hasRole()"
       (click)="stepSelected.emit('permisos')"
     >
-      Permisos
+      Accesos del rol
     </button>
   `,
   host: {

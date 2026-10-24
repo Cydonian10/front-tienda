@@ -5,45 +5,14 @@
 >
 
 <main class="mx-auto max-w-7xl space-y-10 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-  <section
-    class="relative isolate overflow-hidden rounded-box bg-neutral px-6 py-8 text-neutral-content sm:px-9 sm:py-10 lg:px-12"
-    aria-labelledby="portal-title"
-  >
-    <div class="relative z-10 max-w-2xl">
-      <h1
-        id="portal-title"
-        class="max-w-xl text-3xl leading-tight font-bold tracking-tight sm:text-4xl"
-      >
-        Todo tu trabajo, en un solo lugar.
-      </h1>
-      <p class="mt-4 max-w-xl text-sm leading-6 text-neutral-content/75 sm:text-base">
-        Entra a tus sistemas desde aquí y continúa donde lo necesitas.
-      </p>
-    </div>
-
-    <div
-      class="pointer-events-none absolute inset-y-0 right-8 hidden items-center gap-4 sm:flex lg:right-14"
-      aria-hidden="true"
-    >
-      <span
-        class="grid size-20 rotate-[-8deg] place-items-center rounded-box border border-primary/25 bg-primary/15 text-primary sm:size-24"
-      >
-        <app-icon name="package" [size]="36" />
-      </span>
-      <span
-        class="mt-10 grid size-20 rotate-[7deg] place-items-center rounded-box border border-secondary/25 bg-secondary/15 text-secondary sm:size-24"
-      >
-        <app-icon name="grid" [size]="36" />
-      </span>
-    </div>
-  </section>
-
   <section class="space-y-5" aria-labelledby="systems-title">
     <div class="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h2 id="systems-title" class="text-2xl font-semibold tracking-tight">Mis sistemas</h2>
+        <h1 id="systems-title" class="text-2xl font-semibold tracking-tight">
+          ¿Dónde vas a trabajar?
+        </h1>
         <p class="mt-1 text-sm text-base-content/70">
-          Selecciona el sistema al que quieres ingresar.
+          Elige un sistema. Dentro verás las opciones que permite tu rol.
         </p>
       </div>
       @if (!systemsQuery.isPending() && !systemsQuery.isError()) {
@@ -76,13 +45,13 @@
     } @else if (systems().length === 0) {
       <app-empty-state
         title="Todavía no tienes sistemas asignados"
-        description="Cuando tengas acceso a un sistema, aparecerá aquí."
+        description="Pide al administrador que te asigne un rol. Los sistemas disponibles aparecerán aquí."
       />
     } @else if (filteredSystems().length === 0) {
       <app-empty-state
         variant="no-results"
         title="No encontramos sistemas"
-        description="Prueba con otro nombre o código."
+        description="Prueba con otro nombre."
       />
     } @else {
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

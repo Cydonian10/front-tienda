@@ -12,6 +12,7 @@ import {
 } from '../../actions/use-producto-unidades-action';
 import { variantesQueryKey } from '../../actions/use-variante-action';
 import ProductosPage from './productos-page';
+import { AuthStore } from '../../../store/auth/auth.store';
 
 describe('ProductosPage: terminar revisión', () => {
   const product = {
@@ -36,6 +37,14 @@ describe('ProductosPage: terminar revisión', () => {
     client.setQueryData(productoUnidadesQueryKey('p1'), []);
     TestBed.configureTestingModule({
       providers: [
+        {
+          provide: AuthStore,
+          useFactory: () => {
+            const store = new AuthStore();
+            store.setProfile({ isSuperAdmin: true, permissions: [] } as never);
+            return store;
+          },
+        },
         provideTanStackQuery(client),
         {
           provide: ActivatedRoute,
@@ -54,6 +63,36 @@ describe('ProductosPage: terminar revisión', () => {
   });
 
   afterEach(() => TestBed.resetTestingModule());
+
+  it('con solo lectura abre la consulta y bloquea escrituras desde los manejadores', async () => {
+    TestBed.inject(AuthStore).setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: 'PRODUCTOS_LEER', systemCode: 'INVENTARIO' }],
+    } as never);
+    const fixture = TestBed.createComponent(ProductosPage);
+    fixture.detectChanges();
+    expect(navigate).toHaveBeenCalledWith(
+      ['/admin/inventario/productos/gestion'],
+      expect.objectContaining({ replaceUrl: true }),
+    );
+    expect(fixture.nativeElement.querySelector('datos-generales-step')).toBeNull();
+    await fixture.componentInstance.createProduct({
+      nombre: 'No permitido',
+      descripcion: '',
+      activo: true,
+      unidadBaseId: 'u1',
+      imagenes: [],
+    });
+    fixture.componentInstance.product.set(product);
+    await fixture.componentInstance.updateProduct({
+      nombre: 'No permitido',
+      descripcion: '',
+      activo: true,
+      unidadBaseId: 'u1',
+    });
+    expect(create).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
 
   it('muestra la confirmación sin volver a guardar y reinicia solo el asistente al crear otro', () => {
     const fixture = TestBed.createComponent(ProductosPage);
@@ -114,7 +153,8 @@ describe('ProductosPage: terminar revisión', () => {
     fixture.detectChanges();
 
     const manageButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find(
-      (element) => (element as HTMLButtonElement).textContent?.includes('Gestionar producto existente'),
+      (element) =>
+        (element as HTMLButtonElement).textContent?.includes('Gestionar producto existente'),
     ) as HTMLButtonElement;
     manageButton.click();
 

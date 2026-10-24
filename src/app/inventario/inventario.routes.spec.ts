@@ -263,9 +263,7 @@ describe('rutas de inventario', () => {
 
     expect(TestBed.inject(Router).url).toBe('/admin/inventario/productos/gestion');
     expect(harness.routeNativeElement?.textContent).toContain('Gestionar productos');
-    expect(harness.routeNativeElement?.querySelector('a')?.getAttribute('href')).toBe(
-      '/admin/inventario/productos',
-    );
+    expect(harness.routeNativeElement?.querySelector('a[href="/admin/inventario/productos"]')).toBeNull();
   });
 
   it('deniega gestionar productos sin PRODUCTOS_LEER', async () => {

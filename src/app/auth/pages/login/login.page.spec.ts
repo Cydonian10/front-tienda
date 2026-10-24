@@ -25,7 +25,9 @@ describe('LoginPage', () => {
     expect(element.querySelector('input[type="email"]')).toBeTruthy();
     expect(element.querySelector('input[type="password"]')).toBeTruthy();
     expect(element.querySelectorAll('button:disabled')).toHaveLength(2);
-    expect(element.textContent).toContain('Acceso de demostración');
+    expect(element.textContent).toContain('Acceso del equipo');
+    expect((element.querySelector('input[type="email"]') as HTMLInputElement).value).toBe('');
+    expect((element.querySelector('input[type="password"]') as HTMLInputElement).value).toBe('');
   });
 
   it('toggles password visibility accessibly', () => {

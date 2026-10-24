@@ -24,6 +24,9 @@ import { ToastService } from '../../../shared/services/toast/toast.service';
 import { PendingPermissionsGuard } from './guards/pending-permission/pending-permissions.guard';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
 import { UpdateRoleDialog } from './components/update-role-dialog/update-role.dialog';
+import { ROLE_CODES } from '../../../auth/models/role-codes';
+import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
+import { usePermissions } from '../../../auth/services/use-permissions';
 
 @Component({
   imports: [
@@ -40,6 +43,13 @@ import { UpdateRoleDialog } from './components/update-role-dialog/update-role.di
   host: { class: 'block space-y-6' },
 })
 export default class SystemRolesPage {
+  readonly access = usePermissions('ACCESS_CONTROL', {
+    assign: PERMISSION_CODES.ROLES_ASSIGN_PERMISSION,
+    create: PERMISSION_CODES.ROLES_CREATE,
+    edit: PERMISSION_CODES.ROLES_UPDATE,
+    remove: PERMISSION_CODES.ROLES_DELETE,
+  });
+  readonly isProtectedRole = computed(() => this.selectedRol()?.code === ROLE_CODES.SUPER_ADMIN);
   readonly systemQuery = useSystemsQuery();
 
   private readonly route = inject(ActivatedRoute);
@@ -110,6 +120,7 @@ export default class SystemRolesPage {
   readonly mutationDeleteRole = handleRoles().mutationDeleteRole;
 
   openCreateRoleDialog(system: System) {
+    if (!this.access.create()) return;
     const id = `create-role-${system.id}`;
     this.dialog
       .open<Role, System, CreateRoleDialog>(CreateRoleDialog, {
@@ -128,11 +139,13 @@ export default class SystemRolesPage {
           this.queryClient.setQueryData<Role[]>([...rolesQueryKey, role.systemId], (roles) =>
             roles ? [...roles, role] : roles,
           );
+          this.setSelectedRol(role);
         }
       });
   }
 
   openUpdateRolesDialog(role: Role) {
+    if (!this.access.edit() || role.code === ROLE_CODES.SUPER_ADMIN) return;
     const id = `update-role-${role.id}`;
 
     this.dialog
@@ -153,13 +166,14 @@ export default class SystemRolesPage {
         this.queryClient.setQueryData<Role[]>([...rolesQueryKey, updatedRole.systemId], (roles) =>
           roles?.map((role) => (role.id === updatedRole.id ? updatedRole : role)),
         );
-        this.toastService.success('Rol actulizado correctamente', {
+        this.toastService.success('Rol actualizado correctamente', {
           duration: 1000,
         });
       });
   }
 
   handleDeleteRol(role: Role) {
+    if (!this.access.remove() || role.code === ROLE_CODES.SUPER_ADMIN) return;
     this.confirmation
       .confirm({
         title: '¿Eliminar este rol?',
@@ -168,7 +182,7 @@ export default class SystemRolesPage {
         tone: 'danger',
       })
       .subscribe((confirmed) => {
-        if (!confirmed || this.mutationDeleteRole.isPending()) return;
+        if (!confirmed || !this.access.remove() || this.mutationDeleteRole.isPending()) return;
         this.mutationDeleteRole.mutate(role.id, {
           onSuccess: () => {
             this.queryClient.setQueryData<Role[]>([...rolesQueryKey, role.systemId], (roles) =>
@@ -213,7 +227,9 @@ export default class SystemRolesPage {
 
   readonly pemrisosQuery = getPermisosQuery(() => {
     const role = this.selectedRol();
-    return role && this.stepActive() === 'permisos' ? { roleId: role.id } : undefined;
+    return role && !this.isProtectedRole() && this.stepActive() === 'permisos'
+      ? { roleId: role.id }
+      : undefined;
   });
 
   readonly selectedPermissionIds = linkedSignal(
@@ -232,6 +248,12 @@ export default class SystemRolesPage {
   );
 
   onPermissionSelectionChange(change: { id: string; assigned: boolean }) {
+    if (
+      !this.access.assign() ||
+      this.isProtectedRole() ||
+      this.mutationReplacePermission.isPending()
+    )
+      return;
     this.selectedPermissionIds.update((current) => {
       const next = new Set(current);
       if (change.assigned) next.add(change.id);
@@ -241,6 +263,12 @@ export default class SystemRolesPage {
   }
 
   onVisiblePermissionsChange(change: { ids: string[]; assigned: boolean }) {
+    if (
+      !this.access.assign() ||
+      this.isProtectedRole() ||
+      this.mutationReplacePermission.isPending()
+    )
+      return;
     this.selectedPermissionIds.update((current) => {
       const next = new Set(current);
       for (const id of change.ids) {
@@ -275,7 +303,14 @@ export default class SystemRolesPage {
 
   async saveReplacePermissions() {
     const role = this.selectedRol();
-    if (!role || !this.hasPermissionChanges() || this.mutationReplacePermission.isPending()) return;
+    if (
+      !role ||
+      !this.access.assign() ||
+      this.isProtectedRole() ||
+      !this.hasPermissionChanges() ||
+      this.mutationReplacePermission.isPending()
+    )
+      return;
 
     const permissionIds = [...this.selectedPermissionIds()];
     try {
@@ -292,7 +327,7 @@ export default class SystemRolesPage {
             assigned: savedIds.has(permission.id),
           })),
       );
-      this.toastService.success('Permisos guardados correctamente');
+      this.toastService.success('Accesos del rol guardados correctamente');
     } catch {
       // El interceptor muestra el error; se mantienen los cambios para reintentar.
     }

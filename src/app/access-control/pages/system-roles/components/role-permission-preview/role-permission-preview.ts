@@ -1,25 +1,31 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { Permiso } from '../../../../../api/interfaces/access-control/permision.interface';
+import { AccessGroupList } from '../../../../components/access-group-list/access-group-list';
+import { resourceLabel } from '../../../../models/access-groups';
 
 @Component({
-  imports: [],
+  imports: [AccessGroupList],
   selector: 'role-permission-preview',
   templateUrl: './role-permission-preview.html',
   host: {
     class:
       'block space-y-4 pb-[calc(8rem+env(safe-area-inset-bottom))] sm:pb-[calc(5.25rem+env(safe-area-inset-bottom))]',
-    'aria-label': 'Vista previa de permisos',
+    'aria-label': 'Accesos del rol',
   },
 })
 export class RolePermissionPreview {
   readonly roleName = input.required<string>();
   readonly systemName = input.required<string>();
+  readonly systemCode = input('');
+  readonly protectedRole = input(false);
+  readonly disabled = input(false);
   readonly permissions = input<Permiso[]>([]);
   readonly selectedPermissionIds = input.required<ReadonlySet<string>>();
   readonly loading = input(false);
   readonly error = input(false);
   readonly currentResourceCode = signal<string>('');
   readonly searchTerm = signal('');
+  readonly resourceLabel = resourceLabel;
 
   readonly visiblePermissions = computed(() => {
     const resourceCode = this.currentResourceCode().toLowerCase();
@@ -39,21 +45,6 @@ export class RolePermissionPreview {
     const selected = this.selectedPermissionIds();
     return visible.length > 0 && visible.every((permission) => selected.has(permission.id));
   });
-  readonly resourceSummary = computed(() => {
-    const resources = new Map<string, { code: string; selected: number; total: number }>();
-    const selectedIds = this.selectedPermissionIds();
-    for (const permission of this.permissions()) {
-      const resource = resources.get(permission.resourceCode) ?? {
-        code: permission.resourceCode,
-        selected: 0,
-        total: 0,
-      };
-      resource.total++;
-      if (selectedIds.has(permission.id)) resource.selected++;
-      resources.set(permission.resourceCode, resource);
-    }
-    return [...resources.values()];
-  });
 
   readonly resourcesCode = computed(() => {
     const codes = this.permissions().map((p) => p.resourceCode);
@@ -70,7 +61,14 @@ export class RolePermissionPreview {
   }
 
   toggleVisiblePermissions() {
-    if (this.loading() || this.error() || !this.visiblePermissions().length) return;
+    if (
+      this.disabled() ||
+      this.protectedRole() ||
+      this.loading() ||
+      this.error() ||
+      !this.visiblePermissions().length
+    )
+      return;
     this.visiblePermissionsChange.emit({
       ids: this.visiblePermissions().map((permission) => permission.id),
       assigned: !this.allVisibleSelected(),
@@ -78,6 +76,7 @@ export class RolePermissionPreview {
   }
 
   onPermissionChange(id: string, event: Event) {
+    if (this.disabled() || this.protectedRole()) return;
     this.permissionSelectionChange.emit({
       id,
       assigned: (event.target as HTMLInputElement).checked,

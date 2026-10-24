@@ -47,7 +47,9 @@ import { SystemMenuService } from '../services/control-access/system-menu.servic
               <span class="text-sm text-base-content/70">No tienes permisos para ingresar</span>
             } @else {
               <span class="badge badge-warning badge-soft">Aún no disponible</span>
-              <span class="text-sm text-base-content/70">En este frontend</span>
+              <span class="text-sm text-base-content/70"
+                >Este sistema todavía no está habilitado</span
+              >
             }
           }
         </footer>

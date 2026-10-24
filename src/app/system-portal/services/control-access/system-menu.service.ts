@@ -19,7 +19,7 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
         icon: 'shield',
         items: [
           {
-            label: 'Sistemas y roles',
+            label: 'Roles y accesos',
             url: '/admin/access-control/sistemas-roles',
             icon: 'shield-check',
             permission: PERMISSION_CODES.SYSTEM_READ,
@@ -31,7 +31,7 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             permission: PERMISSION_CODES.USERS_READ,
           },
           {
-            label: 'Permisos',
+            label: 'Guía de accesos',
             url: '/admin/access-control/permisos',
             icon: 'key',
             permission: PERMISSION_CODES.PERMISSIONS_READ,

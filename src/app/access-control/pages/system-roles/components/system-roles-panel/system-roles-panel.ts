@@ -23,7 +23,12 @@ import { SystemRolesTable } from '../system-roles-table/system-roles-table';
             {{ system().description }}
           </p>
         </div>
-        <button type="button" class="btn btn-primary" (click)="createRole.emit()">
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!canCreate()"
+          (click)="createRole.emit()"
+        >
           <app-icon name="plus" [size]="17" />
           Nuevo rol
         </button>
@@ -34,7 +39,7 @@ import { SystemRolesTable } from '../system-roles-table/system-roles-table';
           class="input w-full sm:max-w-sm"
           type="search"
           aria-label="Buscar rol"
-          placeholder="Buscar por nombre o código…"
+          placeholder="Buscar un rol…"
           [ngModel]="searchRole()"
           (ngModelChange)="searchRole.set($event)"
         />
@@ -48,6 +53,8 @@ import { SystemRolesTable } from '../system-roles-table/system-roles-table';
           [loading]="loading()"
           [error]="error()"
           [selectedRoleId]="selectedRoleId()"
+          [canEdit]="canEdit()"
+          [canDelete]="canDelete()"
           (retry)="retry.emit()"
           (roleSelected)="roleSelected.emit($event)"
           (editRole)="editRole.emit($event)"
@@ -65,6 +72,9 @@ export class SystemRolesPanel {
   readonly roles = input<Role[]>([]);
   readonly loading = input(false);
   readonly error = input(false);
+  readonly canCreate = input(true);
+  readonly canEdit = input(true);
+  readonly canDelete = input(true);
   readonly retry = output<void>();
   readonly createRole = output<void>();
   readonly selectedRoleId = input<string | null>(null);

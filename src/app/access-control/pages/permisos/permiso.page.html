@@ -6,9 +6,10 @@
     <div class="border-b border-base-300 bg-base-200/50 p-4 sm:p-6">
       <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 id="catalog-title" class="text-base font-semibold">Catálogo de permisos</h2>
+          <h2 id="catalog-title" class="text-lg font-semibold">Guía de accesos</h2>
           <p class="mt-1 text-xs text-base-content/70">
-            Elige un sistema para consultar sus permisos.
+            Consulta qué permite cada grupo. Para dar acceso a una persona, configura un rol y
+            asígnaselo.
           </p>
         </div>
         @if (hasFilters()) {
@@ -18,7 +19,7 @@
         }
       </div>
 
-      <div class="grid gap-4 sm:grid-cols-2 lg:max-w-2xl">
+      <div class="max-w-sm">
         <div class="min-w-0 space-y-2">
           <span class="block text-xs font-semibold">Sistema</span>
           <app-search-select
@@ -28,16 +29,6 @@
             placeholder="Seleccionar sistema"
             searchPlaceholder="Buscar sistema..."
             (selectionChange)="onSystemChange()"
-          />
-        </div>
-        <div class="min-w-0 space-y-2">
-          <span class="block text-xs font-semibold">Recurso</span>
-          <app-search-select
-            [options]="resources()"
-            [formControl]="resourceControl"
-            ariaLabel="Filtrar por recurso"
-            placeholder="Todos los recursos"
-            searchPlaceholder="Buscar recurso..."
           />
         </div>
       </div>
@@ -62,7 +53,9 @@
       </div>
     } @else if (!selectedSystem()) {
       <div class="px-5 py-14 text-center sm:px-6">
-        <p class="text-sm text-base-content/70">Selecciona un sistema para ver sus permisos.</p>
+        <p class="text-sm text-base-content/70">
+          Selecciona un sistema para conocer sus grupos de acceso.
+        </p>
       </div>
     } @else if (permisosQuery.isPending()) {
       <div class="space-y-4 p-5 sm:p-6" role="status" aria-label="Cargando permisos">
@@ -91,64 +84,84 @@
         <p class="mt-1 text-xs text-base-content/70">No se encontraron permisos para consultar.</p>
       </div>
     } @else {
-      <div
-        class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300 px-4 py-3 sm:px-6"
-        role="status"
-      >
-        <p class="text-xs text-base-content/70 tabular-nums">
-          Mostrando
-          <strong class="font-semibold text-base-content">{{
-            filteredPermissions().length
-          }}</strong>
-          de {{ permisosQuery.data()?.length }} permisos
-        </p>
-        @if (permisosQuery.isFetching()) {
-          <span class="text-xs text-base-content/70">Actualizando…</span>
-        }
+      <div class="space-y-5 p-4 sm:p-6">
+        <a
+          routerLink="/admin/access-control/sistemas-roles"
+          [queryParams]="{ system: selectedSystem(), step: 'roles' }"
+          class="btn"
+          >Configurar accesos de un rol</a
+        >
+        <app-access-group-list
+          [permissions]="permisosQuery.data() ?? []"
+          [systemCode]="selectedSystem() ?? ''"
+          [readOnly]="true"
+        />
       </div>
+      <details class="collapse collapse-arrow border-t border-base-300">
+        <summary class="collapse-title font-semibold">
+          Detalle técnico · permisos individuales
+        </summary>
+        <div class="collapse-content">
+          <div class="max-w-sm space-y-2 py-4">
+            <span class="block text-xs font-semibold">Sección</span>
+            <app-search-select
+              [options]="resources()"
+              [formControl]="resourceControl"
+              ariaLabel="Filtrar por recurso"
+              placeholder="Todas las secciones"
+              searchPlaceholder="Buscar sección..."
+            />
+          </div>
+          <div
+            class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300 px-4 py-3 sm:px-6"
+            role="status"
+          >
+            <p class="text-xs text-base-content/70 tabular-nums">
+              Mostrando
+              <strong class="font-semibold text-base-content">{{
+                filteredPermissions().length
+              }}</strong>
+              de {{ permisosQuery.data()?.length }} permisos
+            </p>
+            @if (permisosQuery.isFetching()) {
+              <span class="text-xs text-base-content/70">Actualizando…</span>
+            }
+          </div>
 
-      @if (filteredPermissions().length) {
-        <div class="overflow-x-auto">
-          <table class="table table-sm min-w-235">
-            <thead class="bg-base-200/50 text-base-content/70">
-              <tr>
-                <th scope="col" class="pl-4 sm:pl-6">Permiso</th>
-                <th scope="col">Sistema</th>
-                <th scope="col">Recurso</th>
-                <th scope="col">Acción</th>
-                <th scope="col">Código</th>
-                <th scope="col" class="pr-4 sm:pr-6">ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (permission of filteredPermissions(); track permission.id) {
-                <tr class="border-base-300 hover:bg-base-200/50">
-                  <td class="pl-4 font-semibold sm:pl-6">{{ permission.name }}</td>
-                  <td>
-                    <span class="block font-medium">{{ permission.systemName }}</span>
-                  </td>
-                  <td>
-                    <span class="badge badge-ghost badge-sm">{{ permission.resourceCode }}</span>
-                  </td>
-                  <td>{{ permission.actionCode }}</td>
-                  <td class="text-xs font-medium break-all">{{ permission.code }}</td>
-                  <td class="pr-4 text-xs text-base-content/70 tabular-nums sm:pr-6">
-                    <span class="block max-w-40 break-all">{{ permission.id }}</span>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+          @if (filteredPermissions().length) {
+            <div class="overflow-x-auto">
+              <table class="table table-sm min-w-140">
+                <thead class="bg-base-200/50 text-base-content/70">
+                  <tr>
+                    <th scope="col" class="pl-4 sm:pl-6">Permiso</th>
+                    <th scope="col">Sección</th>
+                    <th scope="col">Código</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (permission of filteredPermissions(); track permission.id) {
+                    <tr class="border-base-300 hover:bg-base-200/50">
+                      <td class="pl-4 font-semibold sm:pl-6">{{ permission.name }}</td>
+                      <td>
+                        {{ resourceLabel(permission.resourceCode) }}
+                      </td>
+                      <td class="text-xs font-medium break-all">{{ permission.code }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="px-5 py-14 text-center sm:px-6">
+              <h3 class="text-sm font-semibold">Sin coincidencias</h3>
+              <p class="mt-1 text-xs text-base-content/70">Prueba con otro sistema o recurso.</p>
+              <button type="button" class="btn btn-ghost btn-sm mt-4" (click)="clearFilters()">
+                Limpiar filtros
+              </button>
+            </div>
+          }
         </div>
-      } @else {
-        <div class="px-5 py-14 text-center sm:px-6">
-          <h3 class="text-sm font-semibold">Sin coincidencias</h3>
-          <p class="mt-1 text-xs text-base-content/70">Prueba con otro sistema o recurso.</p>
-          <button type="button" class="btn btn-ghost btn-sm mt-4" (click)="clearFilters()">
-            Limpiar filtros
-          </button>
-        </div>
-      }
+      </details>
     }
   </section>
 </div>

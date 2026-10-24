@@ -70,7 +70,7 @@ describe('SystemRolesTable', () => {
   it('keeps the permissions action visible beside the menu trigger', () => {
     const { fixture } = setup();
 
-    expect(fixture.nativeElement.textContent).toContain('Permisos');
+    expect(fixture.nativeElement.textContent).toContain('Configurar accesos');
     expect(
       fixture.nativeElement.querySelector('button[aria-label="Más acciones para Administrador"]'),
     ).toBeTruthy();

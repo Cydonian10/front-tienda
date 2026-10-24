@@ -8,17 +8,21 @@ import {
 import { Icon } from '../../../shared/components/icon/icon';
 import { getPermisosQuery } from '../../actions/permisos/get-permisos-action';
 import { useSystemsQuery } from '../../../system-portal/actions/find-systems-action';
+import { RouterLink } from '@angular/router';
+import { AccessGroupList } from '../../components/access-group-list/access-group-list';
+import { resourceLabel } from '../../models/access-groups';
 
 const byLabel = (a: SearchSelectOption, b: SearchSelectOption) =>
   a.label.localeCompare(b.label, 'es');
 
 @Component({
-  imports: [SearchSelect, ReactiveFormsModule, Icon],
+  imports: [SearchSelect, ReactiveFormsModule, Icon, RouterLink, AccessGroupList],
   selector: 'app-permisos',
   templateUrl: './permiso.page.html',
   host: { class: 'block min-w-0' },
 })
 export default class PermisosPage {
+  readonly resourceLabel = resourceLabel;
   readonly systemsQuery = useSystemsQuery();
 
   readonly systemControl = new FormControl<string | null>({ value: null, disabled: true });
@@ -40,7 +44,7 @@ export default class PermisosPage {
     const codes = new Set(
       (this.permisosQuery.data() ?? []).map((permission) => permission.resourceCode),
     );
-    return Array.from(codes, (value) => ({ value, label: value })).sort(byLabel);
+    return Array.from(codes, (value) => ({ value, label: resourceLabel(value) })).sort(byLabel);
   });
 
   readonly filteredPermissions = computed(() =>

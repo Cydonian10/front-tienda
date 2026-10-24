@@ -86,12 +86,12 @@ describe('GestionProductosPage', () => {
     return { fixture, product };
   }
 
-  it('abre sin selección ni petición y permite volver al asistente', () => {
+  it('abre sin selección ni petición y oculta la creación a usuarios de consulta', () => {
     const fixture = TestBed.createComponent(GestionProductosPage);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Selecciona un producto');
-    expect(fixture.nativeElement.querySelector('a')?.getAttribute('href')).toBe('/admin/inventario/productos');
+    expect(fixture.nativeElement.querySelector('a[href="/admin/inventario/productos"]')).toBeNull();
     expect(getById).not.toHaveBeenCalled();
     expect(search).not.toHaveBeenCalled();
   });

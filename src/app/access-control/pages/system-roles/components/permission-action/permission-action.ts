@@ -6,7 +6,7 @@ import { booleanAttribute, Component, input, output } from '@angular/core';
   template: `
     <div
       role="group"
-      aria-label="Acciones de permisos"
+      aria-label="Guardar accesos del rol"
       class="mx-auto flex w-full max-w-7xl flex-col gap-3 sm:flex-row sm:justify-end"
     >
       <button
@@ -23,7 +23,7 @@ import { booleanAttribute, Component, input, output } from '@angular/core';
         [disabled]="!hasPermission() || saving()"
         (click)="save.emit()"
       >
-        Guardar permisos
+        {{ saving() ? 'Guardando…' : 'Guardar accesos' }}
       </button>
     </div>
   `,

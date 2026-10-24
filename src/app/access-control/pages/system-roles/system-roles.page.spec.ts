@@ -11,17 +11,169 @@ import { findSystemsQueryKey } from '../../../system-portal/actions/find-systems
 import { rolesQueryKey } from '../../actions/roles/roles-actions';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
 import SystemRolesPage from './system-roles.page';
+import { AuthStore } from '../../../store/auth/auth.store';
+import { ACCESS_GROUPS } from '../../models/access-groups';
 
 describe('SystemRolesPage', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: AuthStore,
+          useFactory: () => {
+            const store = new AuthStore();
+            store.setProfile({ isSuperAdmin: true, permissions: [] } as never);
+            return store;
+          },
+        },
+      ],
+    });
+  });
   afterEach(() => TestBed.resetTestingModule());
+
+  function groupedRole(code = 'ENCARGADO') {
+    const system = {
+      id: 'inventory',
+      code: 'INVENTARIO',
+      name: 'Inventario',
+      description: '',
+      active: true,
+      order: 1,
+    };
+    const role = {
+      id: 'role',
+      code,
+      name: 'Encargado',
+      description: '',
+      systemId: system.id,
+      permissions: [],
+    };
+    const permissions: Permiso[] = [
+      ...new Set(
+        ACCESS_GROUPS.filter((group) => group.systemCode === system.code).flatMap(
+          (group) => group.codes,
+        ),
+      ),
+    ].map((code) => ({
+      id: `id-${code}`,
+      code,
+      name: code,
+      systemCode: system.code,
+      systemId: system.id,
+      systemName: system.name,
+      resourceCode: '',
+      actionCode: '',
+    }));
+    const params = new BehaviorSubject(
+      convertToParamMap({ system: system.code, roleCode: role.code, step: 'permisos' }),
+    );
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    client.setQueryData([...findSystemsQueryKey], [system]);
+    client.setQueryData([...rolesQueryKey, system.id], [role]);
+    const replacePermissions = vi
+      .fn()
+      .mockImplementation(async (_id: string, ids: string[]) => ({ permissionIds: ids }));
+    const findPermisos = vi.fn().mockResolvedValue(permissions);
+    TestBed.configureTestingModule({
+      providers: [
+        provideTanStackQuery(client),
+        {
+          provide: ActivatedRoute,
+          useValue: { queryParamMap: params, snapshot: { queryParamMap: params.value } },
+        },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: Dialog, useValue: {} },
+        { provide: SystemApi, useValue: { findAllSystems: vi.fn() } },
+        { provide: RolesApi, useValue: { findAll: vi.fn(), replacePermissions } },
+        { provide: PermisosApi, useValue: { findPermisos } },
+      ],
+    });
+    const fixture = TestBed.createComponent(SystemRolesPage);
+    fixture.detectChanges();
+    return { fixture, replacePermissions, findPermisos };
+  }
+
+  it('seleccionar un grupo guarda sus IDs reales sin incluir otros accesos', async () => {
+    const { fixture, replacePermissions } = groupedRole();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('#access-group-catalog-read')).toBeTruthy();
+    });
+    (fixture.nativeElement.querySelector('#access-group-catalog-read') as HTMLInputElement).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selectedPermissionIds()).toEqual(
+      new Set(['id-PRODUCTOS_LEER', 'id-UNIDADES_LEER', 'id-ATRIBUTOS_LEER']),
+    );
+    expect(replacePermissions).not.toHaveBeenCalled();
+    await fixture.componentInstance.saveReplacePermissions();
+    expect(replacePermissions).toHaveBeenCalledWith('role', [
+      'id-PRODUCTOS_LEER',
+      'id-UNIDADES_LEER',
+      'id-ATRIBUTOS_LEER',
+    ]);
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(fixture.componentInstance.hasPermissionChanges()).toBe(false);
+    });
+  });
+
+  it('un fallo al guardar conserva la selección para reintentar', async () => {
+    const { fixture, replacePermissions } = groupedRole();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('#access-group-stock-read')).toBeTruthy();
+    });
+    replacePermissions.mockRejectedValue(new Error('Error de red'));
+    (fixture.nativeElement.querySelector('#access-group-stock-read') as HTMLInputElement).click();
+    await fixture.componentInstance.saveReplacePermissions();
+    expect(fixture.componentInstance.selectedPermissionIds().has('id-EXISTENCIAS_LEER')).toBe(true);
+    expect(fixture.componentInstance.hasPermissionChanges()).toBe(true);
+  });
+
+  it('no consulta ni permite modificar permisos de SUPER_ADMIN', async () => {
+    const { fixture, findPermisos, replacePermissions } = groupedRole('SUPER_ADMIN');
+    fixture.componentInstance.onVisiblePermissionsChange({ ids: ['cualquiera'], assigned: true });
+    await fixture.componentInstance.saveReplacePermissions();
+    expect(findPermisos).not.toHaveBeenCalled();
+    expect(replacePermissions).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('Acceso completo a todos los sistemas');
+    expect(fixture.nativeElement.querySelector('permission-actions')).toBeNull();
+  });
+
+  it('no permite mutar grupos desde manejadores si el usuario solo consulta', async () => {
+    const { fixture, replacePermissions } = groupedRole();
+    TestBed.inject(AuthStore).setProfile({ isSuperAdmin: false, permissions: [] } as never);
+    fixture.componentInstance.onVisiblePermissionsChange({
+      ids: ['id-EXISTENCIAS_LEER'],
+      assigned: true,
+    });
+    fixture.componentInstance.onPermissionSelectionChange({
+      id: 'id-EXISTENCIAS_LEER',
+      assigned: true,
+    });
+    await fixture.componentInstance.saveReplacePermissions();
+    expect(fixture.componentInstance.selectedPermissionIds().size).toBe(0);
+    expect(replacePermissions).not.toHaveBeenCalled();
+  });
 
   it('elimina del caché solo el rol confirmado y conserva los demás', async () => {
     const system = {
-      id: 'system-1', code: 'VENTAS', name: 'Ventas', description: '', active: true, order: 1,
+      id: 'system-1',
+      code: 'VENTAS',
+      name: 'Ventas',
+      description: '',
+      active: true,
+      order: 1,
     };
     const role = {
-      id: 'role-1', systemId: system.id, code: 'ADMIN', name: 'Administrador',
-      description: '', permissions: [],
+      id: 'role-1',
+      systemId: system.id,
+      code: 'ADMIN',
+      name: 'Administrador',
+      description: '',
+      permissions: [],
     };
     const otherRole = { ...role, id: 'role-2', code: 'LECTOR', name: 'Lector' };
     const otherSystemRole = { ...role, id: 'role-3', systemId: 'system-2' };
@@ -56,8 +208,9 @@ describe('SystemRolesPage', () => {
     ) as HTMLButtonElement;
     trigger.click();
     fixture.detectChanges();
-    const deleteButton = [...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')]
-      .find((button) => button.textContent?.includes('Eliminar'))!;
+    const deleteButton = [
+      ...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'),
+    ].find((button) => button.textContent?.includes('Eliminar'))!;
     deleteButton.click();
     fixture.detectChanges();
     expect(confirm).toHaveBeenCalled();
@@ -79,11 +232,20 @@ describe('SystemRolesPage', () => {
 
   it('conserva el caché si falla la eliminación', async () => {
     const system = {
-      id: 'system-1', code: 'VENTAS', name: 'Ventas', description: '', active: true, order: 1,
+      id: 'system-1',
+      code: 'VENTAS',
+      name: 'Ventas',
+      description: '',
+      active: true,
+      order: 1,
     };
     const role = {
-      id: 'role-1', systemId: system.id, code: 'ADMIN', name: 'Administrador',
-      description: '', permissions: [],
+      id: 'role-1',
+      systemId: system.id,
+      code: 'ADMIN',
+      name: 'Administrador',
+      description: '',
+      permissions: [],
     };
     const params = new BehaviorSubject(convertToParamMap({ system: system.code }));
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -100,7 +262,10 @@ describe('SystemRolesPage', () => {
         { provide: Dialog, useValue: {} },
         { provide: ConfirmDialogService, useValue: { confirm: () => of(true) } },
         { provide: SystemApi, useValue: { findAllSystems: vi.fn() } },
-        { provide: RolesApi, useValue: { findAll: vi.fn(), delete: vi.fn().mockRejectedValue(new Error('Error')) } },
+        {
+          provide: RolesApi,
+          useValue: { findAll: vi.fn(), delete: vi.fn().mockRejectedValue(new Error('Error')) },
+        },
         { provide: PermisosApi, useValue: { findPermisos: vi.fn() } },
       ],
     });
@@ -204,7 +369,7 @@ describe('SystemRolesPage', () => {
     fixture.componentInstance.onBeforeUnload(cleanUnload);
     expect(cleanUnload.defaultPrevented).toBe(false);
     const bulkButton = fixture.nativeElement.querySelector(
-      'role-permission-preview section > div:nth-child(2) button',
+      '[data-bulk-permissions]',
     ) as HTMLButtonElement;
     expect(bulkButton.textContent).toContain('Seleccionar visibles');
 
@@ -345,7 +510,9 @@ describe('SystemRolesPage', () => {
     await vi.waitFor(() => expect(findPermisos).toHaveBeenCalledWith({ roleId: role.id }));
     await vi.waitFor(() => {
       fixture.detectChanges();
-      expect(fixture.nativeElement.textContent).toContain('Este rol todavía no tiene permisos.');
+      expect(fixture.nativeElement.textContent).toContain(
+        'No hay acciones configuradas para este sistema',
+      );
     });
     expect(fixture.componentInstance['stepActive']()).toBe('permisos');
     expect(fixture.nativeElement.querySelector('system-selector')).toBeNull();

@@ -1,0 +1,51 @@
+<div class="divide-y divide-base-300">
+  @for (group of groups(); track group.id) {
+    <div class="flex items-start gap-4 py-4 first:pt-0 last:pb-0">
+      @if (!readOnly()) {
+        <input
+          type="checkbox"
+          class="checkbox mt-1 shrink-0"
+          [id]="'access-group-' + group.id"
+          [checked]="group.checked"
+          [indeterminate]="group.partial"
+          [disabled]="disabled() || !group.available"
+          [attr.aria-describedby]="'access-description-' + group.id"
+          (change)="toggle(group)"
+        />
+      }
+      <div class="min-w-0 flex-1">
+        <label
+          [attr.for]="readOnly() ? null : 'access-group-' + group.id"
+          class="block font-semibold"
+        >
+          {{ group.name }}
+        </label>
+        <p
+          [id]="'access-description-' + group.id"
+          class="mt-1 max-w-2xl text-sm text-base-content/70"
+        >
+          {{ group.description }}
+        </p>
+        @if (!group.available) {
+          <p class="mt-2 text-xs text-base-content/70">
+            Configuración incompleta en el servidor. Consulta los permisos individuales.
+          </p>
+        } @else if (group.partial && !readOnly()) {
+          <p class="mt-2 text-xs text-base-content/70">
+            Acceso personalizado: solo algunas acciones están seleccionadas.
+          </p>
+        }
+      </div>
+      @if (!readOnly()) {
+        <span class="shrink-0 text-xs text-base-content/70">{{
+          group.checked ? 'Incluido' : group.partial ? 'Parcial' : 'Sin incluir'
+        }}</span>
+      }
+    </div>
+  } @empty {
+    <p class="text-sm text-base-content/70">
+      Este sistema todavía no tiene grupos de acceso. Usa la configuración avanzada para revisar sus
+      acciones.
+    </p>
+  }
+</div>

@@ -6,9 +6,11 @@
     <p class="max-w-2xl text-sm text-base-content/70">
       Busca por nombre para consultar los productos existentes y sus variantes.
     </p>
-    <a routerLink="/admin/inventario/productos" class="btn btn-ghost">
-      Volver a crear productos
-    </a>
+    @if (permissions.edit()) {
+      <a routerLink="/admin/inventario/productos" class="btn btn-ghost">
+        Volver a crear productos
+      </a>
+    }
   </header>
 
   <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(17rem,21rem)_minmax(0,1fr)]">
@@ -22,120 +24,148 @@
     />
 
     <div class="min-w-0 space-y-6">
-    <section class="card card-border min-w-0 bg-base-100" aria-label="Detalle del producto">
-      <div class="card-body gap-5">
-        @if (!selectedId()) {
-          <h2 class="card-title">Selecciona un producto</h2>
-          <p class="text-sm text-base-content/70">
-            Escribe al menos dos caracteres para buscar en el catálogo.
-          </p>
-        } @else if (invalidId()) {
-          <div role="alert" class="alert alert-error alert-soft">
-            El enlace del producto no es válido. Puedes buscar otro producto.
-          </div>
-          <button type="button" class="btn" (click)="clearProduct()">Volver al selector</button>
-        } @else if (productQuery.isPending()) {
-          <p role="status">Cargando producto…</p>
-        } @else if (productQuery.isError()) {
-          <div role="alert" class="alert alert-error alert-soft">
-            No se pudo abrir el producto. Es posible que no exista o no tengas acceso.
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" class="btn" (click)="productQuery.refetch()">Reintentar</button>
-            <button type="button" class="btn btn-ghost" (click)="clearProduct()">
-              Volver al selector
-            </button>
-          </div>
-        } @else if (productQuery.data(); as product) {
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div class="min-w-0">
-              <h2 class="card-title wrap-anywhere">{{ product.nombre }}</h2>
-              <p class="text-sm text-base-content/70 wrap-anywhere">{{ product.descripcion || 'Sin descripción' }}</p>
+      <section class="card card-border min-w-0 bg-base-100" aria-label="Detalle del producto">
+        <div class="card-body gap-5">
+          @if (!selectedId()) {
+            <h2 class="card-title">Selecciona un producto</h2>
+            <p class="text-sm text-base-content/70">
+              Escribe al menos dos caracteres para buscar en el catálogo.
+            </p>
+          } @else if (invalidId()) {
+            <div role="alert" class="alert alert-error alert-soft">
+              El enlace del producto no es válido. Puedes buscar otro producto.
             </div>
-            @if (!product.activo) {
-              <span class="badge badge-warning badge-soft">Inactivo</span>
-            }
-          </div>
-          <div class="border-t border-base-300 pt-5">
-            <h3 class="mb-4 text-lg font-bold">Datos generales y galería</h3>
-            <datos-generales-step
-              [product]="product"
-              [management]="true"
-              [canEdit]="permissions.edit()"
-              [savedVersion]="savedVersion()"
-              [saving]="updateMutation.isPending()"
-              (update)="saveProduct($event)"
-              (discardRequested)="discardEdit()"
-            />
-            @if (updateMutation.isError()) {
-              <p role="alert" class="mt-4 text-sm text-error">{{ saveError() }}</p>
-            }
-          </div>
-          <button type="button" class="btn btn-ghost self-start" (click)="clearProduct()">
-            Buscar otro producto
-          </button>
-        }
-      </div>
-    </section>
-    @if (productQuery.data(); as product) {
-      <section class="min-w-0 space-y-4" aria-labelledby="product-variants-title">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <h3 id="product-variants-title" class="text-lg font-bold">Variantes existentes</h3>
-          @if (permissions.edit() && !newVariantOpen()) {
-            <button #addVariantButton type="button" class="btn btn-primary" [disabled]="!selectedAttributes().length || attributesQuery.isPending() || attributesQuery.isError()" (click)="openNewVariant()">
-              Añadir variante
+            <button type="button" class="btn" (click)="clearProduct()">Volver al selector</button>
+          } @else if (productQuery.isPending()) {
+            <p role="status">Cargando producto…</p>
+          } @else if (productQuery.isError()) {
+            <div role="alert" class="alert alert-error alert-soft">
+              No se pudo abrir el producto. Es posible que no exista o no tengas acceso.
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="btn" (click)="productQuery.refetch()">Reintentar</button>
+              <button type="button" class="btn btn-ghost" (click)="clearProduct()">
+                Volver al selector
+              </button>
+            </div>
+          } @else if (productQuery.data(); as product) {
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h2 class="card-title wrap-anywhere">{{ product.nombre }}</h2>
+                <p class="text-sm text-base-content/70 wrap-anywhere">
+                  {{ product.descripcion || 'Sin descripción' }}
+                </p>
+              </div>
+              @if (!product.activo) {
+                <span class="badge badge-warning badge-soft">Inactivo</span>
+              }
+            </div>
+            <div class="border-t border-base-300 pt-5">
+              <h3 class="mb-4 text-lg font-bold">Datos generales y galería</h3>
+              <datos-generales-step
+                [product]="product"
+                [management]="true"
+                [canEdit]="permissions.edit()"
+                [savedVersion]="savedVersion()"
+                [saving]="updateMutation.isPending()"
+                (update)="saveProduct($event)"
+                (discardRequested)="discardEdit()"
+              />
+              @if (updateMutation.isError()) {
+                <p role="alert" class="mt-4 text-sm text-error">{{ saveError() }}</p>
+              }
+            </div>
+            <button type="button" class="btn btn-ghost self-start" (click)="clearProduct()">
+              Buscar otro producto
             </button>
           }
         </div>
-        @if ((variantsQuery.isPending() && !variantsQuery.data()) || (attributesQuery.isPending() && !attributesQuery.data())) {
-          <p role="status">Cargando variantes y atributos…</p>
-        } @else {
-          @if (variantsQuery.isError() || attributesQuery.isError()) {
-            <div role="alert" class="alert alert-error alert-soft">
-              No se pudieron actualizar las variantes o los atributos del producto.
-            </div>
-            <button type="button" class="btn" (click)="variantsQuery.refetch(); attributesQuery.refetch()">
-              Reintentar
-            </button>
-          }
-          @if (variantsQuery.isSuccess() && !selectedAttributes().length && permissions.edit()) {
-            <p class="text-sm text-base-content/70">Este producto no tiene atributos configurados para crear variantes.</p>
-          }
-          @if (variantsQuery.isSuccess() && !variantsQuery.data()?.length) {
-            <p class="rounded-box border border-base-300 bg-base-100 p-5 text-sm text-base-content/70">
-              Este producto aún no tiene variantes.
-            </p>
-          }
-          @for (variant of variantsQuery.data() ?? []; track variant.id) {
-            <variante-card
-              [productId]="product.id"
-              [variant]="variant"
-              [productImages]="product.imagenes"
-              [attributes]="selectedAttributes()"
-              [canEdit]="permissions.edit()"
-            />
-          }
-        }
-        @if (newVariantOpen()) {
-          <div class="min-w-0 rounded-box border border-base-300 bg-base-100 p-5 sm:p-6">
-            <variante-form
-              [attributes]="selectedAttributes()"
-              [busy]="createMutation.isPending()"
-              [canCreate]="permissions.edit()"
-              (create)="createVariant($event)"
-            />
-            @if (createMutation.isError()) {
-              <p role="alert" class="mt-4 text-sm text-error">
-                No se pudo crear la variante. Revisa los datos e inténtalo de nuevo.
+      </section>
+      @if (productQuery.data(); as product) {
+        <section class="min-w-0 space-y-4" aria-labelledby="product-variants-title">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 id="product-variants-title" class="text-lg font-bold">Variantes existentes</h3>
+            @if (permissions.edit() && !newVariantOpen()) {
+              <button
+                #addVariantButton
+                type="button"
+                class="btn btn-primary"
+                [disabled]="
+                  !selectedAttributes().length ||
+                  attributesQuery.isPending() ||
+                  attributesQuery.isError()
+                "
+                (click)="openNewVariant()"
+              >
+                Añadir variante
+              </button>
+            }
+          </div>
+          @if (
+            (variantsQuery.isPending() && !variantsQuery.data()) ||
+            (attributesQuery.isPending() && !attributesQuery.data())
+          ) {
+            <p role="status">Cargando variantes y atributos…</p>
+          } @else {
+            @if (variantsQuery.isError() || attributesQuery.isError()) {
+              <div role="alert" class="alert alert-error alert-soft">
+                No se pudieron actualizar las variantes o los atributos del producto.
+              </div>
+              <button
+                type="button"
+                class="btn"
+                (click)="variantsQuery.refetch(); attributesQuery.refetch()"
+              >
+                Reintentar
+              </button>
+            }
+            @if (variantsQuery.isSuccess() && !selectedAttributes().length && permissions.edit()) {
+              <p class="text-sm text-base-content/70">
+                Este producto no tiene atributos configurados para crear variantes.
               </p>
             }
-            <button type="button" class="btn mt-4" [disabled]="createMutation.isPending()" (click)="cancelNewVariant()">
-              Cancelar nueva variante
-            </button>
-          </div>
-        }
-      </section>
-    }
+            @if (variantsQuery.isSuccess() && !variantsQuery.data()?.length) {
+              <p
+                class="rounded-box border border-base-300 bg-base-100 p-5 text-sm text-base-content/70"
+              >
+                Este producto aún no tiene variantes.
+              </p>
+            }
+            @for (variant of variantsQuery.data() ?? []; track variant.id) {
+              <variante-card
+                [productId]="product.id"
+                [variant]="variant"
+                [productImages]="product.imagenes"
+                [attributes]="selectedAttributes()"
+                [canEdit]="permissions.edit()"
+              />
+            }
+          }
+          @if (newVariantOpen()) {
+            <div class="min-w-0 rounded-box border border-base-300 bg-base-100 p-5 sm:p-6">
+              <variante-form
+                [attributes]="selectedAttributes()"
+                [busy]="createMutation.isPending()"
+                [canCreate]="permissions.edit()"
+                (create)="createVariant($event)"
+              />
+              @if (createMutation.isError()) {
+                <p role="alert" class="mt-4 text-sm text-error">
+                  No se pudo crear la variante. Revisa los datos e inténtalo de nuevo.
+                </p>
+              }
+              <button
+                type="button"
+                class="btn mt-4"
+                [disabled]="createMutation.isPending()"
+                (click)="cancelNewVariant()"
+              >
+                Cancelar nueva variante
+              </button>
+            </div>
+          }
+        </section>
+      }
     </div>
   </div>
 </section>

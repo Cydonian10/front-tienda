@@ -6,6 +6,7 @@ import { SystemApi } from '../../../api/access-control/system-api';
 import { getPermisosQueryKey } from '../../actions/permisos/get-permisos-action';
 import { findSystemsQueryKey } from '../../../system-portal/actions/find-systems-action';
 import PermisosPage from './permiso.page';
+import { provideRouter } from '@angular/router';
 
 const permissions: Permiso[] = [
   {
@@ -45,10 +46,13 @@ describe('PermisosPage', () => {
 
   function setup(data: Permiso[] = permissions) {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    client.setQueryData([...findSystemsQueryKey], [
-      { code: 'ACCESS_CONTROL', name: 'Control de acceso' },
-      { code: 'VENTAS', name: 'Ventas' },
-    ]);
+    client.setQueryData(
+      [...findSystemsQueryKey],
+      [
+        { code: 'ACCESS_CONTROL', name: 'Control de acceso' },
+        { code: 'VENTAS', name: 'Ventas' },
+      ],
+    );
     client.setQueryData(
       [...getPermisosQueryKey, 'ACCESS_CONTROL'],
       data.filter((permission) => permission.systemCode === 'ACCESS_CONTROL'),
@@ -61,6 +65,7 @@ describe('PermisosPage', () => {
     const findAllSystems = vi.fn().mockResolvedValue([]);
     TestBed.configureTestingModule({
       providers: [
+        provideRouter([]),
         provideTanStackQuery(client),
         { provide: PermisosApi, useValue: { findPermisos } },
         { provide: SystemApi, useValue: { findAllSystems } },
@@ -83,7 +88,9 @@ describe('PermisosPage', () => {
       { value: 'VENTAS', label: 'Ventas' },
     ]);
     expect(page.resources()).toEqual([]);
-    expect(element.textContent).toContain('Selecciona un sistema para ver sus permisos');
+    expect(element.textContent).toContain(
+      'Selecciona un sistema para conocer sus grupos de acceso',
+    );
     expect(findPermisos).not.toHaveBeenCalled();
   });
 

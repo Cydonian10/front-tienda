@@ -20,6 +20,7 @@ describe('listado de proveedores', () => {
   const id = '123e4567-e89b-12d3-a456-426614174000';
   const proveedor = { id, nombre: 'Acero Norte', documento: '204', contacto: null };
   const list = vi.fn();
+  const listCompras = vi.fn();
   const create = vi.fn();
   const success = vi.fn();
   const empty = { data: [], meta: { page: 1, limit: 20, total: 0, totalPages: 0 } };
@@ -27,11 +28,15 @@ describe('listado de proveedores', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     list.mockResolvedValue(empty);
+    listCompras.mockResolvedValue({
+      proveedor, resumen: { cantidadCompras: 0, totalDocumento: '0' },
+      data: [], meta: { page: 1, limit: 20, total: 0, totalPages: 0 },
+    });
     create.mockResolvedValue({ ...proveedor, documento: null });
     TestBed.configureTestingModule({
       providers: [
         provideTanStackQuery(new QueryClient({ defaultOptions: { queries: { retry: false } } })),
-        { provide: ProveedorApi, useValue: { list, create } },
+        { provide: ProveedorApi, useValue: { list, listCompras, create } },
         { provide: ToastService, useValue: { success } },
         provideRouter([
           { path: 'admin', component: EmptyPage },
@@ -233,5 +238,56 @@ describe('listado de proveedores', () => {
     expect(page.showCreate()).toBe(false);
     expect(document.activeElement).toBe(trigger);
     expect(create).not.toHaveBeenCalled();
+  });
+
+  it('conserva el contexto al abrir el detalle y volver mediante enlaces enfocables', async () => {
+    grant(PERMISSION_CODES.PROVEEDORES_READ, PERMISSION_CODES.COMPRAS_READ);
+    list.mockResolvedValue({
+      data: [proveedor], meta: { page: 2, limit: 10, total: 15, totalPages: 2 },
+    });
+    const listUrl = '/admin/inventario/proveedores?nombre=Acero&documento=204&page=2&limit=10';
+    const harness = await RouterTestingHarness.create(listUrl);
+    await vi.waitFor(() => expect(list).toHaveBeenCalledWith(2, 10, 'Acero', '204'));
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(harness.routeNativeElement?.querySelector('table a')).not.toBeNull();
+    });
+    harness.detectChanges();
+    const detail = harness.routeNativeElement?.querySelector('table a') as HTMLAnchorElement;
+    detail.focus();
+    expect(document.activeElement).toBe(detail);
+    detail.click();
+    await vi.waitFor(() => expect(listCompras).toHaveBeenCalledWith(id, { page: 1, limit: 20 }));
+    harness.detectChanges();
+    const back = harness.routeNativeElement?.querySelector('header a') as HTMLAnchorElement;
+    expect(back.getAttribute('href')).toBe(listUrl);
+    back.focus();
+    expect(document.activeElement).toBe(back);
+    back.click();
+    await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe(listUrl));
+  });
+
+  it('muestra un 403 del servidor como error de permisos sin cerrar el formulario', async () => {
+    grant(PERMISSION_CODES.PROVEEDORES_READ, PERMISSION_CODES.PROVEEDORES_CREATE);
+    create.mockRejectedValue(new HttpErrorResponse({ status: 403 }));
+    const harness = await RouterTestingHarness.create();
+    const page = await harness.navigateByUrl('/admin/inventario/proveedores', ProveedoresPage);
+    harness.detectChanges();
+    (harness.routeNativeElement?.querySelector('header button') as HTMLButtonElement).click();
+    harness.detectChanges();
+    const dialog = harness.routeNativeElement!.querySelector('app-crear-proveedor-dialog')!;
+    const nombre = dialog.querySelector('#crear-proveedor-nombre') as HTMLInputElement;
+    nombre.value = 'Metal Sur';
+    nombre.dispatchEvent(new Event('input', { bubbles: true }));
+    dialog.querySelector('form:not(.modal-backdrop)')!.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true }),
+    );
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(dialog.textContent).toContain('Ya no tienes permiso para crear proveedores');
+    });
+    expect(page.showCreate()).toBe(true);
+    expect(nombre.value).toBe('Metal Sur');
+    expect(success).not.toHaveBeenCalled();
   });
 });

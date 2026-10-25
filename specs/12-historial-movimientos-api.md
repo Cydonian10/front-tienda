@@ -1,6 +1,6 @@
 # SPEC 12 — API de historial de movimientos de inventario
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01, SPEC 07, SPEC 09
 > **Date:** 2026-10-24
 > **Objective:** Exponer un listado paginado y un detalle de movimientos confirmados para que la pantalla de historial pueda consultar operaciones reales.

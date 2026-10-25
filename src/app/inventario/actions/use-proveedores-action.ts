@@ -25,6 +25,7 @@ export const proveedorComprasQueryKey = (id: string, filtro: FiltroComprasProvee
   ] as const;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const esProveedorIdValido = (id: string) => UUID.test(id);
 
 export function useProveedoresListado(
   page: () => number,
@@ -61,12 +62,12 @@ export function useProveedorCompras(id: () => string, filtro: () => FiltroCompra
     return {
       queryKey: proveedorComprasQueryKey(proveedorId, currentFilter),
       queryFn: () => {
-        if (!UUID.test(proveedorId) || !currentFilter) {
+        if (!esProveedorIdValido(proveedorId) || !currentFilter) {
           throw new Error('Selecciona un proveedor y un rango de fechas válidos.');
         }
         return api.listCompras(proveedorId, currentFilter);
       },
-      enabled: UUID.test(proveedorId) && currentFilter !== null && access.proveedores() && access.compras(),
+      enabled: esProveedorIdValido(proveedorId) && currentFilter !== null && access.proveedores() && access.compras(),
       retry: false,
     };
   });

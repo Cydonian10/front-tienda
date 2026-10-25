@@ -19,7 +19,9 @@ export function formatTotalPEN(value: string | null): string {
   return `S/ ${whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}.${decimals}`;
 }
 
-export function documentoCompra(compra: CompraListadoResponse): string {
+export function documentoCompra(
+  compra: Pick<CompraListadoResponse, 'tipoDocumento' | 'serieDocumento' | 'numeroDocumento'>,
+): string {
   const tipo = compra.tipoDocumento
     ? compra.tipoDocumento[0].toUpperCase() + compra.tipoDocumento.slice(1)
     : 'Documento';

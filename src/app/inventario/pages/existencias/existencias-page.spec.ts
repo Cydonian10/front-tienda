@@ -141,6 +141,7 @@ describe('ExistenciasPage', () => {
           producto: {
             id: 'p1',
             nombre: 'Tornillo',
+            marca: { id: 'm1', nombre: 'Truper' },
             activo: false,
             unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
           },
@@ -168,6 +169,11 @@ describe('ExistenciasPage', () => {
     fixture.detectChanges();
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Inactivo con stock');
+    expect(fixture.nativeElement.querySelector('tbody tr td')?.textContent).toContain('Truper');
+    expect(
+      fixture.nativeElement.querySelector('ul[aria-label="Saldos de existencias"] li')
+        ?.textContent,
+    ).toContain('Truper');
     expect(text).toContain('S/ 500.00');
     expect(text).toContain('3.12 u');
   });
@@ -179,6 +185,7 @@ describe('ExistenciasPage', () => {
           producto: {
             id: 'p1',
             nombre: 'Tornillo',
+            marca: { id: 'm1', nombre: 'Truper' },
             activo: true,
             unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
           },
@@ -245,6 +252,7 @@ describe('ExistenciasPage', () => {
           producto: {
             id: 'p1',
             nombre: 'Tuerca',
+            marca: { id: 'm1', nombre: 'Truper' },
             activo: true,
             unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
           },
@@ -260,6 +268,7 @@ describe('ExistenciasPage', () => {
           producto: {
             id: 'p2',
             nombre: 'Perno',
+            marca: { id: 'm2', nombre: 'Stanley' },
             activo: true,
             unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
           },

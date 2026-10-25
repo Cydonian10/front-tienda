@@ -18,6 +18,7 @@ export interface UnidadSecundariaExistencia extends UnidadExistencia {
 export interface ProductoExistencia {
   id: string;
   nombre: string;
+  marca: { id: string; nombre: string };
   activo: boolean;
   unidadBase: UnidadExistencia;
 }

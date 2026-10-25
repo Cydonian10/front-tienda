@@ -151,10 +151,11 @@
         </div>
         @if (resultado.items.length) {
           <div class="hidden overflow-x-auto xl:block">
-            <table class="table table-md w-full min-w-[900px]">
+            <table class="table table-md w-full min-w-[1050px]">
               <thead class="bg-base-200 text-xs uppercase tracking-wide text-base-content/80">
                 <tr>
-                  <th scope="col" class="w-1/4 pl-6">Producto / variante</th>
+                  <th scope="col" class="pl-6">Producto / variante</th>
+                  <th scope="col">Marca</th>
                   <th scope="col">Almacén</th>
                   <th scope="col" class="w-1/4 text-right">Stock base</th>
                   <th scope="col" class="text-right">Costo promedio / base</th>
@@ -186,6 +187,7 @@
                         <span class="badge badge-outline mt-1">Inactivo con stock</span>
                       }
                     </th>
+                    <td class="break-words">{{ fila.producto.marca.nombre }}</td>
                     <td class="break-words">{{ fila.almacen.nombre }}</td>
                     <td class="text-right tabular-nums">
                       <span class="font-semibold whitespace-nowrap"
@@ -222,6 +224,9 @@
               <li class="space-y-4 px-5 py-5 sm:px-6">
                 <div class="min-w-0 space-y-1">
                   <strong class="block break-words leading-snug">{{ fila.producto.nombre }}</strong>
+                  <span class="block break-words text-xs text-base-content/70">{{
+                    fila.producto.marca.nombre
+                  }}</span>
                   <span class="block break-all text-xs font-medium text-base-content/70">{{
                     fila.variante.sku
                   }}</span>

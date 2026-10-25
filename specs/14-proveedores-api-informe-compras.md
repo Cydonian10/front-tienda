@@ -1,6 +1,6 @@
 # SPEC 14 — API de proveedores e informe de compras
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-10-25
 > **Objective:** Permitir crear proveedores y consultar su historial paginado de compras con un resumen monetario filtrable por fecha.

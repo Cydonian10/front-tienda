@@ -1,0 +1,51 @@
+<catalogo-form-dialog titleId="crear-proveedor-title" [busy]="create.isPending()"
+  (closeRequested)="closeRequested.emit()">
+  <div class="border-b border-base-300 px-5 py-5 sm:px-6">
+    <h2 id="crear-proveedor-title" class="text-lg font-semibold tracking-tight">Crear proveedor</h2>
+    <p class="mt-1 text-sm text-base-content/70">Registra la identidad y, si la tienes, su información de contacto.</p>
+  </div>
+  <form class="space-y-4 px-5 py-5 sm:px-6" novalidate (submit)="submit($event)">
+    <div>
+      <label for="crear-proveedor-nombre" class="mb-1 block text-sm font-semibold">Nombre <span aria-hidden="true">*</span></label>
+      <input id="crear-proveedor-nombre" type="text" class="input h-11 w-full"
+        [class.input-error]="nombreError()" [attr.aria-invalid]="!!nombreError()"
+        [attr.aria-describedby]="nombreError() ? 'crear-proveedor-nombre-error' : null"
+        autocomplete="organization" maxlength="200" required [value]="nombre()"
+        (input)="nombre.set($any($event.target).value); nombreError.set('')" />
+      @if (nombreError()) {
+        <p id="crear-proveedor-nombre-error" class="mt-1 text-sm text-error" role="alert">{{ nombreError() }}</p>
+      }
+    </div>
+    <div>
+      <label for="crear-proveedor-documento" class="mb-1 block text-sm font-semibold">Documento <span class="font-normal text-base-content/70">(opcional)</span></label>
+      <input id="crear-proveedor-documento" type="text" class="input h-11 w-full"
+        [class.input-error]="documentoError()" [attr.aria-invalid]="!!documentoError()"
+        [attr.aria-describedby]="documentoError() ? 'crear-proveedor-documento-error' : null"
+        maxlength="100" [value]="documento()"
+        (input)="documento.set($any($event.target).value); documentoError.set('')" />
+      @if (documentoError()) {
+        <p id="crear-proveedor-documento-error" class="mt-1 text-sm text-error" role="alert">{{ documentoError() }}</p>
+      }
+    </div>
+    <div>
+      <label for="crear-proveedor-contacto" class="mb-1 block text-sm font-semibold">Contacto <span class="font-normal text-base-content/70">(opcional)</span></label>
+      <input id="crear-proveedor-contacto" type="text" class="input h-11 w-full" maxlength="200"
+        [class.input-error]="contactoError()" [attr.aria-invalid]="!!contactoError()"
+        [attr.aria-describedby]="contactoError() ? 'crear-proveedor-contacto-error' : null"
+        [value]="contacto()" (input)="contacto.set($any($event.target).value); contactoError.set('')" />
+      @if (contactoError()) {
+        <p id="crear-proveedor-contacto-error" class="mt-1 text-sm text-error" role="alert">{{ contactoError() }}</p>
+      }
+    </div>
+    @if (error()) {
+      <div role="alert" class="alert alert-error alert-soft text-sm">{{ error() }}</div>
+    }
+    <div class="modal-action flex-col-reverse gap-2 sm:flex-row">
+      <button #cancelButton type="button" class="btn w-full sm:w-auto"
+        [disabled]="create.isPending()" (click)="closeRequested.emit()">Cancelar</button>
+      <button type="submit" class="btn btn-primary w-full sm:w-auto" [disabled]="create.isPending()">
+        @if (create.isPending()) { Registrando… } @else { Registrar proveedor }
+      </button>
+    </div>
+  </form>
+</catalogo-form-dialog>

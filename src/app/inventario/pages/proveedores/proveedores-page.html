@@ -1,0 +1,117 @@
+<section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="proveedores-title">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 id="proveedores-title" class="text-2xl font-semibold tracking-tight">Proveedores</h1>
+      <p class="mt-1 text-sm text-base-content/70">Consulta los proveedores registrados en inventario.</p>
+    </div>
+    @if (permissions.create()) {
+      <button type="button" class="btn btn-primary min-h-11" (click)="openCreate()">Crear proveedor</button>
+    }
+  </header>
+
+  @if (showCreate() && permissions.create()) {
+    <app-crear-proveedor-dialog (closeRequested)="showCreate.set(false)" />
+  }
+
+  <section class="card card-border overflow-hidden bg-base-100" aria-labelledby="proveedores-listado-title">
+    <div class="space-y-4 border-b border-base-300 px-5 py-5 sm:px-6">
+      <div>
+        <h2 id="proveedores-listado-title" class="text-lg font-semibold tracking-tight">Listado de proveedores</h2>
+        <p class="mt-1 text-sm text-base-content/70">Busca por nombre, documento o ambos.</p>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <form class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-end" role="search" (submit)="search($event)">
+          <div class="min-w-0 flex-1 sm:max-w-xs">
+            <label class="mb-1 block text-sm font-semibold" for="proveedor-nombre">Nombre</label>
+            <input id="proveedor-nombre" type="search" class="input h-11 w-full" maxlength="200"
+              placeholder="Nombre del proveedor" [value]="nombreDraft()"
+              (input)="nombreDraft.set($any($event.target).value)" />
+          </div>
+          <div class="min-w-0 flex-1 sm:max-w-xs">
+            <label class="mb-1 block text-sm font-semibold" for="proveedor-documento">Documento</label>
+            <input id="proveedor-documento" type="search" class="input h-11 w-full" maxlength="100"
+              placeholder="Número de documento" [value]="documentoDraft()"
+              (input)="documentoDraft.set($any($event.target).value)" />
+          </div>
+          <button type="submit" class="btn min-h-11">Buscar</button>
+        </form>
+        @if (filters().nombre || filters().documento) {
+          <button type="button" class="btn btn-ghost min-h-11" (click)="clearSearch()">Limpiar búsqueda</button>
+        }
+      </div>
+    </div>
+
+    @if (query.isPending()) {
+      <p class="flex items-center justify-center gap-3 p-8 text-sm text-base-content/70" role="status">
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+        Cargando proveedores…
+      </p>
+    } @else if (query.isError()) {
+      <div class="p-5 sm:p-6">
+        <app-empty-state variant="error" actionLabel="Reintentar" (action)="query.refetch()" />
+      </div>
+    } @else if (query.data(); as response) {
+      @if (response.data.length) {
+        <div class="hidden overflow-x-auto sm:block">
+          <table class="table table-md w-full">
+            <thead class="bg-base-200 text-xs uppercase">
+              <tr>
+                <th scope="col" class="pl-6">Proveedor</th>
+                <th scope="col">Documento</th>
+                <th scope="col">Contacto</th>
+                <th scope="col" class="pr-6 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (proveedor of response.data; track proveedor.id) {
+                <tr class="border-b border-base-300/70 last:border-b-0 hover:bg-base-200/60">
+                  <th scope="row" class="pl-6 font-semibold break-words">{{ proveedor.nombre }}</th>
+                  <td class="break-words">{{ proveedor.documento || '—' }}</td>
+                  <td class="break-words">{{ proveedor.contacto || '—' }}</td>
+                  <td class="pr-6 text-right">
+                    <a class="link link-hover inline-block min-h-11 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      [routerLink]="['/admin/inventario/proveedores', proveedor.id]"
+                      [queryParams]="{ listaNombre: filters().nombre || null, listaDocumento: filters().documento || null, listaPage: filters().page, listaLimit: filters().limit }"
+                      [attr.aria-label]="'Detalle de ' + proveedor.nombre">Detalle</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <ul class="divide-y divide-base-300 sm:hidden" aria-label="Listado de proveedores">
+          @for (proveedor of response.data; track proveedor.id) {
+            <li class="space-y-3 px-5 py-5">
+              <div class="min-w-0">
+                <p class="break-words font-semibold">{{ proveedor.nombre }}</p>
+                <p class="mt-1 break-all text-sm text-base-content/70">Documento: {{ proveedor.documento || '—' }}</p>
+                <p class="break-words text-sm text-base-content/70">Contacto: {{ proveedor.contacto || '—' }}</p>
+              </div>
+              <a class="link link-hover inline-flex min-h-11 items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                [routerLink]="['/admin/inventario/proveedores', proveedor.id]"
+                [queryParams]="{ listaNombre: filters().nombre || null, listaDocumento: filters().documento || null, listaPage: filters().page, listaLimit: filters().limit }"
+                [attr.aria-label]="'Detalle de ' + proveedor.nombre">Detalle</a>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="p-5 sm:p-6">
+          @if (filters().nombre || filters().documento) {
+            <app-empty-state variant="no-results" actionLabel="Limpiar búsqueda" (action)="clearSearch()" />
+          } @else {
+            <app-empty-state title="Todavía no hay proveedores"
+              description="Los proveedores aparecerán aquí cuando se registre el primero." />
+          }
+        </div>
+      }
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 px-5 py-4 text-sm text-base-content/70 sm:px-6">
+        <p role="status">{{ response.meta.total }} resultados · Página {{ response.meta.page }} de {{ response.meta.totalPages || 1 }}</p>
+        @if (response.meta.total > 0) {
+          <app-pagination [page]="filters().page" [totalPages]="response.meta.totalPages"
+            [pageSize]="filters().limit" [pageSizeOptions]="[10, 20, 50]" [disabled]="query.isFetching()"
+            (pageChange)="changePage($event)" (pageSizeChange)="changePageSize($event)" />
+        }
+      </div>
+    }
+  </section>
+</section>

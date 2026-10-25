@@ -1,6 +1,6 @@
 <section class="mx-auto w-full max-w-6xl space-y-6 pb-10" aria-labelledby="detalle-historial-title">
   <header class="space-y-3">
-    <a routerLink="/admin/inventario/historial" class="btn btn-ghost min-h-11 -ml-3"
+    <a routerLink="/admin/inventario/historial" [queryParams]="filtrosRegreso()" class="btn btn-ghost min-h-11 -ml-3"
       ><app-icon name="chevron-left" size="16" />Volver al historial</a
     >
     <div>
@@ -8,30 +8,24 @@
         Detalle de movimiento
       </h1>
       <p class="mt-2 text-sm text-base-content/70">
-        Información conservada en este ejemplo de operación confirmada.
+        Información de la operación confirmada y sus variantes.
       </p>
     </div>
   </header>
 
-  <div role="note" class="alert alert-info alert-soft text-sm">
-    <span
-      ><strong>Datos de demostración.</strong> Este movimiento no corresponde a una operación
-      real.</span
-    >
-  </div>
-
-  @if (movimiento(); as registro) {
+  @if (movimiento.isPending()) {
+    <p role="status" class="flex items-center gap-2 text-sm text-base-content/70"><span class="loading loading-spinner loading-sm" aria-hidden="true"></span>Cargando movimiento…</p>
+  } @else if (movimiento.isError()) {
+    <div role="alert" class="card card-border bg-base-100 p-5 sm:p-8">
+      @if (noEncontrado()) {
+        <app-empty-state title="Movimiento no encontrado" description="Este ID no corresponde a un movimiento registrado. Vuelve al historial para consultar otros movimientos." />
+      } @else {
+        <app-empty-state variant="error" title="No se pudo cargar el movimiento" description="Revisa tu conexión e inténtalo de nuevo." actionLabel="Reintentar" (action)="movimiento.refetch()" />
+      }
+      <a routerLink="/admin/inventario/historial" [queryParams]="filtrosRegreso()" class="btn mt-5 min-h-11 self-center">Volver al historial</a>
+    </div>
+  } @else if (movimiento.data(); as registro) {
     <app-historial-resumen [movimiento]="registro" />
     <app-historial-variantes [detalles]="registro.detalles" />
-  } @else {
-    <div class="card card-border bg-base-100 p-5 sm:p-8">
-      <app-empty-state
-        title="Movimiento no encontrado"
-        description="Este ID no corresponde a ningún movimiento de demostración. Vuelve al historial para consultar los ejemplos disponibles."
-      />
-      <a routerLink="/admin/inventario/historial" class="btn mt-5 min-h-11 self-center"
-        >Volver al historial</a
-      >
-    </div>
   }
 </section>

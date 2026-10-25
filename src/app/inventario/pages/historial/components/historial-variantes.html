@@ -5,7 +5,7 @@
   <div class="border-b border-base-300 p-5 sm:px-6">
     <h2 id="variantes-historial-title" class="text-lg font-semibold">Variantes incluidas</h2>
     <p class="mt-1 text-sm text-base-content/70">
-      Cantidades y costo aplicado conservados en este ejemplo.
+      Cantidades y costos registrados en el movimiento.
     </p>
   </div>
   <div class="hidden overflow-x-auto md:block">
@@ -18,10 +18,11 @@
           <th scope="col" class="text-right">Factor</th>
           <th scope="col" class="text-right">Cantidad base</th>
           <th scope="col" class="text-right">Costo / unidad base</th>
+          <th scope="col" class="text-right">Costo total</th>
         </tr>
       </thead>
       <tbody>
-        @for (detalle of detalles(); track detalle.sku) {
+        @for (detalle of detalles(); track detalle.id) {
           <tr>
             <td>
               <strong class="block font-semibold">{{ detalle.producto }}</strong
@@ -31,14 +32,15 @@
             <td>{{ detalle.unidad }}</td>
             <td class="text-right tabular-nums">× {{ detalle.factorABase }}</td>
             <td class="text-right tabular-nums">{{ detalle.cantidadBase }}</td>
-            <td class="text-right font-semibold tabular-nums">S/ {{ detalle.costoAplicado }}</td>
+            <td class="text-right font-semibold tabular-nums">{{ detalle.costoAplicado === null ? 'No disponible' : 'S/ ' + detalle.costoAplicado }}</td>
+            <td class="text-right font-semibold tabular-nums">{{ detalle.costoTotal === null ? 'No disponible' : 'S/ ' + detalle.costoTotal }}</td>
           </tr>
         }
       </tbody>
     </table>
   </div>
   <ul class="divide-y divide-base-300 md:hidden" aria-label="Variantes incluidas en el movimiento">
-    @for (detalle of detalles(); track detalle.sku) {
+    @for (detalle of detalles(); track detalle.id) {
       <li class="space-y-3 p-5">
         <div class="min-w-0">
           <strong class="block break-words font-semibold">{{ detalle.producto }}</strong>
@@ -59,7 +61,11 @@
           </div>
           <div>
             <dt class="text-xs text-base-content/70">Costo / unidad base</dt>
-            <dd class="font-semibold tabular-nums">S/ {{ detalle.costoAplicado }}</dd>
+            <dd class="font-semibold tabular-nums">{{ detalle.costoAplicado === null ? 'No disponible' : 'S/ ' + detalle.costoAplicado }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-base-content/70">Costo total</dt>
+            <dd class="font-semibold tabular-nums">{{ detalle.costoTotal === null ? 'No disponible' : 'S/ ' + detalle.costoTotal }}</dd>
           </div>
         </dl>
       </li>

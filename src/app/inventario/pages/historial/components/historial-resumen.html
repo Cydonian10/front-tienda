@@ -24,7 +24,7 @@
       </div>
       <div>
         <dt class="text-xs font-semibold text-base-content/70">Valor del movimiento a costo</dt>
-        <dd class="mt-1 text-lg font-semibold tabular-nums">S/ {{ movimiento().valorCosto }}</dd>
+        <dd class="mt-1 text-lg font-semibold tabular-nums">{{ movimiento().valorCosto === null ? 'No disponible' : 'S/ ' + movimiento().valorCosto }}</dd>
       </div>
       @if (movimiento().almacenOrigen; as origen) {
         <div>
@@ -42,8 +42,14 @@
       }
       <div class="sm:col-span-2 lg:col-span-3">
         <dt class="text-xs font-semibold text-base-content/70">Motivo</dt>
-        <dd class="mt-1 break-words">{{ movimiento().motivo }}</dd>
+        <dd class="mt-1 break-words">{{ movimiento().motivo ?? 'No disponible' }}</dd>
       </div>
+      @if (movimiento().compraId; as compraId) {
+        <div class="sm:col-span-2 lg:col-span-3">
+          <dt class="text-xs font-semibold text-base-content/70">ID de compra asociada</dt>
+          <dd class="mt-1 break-all font-semibold tabular-nums">{{ compraId }}</dd>
+        </div>
+      }
     </dl>
   </div>
 </section>

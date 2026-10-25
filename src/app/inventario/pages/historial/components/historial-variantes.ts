@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import type { DetalleHistorialDemo } from '../historial-demo.model';
+import type { HistorialMovimientoLinea } from '../../../../api/interfaces/inventario/historial-movimiento.interface';
 
 @Component({
   selector: 'app-historial-variantes',
@@ -7,5 +7,5 @@ import type { DetalleHistorialDemo } from '../historial-demo.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HistorialVariantes {
-  readonly detalles = input.required<readonly DetalleHistorialDemo[]>();
+  readonly detalles = input.required<readonly HistorialMovimientoLinea[]>();
 }

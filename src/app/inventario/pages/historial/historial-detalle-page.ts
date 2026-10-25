@@ -1,11 +1,12 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { Icon } from '../../../shared/components/icon/icon';
+import { useHistorialDetalle } from '../../actions/use-historial-action';
 import { HistorialResumen } from './components/historial-resumen';
 import { HistorialVariantes } from './components/historial-variantes';
-import { MOVIMIENTOS_HISTORIAL_DEMO } from './historial-demo.model';
 
 @Component({
   selector: 'app-historial-detalle-page',
@@ -18,7 +19,21 @@ export default class HistorialDetallePage {
   private readonly params = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
-  readonly movimiento = computed(() =>
-    MOVIMIENTOS_HISTORIAL_DEMO.find((item) => item.id === this.params().get('id')),
-  );
+  private readonly filtros = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
+  readonly id = computed(() => this.params().get('id') ?? '');
+  readonly movimiento = useHistorialDetalle(this.id);
+  readonly filtrosRegreso = computed(() => {
+    const params = this.filtros();
+    return Object.fromEntries(
+      ['q', 'tipo', 'desde', 'hasta', 'page', 'limit']
+        .filter((key) => params.has(key))
+        .map((key) => [key, params.get(key)]),
+    );
+  });
+  readonly noEncontrado = computed(() => {
+    const error = this.movimiento.error();
+    return error instanceof HttpErrorResponse && (error.status === 400 || error.status === 404);
+  });
 }

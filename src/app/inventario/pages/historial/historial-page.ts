@@ -5,7 +5,7 @@ import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { useHistorialListado } from '../../actions/use-historial-action';
 import { HistorialFiltros } from './components/historial-filtros';
 import { HistorialResultados } from './components/historial-resultados';
-import type { FiltroTipoHistorial } from './historial-demo.model';
+import type { FiltroTipoHistorial } from './historial-presentacion.model';
 
 function fechaValida(valor: string | null): string {
   if (!valor || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) return '';
@@ -122,37 +122,37 @@ export default class HistorialPage {
     };
   }
 
-  private sincronizarUrl(): void {
+  private sincronizarUrl(replaceUrl = true): void {
     const normalizados = this.parametros();
     const actuales = this.route.snapshot.queryParamMap;
     if (Object.entries(normalizados).every(([key, valor]) => actuales.get(key) === (valor === null ? null : String(valor)))
       && actuales.keys.every((key) => key in normalizados)) return;
     void this.router.navigate([], {
-      relativeTo: this.route, queryParams: normalizados, replaceUrl: true,
+      relativeTo: this.route, queryParams: normalizados, replaceUrl,
     });
   }
 
   cambiarBusqueda(valor: string): void { this.busqueda.set(valor); }
   cambiarTipo(valor: FiltroTipoHistorial): void {
-    this.tipo.set(valor); this.page.set(1); this.sincronizarUrl();
+    this.tipo.set(valor); this.page.set(1); this.sincronizarUrl(false);
   }
   cambiarDesde(valor: string): void {
-    this.desde.set(fechaValida(valor)); this.page.set(1); this.sincronizarUrl();
+    this.desde.set(fechaValida(valor)); this.page.set(1); this.sincronizarUrl(false);
   }
   cambiarHasta(valor: string): void {
-    this.hasta.set(fechaValida(valor)); this.page.set(1); this.sincronizarUrl();
+    this.hasta.set(fechaValida(valor)); this.page.set(1); this.sincronizarUrl(false);
   }
   cambiarPage(valor: number): void {
     if (!Number.isSafeInteger(valor) || valor < 1) return;
-    this.page.set(valor); this.sincronizarUrl();
+    this.page.set(valor); this.sincronizarUrl(false);
   }
   cambiarLimit(valor: number): void {
     if (![5, 10, 20].includes(valor)) return;
-    this.limit.set(valor); this.page.set(1); this.sincronizarUrl();
+    this.limit.set(valor); this.page.set(1); this.sincronizarUrl(false);
   }
   limpiarFiltros(): void {
     this.busqueda.set(''); this.q.set(''); this.tipo.set('todos');
     this.desde.set(''); this.hasta.set(''); this.page.set(1);
-    this.sincronizarUrl();
+    this.sincronizarUrl(false);
   }
 }

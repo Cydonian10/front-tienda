@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { RouterLink, type Params } from '@angular/router';
 import type { HistorialMovimientoResumen, HistorialMovimientosPagina } from '../../../../api/interfaces/inventario/historial-movimiento.interface';
 import { Pagination } from '../../../../shared/components/pagination/pagination';
-import { etiquetaTipoHistorial } from '../historial-demo.model';
+import { etiquetaTipoHistorial } from '../historial-presentacion.model';
 
 @Component({
   selector: 'app-historial-resultados',

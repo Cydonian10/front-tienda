@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import type { FiltroTipoHistorial } from '../historial-demo.model';
+import type { FiltroTipoHistorial } from '../historial-presentacion.model';
 
 @Component({
   selector: 'app-historial-filtros',

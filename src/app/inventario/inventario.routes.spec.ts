@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -27,10 +28,25 @@ describe('rutas de inventario', () => {
   const confirm = vi.fn();
   const listVariants = vi.fn().mockResolvedValue([]);
   const listarAlmacenesMovimiento = vi.fn();
+  const listarHistorial = vi.fn();
+  const obtenerHistorial = vi.fn();
+  const historialId = '550e8400-e29b-41d4-a716-446655440000';
   let client: QueryClient;
   beforeEach(() => {
     vi.clearAllMocks();
     listarAlmacenesMovimiento.mockResolvedValue([]);
+    listarHistorial.mockResolvedValue({
+      data: [{ id: historialId, fecha: '2026-10-21T15:40:00Z', tipo: 'traslado', estado: 'confirmado',
+        almacenOrigen: 'Principal', almacenDestino: 'Sucursal', cantidadDetalles: 1, valorCosto: null }],
+      meta: { page: 1, limit: 20, total: 1, totalPages: 1 },
+    });
+    obtenerHistorial.mockImplementation((id: string) => id === historialId
+      ? Promise.resolve({ id, fecha: '2026-10-21T15:40:00Z', tipo: 'traslado', estado: 'confirmado',
+        almacenOrigen: 'Principal', almacenDestino: 'Sucursal', cantidadDetalles: 1, valorCosto: null,
+        usuario: 'operador', compraId: null, motivo: null,
+        detalles: [{ id: 'linea-1', producto: 'Taladro', sku: 'TAL-1', cantidad: '1',
+          unidad: 'Unidad', factorABase: '1', cantidadBase: '1', costoTotal: null, costoAplicado: null }] })
+      : Promise.reject(new HttpErrorResponse({ status: 404 })));
     client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     TestBed.configureTestingModule({
       providers: [
@@ -54,7 +70,7 @@ describe('rutas de inventario', () => {
         },
         {
           provide: MovimientoApi,
-          useValue: { listarAlmacenes: listarAlmacenesMovimiento },
+          useValue: { listarAlmacenes: listarAlmacenesMovimiento, listarHistorial, obtenerHistorial },
         },
         provideRouter([
           {
@@ -139,8 +155,12 @@ describe('rutas de inventario', () => {
     setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
     const harness = await RouterTestingHarness.create('/admin/inventario/historial');
     expect(TestBed.inject(Router).url).toBe('/admin/inventario/historial');
-    expect(harness.routeNativeElement?.textContent).toContain('Datos de demostración');
-    expect(harness.routeNativeElement?.textContent).toContain('10 resultados');
+    await vi.waitFor(() => expect(listarHistorial).toHaveBeenCalledWith({ page: 1, limit: 20 }));
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(harness.routeNativeElement?.textContent).toContain('1 resultado');
+    });
+    expect(harness.routeNativeElement?.textContent).not.toContain('Datos de demostración');
     await TestBed.inject(Router).navigateByUrl('/admin/inventario/movimientos/salida');
     harness.detectChanges();
     expect(harness.routeNativeElement?.textContent).toContain('Nueva salida');
@@ -158,21 +178,25 @@ describe('rutas de inventario', () => {
 
   it('abre el detalle por ID, mantiene el regreso y muestra el estado de ID inexistente', async () => {
     setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
-    const harness = await RouterTestingHarness.create('/admin/inventario/historial/MOV-2026-010');
-    expect(TestBed.inject(Router).url).toBe('/admin/inventario/historial/MOV-2026-010');
-    expect(harness.routeNativeElement?.textContent).toContain('Datos de demostración');
-    expect(harness.routeNativeElement?.textContent).toContain('Taladro percutor 650 W');
-    expect(harness.routeNativeElement?.textContent).toContain('Almacén principal');
-    expect(harness.routeNativeElement?.textContent).toContain('Sucursal norte');
-    expect(harness.routeNativeElement?.textContent).toContain('Reposición de stock en sucursal');
+    const harness = await RouterTestingHarness.create(`/admin/inventario/historial/${historialId}?tipo=traslado`);
+    expect(TestBed.inject(Router).url).toBe(`/admin/inventario/historial/${historialId}?tipo=traslado`);
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(harness.routeNativeElement?.textContent).toContain('Taladro');
+    });
+    expect(harness.routeNativeElement?.textContent).toContain('Principal');
+    expect(harness.routeNativeElement?.textContent).toContain('Sucursal');
+    expect(harness.routeNativeElement?.textContent).toContain('No disponible');
     expect(harness.routeNativeElement?.querySelector('a')?.getAttribute('href')).toBe(
-      '/admin/inventario/historial',
+      '/admin/inventario/historial?tipo=traslado',
     );
 
     await TestBed.inject(Router).navigateByUrl('/admin/inventario/historial/desconocido');
-    harness.detectChanges();
-    expect(harness.routeNativeElement?.textContent).toContain('Movimiento no encontrado');
-    expect(harness.routeNativeElement?.textContent).not.toContain('Taladro percutor 650 W');
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(harness.routeNativeElement?.textContent).toContain('Movimiento no encontrado');
+    });
+    expect(harness.routeNativeElement?.textContent).not.toContain('Taladro');
     expect(harness.routeNativeElement?.querySelector('a')?.getAttribute('href')).toBe(
       '/admin/inventario/historial',
     );
@@ -187,12 +211,18 @@ describe('rutas de inventario', () => {
   it('navega mediante Ver detalle y vuelve al listado mediante el enlace', async () => {
     setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
     const harness = await RouterTestingHarness.create('/admin/inventario/historial');
-
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(harness.routeNativeElement?.querySelector('table tbody a')).toBeTruthy();
+    });
     (harness.routeNativeElement?.querySelector('table tbody a') as HTMLAnchorElement).click();
     await harness.fixture.whenStable();
     harness.detectChanges();
-    expect(TestBed.inject(Router).url).toBe('/admin/inventario/historial/MOV-2026-010');
-    expect(harness.routeNativeElement?.textContent).toContain('Variantes incluidas');
+    expect(TestBed.inject(Router).url).toBe(`/admin/inventario/historial/${historialId}`);
+    await vi.waitFor(() => {
+      harness.detectChanges();
+      expect(harness.routeNativeElement?.textContent).toContain('Variantes incluidas');
+    });
 
     (harness.routeNativeElement?.querySelector('a') as HTMLAnchorElement).click();
     await harness.fixture.whenStable();

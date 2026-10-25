@@ -1,6 +1,10 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import type {
+  HistorialMovimientoDetalle,
+  HistorialMovimientosPagina,
+} from '../interfaces/inventario/historial-movimiento.interface';
 import type { NuevoMovimiento } from '../interfaces/inventario/movimiento.interface';
 import { MovimientoApi } from './movimiento-api';
 
@@ -50,6 +54,75 @@ describe('MovimientoApi', () => {
     };
     request.flush(response);
     await expect(result).resolves.toEqual(response);
+  });
+
+  it('lista resúmenes paginados con todos los filtros y conserva costos nulos', async () => {
+    const result = TestBed.inject(MovimientoApi).listarHistorial({
+      q: 'tornillo', tipo: 'ingreso', desde: '2026-10-01', hasta: '2026-10-24', page: 2, limit: 5,
+    });
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      'http://localhost:3000/api/movimientos?page=2&limit=5&q=tornillo&tipo=ingreso&desde=2026-10-01&hasta=2026-10-24',
+    );
+    expect(request.request.method).toBe('GET');
+    const response: HistorialMovimientosPagina = {
+      data: [{
+        id: '550e8400-e29b-41d4-a716-446655440000', fecha: '2026-10-24T12:00:00.000Z',
+        tipo: 'ingreso', estado: 'confirmado', almacenOrigen: null, almacenDestino: 'Principal',
+        cantidadDetalles: 2, valorCosto: null,
+      }],
+      meta: { page: 2, limit: 5, total: 6, totalPages: 2 },
+    };
+    request.flush(response);
+    await expect(result).resolves.toEqual(response);
+  });
+
+  it('omite filtros opcionales al listar sin filtros', async () => {
+    const result = TestBed.inject(MovimientoApi).listarHistorial({ page: 1, limit: 20 });
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      'http://localhost:3000/api/movimientos?page=1&limit=20',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush({ data: [], meta: { page: 1, limit: 20, total: 0, totalPages: 0 } });
+    await expect(result).resolves.toMatchObject({ data: [], meta: { total: 0 } });
+  });
+
+  it('obtiene un detalle completo por UUID sin alterar cadenas decimales ni ausencias', async () => {
+    const id = '550e8400-e29b-41d4-a716-446655440000';
+    const result = TestBed.inject(MovimientoApi).obtenerHistorial(id);
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      `http://localhost:3000/api/movimientos/${id}`,
+    );
+    expect(request.request.method).toBe('GET');
+    const response: HistorialMovimientoDetalle = {
+      id, fecha: '2026-10-24T12:00:00.000Z', tipo: 'ajuste', estado: 'confirmado',
+      almacenOrigen: 'Principal', almacenDestino: null, cantidadDetalles: 1, valorCosto: null,
+      usuario: 'operador', compraId: null, motivo: null,
+      detalles: [{
+        id: 'linea-1', producto: 'Tornillo', sku: 'TOR-M8', cantidad: '-2.500000',
+        unidad: 'Caja', factorABase: '12.00000000', cantidadBase: '-30.000000',
+        costoTotal: null, costoAplicado: null,
+      }],
+    };
+    request.flush(response);
+    await expect(result).resolves.toEqual(response);
+  });
+
+  it('propaga errores HTTP del listado y del detalle, incluidos 400 y 404', async () => {
+    const api = TestBed.inject(MovimientoApi);
+    const http = TestBed.inject(HttpTestingController);
+    const listado = api.listarHistorial({ page: 1, limit: 20 });
+    http.expectOne('http://localhost:3000/api/movimientos?page=1&limit=20').flush(
+      { message: 'Error interno' }, { status: 500, statusText: 'Server Error' },
+    );
+    await expect(listado).rejects.toMatchObject({ status: 500 });
+
+    for (const status of [400, 404]) {
+      const detalle = api.obtenerHistorial('id-invalido');
+      http.expectOne('http://localhost:3000/api/movimientos/id-invalido').flush(
+        { message: 'Movimiento no encontrado' }, { status, statusText: 'Error' },
+      );
+      await expect(detalle).rejects.toMatchObject({ status });
+    }
   });
 
   it('envía JSON con clave idempotente y decimales sin calcular saldos ni costos de salida', async () => {

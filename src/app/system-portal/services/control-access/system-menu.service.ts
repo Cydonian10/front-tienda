@@ -90,6 +90,12 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             permission: PERMISSION_CODES.COMPRAS_READ,
           },
           {
+            label: 'Proveedores',
+            url: '/admin/inventario/proveedores',
+            icon: 'users',
+            permission: PERMISSION_CODES.PROVEEDORES_READ,
+          },
+          {
             label: 'Existencias',
             url: '/admin/inventario/existencias',
             icon: 'warehouse',

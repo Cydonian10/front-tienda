@@ -123,6 +123,45 @@ describe('rutas de inventario', () => {
     expect(TestBed.inject(Router).url).toBe('/admin');
   });
 
+  it('abre el listado de proveedores solo con PROVEEDORES_LEER de INVENTARIO', async () => {
+    setPermissions([{ code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'INVENTARIO' }]);
+    await RouterTestingHarness.create('/admin/inventario/proveedores');
+    expect(TestBed.inject(Router).url).toBe('/admin/inventario/proveedores');
+  });
+
+  it('deniega el listado sin lectura aunque se tenga alta o permiso de otro sistema', async () => {
+    setPermissions([{ code: PERMISSION_CODES.PROVEEDORES_CREATE, systemCode: 'INVENTARIO' }]);
+    const harness = await RouterTestingHarness.create('/admin/inventario/proveedores');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+
+    setPermissions([{ code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'ACCESS_CONTROL' }]);
+    await harness.navigateByUrl('/admin/inventario/proveedores');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+  });
+
+  it('protege el informe directo con PROVEEDORES_LEER y COMPRAS_LEER juntos', async () => {
+    const detail = '/admin/inventario/proveedores/123e4567-e89b-12d3-a456-426614174000';
+    const harness = await RouterTestingHarness.create();
+    for (const code of [PERMISSION_CODES.PROVEEDORES_READ, PERMISSION_CODES.COMPRAS_READ]) {
+      setPermissions([{ code, systemCode: 'INVENTARIO' }]);
+      await harness.navigateByUrl(detail);
+      expect(TestBed.inject(Router).url).toBe('/admin');
+    }
+    setPermissions([
+      { code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'INVENTARIO' },
+      { code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'ACCESS_CONTROL' },
+    ]);
+    await harness.navigateByUrl(detail);
+    expect(TestBed.inject(Router).url).toBe('/admin');
+
+    setPermissions([
+      { code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'INVENTARIO' },
+      { code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' },
+    ]);
+    await harness.navigateByUrl(detail);
+    expect(TestBed.inject(Router).url).toBe(detail);
+  });
+
   it('redirige Movimientos a Salida y permite navegar entre las tres vistas con MOVIMIENTOS_LEER', async () => {
     setPermissions([{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }]);
     const harness = await RouterTestingHarness.create('/admin/inventario/movimientos');

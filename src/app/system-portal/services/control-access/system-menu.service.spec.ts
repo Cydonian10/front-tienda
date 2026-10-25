@@ -18,6 +18,7 @@ describe('SystemMenuService', () => {
         provideRouter([
           { path: 'admin/access-control/usuarios', component: TestPage },
           { path: 'admin/access-control/permisos', component: TestPage },
+          { path: 'admin/inventario/proveedores/:id', component: TestPage },
         ]),
       ],
     }),
@@ -151,6 +152,39 @@ describe('SystemMenuService', () => {
       }),
     ]);
     expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/compras');
+  });
+
+  it('muestra Proveedores solo con PROVEEDORES_LEER de INVENTARIO', async () => {
+    const service = TestBed.inject(SystemMenuService);
+    const store = TestBed.inject(AuthStore);
+    const items = () => service.menuFor('INVENTARIO').flatMap((group) => group.items);
+
+    store.setProfile({ isSuperAdmin: false, permissions: [
+      { code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'ACCESS_CONTROL' },
+    ] } as never);
+    expect(items()).toEqual([]);
+
+    store.setProfile({ isSuperAdmin: false, permissions: [
+      { code: PERMISSION_CODES.PROVEEDORES_CREATE, systemCode: 'INVENTARIO' },
+      { code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' },
+    ] } as never);
+    expect(items().map((item) => item.label)).toEqual(['Compras']);
+
+    store.setProfile({ isSuperAdmin: false, permissions: [
+      { code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'INVENTARIO' },
+    ] } as never);
+    expect(service.menuFor('INVENTARIO')).toEqual([
+      expect.objectContaining({ label: 'Operaciones', items: [
+        expect.objectContaining({
+          label: 'Proveedores',
+          url: '/admin/inventario/proveedores',
+          permission: PERMISSION_CODES.PROVEEDORES_READ,
+        }),
+      ] }),
+    ]);
+    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/proveedores');
+    await TestBed.inject(Router).navigateByUrl('/admin/inventario/proveedores/123?desde=2026-10-01');
+    expect(service.isActiveItem(items()[0])).toBe(true);
   });
 
   it('muestra Operaciones → Existencias con EXISTENCIAS_LEER, sin ALMACENES_LEER', () => {

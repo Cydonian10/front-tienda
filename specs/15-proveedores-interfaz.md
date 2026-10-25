@@ -1,6 +1,6 @@
 # SPEC 15 — Interfaz de proveedores e informe de compras
 
-> **Status:** Borrador
+> **Status:** Aprovado
 > **Depends on:** SPEC 02, SPEC 14
 > **Date:** 2026-10-25
 > **Objective:** Crear una página para listar y registrar proveedores y consultar en una página propia sus compras y resumen por fechas.
@@ -65,11 +65,11 @@
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| Un usuario ve el botón de alta pero perdió el permiso al abrir la sesión. | Verificar permiso reactivo y otra vez antes de mutar; tratar el 403 de la API. |
+| Risk                                                                             | Mitigation                                                                                     |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Un usuario ve el botón de alta pero perdió el permiso al abrir la sesión.        | Verificar permiso reactivo y otra vez antes de mutar; tratar el 403 de la API.                 |
 | Los filtros y la paginación producen respuestas obsoletas durante la navegación. | Incluir ID y todos los filtros en las claves de consulta; conservar URL como origen navegable. |
-| El informe contiene totales y fechas que no caben en móvil. | Presentar filas como fichas compactas, cifras tabulares y comprobar 390 px y ambos temas. |
+| El informe contiene totales y fechas que no caben en móvil.                      | Presentar filas como fichas compactas, cifras tabulares y comprobar 390 px y ambos temas.      |
 
 ## What is **not** in this spec
 

@@ -6,6 +6,11 @@ import type {
   PaginatedResponse,
   ProveedorResponse,
 } from '../interfaces/inventario/compra.interface';
+import type {
+  CrearProveedorDto,
+  FiltroComprasProveedor,
+  InformeComprasProveedor,
+} from '../interfaces/inventario/proveedor.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ProveedorApi {
@@ -36,6 +41,23 @@ export class ProveedorApi {
         params: {
           ...(nombre ? { nombre } : {}),
           ...(documento ? { documento } : {}),
+        },
+      }),
+    );
+  }
+
+  create(dto: CrearProveedorDto): Promise<ProveedorResponse> {
+    return firstValueFrom(this.http.post<ProveedorResponse>(this.url, dto));
+  }
+
+  listCompras(id: string, filtro: FiltroComprasProveedor): Promise<InformeComprasProveedor> {
+    return firstValueFrom(
+      this.http.get<InformeComprasProveedor>(`${this.url}/${encodeURIComponent(id)}/compras`, {
+        params: {
+          page: filtro.page,
+          limit: filtro.limit,
+          ...(filtro.desde ? { desde: filtro.desde } : {}),
+          ...(filtro.hasta ? { hasta: filtro.hasta } : {}),
         },
       }),
     );

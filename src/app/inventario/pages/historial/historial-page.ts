@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, debounced, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { FiltroHistorialMovimientos, TipoMovimientoHistorial } from '../../../api/interfaces/inventario/historial-movimiento.interface';
+import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { useHistorialListado } from '../../actions/use-historial-action';
 import { HistorialFiltros } from './components/historial-filtros';
 import { HistorialResultados } from './components/historial-resultados';
@@ -27,7 +28,7 @@ function tipoValido(valor: string | null): FiltroTipoHistorial {
 
 @Component({
   selector: 'app-historial-page',
-  imports: [HistorialFiltros, HistorialResultados],
+  imports: [EmptyState, HistorialFiltros, HistorialResultados],
   templateUrl: './historial-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -62,6 +63,11 @@ export default class HistorialPage {
   });
   readonly historial = useHistorialListado(this.filtro);
   readonly paramsDetalle = computed(() => this.parametros());
+  readonly hayFiltros = computed(() => !!this.q() || this.tipo() !== 'todos' || !!this.desde() || !!this.hasta());
+  readonly paginaFueraDeRango = computed(() => {
+    const data = this.historial.data();
+    return !!data && data.meta.total > 0 && data.meta.totalPages > 0 && this.page() > data.meta.totalPages;
+  });
 
   constructor() {
     // El primer GET ya usa los parámetros normalizados; corregir la URL sin añadir historial.
@@ -89,6 +95,13 @@ export default class HistorialPage {
       if (q === this.q()) return;
       this.q.set(q);
       this.page.set(1);
+      this.sincronizarUrl();
+    });
+    effect(() => {
+      const data = this.historial.data();
+      // Una página vacía puede ser una URL fuera de rango, no ausencia de movimientos.
+      if (!data || data.meta.total === 0 || data.meta.totalPages < 1 || this.page() <= data.meta.totalPages) return;
+      this.page.set(data.meta.totalPages);
       this.sincronizarUrl();
     });
   }

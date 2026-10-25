@@ -15,13 +15,24 @@
   @if (rangoInvertido()) {
     <div role="alert" class="alert alert-error alert-soft">La fecha «Desde» no puede ser posterior a «Hasta».</div>
   } @else if (historial.isPending()) {
-    <p role="status" class="text-sm text-base-content/70">Cargando movimientos…</p>
+    <p role="status" class="flex items-center gap-2 text-sm text-base-content/70"><span class="loading loading-spinner loading-sm" aria-hidden="true"></span>Cargando movimientos…</p>
   } @else if (historial.isError()) {
-    <div role="alert" class="alert alert-error alert-soft">
-      <span>No se pudo cargar el historial.</span>
-      <button type="button" class="btn" (click)="historial.refetch()">Reintentar</button>
+    <div role="alert" class="card card-border bg-base-100 p-5 sm:p-8">
+      <app-empty-state variant="error" title="No se pudo cargar el historial" description="Revisa tu conexión e inténtalo de nuevo." actionLabel="Reintentar" (action)="historial.refetch()" />
     </div>
   } @else if (historial.data(); as pagina) {
-    <app-historial-resultados [pagina]="pagina" [queryParams]="paramsDetalle()" (pageChange)="cambiarPage($event)" (pageSizeChange)="cambiarLimit($event)" />
+    @if (paginaFueraDeRango()) {
+      <p role="status" class="text-sm text-base-content/70">Abriendo la última página disponible…</p>
+    } @else if (pagina.meta.total === 0) {
+      <div class="card card-border bg-base-100 p-5 sm:p-8">
+        @if (hayFiltros()) {
+          <app-empty-state variant="no-results" title="Sin coincidencias" description="No hay movimientos para esta combinación. Cambia los filtros o límpialos." actionLabel="Limpiar filtros" (action)="limpiarFiltros()" />
+        } @else {
+          <app-empty-state title="Todavía no hay movimientos" description="Las operaciones confirmadas aparecerán aquí cuando se registren." />
+        }
+      </div>
+    } @else {
+      <app-historial-resultados [pagina]="pagina" [queryParams]="paramsDetalle()" (pageChange)="cambiarPage($event)" (pageSizeChange)="cambiarLimit($event)" />
+    }
   }
 </section>

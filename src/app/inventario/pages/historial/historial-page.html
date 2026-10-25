@@ -3,24 +3,42 @@
     <h1 id="historial-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">
       Historial de movimientos
     </h1>
-    <p class="text-sm text-base-content/70">
-      Revisa operaciones confirmadas por tipo, producto o almacén.
-    </p>
+    <p class="text-sm text-base-content/70">Revisa operaciones confirmadas por tipo, producto o almacén.</p>
   </header>
 
-  <div role="note" class="alert alert-info alert-soft text-sm">
-    <span
-      ><strong>Datos de demostración.</strong> Estos movimientos no corresponden a operaciones
-      reales.</span
-    >
-  </div>
-
   <app-historial-filtros
-    [busqueda]="busqueda()"
-    [tipo]="tipo()"
-    (busquedaChange)="busqueda.set($event)"
-    (tipoChange)="tipo.set($event)"
+    [busqueda]="busqueda()" [tipo]="tipo()"
+    (busquedaChange)="cambiarBusqueda($event)" (tipoChange)="cambiarTipo($event)"
   />
 
-  <app-historial-resultados [movimientos]="movimientos()" (limpiar)="limpiarFiltros()" />
+  @if (rangoInvertido()) {
+    <div role="alert" class="alert alert-error alert-soft">La fecha «Desde» no puede ser posterior a «Hasta».</div>
+  } @else if (historial.isPending()) {
+    <p role="status" class="text-sm text-base-content/70">Cargando movimientos…</p>
+  } @else if (historial.isError()) {
+    <div role="alert" class="alert alert-error alert-soft">
+      <span>No se pudo cargar el historial.</span>
+      <button type="button" class="btn" (click)="historial.refetch()">Reintentar</button>
+    </div>
+  } @else if (historial.data(); as pagina) {
+    <section class="card min-w-0 border border-base-300 bg-base-100" aria-label="Movimientos">
+      <div class="card-body">
+        <p class="text-sm text-base-content/70">{{ pagina.meta.total }} resultados</p>
+        @if (pagina.data.length) {
+          <ul class="list" aria-label="Movimientos reales">
+            @for (movimiento of pagina.data; track movimiento.id) {
+              <li class="list-row">
+                <div class="min-w-0">
+                  <a class="link link-hover break-all font-semibold" [routerLink]="['/admin/inventario/historial', movimiento.id]" [queryParams]="paramsDetalle()">{{ movimiento.id }}</a>
+                  <p class="text-sm text-base-content/70">{{ movimiento.tipo }} · {{ movimiento.fecha | date:'dd/MM/yyyy HH:mm':'':'es-PE' }} · {{ movimiento.cantidadDetalles }} variantes</p>
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p>No hay movimientos para estos filtros.</p>
+        }
+      </div>
+    </section>
+  }
 </section>

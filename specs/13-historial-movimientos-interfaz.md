@@ -1,6 +1,6 @@
 # SPEC 13 — Interfaz de historial de movimientos reales
 
-> **Status:** BAprobado
+> **Status:** Aprobado
 > **Depends on:** SPEC 09, SPEC 12
 > **Date:** 2026-10-24
 > **Objective:** Sustituir el historial de demostración por un listado y detalle paginados de movimientos reales, con filtros en la URL y búsqueda diferida mediante señales de Angular.

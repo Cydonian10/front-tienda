@@ -5,17 +5,13 @@ import { AlmacenApi } from '../../api/inventario/almacen-api';
 import { ProveedorApi } from '../../api/inventario/proveedor-api';
 import { VarianteCompraApi } from '../../api/inventario/variante-compra-api';
 import type { NuevaCompra } from '../../api/interfaces/inventario/compra.interface';
+import { proveedoresListadoQueryKey } from './use-proveedores-action';
 
 export const comprasListadoKey = ['compras', 'listado'] as const;
 export const comprasListadoQueryKey = (page: number, limit: number, q: string) =>
   [...comprasListadoKey, page, limit, q] as const;
 export const compraDetalleQueryKey = (id: string) => ['compras', 'detalle', id] as const;
-export const proveedoresQueryKey = (
-  page: number,
-  limit: number,
-  nombre: string,
-  documento: string,
-) => ['proveedores', 'listado', page, limit, nombre, documento] as const;
+export const proveedoresQueryKey = proveedoresListadoQueryKey;
 export const variantesCompraQueryKey = (page: number, limit: number, q: string) =>
   ['variantes', 'compra', page, limit, q] as const;
 export const almacenesCompraQueryKey = (page: number) =>

@@ -28,12 +28,12 @@
               <strong class="block font-semibold">{{ detalle.producto }}</strong
               ><span class="text-xs text-base-content/70">{{ detalle.sku }}</span>
             </td>
-            <td class="text-right tabular-nums">{{ detalle.cantidad }}</td>
+             <td class="text-right tabular-nums">{{ decimalCompacto(detalle.cantidad) }}</td>
             <td>{{ detalle.unidad }}</td>
-            <td class="text-right tabular-nums">× {{ detalle.factorABase }}</td>
-            <td class="text-right tabular-nums">{{ detalle.cantidadBase }}</td>
-            <td class="text-right font-semibold tabular-nums">{{ detalle.costoAplicado === null ? 'No disponible' : 'S/ ' + detalle.costoAplicado }}</td>
-            <td class="text-right font-semibold tabular-nums">{{ detalle.costoTotal === null ? 'No disponible' : 'S/ ' + detalle.costoTotal }}</td>
+             <td class="text-right tabular-nums">× {{ decimalCompacto(detalle.factorABase) }}</td>
+             <td class="text-right tabular-nums">{{ decimalCompacto(detalle.cantidadBase) }}</td>
+             <td class="text-right font-semibold tabular-nums">{{ detalle.costoAplicado === null ? 'No disponible' : soles(detalle.costoAplicado) }}</td>
+             <td class="text-right font-semibold tabular-nums">{{ detalle.costoTotal === null ? 'No disponible' : soles(detalle.costoTotal) }}</td>
           </tr>
         }
       </tbody>
@@ -49,23 +49,23 @@
         <dl class="grid grid-cols-2 gap-3 text-sm">
           <div>
             <dt class="text-xs text-base-content/70">Cantidad</dt>
-            <dd class="tabular-nums">{{ detalle.cantidad }} {{ detalle.unidad }}</dd>
+             <dd class="tabular-nums">{{ decimalCompacto(detalle.cantidad) }} {{ detalle.unidad }}</dd>
           </div>
           <div>
             <dt class="text-xs text-base-content/70">Factor</dt>
-            <dd class="tabular-nums">× {{ detalle.factorABase }}</dd>
+             <dd class="tabular-nums">× {{ decimalCompacto(detalle.factorABase) }}</dd>
           </div>
           <div>
             <dt class="text-xs text-base-content/70">Cantidad base</dt>
-            <dd class="tabular-nums">{{ detalle.cantidadBase }}</dd>
+             <dd class="tabular-nums">{{ decimalCompacto(detalle.cantidadBase) }}</dd>
           </div>
           <div>
             <dt class="text-xs text-base-content/70">Costo / unidad base</dt>
-            <dd class="font-semibold tabular-nums">{{ detalle.costoAplicado === null ? 'No disponible' : 'S/ ' + detalle.costoAplicado }}</dd>
+             <dd class="font-semibold tabular-nums">{{ detalle.costoAplicado === null ? 'No disponible' : soles(detalle.costoAplicado) }}</dd>
           </div>
           <div>
             <dt class="text-xs text-base-content/70">Costo total</dt>
-            <dd class="font-semibold tabular-nums">{{ detalle.costoTotal === null ? 'No disponible' : 'S/ ' + detalle.costoTotal }}</dd>
+             <dd class="font-semibold tabular-nums">{{ detalle.costoTotal === null ? 'No disponible' : soles(detalle.costoTotal) }}</dd>
           </div>
         </dl>
       </li>

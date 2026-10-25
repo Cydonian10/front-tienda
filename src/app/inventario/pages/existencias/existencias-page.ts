@@ -5,20 +5,14 @@ import type {
 } from '../../../api/interfaces/inventario/existencia.interface';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { Pagination } from '../../../shared/components/pagination/pagination';
+import { formatearSoles } from '../../../shared/formatters/decimal';
 import { useAlmacenesExistencias, useExistencias } from '../../actions/use-existencias-action';
 import { ExistenciaUnidad } from './components/existencia-unidad';
 import { decimalCompacto } from './existencia-unidades.model';
 
 /** Redondea a centavos sin pasar por aritmética binaria. */
 export function soles(valor: string): string {
-  const match = /^(\-?)(\d+)(?:\.(\d+))?$/.exec(valor);
-  if (!match) return '—';
-  const [, sign, integer, decimals = ''] = match;
-  const cents = BigInt(integer) * 100n + BigInt(decimals.padEnd(3, '0').slice(0, 2));
-  const rounded = cents + (Number(decimals[2] ?? '0') >= 5 ? 1n : 0n);
-  const absolute = rounded / 100n;
-  const fraction = String(rounded % 100n).padStart(2, '0');
-  return `S/ ${sign && rounded !== 0n ? '-' : ''}${new Intl.NumberFormat('es-PE').format(absolute)}.${fraction}`;
+  return formatearSoles(valor);
 }
 
 export function promedio(valor: string | null): string {

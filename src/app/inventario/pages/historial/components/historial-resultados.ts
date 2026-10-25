@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { RouterLink, type Params } from '@angular/router';
 import type { HistorialMovimientoResumen, HistorialMovimientosPagina } from '../../../../api/interfaces/inventario/historial-movimiento.interface';
 import { Pagination } from '../../../../shared/components/pagination/pagination';
+import { formatearSoles } from '../../../../shared/formatters/decimal';
 import { etiquetaTipoHistorial } from '../historial-presentacion.model';
 
 @Component({
@@ -18,6 +19,7 @@ export class HistorialResultados {
   readonly pageSizeChange = output<number>();
 
   readonly etiqueta = etiquetaTipoHistorial;
+  readonly soles = formatearSoles;
 
   almacenes(movimiento: HistorialMovimientoResumen): string {
     return [movimiento.almacenOrigen, movimiento.almacenDestino].filter(Boolean).join(' → ') || 'No disponible';

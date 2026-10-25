@@ -30,7 +30,7 @@
               </td>
               <td class="max-w-48 whitespace-normal">{{ almacenes(movimiento) }}</td>
               <td class="whitespace-nowrap tabular-nums">{{ movimiento.cantidadDetalles }} {{ movimiento.cantidadDetalles === 1 ? 'variante' : 'variantes' }}</td>
-              <td class="whitespace-nowrap text-right font-semibold tabular-nums">{{ movimiento.valorCosto === null ? 'No disponible' : 'S/ ' + movimiento.valorCosto }}</td>
+               <td class="whitespace-nowrap text-right font-semibold tabular-nums">{{ movimiento.valorCosto === null ? 'No disponible' : soles(movimiento.valorCosto) }}</td>
               <td><span class="badge badge-success badge-soft">Confirmado</span></td>
               <td class="text-right">
                 <a class="btn btn-ghost min-h-11 whitespace-nowrap" [routerLink]="['/admin/inventario/historial', movimiento.id]" [queryParams]="queryParams()" [attr.aria-label]="'Ver detalle de ' + movimiento.id">Ver detalle</a>
@@ -54,7 +54,7 @@
           <p class="break-words text-sm text-base-content/80">{{ almacenes(movimiento) }}</p>
           <div class="flex flex-wrap items-end justify-between gap-2 text-sm">
             <span class="tabular-nums text-base-content/70">{{ movimiento.fecha | date: 'dd/MM/yyyy HH:mm' : '-0500' }}</span>
-            <strong class="tabular-nums">{{ movimiento.valorCosto === null ? 'No disponible' : 'S/ ' + movimiento.valorCosto }}</strong>
+             <strong class="tabular-nums">{{ movimiento.valorCosto === null ? 'No disponible' : soles(movimiento.valorCosto) }}</strong>
           </div>
           <p class="text-xs text-base-content/70">{{ movimiento.cantidadDetalles }} {{ movimiento.cantidadDetalles === 1 ? 'variante' : 'variantes' }}</p>
           <a class="btn btn-ghost min-h-11 w-full" [routerLink]="['/admin/inventario/historial', movimiento.id]" [queryParams]="queryParams()" [attr.aria-label]="'Ver detalle de ' + movimiento.id">Ver detalle</a>

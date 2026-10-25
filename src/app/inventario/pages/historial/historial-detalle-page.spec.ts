@@ -54,7 +54,8 @@ describe('HistorialDetallePage', () => {
     const { element } = await mostrar();
     expect(obtenerHistorial).toHaveBeenCalledExactlyOnceWith(id);
     expect(element.querySelectorAll('table tbody tr')).toHaveLength(2);
-    expect(element.textContent).toContain('30.000000');
+    expect(element.querySelector('table tbody tr')?.textContent).toContain('× 12');
+    expect(element.querySelector('table tbody tr')?.textContent).toContain('30');
     expect(element.textContent).toContain('No disponible');
     expect(element.textContent).toContain('compra-1');
     expect(element.querySelector('a[href*="compra-1"]')).toBeNull();

@@ -1,11 +1,4 @@
-/** Convierte cadenas decimales sin introducir errores de coma flotante. */
-export function decimalCompacto(valor: string): string {
-  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(valor);
-  if (!match) return valor;
-  const [, signo, entero, fraccion = ''] = match;
-  const fraccionSignificativa = fraccion.replace(/0+$/, '');
-  return `${signo}${entero}${fraccionSignificativa ? `.${fraccionSignificativa}` : ''}`;
-}
+export { decimalCompacto } from '../../../shared/formatters/decimal';
 
 export function descomponerUnidadBase(
   cantidadBase: string,

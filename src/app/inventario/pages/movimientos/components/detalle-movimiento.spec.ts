@@ -103,8 +103,8 @@ describe('DetalleMovimiento', () => {
     expect(changes).toHaveBeenCalledWith(expect.objectContaining({ varianteId: 'v1', unidadId: 'u1' }));
     fixture.componentRef.setInput('fila', { ...nuevaFilaMovimiento(1), varianteId: 'v1', unidadId: 'u2', cantidad: '1.2' });
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('#unidad-1').options[2].textContent).toContain('12.50000000');
-    expect(fixture.nativeElement.textContent).toContain('15.000000 und');
+    expect(fixture.nativeElement.querySelector('#unidad-1').options[2].textContent).toContain('12.5 base');
+    expect(fixture.nativeElement.textContent).toContain('15 und');
     expect(fixture.nativeElement.textContent).toContain('Equivalencia: 15 und');
   });
 

@@ -6,6 +6,7 @@ import type {
 } from '../../../../api/interfaces/inventario/movimiento.interface';
 import { useVariantesMovimiento } from '../../../actions/use-movimientos-action';
 import { Icon } from '../../../../shared/components/icon/icon';
+import { decimalCompacto } from '../../../../shared/formatters/decimal';
 import type { FilaMovimiento } from '../movimiento-form.model';
 
 const PAGE_LIMIT = 20;
@@ -33,6 +34,7 @@ export function equivalenciaBase(cantidad: string, factor: string): string | nul
   host: { class: 'block min-w-0' },
 })
 export class DetalleMovimiento {
+  readonly decimalCompacto = decimalCompacto;
   readonly fila = input.required<FilaMovimiento>();
   readonly indice = input.required<number>();
   readonly tipo = input.required<TipoMovimiento>();

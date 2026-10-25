@@ -24,7 +24,7 @@
       </div>
       <div>
         <dt class="text-xs font-semibold text-base-content/70">Valor del movimiento a costo</dt>
-        <dd class="mt-1 text-lg font-semibold tabular-nums">{{ movimiento().valorCosto === null ? 'No disponible' : 'S/ ' + movimiento().valorCosto }}</dd>
+         <dd class="mt-1 text-lg font-semibold tabular-nums">{{ movimiento().valorCosto === null ? 'No disponible' : soles(movimiento().valorCosto!) }}</dd>
       </div>
       @if (movimiento().almacenOrigen; as origen) {
         <div>

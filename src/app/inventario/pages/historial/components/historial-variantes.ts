@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import type { HistorialMovimientoLinea } from '../../../../api/interfaces/inventario/historial-movimiento.interface';
+import { decimalCompacto, formatearSoles } from '../../../../shared/formatters/decimal';
 
 @Component({
   selector: 'app-historial-variantes',
@@ -8,4 +9,6 @@ import type { HistorialMovimientoLinea } from '../../../../api/interfaces/invent
 })
 export class HistorialVariantes {
   readonly detalles = input.required<readonly HistorialMovimientoLinea[]>();
+  readonly soles = formatearSoles;
+  readonly decimalCompacto = decimalCompacto;
 }

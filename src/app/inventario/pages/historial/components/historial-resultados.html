@@ -1,68 +1,39 @@
-<section
-  class="card card-border min-w-0 overflow-hidden bg-base-100"
-  aria-labelledby="resultados-historial-title"
->
-  <div
-    class="flex flex-col gap-1 border-b border-base-300 p-5 sm:flex-row sm:items-end sm:justify-between sm:px-6"
-  >
+<section class="card card-border min-w-0 overflow-hidden bg-base-100" aria-labelledby="resultados-historial-title">
+  <div class="flex flex-col gap-1 border-b border-base-300 p-5 sm:flex-row sm:items-end sm:justify-between sm:px-6">
     <div>
       <h2 id="resultados-historial-title" class="text-lg font-semibold">Movimientos registrados</h2>
-      <p class="mt-1 text-sm text-base-content/70">
-        Solo ejemplos confirmados, ordenados del más reciente al más antiguo.
-      </p>
+      <p class="mt-1 text-sm text-base-content/70">Operaciones confirmadas, ordenadas del más reciente al más antiguo.</p>
     </div>
     <span class="text-sm font-semibold tabular-nums text-base-content/80" aria-live="polite">
-      {{ movimientos().length }} {{ movimientos().length === 1 ? 'resultado' : 'resultados' }}
+      {{ pagina().meta.total }} {{ pagina().meta.total === 1 ? 'resultado' : 'resultados' }}
     </span>
   </div>
 
-  @if (movimientos().length) {
+  @if (pagina().data.length) {
     <div class="hidden overflow-x-auto md:block">
       <table class="table w-full">
-        <thead>
-          <tr>
-            <th scope="col">Fecha</th>
-            <th scope="col">Operación</th>
-            <th scope="col">Almacén</th>
-            <th scope="col">Detalle</th>
-            <th scope="col" class="text-right">Valor a costo</th>
-            <th scope="col">Estado</th>
-            <th scope="col"><span class="sr-only">Detalle</span></th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th scope="col">Fecha</th><th scope="col">Operación</th><th scope="col">Almacén</th>
+          <th scope="col">Detalle</th><th scope="col" class="text-right">Valor a costo</th>
+          <th scope="col">Estado</th><th scope="col"><span class="sr-only">Detalle</span></th>
+        </tr></thead>
         <tbody>
-          @for (movimiento of movimientos(); track movimiento.id) {
+          @for (movimiento of pagina().data; track movimiento.id) {
             <tr>
               <td class="whitespace-nowrap tabular-nums">
-                <strong class="block font-semibold">{{
-                  movimiento.fecha | date: 'dd/MM/yyyy' : '-0500'
-                }}</strong>
-                <span class="text-xs text-base-content/70">{{
-                  movimiento.fecha | date: 'HH:mm' : '-0500'
-                }}</span>
+                <strong class="block font-semibold">{{ movimiento.fecha | date: 'dd/MM/yyyy' : '-0500' }}</strong>
+                <span class="text-xs text-base-content/70">{{ movimiento.fecha | date: 'HH:mm' : '-0500' }}</span>
               </td>
               <td>
                 <span class="font-semibold">{{ etiqueta(movimiento.tipo) }}</span>
-                <span class="block text-xs tabular-nums text-base-content/70">{{
-                  movimiento.id
-                }}</span>
+                <span class="block max-w-48 break-all text-xs tabular-nums text-base-content/70">{{ movimiento.id }}</span>
               </td>
               <td class="max-w-48 whitespace-normal">{{ almacenes(movimiento) }}</td>
-              <td class="whitespace-nowrap tabular-nums">
-                {{ movimiento.detalles.length }}
-                {{ movimiento.detalles.length === 1 ? 'variante' : 'variantes' }}
-              </td>
-              <td class="whitespace-nowrap text-right font-semibold tabular-nums">
-                S/ {{ movimiento.valorCosto }}
-              </td>
+              <td class="whitespace-nowrap tabular-nums">{{ movimiento.cantidadDetalles }} {{ movimiento.cantidadDetalles === 1 ? 'variante' : 'variantes' }}</td>
+              <td class="whitespace-nowrap text-right font-semibold tabular-nums">{{ movimiento.valorCosto === null ? 'No disponible' : 'S/ ' + movimiento.valorCosto }}</td>
               <td><span class="badge badge-success badge-soft">Confirmado</span></td>
               <td class="text-right">
-                <a
-                  class="btn btn-ghost min-h-11 whitespace-nowrap"
-                  [routerLink]="['/admin/inventario/historial', movimiento.id]"
-                  [attr.aria-label]="'Ver detalle de ' + movimiento.id"
-                  >Ver detalle</a
-                >
+                <a class="btn btn-ghost min-h-11 whitespace-nowrap" [routerLink]="['/admin/inventario/historial', movimiento.id]" [queryParams]="queryParams()" [attr.aria-label]="'Ver detalle de ' + movimiento.id">Ver detalle</a>
               </td>
             </tr>
           }
@@ -70,44 +41,33 @@
       </table>
     </div>
 
-    <ul class="divide-y divide-base-300 md:hidden" aria-label="Movimientos de ejemplo">
-      @for (movimiento of movimientos(); track movimiento.id) {
+    <ul class="divide-y divide-base-300 md:hidden" aria-label="Movimientos registrados">
+      @for (movimiento of pagina().data; track movimiento.id) {
         <li class="space-y-3 p-5">
           <div class="flex flex-wrap items-start justify-between gap-2">
             <div class="min-w-0">
               <strong class="block text-base font-semibold">{{ etiqueta(movimiento.tipo) }}</strong>
-              <span class="text-xs tabular-nums text-base-content/70">{{ movimiento.id }}</span>
+              <span class="break-all text-xs tabular-nums text-base-content/70">{{ movimiento.id }}</span>
             </div>
             <span class="badge badge-success badge-soft">Confirmado</span>
           </div>
           <p class="break-words text-sm text-base-content/80">{{ almacenes(movimiento) }}</p>
           <div class="flex flex-wrap items-end justify-between gap-2 text-sm">
-            <span class="tabular-nums text-base-content/70">{{
-              movimiento.fecha | date: 'dd/MM/yyyy HH:mm' : '-0500'
-            }}</span>
-            <strong class="tabular-nums">S/ {{ movimiento.valorCosto }}</strong>
+            <span class="tabular-nums text-base-content/70">{{ movimiento.fecha | date: 'dd/MM/yyyy HH:mm' : '-0500' }}</span>
+            <strong class="tabular-nums">{{ movimiento.valorCosto === null ? 'No disponible' : 'S/ ' + movimiento.valorCosto }}</strong>
           </div>
-          <p class="text-xs text-base-content/70">
-            {{ movimiento.detalles.length }}
-            {{ movimiento.detalles.length === 1 ? 'variante' : 'variantes' }}
-          </p>
-          <a
-            class="btn btn-ghost min-h-11 w-full"
-            [routerLink]="['/admin/inventario/historial', movimiento.id]"
-            [attr.aria-label]="'Ver detalle de ' + movimiento.id"
-            >Ver detalle</a
-          >
+          <p class="text-xs text-base-content/70">{{ movimiento.cantidadDetalles }} {{ movimiento.cantidadDetalles === 1 ? 'variante' : 'variantes' }}</p>
+          <a class="btn btn-ghost min-h-11 w-full" [routerLink]="['/admin/inventario/historial', movimiento.id]" [queryParams]="queryParams()" [attr.aria-label]="'Ver detalle de ' + movimiento.id">Ver detalle</a>
         </li>
       }
     </ul>
   } @else {
-    <div class="p-5 sm:p-8">
-      <app-empty-state
-        variant="no-results"
-        description="No hay movimientos de ejemplo para esta combinación. Prueba con otros términos o limpia los filtros."
-        actionLabel="Limpiar filtros"
-        (action)="limpiar.emit()"
-      />
+    <p class="p-5 text-sm text-base-content/70 sm:p-8">No hay movimientos para estos filtros.</p>
+  }
+
+  @if (pagina().meta.totalPages > 0) {
+    <div class="border-t border-base-300 p-5 sm:px-6">
+      <app-pagination [page]="pagina().meta.page" [totalPages]="pagina().meta.totalPages" [pageSize]="pagina().meta.limit" [pageSizeOptions]="[5, 10, 20]" (pageChange)="pageChange.emit($event)" (pageSizeChange)="pageSizeChange.emit($event)" />
     </div>
   }
 </section>

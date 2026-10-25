@@ -9,8 +9,12 @@ import type { FiltroTipoHistorial } from '../historial-demo.model';
 export class HistorialFiltros {
   readonly busqueda = input.required<string>();
   readonly tipo = input.required<FiltroTipoHistorial>();
+  readonly desde = input.required<string>();
+  readonly hasta = input.required<string>();
   readonly busquedaChange = output<string>();
   readonly tipoChange = output<FiltroTipoHistorial>();
+  readonly desdeChange = output<string>();
+  readonly hastaChange = output<string>();
 
   elegirTipo(valor: string): void {
     if (['todos', 'ingreso', 'salida', 'traslado', 'ajuste'].includes(valor)) {

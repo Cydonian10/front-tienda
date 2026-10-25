@@ -7,8 +7,9 @@
   </header>
 
   <app-historial-filtros
-    [busqueda]="busqueda()" [tipo]="tipo()"
+    [busqueda]="busqueda()" [tipo]="tipo()" [desde]="desde()" [hasta]="hasta()"
     (busquedaChange)="cambiarBusqueda($event)" (tipoChange)="cambiarTipo($event)"
+    (desdeChange)="cambiarDesde($event)" (hastaChange)="cambiarHasta($event)"
   />
 
   @if (rangoInvertido()) {
@@ -21,24 +22,6 @@
       <button type="button" class="btn" (click)="historial.refetch()">Reintentar</button>
     </div>
   } @else if (historial.data(); as pagina) {
-    <section class="card min-w-0 border border-base-300 bg-base-100" aria-label="Movimientos">
-      <div class="card-body">
-        <p class="text-sm text-base-content/70">{{ pagina.meta.total }} resultados</p>
-        @if (pagina.data.length) {
-          <ul class="list" aria-label="Movimientos reales">
-            @for (movimiento of pagina.data; track movimiento.id) {
-              <li class="list-row">
-                <div class="min-w-0">
-                  <a class="link link-hover break-all font-semibold" [routerLink]="['/admin/inventario/historial', movimiento.id]" [queryParams]="paramsDetalle()">{{ movimiento.id }}</a>
-                  <p class="text-sm text-base-content/70">{{ movimiento.tipo }} · {{ movimiento.fecha | date:'dd/MM/yyyy HH:mm':'':'es-PE' }} · {{ movimiento.cantidadDetalles }} variantes</p>
-                </div>
-              </li>
-            }
-          </ul>
-        } @else {
-          <p>No hay movimientos para estos filtros.</p>
-        }
-      </div>
-    </section>
+    <app-historial-resultados [pagina]="pagina" [queryParams]="paramsDetalle()" (pageChange)="cambiarPage($event)" (pageSizeChange)="cambiarLimit($event)" />
   }
 </section>

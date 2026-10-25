@@ -3,22 +3,36 @@
     <div>
       <h2 id="filtros-historial-title" class="text-lg font-semibold">Buscar movimientos</h2>
       <p class="mt-1 text-sm text-base-content/70">
-        Filtra los ejemplos sin modificar ningún registro.
+        Busca movimientos registrados por UUID, SKU, producto o almacén.
       </p>
     </div>
-    <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,16rem)]">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(12rem,16rem)_minmax(9rem,12rem)_minmax(9rem,12rem)]">
       <div class="min-w-0 space-y-2">
         <label for="historial-busqueda" class="block text-sm font-semibold"
-          >Código, SKU, producto o almacén</label
+          >UUID, SKU, producto o almacén</label
         >
         <input
           id="historial-busqueda"
           type="search"
           class="input h-11 w-full min-w-0"
+          maxlength="200"
+          aria-describedby="historial-busqueda-ayuda"
           placeholder="Ej. TAL-650 o Almacén principal"
           [value]="busqueda()"
           (input)="busquedaChange.emit($any($event.target).value)"
         />
+        <p id="historial-busqueda-ayuda" class="text-xs text-base-content/70">
+          @if (busqueda().trim().length === 1) { Escribe al menos 2 caracteres para buscar. }
+          @else { Mínimo 2 caracteres; la búsqueda se aplica al dejar de escribir. }
+        </p>
+      </div>
+      <div class="min-w-0 space-y-2">
+        <label for="historial-desde" class="block text-sm font-semibold">Desde</label>
+        <input id="historial-desde" type="date" class="input h-11 w-full min-w-0" [value]="desde()" (change)="desdeChange.emit($any($event.target).value)" />
+      </div>
+      <div class="min-w-0 space-y-2">
+        <label for="historial-hasta" class="block text-sm font-semibold">Hasta</label>
+        <input id="historial-hasta" type="date" class="input h-11 w-full min-w-0" [value]="hasta()" (change)="hastaChange.emit($any($event.target).value)" />
       </div>
       <div class="min-w-0 space-y-2">
         <label for="historial-tipo" class="block text-sm font-semibold">Tipo de operación</label>

@@ -1,9 +1,9 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, debounced, effect, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import type { FiltroHistorialMovimientos, TipoMovimientoHistorial } from '../../../api/interfaces/inventario/historial-movimiento.interface';
 import { useHistorialListado } from '../../actions/use-historial-action';
 import { HistorialFiltros } from './components/historial-filtros';
+import { HistorialResultados } from './components/historial-resultados';
 import type { FiltroTipoHistorial } from './historial-demo.model';
 
 function fechaValida(valor: string | null): string {
@@ -27,7 +27,7 @@ function tipoValido(valor: string | null): FiltroTipoHistorial {
 
 @Component({
   selector: 'app-historial-page',
-  imports: [DatePipe, HistorialFiltros, RouterLink],
+  imports: [HistorialFiltros, HistorialResultados],
   templateUrl: './historial-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

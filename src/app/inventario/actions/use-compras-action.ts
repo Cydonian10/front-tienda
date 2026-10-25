@@ -4,7 +4,10 @@ import { CompraApi } from '../../api/inventario/compra-api';
 import { AlmacenApi } from '../../api/inventario/almacen-api';
 import { ProveedorApi } from '../../api/inventario/proveedor-api';
 import { VarianteCompraApi } from '../../api/inventario/variante-compra-api';
-import type { NuevaCompra } from '../../api/interfaces/inventario/compra.interface';
+import type {
+  CorreccionCompra,
+  NuevaCompra,
+} from '../../api/interfaces/inventario/compra.interface';
 import { proveedoresListadoQueryKey } from './use-proveedores-action';
 
 export const comprasListadoKey = ['compras', 'listado'] as const;
@@ -105,8 +108,26 @@ export function useAdjuntarComprobante() {
   const client = inject(QueryClient);
   return injectMutation(() => ({
     mutationFn: ({ id, file }: { id: string; file: File }) => api.attachComprobante(id, file),
-    onSuccess: async (_, { id }) => {
+    onSuccess: async (compra, { id }) => {
+      client.setQueryData(compraDetalleQueryKey(id), compra);
       await client.invalidateQueries({ queryKey: compraDetalleQueryKey(id) });
+    },
+  }));
+}
+
+export function useEditarCompra() {
+  const api = inject(CompraApi);
+  const client = inject(QueryClient);
+  return injectMutation(() => ({
+    mutationFn: ({ id, correccion }: { id: string; correccion: CorreccionCompra }) =>
+      api.update(id, correccion),
+    onSuccess: async (_, { id }) => {
+      await Promise.all([
+        client.invalidateQueries({ queryKey: compraDetalleQueryKey(id) }),
+        client.invalidateQueries({ queryKey: comprasListadoKey }),
+        client.invalidateQueries({ queryKey: ['proveedores', 'compras'] }),
+        client.invalidateQueries({ queryKey: ['existencias', 'listado'] }),
+      ]);
     },
   }));
 }

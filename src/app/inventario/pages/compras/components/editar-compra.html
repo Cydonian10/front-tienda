@@ -1,0 +1,151 @@
+<section class="card card-border bg-base-100" aria-labelledby="editar-compra-title">
+  <div class="card-body gap-6 p-5 sm:p-6">
+    <div>
+      <h2 id="editar-compra-title" class="text-xl font-semibold">Corregir documento y precios</h2>
+      <p class="mt-1 text-sm text-base-content/70">
+        Proveedor, almacén, productos y cantidades no se modifican. El total se recalcula con los
+        precios.
+      </p>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Tipo de documento</legend>
+        <select
+          class="select min-h-11 w-full"
+          aria-label="Tipo de documento"
+          [value]="tipo()"
+          [disabled]="saving()"
+          (change)="tipo.set($any($event.target).value)"
+        >
+          <option value="factura">Factura</option>
+          <option value="boleta">Boleta</option>
+          <option value="otro">Otro</option>
+        </select>
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Fecha del documento</legend>
+        <input
+          type="date"
+          class="input min-h-11 w-full"
+          aria-label="Fecha del documento"
+          [value]="fecha()"
+          [disabled]="saving()"
+          [attr.aria-invalid]="submitted() && !dateValid() ? 'true' : null"
+          (input)="fecha.set($any($event.target).value)"
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Serie</legend>
+        <input
+          type="text"
+          class="input min-h-11 w-full"
+          aria-label="Serie del documento"
+          maxlength="100"
+          [value]="serie()"
+          [disabled]="saving()"
+          [attr.aria-invalid]="submitted() && !serie().trim() ? 'true' : null"
+          (input)="serie.set($any($event.target).value)"
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Número</legend>
+        <input
+          type="text"
+          class="input min-h-11 w-full"
+          aria-label="Número del documento"
+          maxlength="100"
+          [value]="numero()"
+          [disabled]="saving()"
+          [attr.aria-invalid]="submitted() && !numero().trim() ? 'true' : null"
+          (input)="numero.set($any($event.target).value)"
+        />
+      </fieldset>
+      <fieldset class="fieldset sm:col-span-2">
+        <legend class="fieldset-legend">Observaciones</legend>
+        <textarea
+          class="textarea min-h-24 w-full"
+          aria-label="Observaciones"
+          maxlength="5000"
+          [value]="observaciones()"
+          [disabled]="saving()"
+          (input)="observaciones.set($any($event.target).value)"
+        ></textarea>
+      </fieldset>
+    </div>
+    <div class="space-y-4 border-t border-base-300 pt-5">
+      <div>
+        <h3 class="font-semibold">Precios por renglón</h3>
+        <p class="text-sm text-base-content/70">
+          Si hubo movimientos posteriores de un producto en este almacén, su precio no podrá
+          corregirse aquí.
+        </p>
+      </div>
+      <div class="grid gap-3 sm:grid-cols-2">
+        @for (row of compra.renglones; track row.id; let index = $index) {
+          <fieldset class="fieldset min-w-0 rounded-box border border-base-300 p-4">
+            <legend class="fieldset-legend">
+              Renglón {{ index + 1 }} · {{ row.productoNombre }}
+            </legend>
+            <p class="text-xs text-base-content/70">
+              {{ row.sku }} · {{ row.cantidad }} {{ row.unidadSimbolo }}
+            </p>
+            <label class="text-sm" [for]="'precio-corregido-' + row.id"
+              >Precio unitario en PEN</label
+            >
+            <input
+              [id]="'precio-corregido-' + row.id"
+              type="text"
+              inputmode="decimal"
+              class="input min-h-11 w-full tabular-nums"
+              [value]="precios()[row.id] ?? ''"
+              [disabled]="saving()"
+              [attr.aria-invalid]="submitted() && !priceValid(row.id) ? 'true' : null"
+              [attr.aria-describedby]="
+                submitted() && !priceValid(row.id) ? 'precio-error-' + row.id : null
+              "
+              (input)="setPrice(row.id, $any($event.target).value)"
+            />
+            @if (submitted() && !priceValid(row.id)) {
+              <p class="text-xs text-error" [id]="'precio-error-' + row.id">
+                Precio no negativo, hasta 6 decimales.
+              </p>
+            }
+          </fieldset>
+        }
+      </div>
+    </div>
+    <div
+      class="flex flex-col gap-4 border-t border-base-300 pt-5 sm:flex-row sm:items-end sm:justify-between"
+    >
+      <div>
+        <p class="text-sm text-base-content/70">Total recalculado en PEN</p>
+        <strong class="text-xl font-semibold tabular-nums">{{ money(total()) }}</strong>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" class="btn min-h-11" [disabled]="saving()" (click)="cancel.emit()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary min-h-11"
+          [disabled]="saving() || !changed()"
+          (click)="save()"
+        >
+          {{ saving() ? 'Guardando…' : 'Guardar corrección' }}
+        </button>
+      </div>
+    </div>
+    @if (submitted() && !valid()) {
+      <p role="alert" class="text-sm text-error">
+        Revisa la fecha, la serie, el número y los precios (hasta 6 decimales, sin valores
+        negativos).
+      </p>
+    }
+    @if (error()) {
+      <div role="alert" class="alert alert-error alert-soft flex-wrap justify-between gap-3">
+        <span>{{ error() }}</span>
+        <button type="button" class="btn btn-sm" (click)="reload.emit()">Actualizar detalle</button>
+      </div>
+    }
+  </div>
+</section>

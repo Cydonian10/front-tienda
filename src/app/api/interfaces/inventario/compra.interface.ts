@@ -68,10 +68,21 @@ export interface ComprobanteCompraResponse {
 }
 
 export interface CompraResponse extends CompraListadoResponse {
+  revision: number;
   observaciones: string | null;
   ingreso: { id: string; fecha: string; estado: 'confirmado' | 'borrador' | 'anulado' } | null;
   renglones: RenglonCompraResponse[];
   comprobante: ComprobanteCompraResponse | null;
+}
+
+export interface CorreccionCompra {
+  revision: number;
+  tipoDocumento: 'factura' | 'boleta' | 'otro';
+  fecha: string;
+  serieDocumento: string;
+  numeroDocumento: string;
+  observaciones: string;
+  precios: { renglonId: string; precioUnitario: string }[];
 }
 
 export interface CrearCompraResponse {

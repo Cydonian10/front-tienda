@@ -2,7 +2,10 @@
   <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h1 id="compras-title" class="text-2xl font-semibold tracking-tight">Compras</h1>
-      <p class="mt-1 text-sm text-base-content/70">Consulta las compras recibidas en inventario.</p>
+      <p class="mt-1 text-sm text-base-content/70">
+        Consulta las compras recibidas. Abre el detalle para corregir el documento o los precios si
+        tienes permiso.
+      </p>
     </div>
     @if (permissions.create() && !showCreate()) {
       <button type="button" class="btn btn-primary" (click)="openCreate()">Nueva compra</button>

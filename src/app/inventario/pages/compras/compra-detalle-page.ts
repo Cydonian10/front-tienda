@@ -22,6 +22,7 @@ import {
 import { useAdjuntarComprobante, useCompraDetalle } from '../../actions/use-compras-action';
 import { documentoCompra, formatTotalPEN } from './compra-form.model';
 import { comprobanteError } from './comprobante-validation';
+import { EditarCompra } from './components/editar-compra';
 
 function safeFilename(name: string): string {
   return (
@@ -34,7 +35,7 @@ function safeFilename(name: string): string {
 
 @Component({
   selector: 'app-compra-detalle-page',
-  imports: [RouterLink, EmptyState, FileUpload, DatePipe],
+  imports: [RouterLink, EmptyState, FileUpload, DatePipe, EditarCompra],
   templateUrl: './compra-detalle-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0' },
@@ -50,6 +51,7 @@ export default class CompraDetallePage {
   readonly permissions = usePermissions('INVENTARIO', {
     read: PERMISSION_CODES.COMPRAS_READ,
     create: PERMISSION_CODES.COMPRAS_CREATE,
+    update: PERMISSION_CODES.COMPRAS_UPDATE,
   });
   readonly query = useCompraDetalle(this.compraId);
   readonly notFound = computed(() => {
@@ -69,9 +71,31 @@ export default class CompraDetallePage {
   readonly downloadError = signal('');
   readonly uploading = signal(false);
   readonly downloading = signal(false);
+  readonly editing = signal(false);
+  readonly editSaved = signal(false);
   readonly money = formatTotalPEN;
   readonly documento = documentoCompra;
   @ViewChild(FileUpload) private fileUpload?: FileUpload;
+
+  startEdit(): void {
+    if (
+      !this.query.data() ||
+      !this.authorization.hasPermission('INVENTARIO', PERMISSION_CODES.COMPRAS_UPDATE)
+    )
+      return;
+    this.editSaved.set(false);
+    this.editing.set(true);
+  }
+
+  finishEdit(): void {
+    this.editing.set(false);
+    this.editSaved.set(true);
+  }
+
+  refreshEdit(): void {
+    this.editing.set(false);
+    void this.query.refetch();
+  }
 
   onFilesChange(files: File[]): void {
     const file = files[0] ?? null;

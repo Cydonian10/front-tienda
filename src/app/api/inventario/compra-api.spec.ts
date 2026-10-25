@@ -89,6 +89,27 @@ describe('CompraApi (lectura)', () => {
     await withoutFile;
   });
 
+  it('corrige documento y precios sin permitir que el cliente imponga el total', async () => {
+    const correccion = {
+      revision: 0,
+      tipoDocumento: 'factura' as const,
+      fecha: '2026-10-17',
+      serieDocumento: 'F001',
+      numeroDocumento: '124',
+      observaciones: '',
+      precios: [{ renglonId: 'r1', precioUnitario: '11.00' }],
+    };
+    const result = TestBed.inject(CompraApi).update('c1', correccion);
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      'http://localhost:3000/api/compras/c1',
+    );
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual(correccion);
+    expect(request.request.body).not.toHaveProperty('totalDocumento');
+    request.flush({ id: 'c1', revision: 1, totalDocumento: '22.000000' });
+    expect((await result).revision).toBe(1);
+  });
+
   it('propaga el error de compra sin convertirlo en éxito de recepción', async () => {
     const result = TestBed.inject(CompraApi).create({
       proveedorId: 'p1',

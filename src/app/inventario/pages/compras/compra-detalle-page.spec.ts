@@ -13,6 +13,7 @@ import type {
 import { FileUpload } from '../../../shared/components/file-upload/file-upload';
 import { AuthStore } from '../../../store/auth/auth.store';
 import CompraDetallePage from './compra-detalle-page';
+import { EditarCompra } from './components/editar-compra';
 
 describe('CompraDetallePage', () => {
   const metadata: ComprobanteCompraResponse = {
@@ -24,6 +25,7 @@ describe('CompraDetallePage', () => {
   };
   const compra: CompraResponse = {
     id: 'c1',
+    revision: 0,
     fecha: '2026-10-17',
     fechaRegistro: '2026-10-17T10:00:00Z',
     tipoDocumento: 'factura',
@@ -54,6 +56,7 @@ describe('CompraDetallePage', () => {
   const getById = vi.fn();
   const attachComprobante = vi.fn();
   const downloadComprobante = vi.fn();
+  const update = vi.fn();
   const paramMap = convertToParamMap({ id: 'c1' });
 
   beforeEach(() => {
@@ -64,7 +67,10 @@ describe('CompraDetallePage', () => {
         provideRouter([]),
         provideTanStackQuery(new QueryClient({ defaultOptions: { queries: { retry: false } } })),
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap }, paramMap: of(paramMap) } },
-        { provide: CompraApi, useValue: { getById, attachComprobante, downloadComprobante } },
+        {
+          provide: CompraApi,
+          useValue: { getById, attachComprobante, downloadComprobante, update },
+        },
       ],
     });
   });
@@ -107,6 +113,69 @@ describe('CompraDetallePage', () => {
     expect(fixture.debugElement.query(By.directive(FileUpload))).toBeNull();
     expect(text).not.toContain('Adjuntar comprobante');
     expect(getById).toHaveBeenCalledWith('c1');
+    expect(text).not.toContain('Editar documento y precios');
+  });
+
+  it('corrige documento y precios con total recalculado y refresca el detalle', async () => {
+    grant(PERMISSION_CODES.COMPRAS_READ, PERMISSION_CODES.COMPRAS_UPDATE);
+    const { fixture, page } = await render();
+    page.startEdit();
+    fixture.detectChanges();
+    const edit = fixture.debugElement.query(By.directive(EditarCompra))
+      .componentInstance as EditarCompra;
+    expect(edit.total()).toBe('21.000000');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Proveedor, almacén, productos y cantidades no se modifican',
+    );
+    edit.numero.set('124');
+    edit.setPrice('r1', '11.00');
+    expect(edit.total()).toBe('22.000000');
+    const updated = {
+      ...compra,
+      revision: 1,
+      numeroDocumento: '124',
+      totalDocumento: '22.000000',
+      renglones: [{ ...compra.renglones[0], precioUnitario: '11.00' }],
+    };
+    update.mockResolvedValue(updated);
+    getById.mockResolvedValue(updated);
+    await edit.save();
+    await vi.waitFor(() => expect(page.query.data()?.numeroDocumento).toBe('124'));
+    fixture.detectChanges();
+    expect(update).toHaveBeenCalledExactlyOnceWith(
+      'c1',
+      expect.objectContaining({
+        revision: 0,
+        numeroDocumento: '124',
+        precios: [{ renglonId: 'r1', precioUnitario: '11.00' }],
+      }),
+    );
+    expect(fixture.nativeElement.textContent).toContain('S/ 22.00');
+    expect(fixture.nativeElement.textContent).toContain('Corrección guardada');
+    expect(page.editing()).toBe(false);
+  });
+
+  it('conserva el formulario si la API rechaza la corrección por movimientos posteriores', async () => {
+    grant(PERMISSION_CODES.COMPRAS_READ, PERMISSION_CODES.COMPRAS_UPDATE);
+    const { fixture, page } = await render();
+    page.startEdit();
+    fixture.detectChanges();
+    const edit = fixture.debugElement.query(By.directive(EditarCompra))
+      .componentInstance as EditarCompra;
+    edit.setPrice('r1', '12.50');
+    update.mockRejectedValue(
+      new HttpErrorResponse({
+        status: 409,
+        error: {
+          message: 'Ya existen movimientos posteriores.',
+        },
+      }),
+    );
+    await edit.save();
+    fixture.detectChanges();
+    expect(page.editing()).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Ya existen movimientos posteriores.');
+    expect(edit.total()).toBe('25.000000');
   });
 
   it('al fallar la subida conserva el ingreso y permite reintentar sin crear otra compra', async () => {

@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ENVIRONMENT } from '../config/env-dev';
 import type {
   CompraListadoResponse,
+  CorreccionCompra,
   CompraResponse,
   ComprobanteCompraResponse,
   CrearCompraResponse,
@@ -26,6 +27,10 @@ export class CompraApi {
 
   getById(id: string): Promise<CompraResponse> {
     return firstValueFrom(this.http.get<CompraResponse>(`${this.url}/${id}`));
+  }
+
+  update(id: string, correccion: CorreccionCompra): Promise<CompraResponse> {
+    return firstValueFrom(this.http.patch<CompraResponse>(`${this.url}/${id}`, correccion));
   }
 
   create(compra: NuevaCompra): Promise<CrearCompraResponse> {

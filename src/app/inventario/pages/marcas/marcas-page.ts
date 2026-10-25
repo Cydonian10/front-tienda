@@ -4,7 +4,9 @@ import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permisi
 import type { CrearMarcaDto, EditarMarcaDto, Marca } from '../../../api/interfaces/inventario/marca.interface';
 import { usePermissions } from '../../../auth/services/use-permissions';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog/confirm-dialog.service';
+import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { Icon } from '../../../shared/components/icon/icon';
+import { Pagination } from '../../../shared/components/pagination/pagination';
 import { CatalogoFormDialog } from '../../components/catalogo-form-dialog';
 import { useMarcasApi, useMarcasListado } from '../../actions/use-marcas-action';
 import { MarcaForm } from './components/marca-form';
@@ -12,7 +14,7 @@ import { MarcaImagen } from './components/marca-imagen';
 
 @Component({
   selector: 'marcas-page',
-  imports: [MarcaForm, MarcaImagen, CatalogoFormDialog, Icon],
+  imports: [MarcaForm, MarcaImagen, CatalogoFormDialog, EmptyState, Icon, Pagination],
   templateUrl: './marcas-page.html',
   host: { class: 'block min-w-0' },
 })
@@ -45,6 +47,11 @@ export default class MarcasPage {
     if (value !== 'todos' && value !== 'activos' && value !== 'inactivos') return;
     this.page.set(1);
     this.status.set(value);
+  }
+
+  changePageSize(size: number): void {
+    this.page.set(1);
+    this.limit.set(size);
   }
 
   clearFilters(): void {

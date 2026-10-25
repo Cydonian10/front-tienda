@@ -1,10 +1,8 @@
 <section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="marcas-title">
-  <header class="flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <h1 id="marcas-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">Marcas</h1>
-      <p class="mt-2 max-w-prose text-sm text-base-content/70">Identifica cada producto con su marca y conserva sus vínculos si se desactiva.</p>
-    </div>
-    @if (access.edit()) { <button type="button" class="btn btn-primary min-h-11" (click)="openCreate()">Nueva marca</button> }
+  <header>
+    <p class="text-xs font-bold tracking-widest text-base-content/65 uppercase">Catálogo / Marcas</p>
+    <h1 id="marcas-title" class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Marcas</h1>
+    <p class="mt-2 max-w-prose text-sm text-base-content/70">Identifica cada producto con su marca y conserva sus vínculos si se desactiva.</p>
   </header>
 
   @if (selection()) {
@@ -14,79 +12,123 @@
     </catalogo-form-dialog>
   }
 
-  <section class="card card-border min-w-0 bg-base-100" aria-labelledby="marcas-list-title">
-    <div class="card-body gap-5">
+  <section class="card card-border min-w-0 overflow-hidden bg-base-100" aria-labelledby="marcas-list-title">
+    <div class="flex flex-col gap-5 border-b border-base-300 px-5 py-5 sm:px-6 sm:py-6">
       <div>
-        <h2 id="marcas-list-title" class="card-title">Listado de marcas</h2>
-        <p class="text-sm text-base-content/70">Consulta el estado y la imagen disponible para cada marca.</p>
+        <h2 id="marcas-list-title" class="text-lg font-semibold tracking-tight sm:text-xl">Listado de marcas</h2>
+        <p class="mt-1 text-sm text-base-content/70">Consulta el estado y la imagen disponible para cada marca.</p>
       </div>
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div class="w-full sm:max-w-sm">
-          <label class="label" for="brands-search">Buscar por nombre</label>
-          <div class="input min-h-11 w-full gap-2">
-            <app-icon name="search" size="18" class="text-base-content/60" />
-            <input id="brands-search" type="search" class="min-w-0 grow" maxlength="200"
-              [value]="search()" (input)="searchBrands($any($event.target).value)" />
-          </div>
+      <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+        <div role="search" class="w-full sm:max-w-sm sm:flex-1">
+          <label class="sr-only" for="brands-search">Buscar marcas por nombre</label>
+          <input id="brands-search" type="search" class="input h-11 w-full" placeholder="Buscar por nombre"
+            maxlength="200" [value]="search()" (input)="searchBrands($any($event.target).value)" />
         </div>
         <div class="w-full sm:w-48">
-          <label class="label" for="brands-status">Estado</label>
-          <select id="brands-status" class="select min-h-11 w-full" [value]="status()" (change)="changeStatus($any($event.target).value)">
-            <option value="todos">Todos</option><option value="activos">Activos</option><option value="inactivos">Inactivos</option>
+          <label class="sr-only" for="brands-status">Estado</label>
+          <select id="brands-status" class="select h-11 w-full" [value]="status()" (change)="changeStatus($any($event.target).value)">
+            <option value="todos">Todos los estados</option>
+            <option value="activos">Activos</option>
+            <option value="inactivos">Inactivos</option>
           </select>
         </div>
         @if (search() || status() !== 'todos') {
           <button type="button" class="btn btn-ghost min-h-11" (click)="clearFilters()">Limpiar filtros</button>
         }
+        @if (access.edit()) {
+          <button type="button" class="btn btn-primary min-h-11 sm:ml-auto" (click)="openCreate()">
+            <app-icon name="plus" [size]="16" /> Nueva marca
+          </button>
+        }
       </div>
-      @if (actionError()) { <div class="alert alert-error alert-soft" role="alert">{{ actionError() }}</div> }
-
-      @if (query.isPending()) {
-        <p class="py-8 text-sm text-base-content/70" role="status">Cargando marcas…</p>
-      } @else if (query.isError()) {
-        <div class="alert alert-error alert-soft" role="alert">
-          No se pudieron cargar las marcas.
-          <button type="button" class="btn btn-sm min-h-11" (click)="query.refetch()">Reintentar</button>
-        </div>
-      } @else if (query.data(); as response) {
-        @if (response.items.length) {
-          <ul class="divide-y divide-base-300" aria-label="Marcas registradas">
-            @for (brand of response.items; track brand.id) {
-              <li class="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex min-w-0 items-center gap-3">
-                  <marca-imagen [id]="brand.id" [imagenId]="brand.imagenId" [nombre]="brand.nombre" />
-                  <div class="min-w-0 space-y-1">
-                    <h3 class="font-semibold break-words">{{ brand.nombre }}</h3>
-                    <span class="badge badge-outline" [class.badge-success]="brand.activo">{{ brand.activo ? 'Activo' : 'Inactivo' }}</span>
-                  </div>
-                </div>
-                @if (access.edit()) {
-                  <div class="flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-outline min-h-11" [disabled]="saving()" (click)="openEdit(brand)"
-                      [attr.aria-label]="'Editar ' + brand.nombre">Editar</button>
-                    <button type="button" class="btn btn-ghost min-h-11" [disabled]="statusMutation.isPending()"
-                      (click)="toggleStatus(brand)" [attr.aria-label]="(brand.activo ? 'Desactivar ' : 'Activar ') + brand.nombre">
-                      {{ brand.activo ? 'Desactivar' : 'Activar' }}
-                    </button>
-                  </div>
-                }
-              </li>
-            }
-          </ul>
-        } @else if (search().trim().length >= 2 || status() !== 'todos') {
-          <div role="status" class="space-y-3 py-6">
-            <p>No hay marcas que coincidan con los filtros.</p>
-            <button type="button" class="btn min-h-11" (click)="clearFilters()">Limpiar filtros</button>
-          </div>
-        } @else { <p role="status" class="py-6 text-base-content/70">Todavía no hay marcas registradas.</p> }
-        <footer class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 pt-4 text-sm">
-          <p role="status" class="tabular-nums">{{ response.totalItems }} resultados · Página {{ page() }} de {{ totalPages() }}</p>
-          <div class="flex gap-2">
-            <button type="button" class="btn min-h-11" [disabled]="page() <= 1 || query.isFetching()" (click)="page.update(value => value - 1)">Anterior</button>
-            <button type="button" class="btn min-h-11" [disabled]="page() >= totalPages() || query.isFetching()" (click)="page.update(value => value + 1)">Siguiente</button>
-          </div>
-        </footer>
-      }
     </div>
+
+    @if (actionError()) {
+      <div class="px-5 pt-5 sm:px-6"><div class="alert alert-error alert-soft" role="alert">{{ actionError() }}</div></div>
+    }
+    @if (query.isPending()) {
+      <p class="p-8 text-center text-sm text-base-content/70" role="status">Cargando marcas…</p>
+    } @else if (query.isError()) {
+      <div class="p-5 sm:p-6"><app-empty-state variant="error" actionLabel="Reintentar" (action)="query.refetch()" /></div>
+    } @else if (query.data(); as response) {
+      @if (response.items.length) {
+        <div class="hidden overflow-x-auto sm:block">
+          <table class="table table-md w-full min-w-147.5" aria-labelledby="marcas-list-title">
+            <thead class="bg-base-200 text-xs uppercase">
+              <tr>
+                <th scope="col" class="w-[50%] pl-6">Marca</th>
+                <th scope="col">Estado</th>
+                @if (access.edit()) { <th scope="col" class="pr-6 text-right">Acciones</th> }
+              </tr>
+            </thead>
+            <tbody>
+              @for (brand of response.items; track brand.id) {
+                <tr class="border-b border-base-300/70 last:border-b-0 hover:bg-base-200/60">
+                  <th scope="row" class="pl-6 font-semibold">
+                    <span class="inline-flex min-w-0 items-center gap-3">
+                      <marca-imagen [id]="brand.id" [imagenId]="brand.imagenId" [nombre]="brand.nombre" />
+                      <span class="[overflow-wrap:anywhere]">{{ brand.nombre }}</span>
+                    </span>
+                  </th>
+                  <td><span class="badge badge-outline" [class.badge-success]="brand.activo">{{ brand.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                  @if (access.edit()) {
+                    <td class="pr-6">
+                      <div class="flex justify-end gap-1">
+                        <button type="button" class="btn btn-ghost btn-sm min-h-10" [disabled]="saving()"
+                          [attr.aria-label]="'Editar ' + brand.nombre" (click)="openEdit(brand)">Editar</button>
+                        <button type="button" class="btn btn-ghost btn-sm min-h-10" [class.text-error]="brand.activo"
+                          [disabled]="statusMutation.isPending()"
+                          [attr.aria-label]="(brand.activo ? 'Desactivar ' : 'Activar ') + brand.nombre"
+                          (click)="toggleStatus(brand)">{{ brand.activo ? 'Desactivar' : 'Activar' }}</button>
+                      </div>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <ul class="divide-y divide-base-300 sm:hidden" aria-label="Marcas registradas">
+          @for (brand of response.items; track brand.id) {
+            <li class="space-y-4 px-5 py-5">
+              <div class="flex min-w-0 items-center gap-3">
+                <marca-imagen [id]="brand.id" [imagenId]="brand.imagenId" [nombre]="brand.nombre" />
+                <div class="min-w-0 space-y-1">
+                  <strong class="block [overflow-wrap:anywhere] text-sm font-semibold">{{ brand.nombre }}</strong>
+                  <span class="badge badge-outline" [class.badge-success]="brand.activo">{{ brand.activo ? 'Activo' : 'Inactivo' }}</span>
+                </div>
+              </div>
+              @if (access.edit()) {
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-outline min-h-11 flex-1" [disabled]="saving()"
+                    [attr.aria-label]="'Editar ' + brand.nombre" (click)="openEdit(brand)">Editar</button>
+                  <button type="button" class="btn btn-outline min-h-11 flex-1" [class.text-error]="brand.activo"
+                    [disabled]="statusMutation.isPending()"
+                    [attr.aria-label]="(brand.activo ? 'Desactivar ' : 'Activar ') + brand.nombre"
+                    (click)="toggleStatus(brand)">{{ brand.activo ? 'Desactivar' : 'Activar' }}</button>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 px-5 py-4 text-sm text-base-content/70 sm:px-6">
+          <p role="status" class="tabular-nums">{{ response.totalItems }} resultados · Página {{ page() }} de {{ totalPages() }}</p>
+          <app-pagination [page]="page()" [totalPages]="totalPages()" [pageSize]="limit()"
+            [disabled]="query.isFetching() || statusMutation.isPending()"
+            (pageChange)="page.set($event)" (pageSizeChange)="changePageSize($event)" />
+        </div>
+      } @else if (search().trim().length >= 2 || status() !== 'todos') {
+        <div class="p-5 sm:p-6">
+          <app-empty-state variant="no-results" title="No hay marcas que coincidan con los filtros"
+            actionLabel="Limpiar filtros" (action)="clearFilters()" />
+        </div>
+      } @else {
+        <div class="p-5 sm:p-6">
+          <app-empty-state title="Todavía no hay marcas registradas"
+            description="Crea una marca para identificar los productos."
+            [actionLabel]="access.edit() ? 'Nueva marca' : ''" (action)="openCreate()" />
+        </div>
+      }
+    }
   </section>
 </section>

@@ -5,17 +5,5 @@
       "path": "../../api-tienda",
       "description": "API de la tienda; consultar cuando se necesite contexto del backend."
     }
-  },
-  "mcp": {
-    "servers": {
-      "playwright": {
-        "type": "local",
-        "command": [
-          "/bin/bash",
-          "-lc",
-          "source \"$HOME/.nvm/nvm.sh\" && nvm use default >/dev/null 2>&1 && exec npx -y @playwright/mcp@latest"
-        ]
-      }
-    }
   }
 }

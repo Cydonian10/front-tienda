@@ -122,4 +122,84 @@
       </div>
     </section>
   }
+
+  @if (periodo() && (access.compras() || access.movimientos()) && mostrarActividad()) {
+    <section class="card card-border bg-base-200 min-w-0" aria-labelledby="actividad-diaria">
+      <div class="card-body min-w-0">
+        <h2 id="actividad-diaria" class="card-title">Actividad diaria</h2>
+        <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+          @if (access.compras() && compras.isSuccess()) { <p><span class="inline-block size-3 rounded-sm bg-primary" aria-hidden="true"></span> Compras · Todos los almacenes</p> }
+          @if (access.movimientos() && salidas.isSuccess()) { <p><span class="inline-block size-3 rounded-sm bg-secondary" aria-hidden="true"></span> Salidas · {{ almacenNombre() }}</p> }
+        </div>
+        <p class="text-sm text-base-content/70">Conteos por día en America/Lima. Consulta los valores exactos en la tabla.</p>
+        <div class="w-full overflow-x-auto" aria-hidden="true">
+          <div class="flex h-36 min-w-max items-end gap-1 border-b border-base-300 py-1">
+            @for (dia of serieDiaria(); track dia.fecha) {
+              <div class="flex h-full w-6 shrink-0 items-end gap-px" [title]="dia.fecha">
+                @if (dia.compras !== null) {
+                  <div class="w-1/2 bg-primary" [style.height.%]="dia.compras / maximoDiario() * 100"></div>
+                }
+                @if (dia.salidas !== null) {
+                  <div class="w-1/2 bg-secondary" [style.height.%]="dia.salidas / maximoDiario() * 100"></div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        <details class="mt-2">
+          <summary class="cursor-pointer font-semibold underline-offset-4 focus-visible:outline-2 focus-visible:outline-primary">Ver conteos por fecha</summary>
+          <div class="mt-3 max-h-80 overflow-auto">
+            <table class="table table-sm">
+              <caption class="sr-only">Cantidad diaria de compras globales y salidas del almacén seleccionado</caption>
+              <thead><tr><th scope="col">Fecha</th>@if (access.compras() && compras.isSuccess()) { <th scope="col">Compras · Todos los almacenes</th> }@if (access.movimientos() && salidas.isSuccess()) { <th scope="col">Salidas · {{ almacenNombre() }}</th> }</tr></thead>
+              <tbody>
+                @for (dia of serieDiaria(); track dia.fecha) {
+                  <tr><th scope="row">{{ dia.fecha }}</th>@if (access.compras() && compras.isSuccess()) { <td class="tabular-nums">{{ dia.compras }}</td> }@if (access.movimientos() && salidas.isSuccess()) { <td class="tabular-nums">{{ dia.salidas }}</td> }</tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </section>
+  }
+
+  <div class="grid min-w-0 gap-4 lg:grid-cols-2">
+    @if (access.compras() && compras.isSuccess()) {
+      <section class="card card-border bg-base-200 min-w-0">
+        <div class="card-body">
+          <h2 class="card-title">Compras recientes · Todos los almacenes</h2>
+          @if (!compras.data()?.recientes?.length) { <p>No hay compras en el rango seleccionado.</p> }
+          @else {
+            <ul class="list">
+              @for (compra of compras.data()?.recientes?.slice(0, 5); track compra.id) {
+                <li class="list-row items-center">
+                  <div class="min-w-0 list-col-grow"><p class="font-semibold">{{ compra.proveedorNombre }}</p><p class="text-sm text-base-content/70">{{ compra.fecha }} · {{ compra.tipoDocumento ?? 'Sin documento' }} {{ compra.serieDocumento ?? '' }} {{ compra.numeroDocumento ?? '' }}</p></div>
+                  <a class="btn btn-ghost btn-sm" [routerLink]="['../compras', compra.id]">Ver compra</a>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
+    }
+    @if (access.movimientos() && almacenId() && salidas.isSuccess()) {
+      <section class="card card-border bg-base-200 min-w-0">
+        <div class="card-body">
+          <h2 class="card-title">Salidas recientes · {{ almacenNombre() }}</h2>
+          @if (!salidas.data()?.recientes?.length) { <p>No hay salidas en el rango seleccionado.</p> }
+          @else {
+            <ul class="list">
+              @for (salida of salidas.data()?.recientes?.slice(0, 5); track salida.id) {
+                <li class="list-row items-center">
+                  <div class="min-w-0 list-col-grow"><p class="font-semibold">{{ salida.almacenOrigenNombre }}</p><p class="text-sm text-base-content/70">{{ salida.fecha }} · {{ salida.cantidadDetalles }} detalles</p></div>
+                  <a class="btn btn-ghost btn-sm" [routerLink]="['../historial', salida.id]">Ver salida</a>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
+    }
+  </div>
 </div>

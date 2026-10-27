@@ -11,7 +11,7 @@ import { AuthProfileService } from '../../../auth/services/auth-profile.service'
 import { AuthSessionService } from '../../../auth/services/auth-session.service';
 import { AuthStore } from '../../../store/auth/auth.store';
 import routes from '../../inventario.routes';
-import DashboardReposicionPage, { rangoValido } from './dashboard-reposicion-page';
+import DashboardReposicionPage, { diasActividad, rangoValido } from './dashboard-reposicion-page';
 
 @Component({ template: '' })
 class EmptyPage {}
@@ -101,5 +101,44 @@ describe('dashboard de reposición', () => {
     expect(rangoValido('2026-10-30', '2026-10-01')).toBe(false);
     expect(rangoValido('2026-02-30', '2026-03-01')).toBe(false);
     expect(rangoValido('2026-02-28', '2026-03-01')).toBe(true);
+  });
+
+  it('rellena días sin datos con cero sin confundir módulos ausentes con cero', () => {
+    const periodo = { desde: '2026-10-29', hasta: '2026-10-31' };
+    expect(diasActividad(periodo, [{ fecha: '2026-10-30', cantidad: 2 }], null)).toEqual([
+      { fecha: '2026-10-29', compras: 0, salidas: null },
+      { fecha: '2026-10-30', compras: 2, salidas: null },
+      { fecha: '2026-10-31', compras: 0, salidas: null },
+    ]);
+    expect(diasActividad(periodo, null, [{ fecha: '2026-10-31', cantidad: 1 }])[2]).toEqual({ fecha: '2026-10-31', compras: null, salidas: 1 });
+  });
+
+  it('muestra los 30 días del período y permite acceder a valores exactos por teclado', async () => {
+    grant(PERMISSION_CODES.COMPRAS_READ);
+    compras.mockResolvedValue({ total: 1, porDia: [{ fecha: '2026-10-01', cantidad: 1 }], recientes: [] });
+    const harness = await RouterTestingHarness.create('/admin/inventario/resumen?desde=2026-10-01&hasta=2026-10-30');
+    const page = await harness.navigateByUrl(TestBed.inject(Router).url, DashboardReposicionPage);
+    await vi.waitFor(() => expect(page.serieDiaria()[0]?.compras).toBe(1));
+    harness.detectChanges();
+    expect(page.serieDiaria()).toHaveLength(30);
+    expect(page.serieDiaria()[29]).toEqual({ fecha: '2026-10-30', compras: 0, salidas: null });
+    const element = harness.routeNativeElement!;
+    expect(element.querySelector('details summary')?.textContent).toContain('Ver conteos');
+    expect(element.querySelectorAll('tbody tr')).toHaveLength(30);
+    expect(element.textContent).toContain('Todos los almacenes');
+    expect(element.querySelectorAll('a[href*="historial"]')).toHaveLength(0);
+  });
+
+  it('enlaza hasta cinco compras y cinco salidas a sus detalles autorizados', async () => {
+    grant(PERMISSION_CODES.COMPRAS_READ, PERMISSION_CODES.MOVIMIENTOS_READ);
+    compras.mockResolvedValue({ total: 7, porDia: [], recientes: Array.from({ length: 7 }, (_, index) => ({ id: `c${index}`, fecha: '2026-10-01', proveedorNombre: 'Acme', tipoDocumento: null, serieDocumento: null, numeroDocumento: null, totalDocumento: null, recibida: true })) });
+    salidas.mockResolvedValue({ total: 7, porDia: [], recientes: Array.from({ length: 7 }, (_, index) => ({ id: `m${index}`, fecha: '2026-10-01', almacenOrigenId: 'a1', almacenOrigenNombre: 'Principal', cantidadDetalles: 1 })) });
+    const harness = await RouterTestingHarness.create('/admin/inventario/resumen?almacenId=a1&desde=2026-10-01&hasta=2026-10-30');
+    await harness.navigateByUrl(TestBed.inject(Router).url, DashboardReposicionPage);
+    await vi.waitFor(() => expect(salidas).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(harness.routeNativeElement?.querySelectorAll('a[href*="historial/"]')).toHaveLength(5));
+    expect(harness.routeNativeElement?.querySelectorAll('a[href*="compras/"]')).toHaveLength(5);
+    expect(harness.routeNativeElement?.querySelector('a[href$="compras/c0"]')).not.toBeNull();
+    expect(harness.routeNativeElement?.querySelector('a[href$="historial/m0"]')).not.toBeNull();
   });
 });

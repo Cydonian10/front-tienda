@@ -30,6 +30,29 @@ export function rangoValido(desde: string, hasta: string): boolean {
   return esFecha(desde) && esFecha(hasta) && desde <= hasta;
 }
 
+export interface DiaActividad {
+  fecha: string;
+  compras: number | null;
+  salidas: number | null;
+}
+
+/** Une las dos series por fecha y rellena días sin operaciones sin convertir fallos en ceros. */
+export function diasActividad(
+  periodo: PeriodoActividadInventario,
+  compras: { fecha: string; cantidad: number }[] | null,
+  salidas: { fecha: string; cantidad: number }[] | null,
+): DiaActividad[] {
+  const entradas = compras === null ? null : new Map(compras.map((item) => [item.fecha, item.cantidad]));
+  const salidasPorDia = salidas === null ? null : new Map(salidas.map((item) => [item.fecha, item.cantidad]));
+  const result: DiaActividad[] = [];
+  const end = Date.parse(`${periodo.hasta}T00:00:00Z`);
+  for (let date = Date.parse(`${periodo.desde}T00:00:00Z`); date <= end; date += 86_400_000) {
+    const fecha = new Date(date).toISOString().slice(0, 10);
+    result.push({ fecha, compras: entradas?.get(fecha) ?? (entradas ? 0 : null), salidas: salidasPorDia?.get(fecha) ?? (salidasPorDia ? 0 : null) });
+  }
+  return result;
+}
+
 @Component({
   selector: 'app-dashboard-reposicion-page',
   imports: [RouterLink],
@@ -89,6 +112,17 @@ export default class DashboardReposicionPage {
   readonly stock = useResumenReposicion(this.almacenId);
   readonly compras = useResumenCompras(this.periodo);
   readonly salidas = useResumenSalidas(this.almacenId, this.periodo);
+  readonly serieDiaria = computed(() => {
+    const rango = this.periodo();
+    if (!rango) return [];
+    return diasActividad(rango,
+      this.access.compras() && this.compras.isSuccess() ? this.compras.data()!.porDia : null,
+      this.access.movimientos() && this.almacenId() && this.salidas.isSuccess() ? this.salidas.data()!.porDia : null,
+    );
+  });
+  readonly maximoDiario = computed(() => Math.max(1, ...this.serieDiaria().flatMap((dia) => [dia.compras ?? 0, dia.salidas ?? 0])));
+  readonly mostrarActividad = computed(() => (this.access.compras() && this.compras.isSuccess()) ||
+    (this.access.movimientos() && !!this.almacenId() && this.salidas.isSuccess()));
 
   constructor() {
     effect(() => {

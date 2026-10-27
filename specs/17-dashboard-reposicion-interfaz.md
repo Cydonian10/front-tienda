@@ -1,6 +1,6 @@
 # SPEC 17 — Interfaz del dashboard de reposición
 
-> **Status:** Borrador
+> **Status:** Aprobado
 > **Depends on:** SPEC 04, SPEC 08, SPEC 13, SPEC 16
 > **Date:** 2026-10-25
 > **Objective:** Crear un inicio operativo de Inventario que muestre alertas de reposición y actividad reciente y permita configurar mínimos desde Existencias.
@@ -69,11 +69,11 @@
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| El gráfico se interpreta como comparación de datos del mismo almacén. | Etiquetar compras «Todos los almacenes» en tarjeta, leyenda y serie; identificar salidas por almacén. |
+| Risk                                                                         | Mitigation                                                                                                                  |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| El gráfico se interpreta como comparación de datos del mismo almacén.        | Etiquetar compras «Todos los almacenes» en tarjeta, leyenda y serie; identificar salidas por almacén.                       |
 | La consulta de Existencias no restaura aún filtros al volver de otra página. | Incorporar en esta spec lectura de `almacenId` y `q` al abrir Existencias y mantenerlos en la URL al buscar/cambiar filtro. |
-| Cambia el permiso durante una sesión abierta. | Volver a comprobarlo antes de cada mutación y tratar 403 por módulo. |
+| Cambia el permiso durante una sesión abierta.                                | Volver a comprobarlo antes de cada mutación y tratar 403 por módulo.                                                        |
 
 ## What is **not** in this spec
 

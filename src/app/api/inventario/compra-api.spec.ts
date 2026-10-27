@@ -28,6 +28,24 @@ describe('CompraApi (lectura)', () => {
     await expect(result).resolves.toEqual(response);
   });
 
+  it('consulta compras globales solo por fechas y conserva campos nulos', async () => {
+    const result = TestBed.inject(CompraApi).resumenInventario({ desde: '2026-10-01', hasta: '2026-10-30' });
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      'http://localhost:3000/api/compras/resumen-inventario?desde=2026-10-01&hasta=2026-10-30',
+    );
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.has('almacenId')).toBe(false);
+    const response = { total: 1, porDia: [{ fecha: '2026-10-01', cantidad: 1 }], recientes: [{ id: 'c1', fecha: '2026-10-01', proveedorNombre: 'Acme', tipoDocumento: null, serieDocumento: null, numeroDocumento: null, totalDocumento: null, recibida: false }] };
+    request.flush(response);
+    await expect(result).resolves.toEqual(response);
+
+    const denied = TestBed.inject(CompraApi).resumenInventario({ desde: '2026-10-01', hasta: '2026-10-30' });
+    TestBed.inject(HttpTestingController).expectOne((req) => req.url.endsWith('/resumen-inventario')).flush(
+      { message: 'Sin permiso' }, { status: 403, statusText: 'Forbidden' },
+    );
+    await expect(denied).rejects.toMatchObject({ status: 403 });
+  });
+
   it('no envía una búsqueda vacía y obtiene el detalle por ID', async () => {
     const api = TestBed.inject(CompraApi);
     const http = TestBed.inject(HttpTestingController);

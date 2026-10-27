@@ -14,11 +14,20 @@ import type {
   MovimientoCreado,
   NuevoMovimiento,
 } from '../interfaces/inventario/movimiento.interface';
+import type { PeriodoActividadInventario, ResumenSalidasInventario } from '../interfaces/inventario/resumen-reposicion.interface';
 
 @Injectable({ providedIn: 'root' })
 export class MovimientoApi {
   private readonly http = inject(HttpClient);
   private readonly url = `${inject(ENVIRONMENT).apiUrl}/movimientos`;
+
+  resumenSalidas(almacenId: string, { desde, hasta }: PeriodoActividadInventario): Promise<ResumenSalidasInventario> {
+    return firstValueFrom(
+      this.http.get<ResumenSalidasInventario>(`${this.url}/resumen-salidas`, {
+        params: { almacenId, desde, hasta },
+      }),
+    );
+  }
 
   listarAlmacenes(): Promise<AlmacenMovimiento[]> {
     return firstValueFrom(this.http.get<AlmacenMovimiento[]>(`${this.url}/almacenes`));

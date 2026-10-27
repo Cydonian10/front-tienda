@@ -31,6 +31,26 @@ describe('MovimientoApi', () => {
     await expect(result).resolves.toEqual(almacenes);
   });
 
+  it('consulta salidas por almacén y fechas y propaga los errores', async () => {
+    const api = TestBed.inject(MovimientoApi);
+    const http = TestBed.inject(HttpTestingController);
+    const periodo = { desde: '2026-10-01', hasta: '2026-10-30' };
+    const result = api.resumenSalidas('a1', periodo);
+    const request = http.expectOne(
+      'http://localhost:3000/api/movimientos/resumen-salidas?almacenId=a1&desde=2026-10-01&hasta=2026-10-30',
+    );
+    expect(request.request.method).toBe('GET');
+    const response = { total: 1, porDia: [{ fecha: '2026-10-01', cantidad: 1 }], recientes: [{ id: 'm1', fecha: '2026-10-01', almacenOrigenId: 'a1', almacenOrigenNombre: 'Principal', cantidadDetalles: 2 }] };
+    request.flush(response);
+    await expect(result).resolves.toEqual(response);
+
+    const invalid = api.resumenSalidas('a1', periodo);
+    http.expectOne((req) => req.url.endsWith('/resumen-salidas')).flush(
+      { message: 'Rango inválido' }, { status: 400, statusText: 'Bad Request' },
+    );
+    await expect(invalid).rejects.toMatchObject({ status: 400 });
+  });
+
   it('busca variantes por tipo, almacén y término con paginación y decimales intactos', async () => {
     const result = TestBed.inject(MovimientoApi).buscarVariantes({
       tipo: 'salida',

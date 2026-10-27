@@ -43,6 +43,7 @@ export interface ExistenciaItem {
   almacen: AlmacenExistencia;
   /** Los valores decimales se conservan como cadenas exactas de la API. */
   cantidadBase: string;
+  minimoBase: string | null;
   valorCosto: string;
   costoPromedioBase: string | null;
   costoRegistradoCero: boolean;

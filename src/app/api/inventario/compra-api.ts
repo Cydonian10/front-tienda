@@ -11,11 +11,20 @@ import type {
   NuevaCompra,
   PaginatedResponse,
 } from '../interfaces/inventario/compra.interface';
+import type { PeriodoActividadInventario, ResumenComprasInventario } from '../interfaces/inventario/resumen-reposicion.interface';
 
 @Injectable({ providedIn: 'root' })
 export class CompraApi {
   private readonly http = inject(HttpClient);
   private readonly url = `${inject(ENVIRONMENT).apiUrl}/compras`;
+
+  resumenInventario({ desde, hasta }: PeriodoActividadInventario): Promise<ResumenComprasInventario> {
+    return firstValueFrom(
+      this.http.get<ResumenComprasInventario>(`${this.url}/resumen-inventario`, {
+        params: { desde, hasta },
+      }),
+    );
+  }
 
   list(page: number, limit: number, q?: string): Promise<PaginatedResponse<CompraListadoResponse>> {
     return firstValueFrom(

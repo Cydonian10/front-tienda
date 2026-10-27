@@ -7,6 +7,7 @@ import type {
   FiltroExistencias,
   ListaExistenciasResponse,
 } from '../interfaces/inventario/existencia.interface';
+import type { ResumenReposicion } from '../interfaces/inventario/resumen-reposicion.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ExistenciaApi {
@@ -16,6 +17,26 @@ export class ExistenciaApi {
 
   listarAlmacenes(): Promise<AlmacenExistencia[]> {
     return firstValueFrom(this.http.get<AlmacenExistencia[]>(`${this.url}/almacenes`));
+  }
+
+  resumenReposicion(almacenId: string): Promise<ResumenReposicion> {
+    return firstValueFrom(
+      this.http.get<ResumenReposicion>(`${this.url}/resumen-reposicion`, {
+        params: { almacenId },
+      }),
+    );
+  }
+
+  guardarMinimo(varianteId: string, almacenId: string, minimoBase: string): Promise<void> {
+    return firstValueFrom(
+      this.http.put<void>(`${this.url}/minimos/${encodeURIComponent(varianteId)}/${encodeURIComponent(almacenId)}`, { minimoBase }),
+    );
+  }
+
+  quitarMinimo(varianteId: string, almacenId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(`${this.url}/minimos/${encodeURIComponent(varianteId)}/${encodeURIComponent(almacenId)}`),
+    );
   }
 
   listar(filtro: FiltroExistencias): Promise<ListaExistenciasResponse> {

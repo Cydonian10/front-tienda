@@ -1,6 +1,6 @@
 # SPEC 16 — API de mínimos de stock y resumen de reposición
 
-> **Status:** Borrador
+> **Status:** Implementado
 > **Depends on:** SPEC 01, SPEC 03, SPEC 07, SPEC 12
 > **Date:** 2026-10-25
 > **Objective:** Exponer mínimos configurables por variante y almacén y datos de stock, compras y salidas para un dashboard de reposición con permisos independientes.
@@ -48,18 +48,18 @@
 
 ## Acceptance criteria
 
-- [ ] Un mínimo positivo se crea o reemplaza por par variante–almacén sin crear saldo; `DELETE` lo deja en `null` incluso si se repite, y nunca cambia `Existencia.cantidad`.
-- [ ] La base rechaza mínimos cero, negativos y duplicados; la API rechaza más de seis decimales, UUID inválidos y entidades inexistentes/inactivas.
-- [ ] Solo `EXISTENCIAS_EDITAR_MINIMO` autoriza PUT/DELETE y ningún rol lo recibe automáticamente; `EXISTENCIAS_LEER` sigue protegiendo lectura de saldos y resumen.
-- [ ] `GET /api/existencias` añade `minimoBase` sin alterar los demás campos ni la paginación.
-- [ ] `bajoMinimo` cuenta pares con saldo positivo `<= minimoBase`; `agotadas` cuenta pares activos de saldo cero con o sin mínimo; ambas cifras son independientes de las diez alertas.
-- [ ] La lista de alertas tiene como máximo diez filas y orden estable; los pares sin mínimo y con saldo positivo no figuran como bajo mínimo.
-- [ ] Los almacenes antiguos se ordenan inicialmente por nombre e ID; los nuevos conservan orden real de alta, y tanto el listado de Existencias como el de Movimientos entregan el primer almacén activo en el mismo orden.
-- [ ] Compras exige `COMPRAS_LEER` y cuenta todos los documentos por fecha de compra, aunque aún no tengan ingreso; no recibe ni aplica filtro de almacén.
-- [ ] Salidas exige `MOVIMIENTOS_LEER`, filtra por almacén origen cuando se indica y solo cuenta movimientos confirmados de tipo salida.
-- [ ] Ambas series devuelven cada día del rango inclusive en `America/Lima`, con cero en días vacíos; los cinco recientes pertenecen al mismo rango y usan fecha/ID descendentes.
-- [ ] Al faltar cualquiera de los tres permisos de lectura, solo se deniega su endpoint; los otros resúmenes siguen disponibles según sus permisos.
-- [ ] Pasan `npm test` y `npm run build` en `api-tienda`.
+- [x] Un mínimo positivo se crea o reemplaza por par variante–almacén sin crear saldo; `DELETE` lo deja en `null` incluso si se repite, y nunca cambia `Existencia.cantidad`.
+- [x] La base rechaza mínimos cero, negativos y duplicados; la API rechaza más de seis decimales, UUID inválidos y entidades inexistentes/inactivas.
+- [x] Solo `EXISTENCIAS_EDITAR_MINIMO` autoriza PUT/DELETE y ningún rol lo recibe automáticamente; `EXISTENCIAS_LEER` sigue protegiendo lectura de saldos y resumen.
+- [x] `GET /api/existencias` añade `minimoBase` sin alterar los demás campos ni la paginación.
+- [x] `bajoMinimo` cuenta pares con saldo positivo `<= minimoBase`; `agotadas` cuenta pares activos de saldo cero con o sin mínimo; ambas cifras son independientes de las diez alertas.
+- [x] La lista de alertas tiene como máximo diez filas y orden estable; los pares sin mínimo y con saldo positivo no figuran como bajo mínimo.
+- [x] Los almacenes antiguos se ordenan inicialmente por nombre e ID; los nuevos conservan orden real de alta, y tanto el listado de Existencias como el de Movimientos entregan el primer almacén activo en el mismo orden.
+- [x] Compras exige `COMPRAS_LEER` y cuenta todos los documentos por fecha de compra, aunque aún no tengan ingreso; no recibe ni aplica filtro de almacén.
+- [x] Salidas exige `MOVIMIENTOS_LEER`, filtra por almacén origen cuando se indica y solo cuenta movimientos confirmados de tipo salida.
+- [x] Ambas series devuelven cada día del rango inclusive en `America/Lima`, con cero en días vacíos; los cinco recientes pertenecen al mismo rango y usan fecha/ID descendentes.
+- [x] Al faltar cualquiera de los tres permisos de lectura, solo se deniega su endpoint; los otros resúmenes siguen disponibles según sus permisos.
+- [x] Pasan `npm test` y `npm run build` en `api-tienda`.
 
 ## Decisions
 
@@ -73,12 +73,12 @@
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| Generar combinaciones variante–almacén para saldos ausentes es costoso. | Agregar y limitar alertas en base de datos; medir consultas con un volumen representativo. |
-| Compras globales y salidas por almacén parecen series del mismo alcance. | Identificar el alcance en cada respuesta y rotular explícitamente ambos en SPEC 17. |
-| Un almacén antiguo pudo crearse antes que otro aunque su nombre ordene después. | Documentar el backfill alfabético; nunca presentarlo como fecha histórica. |
-| Una operación alrededor de medianoche cae en otro día UTC. | Agrupar movimientos en `America/Lima` y probar los límites de fecha. |
+| Risk                                                                            | Mitigation                                                                                 |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Generar combinaciones variante–almacén para saldos ausentes es costoso.         | Agregar y limitar alertas en base de datos; medir consultas con un volumen representativo. |
+| Compras globales y salidas por almacén parecen series del mismo alcance.        | Identificar el alcance en cada respuesta y rotular explícitamente ambos en SPEC 17.        |
+| Un almacén antiguo pudo crearse antes que otro aunque su nombre ordene después. | Documentar el backfill alfabético; nunca presentarlo como fecha histórica.                 |
+| Una operación alrededor de medianoche cae en otro día UTC.                      | Agrupar movimientos en `America/Lima` y probar los límites de fecha.                       |
 
 ## What is **not** in this spec
 

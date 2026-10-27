@@ -1,4 +1,6 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import type {
   ExistenciaItem,
   FiltroExistencias,
@@ -8,6 +10,7 @@ import { Pagination } from '../../../shared/components/pagination/pagination';
 import { formatearSoles } from '../../../shared/formatters/decimal';
 import { useAlmacenesExistencias, useExistencias } from '../../actions/use-existencias-action';
 import { ExistenciaUnidad } from './components/existencia-unidad';
+import { ExistenciaMinimo } from './components/existencia-minimo';
 import { decimalCompacto } from './existencia-unidades.model';
 
 /** Redondea a centavos sin pasar por aritmética binaria. */
@@ -21,16 +24,19 @@ export function promedio(valor: string | null): string {
 
 @Component({
   selector: 'app-existencias-page',
-  imports: [EmptyState, Pagination, ExistenciaUnidad],
+  imports: [EmptyState, Pagination, ExistenciaUnidad, ExistenciaMinimo],
   templateUrl: './existencias-page.html',
   host: { class: 'block min-w-0' },
 })
 export default class ExistenciasPage {
-  readonly almacenId = signal<string | null>(null);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  readonly params = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
+  readonly almacenId = computed(() => this.params().get('almacenId') || null);
   readonly page = signal(1);
   readonly pageSize = signal(20);
-  readonly q = signal('');
-  readonly searchDraft = signal('');
+  readonly q = computed(() => this.params().get('q') ?? '');
+  readonly searchDraft = signal(this.route.snapshot.queryParamMap.get('q') ?? '');
   readonly disponibilidad = signal<FiltroExistencias['disponibilidad']>('todas');
   readonly unidadesElegidas = signal<Record<string, string>>({});
   readonly filtro = computed<FiltroExistencias | null>(() => {
@@ -61,6 +67,10 @@ export default class ExistenciasPage {
   readonly promedio = promedio;
   readonly decimalCompacto = decimalCompacto;
 
+  constructor() {
+    effect(() => this.searchDraft.set(this.q()));
+  }
+
   unidadElegida(fila: ExistenciaItem): string | null {
     return this.unidadesElegidas()[`${fila.variante.id}:${fila.almacen.id}`] ?? null;
   }
@@ -77,13 +87,13 @@ export default class ExistenciasPage {
   }
 
   elegirAlmacen(id: string): void {
-    this.almacenId.set(id || null);
+    void this.router.navigate([], { relativeTo: this.route, queryParams: { almacenId: id || null }, queryParamsHandling: 'merge' });
     this.page.set(1);
   }
 
   buscar(event: Event): void {
     event.preventDefault();
-    this.q.set(this.searchDraft().trim());
+    void this.router.navigate([], { relativeTo: this.route, queryParams: { q: this.searchDraft().trim() || null }, queryParamsHandling: 'merge' });
     this.page.set(1);
   }
 
@@ -95,7 +105,7 @@ export default class ExistenciasPage {
 
   limpiarFiltros(): void {
     this.searchDraft.set('');
-    this.q.set('');
+    void this.router.navigate([], { relativeTo: this.route, queryParams: { q: null }, queryParamsHandling: 'merge' });
     this.disponibilidad.set('todas');
     this.page.set(1);
   }

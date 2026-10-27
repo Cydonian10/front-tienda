@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import { ExistenciaApi } from '../../../api/inventario/existencia-api';
 import ExistenciasPage, { promedio, soles } from './existencias-page';
@@ -22,6 +23,7 @@ describe('ExistenciasPage', () => {
     TestBed.configureTestingModule({
       providers: [
         provideTanStackQuery(client),
+        provideRouter([]),
         { provide: ExistenciaApi, useValue: { listarAlmacenes, listar } },
       ],
     });
@@ -49,6 +51,7 @@ describe('ExistenciasPage', () => {
 
     select.value = 'a1';
     select.dispatchEvent(new Event('change'));
+    await vi.waitFor(() => expect(fixture.componentInstance.almacenId()).toBe('a1'));
     fixture.detectChanges();
     await vi.waitFor(() =>
       expect(listar).toHaveBeenCalledWith(expect.objectContaining({ almacenId: 'a1', page: 1 })),
@@ -87,6 +90,27 @@ describe('ExistenciasPage', () => {
     expect(listar).not.toHaveBeenCalled();
   });
 
+  it('restaura almacén y SKU del enlace y los mantiene en la URL al cambiar filtros', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/?almacenId=a1&q=TOR-M8');
+    const fixture = TestBed.createComponent(ExistenciasPage);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.almacenId()).toBe('a1');
+    expect(fixture.componentInstance.q()).toBe('TOR-M8');
+    expect(fixture.componentInstance.searchDraft()).toBe('TOR-M8');
+    await vi.waitFor(() => expect(listar).toHaveBeenCalledWith(expect.objectContaining({ almacenId: 'a1', q: 'TOR-M8' })));
+    fixture.componentInstance.elegirAlmacen('todos');
+    await vi.waitFor(() => expect(router.url).toContain('almacenId=todos'));
+    expect(router.url).toContain('q=TOR-M8');
+    fixture.componentInstance.searchDraft.set('CLAVO');
+    fixture.componentInstance.buscar(new Event('submit'));
+    await vi.waitFor(() => expect(router.url).toContain('q=CLAVO'));
+    expect(router.url).toContain('almacenId=todos');
+    fixture.componentInstance.limpiarFiltros();
+    await vi.waitFor(() => expect(router.url).not.toContain('q='));
+    expect(router.url).toContain('almacenId=todos');
+  });
+
   it('formatea PEN a dos decimales sin convertir cadenas monetarias a number', () => {
     expect(soles('123456789012345678.125000')).toContain('123,456,789,012,345,678.13');
     expect(soles('0.000000')).toBe('S/ 0.00');
@@ -102,11 +126,12 @@ describe('ExistenciasPage', () => {
     await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()?.length).toBe(1));
     const page = fixture.componentInstance;
     page.elegirAlmacen('a1');
+    await vi.waitFor(() => expect(page.almacenId()).toBe('a1'));
     page.page.set(3);
     page.searchDraft.set('Tornillo');
     page.buscar(new Event('submit'));
     expect(page.page()).toBe(1);
-    expect(page.filtro()?.q).toBe('Tornillo');
+    await vi.waitFor(() => expect(page.filtro()?.q).toBe('Tornillo'));
 
     page.page.set(2);
     page.elegirDisponibilidad('sin_stock');
@@ -127,11 +152,11 @@ describe('ExistenciasPage', () => {
     expect(fixture.nativeElement.textContent).toContain('No hay resultados para estos filtros');
 
     page.limpiarFiltros();
-    expect(page.filtro()).toMatchObject({
+    await vi.waitFor(() => expect(page.filtro()).toMatchObject({
       q: '',
       disponibilidad: 'todas',
       page: 1,
-    });
+    }));
   });
 
   it('identifica variantes inactivas con saldo y muestra el valor del almacén, no la suma de filas', async () => {
@@ -350,6 +375,7 @@ describe('ExistenciasPage', () => {
     fixture.detectChanges();
     await vi.waitFor(() => expect(fixture.componentInstance.almacenes.data()?.length).toBe(1));
     fixture.componentInstance.elegirAlmacen('a1');
+    await vi.waitFor(() => expect(listar).toHaveBeenCalledOnce());
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Cargando existencias');
     expect(fixture.nativeElement.querySelector('#filtros-existencias-title')).not.toBeNull();

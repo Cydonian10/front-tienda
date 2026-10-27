@@ -157,7 +157,7 @@
                   <th scope="col" class="pl-6">Producto / variante</th>
                   <th scope="col">Marca</th>
                   <th scope="col">Almacén</th>
-                  <th scope="col" class="w-1/4 text-right">Stock base</th>
+                  <th scope="col" class="w-1/4 text-right">Stock base / mínimo</th>
                   <th scope="col" class="text-right">Costo promedio / base</th>
                   <th scope="col" class="text-right">Valor a costo</th>
                   <th scope="col" class="pr-6 text-right">Precio de venta</th>
@@ -199,6 +199,7 @@
                         [unidadId]="unidadElegida(fila)"
                         (unidadChange)="elegirUnidad(fila, $event)"
                       />
+                      <app-existencia-minimo [fila]="fila" context="escritorio" />
                     </td>
                     <td class="text-right tabular-nums whitespace-nowrap">
                       {{ promedio(fila.costoPromedioBase) }}
@@ -261,6 +262,7 @@
                         [unidadId]="unidadElegida(fila)"
                         (unidadChange)="elegirUnidad(fila, $event)"
                       />
+                      <app-existencia-minimo [fila]="fila" context="movil" />
                     </dd>
                   </div>
                   <div class="min-w-0">

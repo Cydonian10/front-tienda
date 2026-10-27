@@ -1,0 +1,125 @@
+<div class="space-y-6">
+  <header class="space-y-2">
+    <h1 class="text-2xl font-semibold tracking-tight">Resumen de inventario</h1>
+    <p class="text-base-content/70">Reposición y actividad reciente para decidir qué atender hoy.</p>
+  </header>
+
+  @if (puedeElegirAlmacen()) {
+    <section class="card card-border bg-base-200" aria-label="Almacén de referencia">
+      <div class="card-body gap-3 sm:flex-row sm:items-end">
+        <div class="min-w-0 flex-1">
+          <label class="mb-2 block font-semibold" for="resumen-almacen">Almacén para existencias y salidas</label>
+          @if (almacenesError()) {
+            <div role="alert" class="alert alert-error alert-soft">
+              <span>No se pudieron cargar los almacenes.</span>
+              <button type="button" class="btn btn-sm" (click)="reintentarAlmacenes()">Reintentar almacenes</button>
+            </div>
+          } @else if (almacenesPendientes()) {
+            <p role="status">Cargando almacenes…</p>
+          } @else if (!almacenes()?.length) {
+            <p>No hay almacenes activos. Existencias y salidas no están disponibles.</p>
+          } @else {
+            <select id="resumen-almacen" class="select w-full max-w-sm" [value]="almacenId() ?? ''" (change)="cambiarAlmacen($any($event.target).value)">
+              @for (almacen of almacenes(); track almacen.id) {
+                <option [value]="almacen.id">{{ almacen.nombre }}</option>
+              }
+            </select>
+          }
+        </div>
+        @if (access.existencias()) {
+          <a class="btn btn-ghost" routerLink="../existencias" [queryParams]="{ almacenId: almacenId() }">Ver existencias</a>
+        }
+      </div>
+    </section>
+  }
+
+  @if (access.compras() || access.movimientos()) {
+    <section class="card card-border bg-base-200" aria-label="Período de actividad">
+      <div class="card-body gap-3">
+        <h2 class="card-title">Actividad del período</h2>
+        <p class="text-sm text-base-content/70">Fechas de calendario en America/Lima. Las compras incluyen todos los almacenes.</p>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="grid gap-1 font-semibold">Desde
+            <input class="input w-full" type="date" [value]="desde()" (change)="cambiarFecha('desde', $any($event.target).value)" />
+          </label>
+          <label class="grid gap-1 font-semibold">Hasta
+            <input class="input w-full" type="date" [value]="hasta()" (change)="cambiarFecha('hasta', $any($event.target).value)" />
+          </label>
+        </div>
+        @if (fechaError()) { <p role="alert" class="text-error">{{ fechaError() }}</p> }
+      </div>
+    </section>
+  }
+
+  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    @if (access.existencias()) {
+      <section class="card card-border bg-base-200 min-w-0">
+        <div class="card-body gap-2">
+          <h2 class="text-sm font-semibold">Bajo mínimo · {{ almacenNombre() }}</h2>
+          @if (almacenesError()) { <p>Esperando almacenes. Reintenta el selector.</p> }
+          @else if (almacenesPendientes()) { <p role="status">Cargando almacenes…</p> }
+          @else if (!almacenId()) { <p>Sin almacenes activos.</p> }
+          @else if (stock.isPending()) { <p role="status">Cargando existencias…</p> }
+          @else if (stock.isError()) { <div role="alert"><p>No se pudieron cargar las existencias.</p><button type="button" class="btn btn-sm" (click)="stock.refetch()">Reintentar existencias</button></div> }
+          @else { <p class="text-3xl font-semibold tabular-nums">{{ stock.data()?.bajoMinimo }}</p> }
+        </div>
+      </section>
+      <section class="card card-border bg-base-200 min-w-0">
+        <div class="card-body gap-2">
+          <h2 class="text-sm font-semibold">Agotadas · {{ almacenNombre() }}</h2>
+          @if (!almacenId()) { <p>Sin almacén disponible.</p> }
+          @else if (stock.isPending()) { <p role="status">Cargando existencias…</p> }
+          @else if (stock.isError()) { <p>Las existencias no están disponibles. Reintenta en la tarjeta anterior.</p> }
+          @else { <p class="text-3xl font-semibold tabular-nums">{{ stock.data()?.agotadas }}</p> }
+        </div>
+      </section>
+    }
+    @if (access.compras()) {
+      <section class="card card-border bg-base-200 min-w-0">
+        <div class="card-body gap-2">
+          <h2 class="text-sm font-semibold">Compras · Todos los almacenes</h2>
+          @if (fechaError()) { <p>Corrige el rango para consultar compras.</p> }
+          @else if (compras.isPending()) { <p role="status">Cargando compras…</p> }
+          @else if (compras.isError()) { <div role="alert"><p>No se pudieron cargar las compras.</p><button type="button" class="btn btn-sm" (click)="compras.refetch()">Reintentar compras</button></div> }
+          @else { <p class="text-3xl font-semibold tabular-nums">{{ compras.data()?.total }}</p> }
+        </div>
+      </section>
+    }
+    @if (access.movimientos()) {
+      <section class="card card-border bg-base-200 min-w-0">
+        <div class="card-body gap-2">
+          <h2 class="text-sm font-semibold">Salidas · {{ almacenNombre() }}</h2>
+          @if (fechaError()) { <p>Corrige el rango para consultar salidas.</p> }
+          @else if (almacenesError()) { <p>Esperando almacenes. Reintenta el selector.</p> }
+          @else if (!almacenId()) { <p>Sin almacenes activos.</p> }
+          @else if (salidas.isPending()) { <p role="status">Cargando salidas…</p> }
+          @else if (salidas.isError()) { <div role="alert"><p>No se pudieron cargar las salidas.</p><button type="button" class="btn btn-sm" (click)="salidas.refetch()">Reintentar salidas</button></div> }
+          @else { <p class="text-3xl font-semibold tabular-nums">{{ salidas.data()?.total }}</p> }
+        </div>
+      </section>
+    }
+  </div>
+
+  @if (access.existencias() && almacenId() && stock.isSuccess()) {
+    <section class="card card-border bg-base-200">
+      <div class="card-body">
+        <h2 class="card-title">Alertas de reposición</h2>
+        @if (!stock.data()?.alertas?.length) {
+          <p>No hay variantes agotadas o bajo mínimo en este almacén.</p>
+        } @else {
+          <ul class="divide-y divide-base-300">
+            @for (alerta of stock.data()?.alertas; track alerta.varianteId + ':' + alerta.almacenId) {
+              <li class="flex min-w-0 flex-wrap items-center justify-between gap-3 py-3">
+                <div class="min-w-0">
+                  <p class="font-semibold">{{ alerta.productoNombre }} · {{ alerta.sku }}</p>
+                  <p class="text-sm text-base-content/70">{{ alerta.almacenNombre }} · Saldo {{ alerta.cantidadBase }} {{ alerta.unidadBaseSimbolo }} · Mínimo {{ alerta.minimoBase ?? 'Sin mínimo configurado' }}</p>
+                </div>
+                <a class="btn btn-ghost btn-sm" routerLink="../existencias" [queryParams]="{ almacenId: alerta.almacenId, q: alerta.sku }">Ver existencia</a>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+  }
+</div>

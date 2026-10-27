@@ -6,7 +6,7 @@ import { AuthorizationService } from '../services/authorization.service';
 import { AuthProfileService } from '../services/auth-profile.service';
 import { AuthSessionService } from '../services/auth-session.service';
 
-export function permissionGuard(systemCode: string, permissionCode: PermissionCode): CanActivateFn {
+export function permissionGuard(systemCode: string, permissionCode: PermissionCode | readonly PermissionCode[]): CanActivateFn {
   return async (_, state) => {
     const router = inject(Router);
     const session = inject(AuthSessionService);
@@ -26,7 +26,9 @@ export function permissionGuard(systemCode: string, permissionCode: PermissionCo
       return login();
     }
 
-    return authorization.hasPermission(systemCode, permissionCode)
+    return (Array.isArray(permissionCode) ? permissionCode : [permissionCode]).some((code) =>
+      authorization.hasPermission(systemCode, code as PermissionCode),
+    )
       ? true
       : router.createUrlTree(['/admin']);
   };

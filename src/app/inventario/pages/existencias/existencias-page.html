@@ -199,7 +199,7 @@
                         [unidadId]="unidadElegida(fila)"
                         (unidadChange)="elegirUnidad(fila, $event)"
                       />
-                      <app-existencia-minimo [fila]="fila" context="escritorio" />
+                      <app-existencia-minimo [fila]="fila" (editRequested)="editingMinimum.set($event)" />
                     </td>
                     <td class="text-right tabular-nums whitespace-nowrap">
                       {{ promedio(fila.costoPromedioBase) }}
@@ -262,7 +262,7 @@
                         [unidadId]="unidadElegida(fila)"
                         (unidadChange)="elegirUnidad(fila, $event)"
                       />
-                      <app-existencia-minimo [fila]="fila" context="movil" />
+                      <app-existencia-minimo [fila]="fila" (editRequested)="editingMinimum.set($event)" />
                     </dd>
                   </div>
                   <div class="min-w-0">
@@ -332,5 +332,8 @@
     <div role="status" class="alert alert-soft">
       Elige un almacén o «Todos los almacenes» para consultar existencias.
     </div>
+  }
+  @if (editingMinimum(); as item) {
+    <app-editar-minimo-dialog [fila]="item" (closed)="editingMinimum.set(null)" />
   }
 </section>

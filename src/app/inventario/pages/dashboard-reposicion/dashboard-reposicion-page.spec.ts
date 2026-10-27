@@ -28,6 +28,7 @@ describe('dashboard de reposición', () => {
   const almacenes = [{ id: 'a1', nombre: 'Principal' }, { id: 'a2', nombre: 'Secundario' }];
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
     listarExistencias.mockResolvedValue(almacenes);
     listarMovimientos.mockResolvedValue(almacenes);
     stock.mockResolvedValue({ bajoMinimo: 2, agotadas: 1, alertas: [] });
@@ -49,7 +50,7 @@ describe('dashboard de reposición', () => {
       { provide: AuthProfileService, useValue: { load: vi.fn().mockResolvedValue(undefined), clear: vi.fn() } },
     ] });
   });
-  afterEach(() => TestBed.resetTestingModule());
+  afterEach(() => { vi.restoreAllMocks(); TestBed.resetTestingModule(); });
 
   function grant(...codes: string[]) {
     TestBed.inject(AuthStore).setProfile({ isSuperAdmin: false, permissions: codes.map((code) => ({ code, systemCode: 'INVENTARIO' })) } as never);
@@ -144,6 +145,29 @@ describe('dashboard de reposición', () => {
     expect(element.querySelectorAll('tbody tr')).toHaveLength(30);
     expect(element.textContent).toContain('Todos los almacenes');
     expect(element.querySelectorAll('a[href*="historial"]')).toHaveLength(0);
+    expect(element.querySelector('app-actividad-calendario')).not.toBeNull();
+    expect(element.querySelector('app-actividad-chart')).not.toBeNull();
+  });
+
+  it('muestra conteos en el calendario sin modificar el período al elegir un día', async () => {
+    grant(PERMISSION_CODES.COMPRAS_READ);
+    compras.mockResolvedValue({ total: 2, porDia: [{ fecha: '2026-09-30', cantidad: 1 }, { fecha: '2026-10-01', cantidad: 1 }], recientes: [] });
+    const harness = await RouterTestingHarness.create('/admin/inventario?desde=2026-09-29&hasta=2026-10-02');
+    const page = await harness.navigateByUrl(TestBed.inject(Router).url, DashboardReposicionPage);
+    await vi.waitFor(() => expect(page.compras.isSuccess()).toBe(true));
+    harness.detectChanges();
+    const calendar = harness.routeNativeElement!.querySelector('app-actividad-calendario')!;
+    expect(calendar.textContent).toContain('Octubre de 2026');
+    expect(calendar.querySelectorAll('button[aria-pressed="true"]')).toHaveLength(1);
+    (calendar.querySelector('button[aria-label="Mes anterior"]') as HTMLButtonElement).click();
+    harness.detectChanges();
+    expect(calendar.textContent).toContain('Setiembre de 2026');
+    (calendar.querySelector('button[aria-label^="2026-09-30"]') as HTMLButtonElement).click();
+    harness.detectChanges();
+    expect(calendar.textContent).toContain('Compras');
+    expect(calendar.querySelector('dd')?.textContent).toBe('1');
+    expect(calendar.querySelector('button[aria-label^="2026-09-30"]')?.getAttribute('aria-pressed')).toBe('true');
+    expect(page.periodo()).toEqual({ desde: '2026-09-29', hasta: '2026-10-02' });
   });
 
   it('enlaza hasta cinco compras y cinco salidas a sus detalles autorizados', async () => {

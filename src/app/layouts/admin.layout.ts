@@ -5,7 +5,6 @@ import {
   NavigationEnd,
   Router,
   RouterLink,
-  RouterLinkActive,
   RouterOutlet,
 } from '@angular/router';
 import { filter } from 'rxjs';
@@ -21,7 +20,7 @@ import { SystemMenuGroup } from '../system-portal/models/system-menu.model';
 import { SystemMenuService } from '../system-portal/services/control-access/system-menu.service';
 
 @Component({
-  imports: [RouterOutlet, AdminHeader, AdminFooterPage, RouterLink, RouterLinkActive, Icon],
+  imports: [RouterOutlet, AdminHeader, AdminFooterPage, RouterLink, Icon],
   selector: 'app-admin',
   template: `
     <div
@@ -118,9 +117,8 @@ import { SystemMenuService } from '../system-portal/services/control-access/syst
                   <li>
                     <a
                       [routerLink]="item.url"
-                      routerLinkActive="menu-active"
-                      ariaCurrentWhenActive="page"
-                      [routerLinkActiveOptions]="{ exact: false }"
+                      [class.menu-active]="systemMenu.isActiveItem(item)"
+                      [attr.aria-current]="systemMenu.isActiveItem(item) ? 'page' : null"
                       class="flex min-h-12 items-center gap-3 rounded-field px-3 text-sm font-medium"
                       (click)="closeNavigation()"
                     >
@@ -194,7 +192,7 @@ export class AdminLayout {
   private readonly route = inject(ActivatedRoute);
   private readonly session = inject(AuthSessionService);
   private readonly profile = inject(AuthProfileService);
-  private readonly systemMenu = inject(SystemMenuService);
+  readonly systemMenu = inject(SystemMenuService);
   private readonly queryClient = inject(QueryClient);
   private readonly confirmation = inject(ConfirmDialogService);
   private readonly header = viewChild(AdminHeader);

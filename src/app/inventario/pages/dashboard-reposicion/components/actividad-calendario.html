@@ -1,0 +1,37 @@
+<div class="flex items-center justify-between gap-2">
+  <h3 class="text-sm font-semibold">{{ currentMonthLabel() }}</h3>
+  <div class="flex gap-1">
+    <button type="button" class="btn btn-ghost btn-square btn-sm min-h-11 min-w-11" aria-label="Mes anterior" [disabled]="monthIndex() === 0" (click)="moveMonth(-1)"><app-icon name="chevron-left" /></button>
+    <button type="button" class="btn btn-ghost btn-square btn-sm min-h-11 min-w-11" aria-label="Mes siguiente" [disabled]="monthIndex() === months().length - 1" (click)="moveMonth(1)"><app-icon name="chevron-right" /></button>
+  </div>
+</div>
+<div class="mt-3 grid grid-cols-7 gap-1 text-center text-xs text-base-content/70" aria-hidden="true">
+  @for (weekday of ['L', 'M', 'X', 'J', 'V', 'S', 'D']; track $index) { <span>{{ weekday }}</span> }
+</div>
+<div class="mt-1 grid grid-cols-7 gap-1" role="group" [attr.aria-label]="'Actividad de ' + currentMonthLabel()">
+  @for (day of cells(); track $index) {
+    @if (day) {
+      <button type="button" class="flex min-h-11 flex-col items-center justify-center rounded-field text-xs tabular-nums hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-primary"
+        [class.bg-base-200]="activeDay()?.fecha === day.fecha"
+        [class.font-bold]="activeDay()?.fecha === day.fecha"
+        [attr.aria-label]="day.fecha + ': ' + (day.compras === null ? 'compras no disponibles' : day.compras + ' compras') + ', ' + (day.salidas === null ? 'salidas no disponibles' : day.salidas + ' salidas')"
+        [attr.aria-pressed]="activeDay()?.fecha === day.fecha"
+        (click)="selectedDate.set(day.fecha)">
+        <span>{{ +day.fecha.slice(-2) }}</span>
+        <span class="flex h-1.5 gap-1" aria-hidden="true">
+          @if (day.compras) { <span class="size-1.5 rounded-full bg-primary"></span> }
+          @if (day.salidas) { <span class="size-1.5 rounded-full bg-secondary"></span> }
+        </span>
+      </button>
+    } @else { <span aria-hidden="true"></span> }
+  }
+</div>
+@if (activeDay(); as day) {
+  <div class="mt-4 border-t border-base-300 pt-3">
+    <p class="text-sm font-semibold">{{ activeDayLabel() }}</p>
+    <dl class="mt-2 grid grid-cols-2 gap-2 text-sm">
+      @if (day.compras !== null) { <div><dt class="text-base-content/70">Compras</dt><dd class="font-semibold tabular-nums text-primary">{{ day.compras }}</dd></div> }
+      @if (day.salidas !== null) { <div><dt class="text-base-content/70">Salidas</dt><dd class="font-semibold tabular-nums text-secondary">{{ day.salidas }}</dd></div> }
+    </dl>
+  </div>
+}

@@ -179,12 +179,16 @@ export class SystemMenuService {
   }
 
   isActiveItem(item: SystemMenuItem): boolean {
-    return containsTree(this.router.parseUrl(this.router.url), this.router.parseUrl(item.url), {
+    const currentUrl = this.router.parseUrl(this.router.url);
+    const options = {
       paths: item.url === '/admin/inventario' ? 'exact' : 'subset',
       queryParams: 'ignored',
       matrixParams: 'ignored',
       fragment: 'ignored',
-    });
+    } as const;
+    return containsTree(currentUrl, this.router.parseUrl(item.url), options) ||
+      (item.url === '/admin/inventario' &&
+        containsTree(currentUrl, this.router.parseUrl('/admin/inventario/resumen'), options));
   }
 
   isActiveGroup(group: SystemMenuGroup): boolean {

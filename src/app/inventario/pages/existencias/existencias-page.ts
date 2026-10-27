@@ -11,6 +11,7 @@ import { formatearSoles } from '../../../shared/formatters/decimal';
 import { useAlmacenesExistencias, useExistencias } from '../../actions/use-existencias-action';
 import { ExistenciaUnidad } from './components/existencia-unidad';
 import { ExistenciaMinimo } from './components/existencia-minimo';
+import { EditarMinimoDialog } from './components/editar-minimo-dialog';
 import { decimalCompacto } from './existencia-unidades.model';
 
 /** Redondea a centavos sin pasar por aritmética binaria. */
@@ -24,7 +25,7 @@ export function promedio(valor: string | null): string {
 
 @Component({
   selector: 'app-existencias-page',
-  imports: [EmptyState, Pagination, ExistenciaUnidad, ExistenciaMinimo],
+  imports: [EmptyState, Pagination, ExistenciaUnidad, ExistenciaMinimo, EditarMinimoDialog],
   templateUrl: './existencias-page.html',
   host: { class: 'block min-w-0' },
 })
@@ -39,6 +40,7 @@ export default class ExistenciasPage {
   readonly searchDraft = signal(this.route.snapshot.queryParamMap.get('q') ?? '');
   readonly disponibilidad = signal<FiltroExistencias['disponibilidad']>('todas');
   readonly unidadesElegidas = signal<Record<string, string>>({});
+  readonly editingMinimum = signal<ExistenciaItem | null>(null);
   readonly filtro = computed<FiltroExistencias | null>(() => {
     const almacenId = this.almacenId();
     return almacenId

@@ -4,9 +4,10 @@
     <p class="text-base-content/70">Reposición y actividad reciente para decidir qué atender hoy.</p>
   </header>
 
-  @if (puedeElegirAlmacen()) {
-    <section class="card card-border bg-base-100" aria-label="Almacén de referencia">
-      <div class="card-body gap-3 sm:flex-row sm:items-end">
+  @if (puedeElegirAlmacen() || access.compras() || access.movimientos()) {
+    <section class="card card-border bg-base-100" aria-label="Filtros del resumen">
+      <div class="card-body grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] lg:items-end">
+      @if (puedeElegirAlmacen()) {
         <div class="min-w-0 flex-1">
           <label class="mb-2 block font-semibold" for="resumen-almacen">Almacén para existencias y salidas</label>
           @if (almacenesError()) {
@@ -19,34 +20,31 @@
           } @else if (!almacenes()?.length) {
             <p>No hay almacenes activos. Existencias y salidas no están disponibles.</p>
           } @else {
-            <select id="resumen-almacen" class="select w-full max-w-sm" [value]="almacenId() ?? ''" (change)="cambiarAlmacen($any($event.target).value)">
+            <select id="resumen-almacen" class="select min-h-11 w-full" [value]="almacenId() ?? ''" (change)="cambiarAlmacen($any($event.target).value)">
               @for (almacen of almacenes(); track almacen.id) {
                 <option [value]="almacen.id">{{ almacen.nombre }}</option>
               }
             </select>
           }
+          @if (access.existencias()) {
+            <a class="btn btn-ghost mt-2 min-h-11" routerLink="../existencias" [queryParams]="{ almacenId: almacenId() }">Ver existencias</a>
+          }
         </div>
-        @if (access.existencias()) {
-          <a class="btn btn-ghost" routerLink="../existencias" [queryParams]="{ almacenId: almacenId() }">Ver existencias</a>
-        }
-      </div>
-    </section>
-  }
-
-  @if (access.compras() || access.movimientos()) {
-    <section class="card card-border bg-base-100" aria-label="Período de actividad">
-      <div class="card-body gap-3">
-        <h2 class="card-title">Actividad del período</h2>
-        <p class="text-sm text-base-content/70">Fechas de calendario en America/Lima. Las compras incluyen todos los almacenes.</p>
-        <div class="grid gap-3 sm:grid-cols-2">
-          <label class="grid gap-1 font-semibold">Desde
-            <input class="input w-full" type="date" [value]="desde()" (change)="cambiarFecha('desde', $any($event.target).value)" />
-          </label>
-          <label class="grid gap-1 font-semibold">Hasta
-            <input class="input w-full" type="date" [value]="hasta()" (change)="cambiarFecha('hasta', $any($event.target).value)" />
-          </label>
+      }
+      @if (access.compras() || access.movimientos()) {
+        <div class="min-w-0">
+          <p class="mb-2 font-semibold">Período de actividad <span class="text-xs font-medium text-base-content/70">· Hora de Lima</span></p>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <label class="grid gap-1 text-sm font-semibold">Desde
+              <input class="input min-h-11 w-full min-w-0" type="date" [value]="desde()" (change)="cambiarFecha('desde', $any($event.target).value)" />
+            </label>
+            <label class="grid gap-1 text-sm font-semibold">Hasta
+              <input class="input min-h-11 w-full min-w-0" type="date" [value]="hasta()" (change)="cambiarFecha('hasta', $any($event.target).value)" />
+            </label>
+          </div>
+          @if (fechaError()) { <p role="alert" class="mt-2 text-sm text-error">{{ fechaError() }}</p> }
         </div>
-        @if (fechaError()) { <p role="alert" class="text-error">{{ fechaError() }}</p> }
+      }
       </div>
     </section>
   }
@@ -125,31 +123,34 @@
 
   @if (periodo() && (access.compras() || access.movimientos()) && mostrarActividad()) {
     <section class="card card-border bg-base-100 min-w-0" aria-labelledby="actividad-diaria">
-      <div class="card-body min-w-0">
-        <h2 id="actividad-diaria" class="card-title">Actividad diaria</h2>
-        <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-          @if (access.compras() && compras.isSuccess()) { <p><span class="inline-block size-3 rounded-sm bg-primary" aria-hidden="true"></span> Compras · Todos los almacenes</p> }
-          @if (access.movimientos() && salidas.isSuccess()) { <p><span class="inline-block size-3 rounded-sm bg-secondary" aria-hidden="true"></span> Salidas · {{ almacenNombre() }}</p> }
+      <div class="card-body min-w-0 gap-5">
+        <div>
+          <h2 id="actividad-diaria" class="card-title">Actividad diaria</h2>
+          <p class="mt-1 text-sm text-base-content/70">
+            @if (access.compras() && compras.isSuccess()) { Compras de todos los almacenes. }
+            @if (access.movimientos() && salidas.isSuccess()) { Salidas de {{ almacenNombre() }}. }
+            Hora de Lima.
+          </p>
         </div>
-        <p class="text-sm text-base-content/70">Conteos por día en America/Lima. Consulta los valores exactos en la tabla.</p>
-        <div class="w-full overflow-x-auto" aria-hidden="true">
-          <div class="flex h-36 min-w-max items-end gap-0.5 border-b border-base-300 py-1 sm:gap-1">
-            @for (dia of serieDiaria(); track dia.fecha) {
-              <div class="flex h-full w-2 shrink-0 items-end gap-px sm:w-4 xl:w-6" [title]="dia.fecha">
-                @if (dia.compras !== null) {
-                  <div class="w-1/2 bg-primary" [style.height.%]="dia.compras / maximoDiario() * 100"></div>
-                }
-                @if (dia.salidas !== null) {
-                  <div class="w-1/2 bg-secondary" [style.height.%]="dia.salidas / maximoDiario() * 100"></div>
-                }
-              </div>
+        <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)]">
+          <div class="min-w-0 space-y-4">
+            <div class="flex flex-wrap gap-x-6 gap-y-1 text-xs sm:text-sm">
+              @if (access.compras() && compras.isSuccess()) { <p><span class="mr-1 inline-block size-2.5 rounded-sm bg-primary" aria-hidden="true"></span> Compras · Todos los almacenes</p> }
+              @if (access.movimientos() && salidas.isSuccess()) { <p><span class="mr-1 inline-block size-2.5 rounded-sm bg-secondary" aria-hidden="true"></span> Salidas · {{ almacenNombre() }}</p> }
+            </div>
+            <p class="text-xs text-base-content/70">Gráfico: últimos {{ serieReciente().length }} días del período. El calendario y la tabla muestran todas las fechas.</p>
+            @if (hayActividadReciente()) {
+              <app-actividad-chart [days]="serieReciente()" [warehouseName]="almacenNombre()" />
+            } @else {
+              <div class="flex h-64 items-center justify-center rounded-box border border-dashed border-base-300 px-4 text-center text-sm text-base-content/70">Sin actividad registrada en los últimos {{ serieReciente().length }} días disponibles.</div>
             }
           </div>
+          <div class="min-w-0 border-t border-base-300 pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+            <h3 class="mb-3 font-semibold">Conteos por fecha</h3>
+            <app-actividad-calendario [days]="serieDiaria()" />
+          </div>
         </div>
-        <div class="flex justify-between gap-2 text-xs tabular-nums text-base-content/70" aria-hidden="true">
-          <span>{{ desde() }}</span><span>{{ hasta() }}</span>
-        </div>
-        <details class="mt-2">
+        <details class="border-t border-base-300 pt-4">
           <summary class="cursor-pointer font-semibold underline-offset-4 focus-visible:outline-2 focus-visible:outline-primary">Ver conteos por fecha</summary>
           <div class="mt-3 max-h-80 overflow-auto">
             <table class="table table-sm">

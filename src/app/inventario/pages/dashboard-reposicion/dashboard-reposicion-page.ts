@@ -10,6 +10,8 @@ import { usePermissions } from '../../../auth/services/use-permissions';
 import { existenciasAlmacenesQueryKey } from '../../actions/use-existencias-action';
 import { movimientosAlmacenesQueryKey } from '../../actions/use-movimientos-action';
 import { useResumenCompras, useResumenReposicion, useResumenSalidas } from '../../actions/use-dashboard-reposicion-action';
+import { ActividadCalendario } from './components/actividad-calendario';
+import { ActividadChart } from './components/actividad-chart';
 
 function fechaLima(offsetDays = 0): string {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -55,7 +57,7 @@ export function diasActividad(
 
 @Component({
   selector: 'app-dashboard-reposicion-page',
-  imports: [RouterLink],
+  imports: [RouterLink, ActividadCalendario, ActividadChart],
   templateUrl: './dashboard-reposicion-page.html',
   host: { class: 'block min-w-0' },
 })
@@ -121,7 +123,8 @@ export default class DashboardReposicionPage {
       this.access.movimientos() && this.almacenId() && this.salidas.isSuccess() ? this.salidas.data()!.porDia : null,
     );
   });
-  readonly maximoDiario = computed(() => Math.max(1, ...this.serieDiaria().flatMap((dia) => [dia.compras ?? 0, dia.salidas ?? 0])));
+  readonly serieReciente = computed(() => this.serieDiaria().slice(-30));
+  readonly hayActividadReciente = computed(() => this.serieReciente().some((dia) => (dia.compras ?? 0) > 0 || (dia.salidas ?? 0) > 0));
   readonly mostrarActividad = computed(() => (this.access.compras() && this.compras.isSuccess()) ||
     (this.access.movimientos() && !!this.almacenId() && this.salidas.isSuccess()));
 

@@ -1,0 +1,45 @@
+<catalogo-form-dialog [titleId]="inputId() + '-title'" [busy]="busy()" (closeRequested)="cerrar()">
+  <div class="space-y-6 p-5 sm:p-7">
+    <header class="space-y-2">
+      <h2 class="text-xl font-semibold tracking-tight" [id]="inputId() + '-title'">Configurar stock mínimo</h2>
+      <p class="text-sm text-base-content/70">Este producto aparecerá en Resumen cuando su stock llegue a este valor o baje de él.</p>
+    </header>
+
+    <div class="space-y-3 border-y border-base-300 py-4 text-sm">
+      <p class="font-semibold break-words">{{ fila().producto.nombre }} <span class="font-medium text-base-content/70">{{ fila().variante.sku }}</span></p>
+      <dl class="grid gap-3 sm:grid-cols-2">
+        <div><dt class="text-base-content/70">Almacén</dt><dd class="mt-1 font-medium break-words">{{ fila().almacen.nombre }}</dd></div>
+        <div><dt class="text-base-content/70">Stock actual</dt><dd class="mt-1 font-semibold tabular-nums">{{ decimalCompacto(fila().cantidadBase) }} {{ fila().producto.unidadBase.simbolo }}</dd></div>
+      </dl>
+    </div>
+
+    <form class="space-y-4" (submit)="guardar($event)" novalidate>
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold" [for]="inputId()">Mínimo en {{ fila().producto.unidadBase.nombre }} ({{ fila().producto.unidadBase.simbolo }})</label>
+        <input class="input h-11 w-full tabular-nums" [id]="inputId()" type="text" inputmode="decimal" autocomplete="off" [value]="draft()" [attr.aria-invalid]="error() ? 'true' : null" [attr.aria-describedby]="inputId() + '-hint'" [disabled]="busy()" (input)="draft.set($any($event.target).value); error.set('')" />
+        <p class="text-xs text-base-content/70" [id]="inputId() + '-hint'">Cantidad positiva en unidad base; hasta seis decimales.</p>
+        @if (error()) { <p role="alert" class="text-sm text-error">{{ error() }}</p> }
+      </div>
+      <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+        <button type="button" class="btn btn-ghost min-h-11" [disabled]="busy()" (click)="cerrar()">Cancelar</button>
+        <button type="submit" class="btn btn-primary min-h-11" [disabled]="busy()">{{ busy() ? 'Guardando…' : 'Guardar mínimo' }}</button>
+      </div>
+    </form>
+
+    @if (fila().minimoBase !== null) {
+      <div class="border-t border-base-300 pt-4">
+        @if (!confirming()) {
+          <button type="button" class="btn btn-ghost min-h-11 text-error" [disabled]="busy()" (click)="confirming.set(true)">Quitar mínimo</button>
+        } @else {
+          <div class="space-y-3" role="group" aria-label="Confirmar quitar mínimo">
+            <p class="text-sm">¿Quitar la alerta de {{ fila().variante.sku }} en {{ fila().almacen.nombre }}?</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="btn btn-error btn-outline min-h-11" [disabled]="busy()" (click)="quitar()">Sí, quitar mínimo</button>
+              <button type="button" class="btn btn-ghost min-h-11" [disabled]="busy()" (click)="confirming.set(false)">Conservar mínimo</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</catalogo-form-dialog>

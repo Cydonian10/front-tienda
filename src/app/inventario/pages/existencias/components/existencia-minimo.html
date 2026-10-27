@@ -1,32 +1,6 @@
-<div class="space-y-2 text-sm">
-  <p class="tabular-nums">Mínimo: <strong>{{ fila().minimoBase ?? 'Sin mínimo configurado' }}</strong> {{ fila().producto.unidadBase.simbolo }} base</p>
+<div class="space-y-1 text-sm">
+  <p class="tabular-nums">Mínimo: <strong>{{ fila().minimoBase === null ? 'Sin mínimo configurado' : decimalCompacto(fila().minimoBase!) }}</strong>@if (fila().minimoBase !== null) { {{ fila().producto.unidadBase.simbolo }} }</p>
   @if (access.edit()) {
-    @if (!editing()) {
-      <button type="button" class="btn btn-ghost btn-sm" (click)="abrir()" [attr.aria-label]="'Editar mínimo de ' + fila().variante.sku + ' en ' + fila().almacen.nombre">Editar mínimo</button>
-    } @else {
-      <form class="space-y-2" (submit)="guardar($event)" novalidate>
-        <label class="block font-semibold" [for]="inputId()">Mínimo en unidad base</label>
-        <input class="input input-sm w-full" [id]="inputId()" type="text" inputmode="decimal" autocomplete="off" [value]="draft()" [attr.aria-invalid]="error() ? 'true' : null" [disabled]="busy()" (input)="draft.set($any($event.target).value); error.set('')" />
-        <p class="text-xs text-base-content/70">Valor positivo, máximo seis decimales.</p>
-        @if (error()) { <p role="alert" class="text-error">{{ error() }}</p> }
-        @if (busy()) { <p role="status">Guardando mínimo…</p> }
-        <div class="flex flex-wrap gap-2">
-          <button type="submit" class="btn btn-primary btn-sm" [disabled]="busy()">Guardar</button>
-          <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="cerrar()">Cancelar</button>
-          @if (fila().minimoBase !== null && fila().minimoBase !== undefined) {
-            <button type="button" class="btn btn-error btn-outline btn-sm" [disabled]="busy()" (click)="confirming.set(true)">Quitar mínimo</button>
-          }
-        </div>
-        @if (confirming()) {
-          <div role="group" aria-label="Confirmar quitar mínimo" class="space-y-2 rounded-box border border-error p-2">
-            <p>¿Quitar el mínimo de {{ fila().variante.sku }} en {{ fila().almacen.nombre }}?</p>
-            <div class="flex flex-wrap gap-2">
-              <button type="button" class="btn btn-error btn-sm" [disabled]="busy()" (click)="quitar()">Sí, quitar mínimo</button>
-              <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="confirming.set(false)">Conservar mínimo</button>
-            </div>
-          </div>
-        }
-      </form>
-    }
+    <button type="button" class="btn btn-ghost btn-sm min-h-11" (click)="abrir()" [attr.aria-label]="'Editar mínimo de ' + fila().variante.sku + ' en ' + fila().almacen.nombre">Editar mínimo</button>
   }
 </div>

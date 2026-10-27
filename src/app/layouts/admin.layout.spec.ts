@@ -110,4 +110,31 @@ describe('AdminLayout navigation', () => {
     expect(sidebar().querySelector('a[href="/admin/access-control/usuarios"]')).toBeNull();
     expect(sidebar().querySelector('a[href="/admin/inventario/productos"]')).toBeTruthy();
   });
+
+  it('highlights Resumen only on the dashboard, including its legacy route', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: 'admin/inventario', component: AdminLayout, data: { systemCode: 'INVENTARIO' }, children: [
+          { path: '', component: TestPage },
+          { path: 'resumen', component: TestPage },
+          { path: 'compras', component: TestPage },
+        ] }]),
+        provideTanStackQuery(new QueryClient()),
+        { provide: AuthSessionService, useValue: {} },
+        { provide: AuthProfileService, useValue: {} },
+        { provide: ConfirmDialogService, useValue: {} },
+      ],
+    });
+    TestBed.inject(AuthStore).setProfile({ isSuperAdmin: true, permissions: [] } as never);
+    const harness = await RouterTestingHarness.create('/admin/inventario');
+    const link = (path: string) => harness.routeNativeElement!.querySelector(`nav a[href="${path}"]`);
+
+    expect(link('/admin/inventario')?.classList).toContain('menu-active');
+    await harness.navigateByUrl('/admin/inventario/compras');
+    expect(link('/admin/inventario')?.classList).not.toContain('menu-active');
+    expect(link('/admin/inventario/compras')?.classList).toContain('menu-active');
+    await harness.navigateByUrl('/admin/inventario/resumen');
+    expect(link('/admin/inventario')?.getAttribute('aria-current')).toBe('page');
+    expect(link('/admin/inventario/compras')?.classList).not.toContain('menu-active');
+  });
 });

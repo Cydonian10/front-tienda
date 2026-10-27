@@ -44,6 +44,16 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
     icon: 'package',
     menu: [
       {
+        label: 'Inicio',
+        icon: 'chart-line',
+        items: [{
+          label: 'Resumen',
+          url: '/admin/inventario',
+          icon: 'chart-line',
+          permission: [PERMISSION_CODES.EXISTENCIAS_READ, PERMISSION_CODES.COMPRAS_READ, PERMISSION_CODES.MOVIMIENTOS_READ],
+        }],
+      },
+      {
         label: 'Catálogo',
         icon: 'package',
         items: [
@@ -160,7 +170,9 @@ export class SystemMenuService {
       .map((group) => ({
         ...group,
         items: group.items.filter((item) =>
-          this.authorization.hasPermission(systemCode, item.permission),
+          (Array.isArray(item.permission) ? item.permission : [item.permission]).some((code) =>
+            this.authorization.hasPermission(systemCode, code as (typeof PERMISSION_CODES)[keyof typeof PERMISSION_CODES]),
+          ),
         ),
       }))
       .filter((group) => group.items.length > 0);
@@ -168,7 +180,7 @@ export class SystemMenuService {
 
   isActiveItem(item: SystemMenuItem): boolean {
     return containsTree(this.router.parseUrl(this.router.url), this.router.parseUrl(item.url), {
-      paths: 'subset',
+      paths: item.url === '/admin/inventario' ? 'exact' : 'subset',
       queryParams: 'ignored',
       matrixParams: 'ignored',
       fragment: 'ignored',

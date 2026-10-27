@@ -5,7 +5,7 @@ export interface SystemMenuItem {
   readonly label: string;
   readonly url: string;
   readonly icon: IconName;
-  readonly permission: PermissionCode;
+  readonly permission: PermissionCode | readonly PermissionCode[];
 }
 
 export interface SystemMenuGroup {

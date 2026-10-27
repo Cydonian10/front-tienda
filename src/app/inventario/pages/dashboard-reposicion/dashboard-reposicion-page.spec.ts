@@ -64,6 +64,18 @@ describe('dashboard de reposición', () => {
     expect(harness.routeNativeElement?.textContent).toContain('Todos los almacenes');
   });
 
+  it('entra directamente en Resumen desde /admin/inventario sin cambiar /admin', async () => {
+    grant(PERMISSION_CODES.EXISTENCIAS_READ);
+    const harness = await RouterTestingHarness.create('/admin');
+    expect(TestBed.inject(Router).url).toBe('/admin');
+    const page = await harness.navigateByUrl('/admin/inventario', DashboardReposicionPage);
+    expect(page).toBeInstanceOf(DashboardReposicionPage);
+    expect(TestBed.inject(Router).url).toContain('/admin/inventario');
+    expect(harness.routeNativeElement?.textContent).toContain('Resumen de inventario');
+    expect(compras).not.toHaveBeenCalled();
+    expect(salidas).not.toHaveBeenCalled();
+  });
+
   it('elige el primero en orden de creación y conserva fechas al cambiar de almacén', async () => {
     grant(PERMISSION_CODES.EXISTENCIAS_READ, PERMISSION_CODES.MOVIMIENTOS_READ, PERMISSION_CODES.COMPRAS_READ);
     const harness = await RouterTestingHarness.create('/admin/inventario/resumen?desde=2026-10-01&hasta=2026-10-30');

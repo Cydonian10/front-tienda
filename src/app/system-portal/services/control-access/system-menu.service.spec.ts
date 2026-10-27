@@ -140,6 +140,7 @@ describe('SystemMenuService', () => {
       permissions: [{ code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' }],
     } as never);
     expect(service.menuFor('INVENTARIO')).toEqual([
+      expect.objectContaining({ label: 'Inicio', items: [expect.objectContaining({ label: 'Resumen', url: '/admin/inventario' })] }),
       expect.objectContaining({
         label: 'Operaciones',
         items: [
@@ -151,7 +152,7 @@ describe('SystemMenuService', () => {
         ],
       }),
     ]);
-    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/compras');
+    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario');
   });
 
   it('muestra Proveedores solo con PROVEEDORES_LEER de INVENTARIO', async () => {
@@ -168,7 +169,7 @@ describe('SystemMenuService', () => {
       { code: PERMISSION_CODES.PROVEEDORES_CREATE, systemCode: 'INVENTARIO' },
       { code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' },
     ] } as never);
-    expect(items().map((item) => item.label)).toEqual(['Compras']);
+    expect(items().map((item) => item.label)).toEqual(['Resumen', 'Compras']);
 
     store.setProfile({ isSuperAdmin: false, permissions: [
       { code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'INVENTARIO' },
@@ -196,6 +197,7 @@ describe('SystemMenuService', () => {
     } as never);
 
     expect(service.menuFor('INVENTARIO')).toEqual([
+      expect.objectContaining({ label: 'Inicio', items: [expect.objectContaining({ label: 'Resumen', url: '/admin/inventario' })] }),
       expect.objectContaining({
         label: 'Operaciones',
         items: [
@@ -207,13 +209,14 @@ describe('SystemMenuService', () => {
         ],
       }),
     ]);
-    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/existencias');
+    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario');
 
     store.setProfile({
       isSuperAdmin: false,
       permissions: [{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }],
     } as never);
     expect(service.menuFor('INVENTARIO')).toEqual([
+      expect.objectContaining({ label: 'Inicio', items: [expect.objectContaining({ label: 'Resumen' })] }),
       expect.objectContaining({
         label: 'Operaciones',
         items: [
@@ -230,7 +233,7 @@ describe('SystemMenuService', () => {
         ],
       }),
     ]);
-    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/movimientos');
+    expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario');
 
     store.setProfile({
       isSuperAdmin: false,

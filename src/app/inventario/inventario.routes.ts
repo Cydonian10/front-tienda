@@ -11,7 +11,8 @@ const inventarioRoutes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'productos',
+    loadComponent: () => import('./pages/dashboard-reposicion/dashboard-reposicion-page'),
+    canActivate: [permissionGuard('INVENTARIO', [PERMISSION_CODES.EXISTENCIAS_READ, PERMISSION_CODES.COMPRAS_READ, PERMISSION_CODES.MOVIMIENTOS_READ])],
   },
   {
     path: 'resumen',

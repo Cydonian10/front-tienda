@@ -93,8 +93,9 @@ export default class DashboardReposicionPage {
     enabled: !this.access.existencias() && this.access.movimientos(), retry: false,
   }));
   readonly almacenes = computed(() => this.access.existencias()
-    ? this.almacenesExistencias.data()
-    : this.access.movimientos() ? this.almacenesMovimientos.data() : undefined);
+    ? this.almacenesExistencias.isError() ? undefined : this.almacenesExistencias.data()
+    : this.access.movimientos() && !this.almacenesMovimientos.isError()
+      ? this.almacenesMovimientos.data() : undefined);
   readonly almacenesError = computed(() => this.access.existencias()
     ? this.almacenesExistencias.isError()
     : this.access.movimientos() && this.almacenesMovimientos.isError());

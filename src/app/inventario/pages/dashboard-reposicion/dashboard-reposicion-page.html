@@ -5,7 +5,7 @@
   </header>
 
   @if (puedeElegirAlmacen()) {
-    <section class="card card-border bg-base-200" aria-label="Almacén de referencia">
+    <section class="card card-border bg-base-100" aria-label="Almacén de referencia">
       <div class="card-body gap-3 sm:flex-row sm:items-end">
         <div class="min-w-0 flex-1">
           <label class="mb-2 block font-semibold" for="resumen-almacen">Almacén para existencias y salidas</label>
@@ -34,7 +34,7 @@
   }
 
   @if (access.compras() || access.movimientos()) {
-    <section class="card card-border bg-base-200" aria-label="Período de actividad">
+    <section class="card card-border bg-base-100" aria-label="Período de actividad">
       <div class="card-body gap-3">
         <h2 class="card-title">Actividad del período</h2>
         <p class="text-sm text-base-content/70">Fechas de calendario en America/Lima. Las compras incluyen todos los almacenes.</p>
@@ -53,7 +53,7 @@
 
   <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
     @if (access.existencias()) {
-      <section class="card card-border bg-base-200 min-w-0">
+      <section class="card card-border bg-base-100 min-w-0">
         <div class="card-body gap-2">
           <h2 class="text-sm font-semibold">Bajo mínimo · {{ almacenNombre() }}</h2>
           @if (almacenesError()) { <p>Esperando almacenes. Reintenta el selector.</p> }
@@ -64,7 +64,7 @@
           @else { <p class="text-3xl font-semibold tabular-nums">{{ stock.data()?.bajoMinimo }}</p> }
         </div>
       </section>
-      <section class="card card-border bg-base-200 min-w-0">
+      <section class="card card-border bg-base-100 min-w-0">
         <div class="card-body gap-2">
           <h2 class="text-sm font-semibold">Agotadas · {{ almacenNombre() }}</h2>
           @if (!almacenId()) { <p>Sin almacén disponible.</p> }
@@ -75,7 +75,7 @@
       </section>
     }
     @if (access.compras()) {
-      <section class="card card-border bg-base-200 min-w-0">
+      <section class="card card-border bg-base-100 min-w-0">
         <div class="card-body gap-2">
           <h2 class="text-sm font-semibold">Compras · Todos los almacenes</h2>
           @if (fechaError()) { <p>Corrige el rango para consultar compras.</p> }
@@ -86,7 +86,7 @@
       </section>
     }
     @if (access.movimientos()) {
-      <section class="card card-border bg-base-200 min-w-0">
+      <section class="card card-border bg-base-100 min-w-0">
         <div class="card-body gap-2">
           <h2 class="text-sm font-semibold">Salidas · {{ almacenNombre() }}</h2>
           @if (fechaError()) { <p>Corrige el rango para consultar salidas.</p> }
@@ -101,14 +101,14 @@
   </div>
 
   @if (access.existencias() && almacenId() && stock.isSuccess()) {
-    <section class="card card-border bg-base-200">
+    <section class="card card-border bg-base-100">
       <div class="card-body">
         <h2 class="card-title">Alertas de reposición</h2>
         @if (!stock.data()?.alertas?.length) {
           <p>No hay variantes agotadas o bajo mínimo en este almacén.</p>
         } @else {
           <ul class="divide-y divide-base-300">
-            @for (alerta of stock.data()?.alertas; track alerta.varianteId + ':' + alerta.almacenId) {
+            @for (alerta of stock.data()?.alertas?.slice(0, 10); track alerta.varianteId + ':' + alerta.almacenId) {
               <li class="flex min-w-0 flex-wrap items-center justify-between gap-3 py-3">
                 <div class="min-w-0">
                   <p class="font-semibold">{{ alerta.productoNombre }} · {{ alerta.sku }}</p>
@@ -124,7 +124,7 @@
   }
 
   @if (periodo() && (access.compras() || access.movimientos()) && mostrarActividad()) {
-    <section class="card card-border bg-base-200 min-w-0" aria-labelledby="actividad-diaria">
+    <section class="card card-border bg-base-100 min-w-0" aria-labelledby="actividad-diaria">
       <div class="card-body min-w-0">
         <h2 id="actividad-diaria" class="card-title">Actividad diaria</h2>
         <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
@@ -133,9 +133,9 @@
         </div>
         <p class="text-sm text-base-content/70">Conteos por día en America/Lima. Consulta los valores exactos en la tabla.</p>
         <div class="w-full overflow-x-auto" aria-hidden="true">
-          <div class="flex h-36 min-w-max items-end gap-1 border-b border-base-300 py-1">
+          <div class="flex h-36 min-w-max items-end gap-0.5 border-b border-base-300 py-1 sm:gap-1">
             @for (dia of serieDiaria(); track dia.fecha) {
-              <div class="flex h-full w-6 shrink-0 items-end gap-px" [title]="dia.fecha">
+              <div class="flex h-full w-2 shrink-0 items-end gap-px sm:w-4 xl:w-6" [title]="dia.fecha">
                 @if (dia.compras !== null) {
                   <div class="w-1/2 bg-primary" [style.height.%]="dia.compras / maximoDiario() * 100"></div>
                 }
@@ -145,6 +145,9 @@
               </div>
             }
           </div>
+        </div>
+        <div class="flex justify-between gap-2 text-xs tabular-nums text-base-content/70" aria-hidden="true">
+          <span>{{ desde() }}</span><span>{{ hasta() }}</span>
         </div>
         <details class="mt-2">
           <summary class="cursor-pointer font-semibold underline-offset-4 focus-visible:outline-2 focus-visible:outline-primary">Ver conteos por fecha</summary>
@@ -166,7 +169,7 @@
 
   <div class="grid min-w-0 gap-4 lg:grid-cols-2">
     @if (access.compras() && compras.isSuccess()) {
-      <section class="card card-border bg-base-200 min-w-0">
+      <section class="card card-border bg-base-100 min-w-0">
         <div class="card-body">
           <h2 class="card-title">Compras recientes · Todos los almacenes</h2>
           @if (!compras.data()?.recientes?.length) { <p>No hay compras en el rango seleccionado.</p> }
@@ -184,7 +187,7 @@
       </section>
     }
     @if (access.movimientos() && almacenId() && salidas.isSuccess()) {
-      <section class="card card-border bg-base-200 min-w-0">
+      <section class="card card-border bg-base-100 min-w-0">
         <div class="card-body">
           <h2 class="card-title">Salidas recientes · {{ almacenNombre() }}</h2>
           @if (!salidas.data()?.recientes?.length) { <p>No hay salidas en el rango seleccionado.</p> }

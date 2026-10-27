@@ -11,6 +11,7 @@ import { AuthProfileService } from '../../../auth/services/auth-profile.service'
 import { AuthSessionService } from '../../../auth/services/auth-session.service';
 import { AuthStore } from '../../../store/auth/auth.store';
 import routes from '../../inventario.routes';
+import { useEditarMinimoExistencia } from '../../actions/use-existencias-action';
 import DashboardReposicionPage, { diasActividad, rangoValido } from './dashboard-reposicion-page';
 
 @Component({ template: '' })
@@ -20,6 +21,8 @@ describe('dashboard de reposición', () => {
   const listarExistencias = vi.fn();
   const listarMovimientos = vi.fn();
   const stock = vi.fn();
+  const guardarMinimo = vi.fn();
+  const quitarMinimo = vi.fn();
   const compras = vi.fn();
   const salidas = vi.fn();
   const almacenes = [{ id: 'a1', nombre: 'Principal' }, { id: 'a2', nombre: 'Secundario' }];
@@ -28,6 +31,8 @@ describe('dashboard de reposición', () => {
     listarExistencias.mockResolvedValue(almacenes);
     listarMovimientos.mockResolvedValue(almacenes);
     stock.mockResolvedValue({ bajoMinimo: 2, agotadas: 1, alertas: [] });
+    guardarMinimo.mockResolvedValue(undefined);
+    quitarMinimo.mockResolvedValue(undefined);
     compras.mockResolvedValue({ total: 3, porDia: [], recientes: [] });
     salidas.mockResolvedValue({ total: 4, porDia: [], recientes: [] });
     TestBed.configureTestingModule({ providers: [
@@ -37,7 +42,7 @@ describe('dashboard de reposición', () => {
         { path: 'auth/login', component: EmptyPage },
         { path: 'admin/inventario', children: routes },
       ]),
-      { provide: ExistenciaApi, useValue: { listarAlmacenes: listarExistencias, resumenReposicion: stock } },
+      { provide: ExistenciaApi, useValue: { listarAlmacenes: listarExistencias, resumenReposicion: stock, guardarMinimo, quitarMinimo } },
       { provide: CompraApi, useValue: { resumenInventario: compras } },
       { provide: MovimientoApi, useValue: { listarAlmacenes: listarMovimientos, resumenSalidas: salidas } },
       { provide: AuthSessionService, useValue: { get: () => ({ accessToken: 'token' }) } },
@@ -152,5 +157,78 @@ describe('dashboard de reposición', () => {
     expect(harness.routeNativeElement?.querySelectorAll('a[href*="compras/"]')).toHaveLength(5);
     expect(harness.routeNativeElement?.querySelector('a[href$="compras/c0"]')).not.toBeNull();
     expect(harness.routeNativeElement?.querySelector('a[href$="historial/m0"]')).not.toBeNull();
+  });
+
+  it('sin fechas ni almacén en la URL usa 30 días inclusivos y el primer almacén activo', async () => {
+    grant(PERMISSION_CODES.EXISTENCIAS_READ, PERMISSION_CODES.COMPRAS_READ);
+    const harness = await RouterTestingHarness.create('/admin/inventario');
+    const page = await harness.navigateByUrl('/admin/inventario', DashboardReposicionPage);
+    await vi.waitFor(() => expect(page.almacenId()).toBe('a1'));
+    await vi.waitFor(() => expect(TestBed.inject(Router).url).toContain('desde='));
+    expect(page.serieDiaria()).toHaveLength(30);
+    expect(page.periodo()).toEqual({ desde: page.defaultDesde, hasta: page.defaultHasta });
+    expect(TestBed.inject(Router).url).toContain('almacenId=a1');
+  });
+
+  it('corrige un almacén antiguo; sin almacenes activos mantiene vacío stock y salidas', async () => {
+    grant(PERMISSION_CODES.EXISTENCIAS_READ, PERMISSION_CODES.MOVIMIENTOS_READ);
+    const harness = await RouterTestingHarness.create('/admin/inventario?almacenId=antiguo&desde=2026-10-01&hasta=2026-10-30');
+    const page = await harness.navigateByUrl(TestBed.inject(Router).url, DashboardReposicionPage);
+    await vi.waitFor(() => expect(page.almacenId()).toBe('a1'));
+    await vi.waitFor(() => expect(TestBed.inject(Router).url).toContain('almacenId=a1'));
+
+    listarExistencias.mockResolvedValue([]);
+    await page.almacenesExistencias.refetch();
+    await vi.waitFor(() => expect(page.almacenes()).toEqual([]));
+    expect(page.almacenId()).toBeNull();
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('No hay almacenes activos');
+    expect(harness.routeNativeElement?.textContent).not.toContain('Salidas · Principal');
+  });
+
+  it('un fallo de compras no bloquea stock ni salidas, y cada módulo ofrece su propio reintento', async () => {
+    grant(PERMISSION_CODES.EXISTENCIAS_READ, PERMISSION_CODES.COMPRAS_READ, PERMISSION_CODES.MOVIMIENTOS_READ);
+    compras.mockRejectedValueOnce({ status: 403 });
+    const harness = await RouterTestingHarness.create('/admin/inventario?desde=2026-10-01&hasta=2026-10-30');
+    const page = await harness.navigateByUrl(TestBed.inject(Router).url, DashboardReposicionPage);
+    await vi.waitFor(() => expect(page.compras.isError()).toBe(true));
+    await vi.waitFor(() => expect(page.stock.isSuccess()).toBe(true));
+    await vi.waitFor(() => expect(page.salidas.isSuccess()).toBe(true));
+    harness.detectChanges();
+    const text = harness.routeNativeElement!.textContent!;
+    expect(text).toContain('No se pudieron cargar las compras');
+    expect(text).toContain('Salidas · Principal');
+    expect(text).toContain('Agotadas · Principal');
+    expect(text).not.toContain('Compras · Todos los almacenes 0');
+    await page.compras.refetch();
+    await vi.waitFor(() => expect(page.compras.isSuccess()).toBe(true));
+    expect(compras).toHaveBeenCalledTimes(2);
+  });
+
+  it('un 403 de almacenes no inicia consultas de stock ni salidas', async () => {
+    grant(PERMISSION_CODES.EXISTENCIAS_READ, PERMISSION_CODES.MOVIMIENTOS_READ);
+    listarExistencias.mockRejectedValue({ status: 403 });
+    const harness = await RouterTestingHarness.create('/admin/inventario?desde=2026-10-01&hasta=2026-10-30');
+    const page = await harness.navigateByUrl(TestBed.inject(Router).url, DashboardReposicionPage);
+    await vi.waitFor(() => expect(page.almacenesError()).toBe(true));
+    expect(page.almacenId()).toBeNull();
+    expect(stock).not.toHaveBeenCalled();
+    expect(salidas).not.toHaveBeenCalled();
+  });
+
+  it('tras guardar un mínimo actualiza la tarjeta y las alertas sin recargar la página', async () => {
+    grant(PERMISSION_CODES.EXISTENCIAS_READ, PERMISSION_CODES.EXISTENCIAS_EDIT_MINIMUM);
+    stock.mockResolvedValueOnce({ bajoMinimo: 1, agotadas: 0, alertas: [{ varianteId: 'v1', almacenId: 'a1', sku: 'TOR', productoNombre: 'Tornillo', almacenNombre: 'Principal', unidadBaseSimbolo: 'u', cantidadBase: '1.000000', minimoBase: '2.000000', tipo: 'bajo_minimo' }] });
+    stock.mockResolvedValue({ bajoMinimo: 0, agotadas: 0, alertas: [] });
+    const harness = await RouterTestingHarness.create('/admin/inventario');
+    const page = await harness.navigateByUrl('/admin/inventario', DashboardReposicionPage);
+    await vi.waitFor(() => expect(page.stock.data()?.bajoMinimo).toBe(1));
+    const mutation = TestBed.runInInjectionContext(() => useEditarMinimoExistencia());
+    await mutation.guardar.mutateAsync({ varianteId: 'v1', almacenId: 'a1', minimoBase: '0.5' });
+    await vi.waitFor(() => expect(page.stock.data()?.bajoMinimo).toBe(0));
+    harness.detectChanges();
+    expect(page.stock.data()?.alertas).toEqual([]);
+    expect(harness.routeNativeElement?.textContent).toContain('No hay variantes agotadas');
+    expect(stock).toHaveBeenCalledTimes(2);
   });
 });

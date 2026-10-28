@@ -2,6 +2,6 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-cajas-turnos-page',
-  template: 'Cajas y turnos',
+  templateUrl: './cajas-turnos-page.html',
 })
 export default class CajasTurnosPage {}

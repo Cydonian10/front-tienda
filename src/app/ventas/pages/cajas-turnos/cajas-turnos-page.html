@@ -1,16 +1,119 @@
-<div class="space-y-6">
-  <header class="space-y-2">
-    <h1 id="admin-section-title" class="text-2xl font-semibold tracking-tight">Cajas y turnos</h1>
-    <p class="text-base-content/70">Espacio de trabajo del sistema Ventas.</p>
+<div class="min-w-0 space-y-7">
+  <header class="flex flex-wrap items-start justify-between gap-4">
+    <div class="min-w-0 space-y-2">
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 id="admin-section-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">Cajas y turnos</h1>
+        <span class="badge badge-info badge-soft">Demo · datos de prueba</span>
+      </div>
+      <p class="max-w-prose text-sm text-base-content/70">Controla el efectivo de cada turno. Los cambios de esta demostración se pierden al recargar.</p>
+    </div>
+    <div class="flex items-center gap-2 self-start rounded-field border border-base-300 bg-base-100 px-3 py-2 text-sm">
+      <app-icon name="calendar" size="18" aria-hidden="true" />
+      <span>Fecha de prueba: <strong class="font-semibold">{{ fechaVisible() }}</strong></span>
+    </div>
   </header>
 
-  <section class="card card-border bg-base-100" aria-labelledby="cajas-turnos-estado">
-    <div class="card-body gap-3 sm:p-8">
-      <h2 id="cajas-turnos-estado" class="card-title">Gestión aún no disponible</h2>
-      <p class="max-w-prose leading-relaxed text-base-content/70">
-        Aquí podrás gestionar cajas y turnos cuando esta funcionalidad esté habilitada.
-        Por ahora, no es posible abrir, cerrar ni consultar turnos desde esta pantalla.
-      </p>
+  <section aria-label="Resumen de cajas y cobros" class="overflow-hidden rounded-box border border-base-300 bg-base-100">
+    <div class="grid grid-cols-1 divide-y divide-base-300 sm:grid-cols-2 sm:divide-y-0 xl:grid-cols-4">
+      <div class="p-5 sm:border-r sm:border-base-300 xl:border-r">
+        <p class="text-sm text-base-content/70">Cajas abiertas</p>
+        <p class="mt-3 text-3xl font-semibold tracking-tight tabular-nums">{{ store.cajasAbiertas() }} <span class="text-base font-medium text-base-content/60">/ {{ store.datos().cajas.length }}</span></p>
+        <p class="mt-2 text-xs text-base-content/70">Con turno activo en esta fecha</p>
+      </div>
+      <div class="p-5 xl:border-r xl:border-base-300">
+        <p class="text-sm text-base-content/70">Efectivo en caja</p>
+        <p class="mt-3 text-3xl font-semibold tracking-tight tabular-nums">{{ moneda(store.resumen().efectivoEnCajaCentavos) }}</p>
+        <p class="mt-2 text-xs text-base-content/70">Esperado en los turnos abiertos</p>
+      </div>
+      <div class="border-t border-base-300 p-5 sm:border-r sm:border-base-300 xl:border-t-0">
+        <p class="text-sm text-base-content/70">Ventas en efectivo</p>
+        <p class="mt-3 text-3xl font-semibold tracking-tight tabular-nums">{{ moneda(store.resumen().ventasEfectivoCentavos) }}</p>
+        <p class="mt-2 text-xs text-base-content/70">Cobros netos del día, incluso turnos cerrados</p>
+      </div>
+      <div class="border-t border-base-300 p-5 xl:border-t-0">
+        <p class="text-sm text-base-content/70">Ventas por Yape</p>
+        <p class="mt-3 text-3xl font-semibold tracking-tight tabular-nums">{{ moneda(store.resumen().ventasYapeCentavos) }}</p>
+        <p class="mt-2 text-xs text-base-content/70">Separadas del efectivo físico</p>
+      </div>
     </div>
+  </section>
+
+  <section aria-labelledby="cajas-listado" class="space-y-5">
+    <div class="flex flex-wrap items-end justify-between gap-4 border-b border-base-300 pb-3">
+      <div>
+        <h2 id="cajas-listado" class="text-lg font-semibold">Cajas de la fecha operativa</h2>
+        <p class="mt-1 text-xs text-base-content/70">{{ fechaVisible() }} · Toda la información es simulada</p>
+      </div>
+      <div aria-label="Filtrar cajas por estado" class="flex max-w-full flex-wrap gap-1">
+        <button type="button" class="btn btn-sm min-h-11" [class.btn-primary]="filtro() === 'todas'" [class.btn-ghost]="filtro() !== 'todas'" [attr.aria-pressed]="filtro() === 'todas'" (click)="cambiarFiltro('todas')">Todas <span class="tabular-nums">{{ store.datos().cajas.length }}</span></button>
+        <button type="button" class="btn btn-sm min-h-11" [class.btn-primary]="filtro() === 'abiertas'" [class.btn-ghost]="filtro() !== 'abiertas'" [attr.aria-pressed]="filtro() === 'abiertas'" (click)="cambiarFiltro('abiertas')">Abiertas <span class="tabular-nums">{{ store.cajasAbiertas() }}</span></button>
+        <button type="button" class="btn btn-sm min-h-11" [class.btn-primary]="filtro() === 'cerradas'" [class.btn-ghost]="filtro() !== 'cerradas'" [attr.aria-pressed]="filtro() === 'cerradas'" (click)="cambiarFiltro('cerradas')">Cerradas <span class="tabular-nums">{{ cajasCerradas() }}</span></button>
+      </div>
+    </div>
+
+    <label class="flex max-w-sm flex-col gap-2 text-sm font-medium" for="buscar-caja">
+      Buscar caja por nombre o código
+      <span class="relative block">
+        <app-icon name="search" size="18" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/60" aria-hidden="true" />
+        <input id="buscar-caja" type="search" class="input min-h-11 w-full pl-10" placeholder="Ej. Caja principal o CJ-001" [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" />
+      </span>
+    </label>
+
+    @if (cajasVisibles().length === 0) {
+      <div class="rounded-box border border-dashed border-base-300 bg-base-100 p-8 text-center">
+        <app-icon name="inbox" size="32" class="mx-auto text-base-content/60" aria-hidden="true" />
+        <h3 class="mt-3 font-semibold">{{ store.datos().cajas.length ? 'No hay cajas que coincidan' : 'Aún no hay cajas' }}</h3>
+        <p class="mt-1 text-sm text-base-content/70">{{ store.datos().cajas.length ? 'Prueba otra búsqueda o selecciona «Todas».' : 'Crea una caja para comenzar la demostración.' }}</p>
+      </div>
+    } @else {
+      <div class="grid min-w-0 gap-4 lg:grid-cols-2">
+        @for (item of cajasVisibles(); track item.caja.id) {
+          <article class="card card-border min-w-0 bg-base-100" [attr.aria-label]="item.caja.nombre + ', ' + (item.turnoAbierto ? 'abierta' : item.diaCerrado ? 'día cerrado' : 'sin turno activo')">
+            <div class="card-body min-w-0 gap-5">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  <span class="flex size-10 shrink-0 items-center justify-center rounded-field bg-base-200 text-primary"><app-icon name="grid" size="19" aria-hidden="true" /></span>
+                  <div class="min-w-0">
+                    <h3 class="font-semibold">{{ item.caja.nombre }}</h3>
+                    <p class="text-xs text-base-content/70">{{ item.caja.codigo }} · Caja física de prueba</p>
+                  </div>
+                </div>
+                @if (item.turnoAbierto) { <span class="badge badge-success badge-soft">Turno abierto</span> }
+                @else if (item.diaCerrado) { <span class="badge badge-neutral badge-soft">Día cerrado</span> }
+                @else { <span class="badge badge-ghost">Sin turno activo</span> }
+              </div>
+
+              <div class="flex flex-wrap items-end justify-between gap-3 border-t border-base-300 pt-4">
+                <div>
+                  <p class="text-xs text-base-content/70">{{ item.turnoAbierto ? 'Efectivo esperado' : item.ultimoTurno ? 'Último efectivo contado' : 'Sin operaciones este día' }}</p>
+                  <p class="mt-2 text-2xl font-semibold tabular-nums">{{ item.turnoAbierto ? moneda(item.resumen!.efectivoEsperadoCentavos) : item.ultimoTurno ? moneda(item.ultimoTurno.efectivoContadoCentavos ?? 0) : '—' }}</p>
+                </div>
+                @if (item.ultimoTurno) {
+                  <p class="text-right text-xs text-base-content/70">Turno #{{ item.ultimoTurno.numero }}<br />{{ item.turnoAbierto ? 'En operación' : 'Turno finalizado' }}</p>
+                }
+              </div>
+
+              @if (item.turnoAbierto && item.resumen) {
+                <dl class="grid grid-cols-3 gap-2 rounded-field bg-base-200 p-3 text-xs">
+                  <div><dt class="text-base-content/70">Saldo inicial</dt><dd class="mt-1 font-semibold tabular-nums">{{ moneda(item.resumen.saldoInicialCentavos) }}</dd></div>
+                  <div><dt class="text-base-content/70">Efectivo neto</dt><dd class="mt-1 font-semibold tabular-nums">{{ moneda(item.resumen.ventasEfectivoCentavos) }}</dd></div>
+                  <div><dt class="text-base-content/70">Yape neto</dt><dd class="mt-1 font-semibold tabular-nums">{{ moneda(item.resumen.ventasYapeCentavos) }}</dd></div>
+                </dl>
+              } @else if (item.diaCerrado) {
+                <p class="text-sm text-base-content/70">Operación del día finalizada. La caja podrá volver a abrirse en la siguiente fecha de prueba.</p>
+              } @else {
+                <p class="text-sm text-base-content/70">Esta caja no tiene un turno abierto en la fecha seleccionada.</p>
+              }
+
+              <div class="border-t border-base-300 pt-3 text-xs text-base-content/70">
+                @if (item.turnoAbierto) { Responsable: {{ item.turnoAbierto.responsableApertura }} }
+                @else if (item.ultimoTurno) { Último cierre: {{ item.ultimoTurno.responsableCierre }} }
+                @else { Sin turno en esta fecha }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
   </section>
 </div>

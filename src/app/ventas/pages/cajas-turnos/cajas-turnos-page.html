@@ -7,11 +7,34 @@
       </div>
       <p class="max-w-prose text-sm text-base-content/70">Controla el efectivo de cada turno. Los cambios de esta demostración se pierden al recargar.</p>
     </div>
-    <div class="flex items-center gap-2 self-start rounded-field border border-base-300 bg-base-100 px-3 py-2 text-sm">
-      <app-icon name="calendar" size="18" aria-hidden="true" />
-      <span>Fecha de prueba: <strong class="font-semibold">{{ fechaVisible() }}</strong></span>
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="flex items-center gap-2 rounded-field border border-base-300 bg-base-100 px-3 py-2 text-sm">
+        <app-icon name="calendar" size="18" aria-hidden="true" />
+        <span>Fecha de prueba: <strong class="font-semibold">{{ fechaVisible() }}</strong></span>
+      </span>
+      <button type="button" class="btn btn-primary min-h-11" [attr.aria-expanded]="mostrarCrearCaja()" aria-controls="crear-caja-formulario" (click)="alternarCrearCaja()">
+        <app-icon name="plus" size="18" aria-hidden="true" /> Crear caja
+      </button>
     </div>
   </header>
+
+  @if (mostrarCrearCaja()) {
+    <section id="crear-caja-formulario" class="rounded-box border border-base-300 bg-base-100 p-5" aria-labelledby="crear-caja-titulo">
+      <h2 id="crear-caja-titulo" class="text-lg font-semibold">Nueva caja de prueba</h2>
+      <p class="mt-1 text-sm text-base-content/70">El código se asigna automáticamente. No se creará ninguna caja real.</p>
+      <form class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end" novalidate (submit)="crearCaja($event)">
+        <label class="grid min-w-0 flex-1 gap-2 text-sm font-semibold" for="nombre-nueva-caja">
+          Nombre de la caja
+          <input id="nombre-nueva-caja" class="input min-h-11 w-full" type="text" maxlength="150" autocomplete="off" [value]="nombreCaja()" [attr.aria-invalid]="errorCaja() ? 'true' : null" [attr.aria-describedby]="errorCaja() ? 'error-nueva-caja' : null" (input)="nombreCaja.set($any($event.target).value); errorCaja.set('')" />
+        </label>
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-primary min-h-11" type="submit">Guardar caja de prueba</button>
+          <button class="btn btn-ghost min-h-11" type="button" (click)="alternarCrearCaja()">Cancelar</button>
+        </div>
+      </form>
+      @if (errorCaja()) { <p id="error-nueva-caja" role="alert" class="mt-2 text-sm text-error">{{ errorCaja() }}</p> }
+    </section>
+  }
 
   <section aria-label="Resumen de cajas y cobros" class="overflow-hidden rounded-box border border-base-300 bg-base-100">
     <div class="grid grid-cols-1 divide-y divide-base-300 sm:grid-cols-2 sm:divide-y-0 xl:grid-cols-4">
@@ -103,6 +126,32 @@
                 <p class="text-sm text-base-content/70">Operación del día finalizada. La caja podrá volver a abrirse en la siguiente fecha de prueba.</p>
               } @else {
                 <p class="text-sm text-base-content/70">Esta caja no tiene un turno abierto en la fecha seleccionada.</p>
+              }
+
+              @if (!item.turnoAbierto && !item.diaCerrado) {
+                <div class="border-t border-base-300 pt-4">
+                  <button type="button" class="btn btn-outline min-h-11" [attr.aria-expanded]="cajaAperturaId() === item.caja.id" [attr.aria-controls]="'apertura-' + item.caja.id" (click)="alternarApertura(item.caja.id)">Abrir turno</button>
+                  @if (cajaAperturaId() === item.caja.id) {
+                    <form [id]="'apertura-' + item.caja.id" class="mt-4 space-y-3" novalidate (submit)="abrirTurno($event, item.caja.id)">
+                      <p class="font-semibold">Nuevo turno #{{ (item.ultimoTurno?.numero ?? 0) + 1 }}</p>
+                      @if (store.saldoSiguiente(item.caja.id); as saldoHeredado) {
+                        <p class="text-sm">Saldo heredado del cierre anterior: <strong class="tabular-nums">{{ moneda(saldoHeredado) }}</strong></p>
+                      } @else if (store.saldoSiguiente(item.caja.id) === 0) {
+                        <p class="text-sm">Saldo heredado del cierre anterior: <strong class="tabular-nums">{{ moneda(0) }}</strong></p>
+                      } @else {
+                        <label class="grid gap-2 text-sm font-semibold" [for]="'saldo-' + item.caja.id">
+                          Saldo inicial (S/)
+                          <input [id]="'saldo-' + item.caja.id" class="input min-h-11 w-full max-w-xs tabular-nums" type="text" inputmode="decimal" placeholder="0.00" [value]="saldoInicial()" [attr.aria-invalid]="errorApertura() ? 'true' : null" [attr.aria-describedby]="errorApertura() ? 'error-apertura' : null" (input)="saldoInicial.set($any($event.target).value); errorApertura.set('')" />
+                        </label>
+                      }
+                      @if (errorApertura()) { <p id="error-apertura" role="alert" class="text-sm text-error">{{ errorApertura() }}</p> }
+                      <div class="flex flex-wrap gap-2">
+                        <button class="btn btn-primary min-h-11" type="submit">Confirmar apertura</button>
+                        <button class="btn btn-ghost min-h-11" type="button" (click)="alternarApertura(item.caja.id)">Cancelar</button>
+                      </div>
+                    </form>
+                  }
+                </div>
               }
 
               <div class="border-t border-base-300 pt-3 text-xs text-base-content/70">

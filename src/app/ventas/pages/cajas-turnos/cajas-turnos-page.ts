@@ -19,6 +19,15 @@ const formatoFecha = new Intl.DateTimeFormat('es-PE', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
 });
 
+/** No convierte a coma flotante importes que se guardarán en céntimos. */
+export function parsearCentavos(texto: string): number | null {
+  const limpio = texto.trim();
+  if (!/^(0|[1-9]\d*)(?:[.,](\d{1,2}))?$/.test(limpio)) return null;
+  const [entero, decimal = ''] = limpio.replace(',', '.').split('.');
+  const resultado = Number(entero) * 100 + Number(decimal.padEnd(2, '0'));
+  return Number.isSafeInteger(resultado) ? resultado : null;
+}
+
 @Component({
   selector: 'app-cajas-turnos-page',
   imports: [Icon],
@@ -30,6 +39,12 @@ export default class CajasTurnosPage {
   readonly store = inject(CajasTurnosDemoStore);
   readonly filtro = signal<FiltroCajas>('todas');
   readonly busqueda = signal('');
+  readonly mostrarCrearCaja = signal(false);
+  readonly nombreCaja = signal('');
+  readonly errorCaja = signal('');
+  readonly cajaAperturaId = signal<string | null>(null);
+  readonly saldoInicial = signal('');
+  readonly errorApertura = signal('');
   readonly fechaVisible = computed(() => formatoFecha.format(new Date(`${this.store.fechaOperativa()}T12:00:00Z`)));
 
   readonly cajasVisibles = computed<CajaVisible[]>(() => {
@@ -64,5 +79,48 @@ export default class CajasTurnosPage {
 
   cambiarFiltro(filtro: FiltroCajas): void {
     this.filtro.set(filtro);
+  }
+
+  alternarCrearCaja(): void {
+    this.mostrarCrearCaja.update((visible) => !visible);
+    this.nombreCaja.set('');
+    this.errorCaja.set('');
+  }
+
+  crearCaja(evento: Event): void {
+    evento.preventDefault();
+    try {
+      this.store.crearCaja(this.nombreCaja());
+      this.mostrarCrearCaja.set(false);
+      this.nombreCaja.set('');
+      this.errorCaja.set('');
+      this.busqueda.set('');
+      this.filtro.set('todas');
+    } catch (error) {
+      this.errorCaja.set((error as Error).message);
+    }
+  }
+
+  alternarApertura(cajaId: string): void {
+    this.cajaAperturaId.set(this.cajaAperturaId() === cajaId ? null : cajaId);
+    this.saldoInicial.set('');
+    this.errorApertura.set('');
+  }
+
+  abrirTurno(evento: Event, cajaId: string): void {
+    evento.preventDefault();
+    try {
+      const saldoHeredado = this.store.saldoSiguiente(cajaId);
+      const saldo = saldoHeredado === null ? parsearCentavos(this.saldoInicial()) : undefined;
+      if (saldoHeredado === null && saldo === null) {
+        this.errorApertura.set('Ingresa un saldo inicial válido con hasta dos decimales.');
+        return;
+      }
+      this.store.abrirTurno(cajaId, saldo ?? undefined);
+      this.cajaAperturaId.set(null);
+      this.errorApertura.set('');
+    } catch (error) {
+      this.errorApertura.set((error as Error).message);
+    }
   }
 }

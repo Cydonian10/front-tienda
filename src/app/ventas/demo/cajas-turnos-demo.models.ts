@@ -69,3 +69,23 @@ export interface ResumenDiaDemo {
   ventasEfectivoCentavos: number;
   ventasYapeCentavos: number;
 }
+
+export interface ReporteCajaDemo {
+  caja: DemoCaja;
+  fechaOperativa: string;
+  estado: 'provisional' | 'final';
+  turnos: { turno: DemoTurno; resumen: ResumenTurnoDemo }[];
+  totales: {
+    saldoInicialCentavos: number;
+    cobrosEfectivoCentavos: number;
+    vueltosEfectivoCentavos: number;
+    ventasEfectivoCentavos: number;
+    ventasYapeCentavos: number;
+    ingresosCentavos: number;
+    egresosCentavos: number;
+    reintegrosEfectivoCentavos: number;
+    diferenciasCentavos: number;
+    efectivoEsperadoUltimoCentavos: number;
+    efectivoContadoUltimoCentavos: number | null;
+  };
+}

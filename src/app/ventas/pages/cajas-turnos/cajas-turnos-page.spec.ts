@@ -195,4 +195,47 @@ describe('página de cajas y turnos de prueba', () => {
     });
     expect(() => store.abrirTurno('demo-caja-1')).toThrow('día');
   });
+
+  it('muestra reporte provisional con turno abierto y final al cerrar día', () => {
+    const { fixture, store } = montar();
+    const root = fixture.nativeElement as HTMLElement;
+    const principal = [...root.querySelectorAll('article')].find((node) => node.textContent?.includes('CJ-001'))!;
+    (principal.querySelector('button[class*="btn-ghost"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const provisional = root.querySelector('app-reporte-caja')!;
+    expect(provisional.textContent).toContain('Provisional');
+    expect(provisional.textContent).toContain('160.00');
+    expect(provisional.textContent).not.toContain('Último efectivo contado');
+    store.cerrarTurno('demo-caja-1', 'dia', 15500, 'Faltante contado');
+    fixture.detectChanges();
+    const final = root.querySelector('app-reporte-caja')!;
+    expect(final.textContent).toContain('Final');
+    expect(final.textContent).toContain('Faltante contado');
+    expect(final.textContent).toContain('Último efectivo contado');
+    expect(final.textContent).toContain('155.00');
+  });
+
+  it('conserva los reportes al avanzar el día y exige nuevo saldo en el primer turno', () => {
+    const { fixture, store } = montar();
+    const root = fixture.nativeElement as HTMLElement;
+    const fechaInicial = store.fechaOperativa();
+    expect((root.querySelector('button[disabled]') as HTMLButtonElement)?.textContent).toContain('Avanzar día');
+    store.cerrarTurno('demo-caja-1', 'turno', 15500);
+    fixture.detectChanges();
+    [...root.querySelectorAll('button')].find((button) => button.textContent?.includes('Avanzar día'))!.click();
+    fixture.detectChanges();
+    expect(store.fechaOperativa()).not.toBe(fechaInicial);
+    expect(root.textContent).toContain('Reportes anteriores');
+    const secundaria = [...root.querySelectorAll('article')].find((node) => node.textContent?.includes('CJ-002'))!;
+    (secundaria.querySelector('details') as HTMLDetailsElement).open = true;
+    (secundaria.querySelector('details button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const reporte = root.querySelector('app-reporte-caja')!;
+    expect(reporte.textContent).toContain('Final');
+    expect(reporte.textContent).toContain('Caja secundaria');
+    expect(reporte.textContent).toContain('Saldo inicial del primer turno');
+    expect(reporte.textContent).toContain('50.00');
+    expect(reporte.textContent).toContain('30.00');
+    expect(store.abrirTurno('demo-caja-2', 0).saldoInicialCentavos).toBe(0);
+  });
 });

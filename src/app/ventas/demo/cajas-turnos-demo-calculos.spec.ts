@@ -1,5 +1,5 @@
 import { datosInicialesCaja, fechaOperativaLima, siguienteFechaOperativa } from './cajas-turnos-demo-data';
-import { diaCerrado, resumenDia, resumenTurno, saldoSiguienteTurno, turnosCajaDia } from './cajas-turnos-demo-calculos';
+import { diaCerrado, reporteCaja, resumenDia, resumenTurno, saldoSiguienteTurno, turnosCajaDia } from './cajas-turnos-demo-calculos';
 
 describe('datos y cálculos de cajas de prueba', () => {
   const fecha = '2026-10-27';
@@ -43,5 +43,20 @@ describe('datos y cálculos de cajas de prueba', () => {
     expect(fechaOperativaLima(new Date('2026-10-27T05:00:00Z'))).toBe('2026-10-27');
     expect(siguienteFechaOperativa('2026-12-31')).toBe('2027-01-01');
     expect(siguienteFechaOperativa('2028-02-28')).toBe('2028-02-29');
+  });
+
+  it('consolida varios turnos sin duplicar el saldo trasladado', () => {
+    const datos = datosInicialesCaja(fecha);
+    const cerrado = reporteCaja(datos, 'demo-caja-2', fecha)!;
+    expect(cerrado.estado).toBe('final');
+    expect(cerrado.turnos).toHaveLength(2);
+    expect(cerrado.totales).toMatchObject({
+      saldoInicialCentavos: 5000, ingresosCentavos: 3000,
+      efectivoEsperadoUltimoCentavos: 8000, efectivoContadoUltimoCentavos: 8000,
+    });
+    expect(cerrado.totales.saldoInicialCentavos + cerrado.totales.ingresosCentavos).toBe(8000);
+    expect(reporteCaja(datos, 'demo-caja-1', fecha)?.estado).toBe('provisional');
+    expect(reporteCaja(datos, 'demo-caja-1', fecha)?.totales.efectivoContadoUltimoCentavos).toBeNull();
+    expect(reporteCaja(datos, 'demo-caja-1', siguienteFechaOperativa(fecha))).toBeNull();
   });
 });

@@ -15,8 +15,14 @@
       <button type="button" class="btn btn-primary min-h-11" [attr.aria-expanded]="mostrarCrearCaja()" aria-controls="crear-caja-formulario" (click)="alternarCrearCaja()">
         <app-icon name="plus" size="18" aria-hidden="true" /> Crear caja
       </button>
+      <button type="button" class="btn min-h-11" [disabled]="store.cajasAbiertas() > 0" (click)="avanzarDia()">Avanzar día de prueba</button>
     </div>
   </header>
+
+  @if (store.cajasAbiertas() > 0) {
+    <p class="text-sm text-base-content/70">Para avanzar el día de prueba, cierra los {{ store.cajasAbiertas() }} turno(s) abierto(s).</p>
+  }
+  @if (errorFecha()) { <p role="alert" class="text-sm text-error">{{ errorFecha() }}</p> }
 
   @if (mostrarCrearCaja()) {
     <section id="crear-caja-formulario" class="rounded-box border border-base-300 bg-base-100 p-5" aria-labelledby="crear-caja-titulo">
@@ -188,6 +194,24 @@
                 </div>
               }
 
+              @if (item.ultimoTurno || fechasAnteriores(item.caja.id).length > 0) {
+                <div class="flex flex-wrap items-center gap-3 border-t border-base-300 pt-3">
+                  @if (item.ultimoTurno) {
+                    <button type="button" class="btn btn-ghost min-h-11" (click)="verReporte(item.caja.id, store.fechaOperativa())">Ver reporte {{ item.diaCerrado ? 'final' : 'provisional' }}</button>
+                  }
+                  @if (fechasAnteriores(item.caja.id).length > 0) {
+                    <details class="collapse collapse-arrow min-w-0 border border-base-300">
+                      <summary class="collapse-title text-sm font-semibold">Reportes anteriores</summary>
+                      <div class="collapse-content flex flex-wrap gap-2">
+                        @for (fecha of fechasAnteriores(item.caja.id); track fecha) {
+                          <button type="button" class="btn btn-outline btn-sm min-h-11" (click)="verReporte(item.caja.id, fecha)">{{ fecha }}</button>
+                        }
+                      </div>
+                    </details>
+                  }
+                </div>
+              }
+
               <div class="border-t border-base-300 pt-3 text-xs text-base-content/70">
                 @if (item.turnoAbierto) { Responsable: {{ item.turnoAbierto.responsableApertura }} }
                 @else if (item.ultimoTurno) { Último cierre: {{ item.ultimoTurno.responsableCierre }} }
@@ -199,6 +223,10 @@
       </div>
     }
   </section>
+
+  @if (reporteVisible(); as reporte) {
+    <app-reporte-caja [reporte]="reporte" (cerrar)="reporteSeleccion.set(null)" />
+  }
 
   <app-actividad-reciente-caja [datos]="store.datos()" [fechaOperativa]="store.fechaOperativa()" />
 

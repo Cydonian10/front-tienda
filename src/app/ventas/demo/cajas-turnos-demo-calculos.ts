@@ -1,5 +1,5 @@
 import type {
-  DatosDemoCaja, DemoMovimientoCaja, DemoTurno, DemoVenta, ResumenDiaDemo, ResumenTurnoDemo,
+  DatosDemoCaja, DemoMovimientoCaja, DemoTurno, DemoVenta, ReporteCajaDemo, ResumenDiaDemo, ResumenTurnoDemo,
 } from './cajas-turnos-demo.models';
 
 /** Convierte a céntimos sin redondear importes escritos con más de dos decimales. */
@@ -68,4 +68,30 @@ export function diaCerrado(turnos: readonly DemoTurno[], cajaId: string, fechaOp
 export function saldoSiguienteTurno(turnos: readonly DemoTurno[], cajaId: string, fechaOperativa: string): number | null {
   const anteriores = turnosCajaDia(turnos, cajaId, fechaOperativa);
   return anteriores.length ? anteriores[anteriores.length - 1].efectivoContadoCentavos : null;
+}
+
+export function reporteCaja(datos: DatosDemoCaja, cajaId: string, fechaOperativa: string): ReporteCajaDemo | null {
+  const caja = datos.cajas.find((item) => item.id === cajaId);
+  const turnos = turnosCajaDia(datos.turnos, cajaId, fechaOperativa)
+    .map((turno) => ({ turno, resumen: resumenTurno(turno, datos.ventas, datos.movimientos) }));
+  if (!caja || turnos.length === 0) return null;
+  const ultimo = turnos[turnos.length - 1];
+  const sumar = (obtener: (item: typeof ultimo) => number) => turnos.reduce((total, item) => total + obtener(item), 0);
+  return {
+    caja, fechaOperativa, estado: ultimo.turno.tipoCierre === 'dia' ? 'final' : 'provisional', turnos,
+    totales: {
+      // El saldo trasladado entre turnos NO es una entrada nueva del día.
+      saldoInicialCentavos: turnos[0].turno.saldoInicialCentavos,
+      cobrosEfectivoCentavos: sumar((item) => item.resumen.cobrosEfectivoCentavos),
+      vueltosEfectivoCentavos: sumar((item) => item.resumen.vueltosEfectivoCentavos),
+      ventasEfectivoCentavos: sumar((item) => item.resumen.ventasEfectivoCentavos),
+      ventasYapeCentavos: sumar((item) => item.resumen.ventasYapeCentavos),
+      ingresosCentavos: sumar((item) => item.resumen.ingresosCentavos),
+      egresosCentavos: sumar((item) => item.resumen.egresosCentavos),
+      reintegrosEfectivoCentavos: sumar((item) => item.resumen.reintegrosEfectivoCentavos),
+      diferenciasCentavos: sumar((item) => item.turno.diferenciaCentavos ?? 0),
+      efectivoEsperadoUltimoCentavos: ultimo.resumen.efectivoEsperadoCentavos,
+      efectivoContadoUltimoCentavos: ultimo.turno.efectivoContadoCentavos,
+    },
+  };
 }

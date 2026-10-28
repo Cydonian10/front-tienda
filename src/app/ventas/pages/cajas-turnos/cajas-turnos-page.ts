@@ -1,8 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Icon } from '../../../shared/components/icon/icon';
 import { ActividadRecienteCaja } from './components/actividad-reciente';
-import { parsearCentavos, resumenTurno } from '../../demo/cajas-turnos-demo-calculos';
+import { parsearCentavos, reporteCaja, resumenTurno } from '../../demo/cajas-turnos-demo-calculos';
 import { CierreTurnoDialog } from './components/cierre-turno-dialog';
+import { ReporteCaja } from './components/reporte-caja';
 import { CajasTurnosDemoStore } from '../../demo/cajas-turnos-demo.store';
 import type { DemoCaja, DemoTurno, ResumenTurnoDemo, TipoCierreDemo, TipoMovimientoDemo } from '../../demo/cajas-turnos-demo.models';
 
@@ -25,7 +26,7 @@ const formatoFecha = new Intl.DateTimeFormat('es-PE', {
 
 @Component({
   selector: 'app-cajas-turnos-page',
-  imports: [Icon, ActividadRecienteCaja, CierreTurnoDialog],
+  imports: [Icon, ActividadRecienteCaja, CierreTurnoDialog, ReporteCaja],
   templateUrl: './cajas-turnos-page.html',
   providers: [CajasTurnosDemoStore],
   host: { class: 'block min-w-0' },
@@ -48,6 +49,8 @@ export default class CajasTurnosPage {
   readonly cierreCajaId = signal<string | null>(null);
   readonly tipoCierre = signal<TipoCierreDemo>('turno');
   readonly errorCierre = signal('');
+  readonly reporteSeleccion = signal<{ cajaId: string; fechaOperativa: string } | null>(null);
+  readonly errorFecha = signal('');
   readonly fechaVisible = computed(() => formatoFecha.format(new Date(`${this.store.fechaOperativa()}T12:00:00Z`)));
 
   readonly cajasVisibles = computed<CajaVisible[]>(() => {
@@ -83,6 +86,10 @@ export default class CajasTurnosPage {
     const turno = datos.turnos.find((item) => item.cajaId === cajaId && item.fechaCierre === null
       && item.fechaOperativa === this.store.fechaOperativa());
     return caja && turno ? { caja, turno, resumen: resumenTurno(turno, datos.ventas, datos.movimientos) } : null;
+  });
+  readonly reporteVisible = computed(() => {
+    const seleccion = this.reporteSeleccion();
+    return seleccion ? reporteCaja(this.store.datos(), seleccion.cajaId, seleccion.fechaOperativa) : null;
   });
 
   moneda(centavos: number): string {
@@ -181,6 +188,29 @@ export default class CajasTurnosPage {
       this.cajaMovimientoId.set(null);
     } catch (error) {
       this.errorCierre.set((error as Error).message);
+    }
+  }
+
+  fechasAnteriores(cajaId: string): string[] {
+    return [...new Set(this.store.datos().turnos.filter((turno) =>
+      turno.cajaId === cajaId && turno.fechaOperativa !== this.store.fechaOperativa())
+      .map((turno) => turno.fechaOperativa))].sort().reverse();
+  }
+
+  verReporte(cajaId: string, fechaOperativa: string): void {
+    if (!reporteCaja(this.store.datos(), cajaId, fechaOperativa)) return;
+    this.reporteSeleccion.set({ cajaId, fechaOperativa });
+    queueMicrotask(() => document.getElementById('reporte-caja')?.focus());
+  }
+
+  avanzarDia(): void {
+    try {
+      this.store.avanzarDia();
+      this.busqueda.set('');
+      this.filtro.set('todas');
+      this.errorFecha.set('');
+    } catch (error) {
+      this.errorFecha.set((error as Error).message);
     }
   }
 }

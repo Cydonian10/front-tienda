@@ -39,6 +39,17 @@ export const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'ventas',
+        component: AdminLayout,
+        data: { systemCode: 'VENTAS' },
+        children: [
+          {
+            path: '',
+            loadChildren: () => import('./ventas/ventas.routes'),
+          },
+        ],
+      },
     ],
   },
   {

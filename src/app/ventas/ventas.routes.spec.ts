@@ -42,14 +42,15 @@ describe('rutas de ventas', () => {
     } as never);
   }
 
-  it('redirige la entrada de Ventas y muestra el aviso informativo', async () => {
+  it('redirige la entrada de Ventas y muestra la demo de cajas sin operaciones remotas', async () => {
     grant('VENTAS');
     const harness = await RouterTestingHarness.create('/admin/ventas');
 
     expect(TestBed.inject(Router).url).toBe('/admin/ventas/cajas-turnos');
     expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Cajas y turnos');
-    expect(harness.routeNativeElement?.textContent).toContain('Gestión aún no disponible');
-    expect(harness.routeNativeElement?.querySelector('button, input, form')).toBeNull();
+    expect(harness.routeNativeElement?.textContent).toContain('Demo · datos de prueba');
+    expect(harness.routeNativeElement?.textContent).toContain('Caja principal');
+    expect(harness.routeNativeElement?.querySelector('button[aria-controls="crear-caja-formulario"]')).not.toBeNull();
 
     await harness.navigateByUrl('/admin/ventas/cajas-turnos');
     expect(TestBed.inject(Router).url).toBe('/admin/ventas/cajas-turnos');

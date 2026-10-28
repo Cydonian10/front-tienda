@@ -238,4 +238,27 @@ describe('página de cajas y turnos de prueba', () => {
     expect(reporte.textContent).toContain('30.00');
     expect(store.abrirTurno('demo-caja-2', 0).saldoInicialCentavos).toBe(0);
   });
+
+  it('presenta un estado vacío sin cajas ni actividad', () => {
+    const { fixture, store } = montar();
+    store.datos.update((datos) => ({ ...datos, cajas: [], turnos: [], ventas: [], movimientos: [] }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Aún no hay cajas');
+    expect(fixture.nativeElement.textContent).toContain('Todavía no hay actividad');
+    expect(fixture.nativeElement.querySelectorAll('article')).toHaveLength(0);
+  });
+
+  it('permite cancelar el cierre sin modificar el turno y devolver el foco al disparador', async () => {
+    const { fixture, store } = montar();
+    const articulo = [...(fixture.nativeElement as HTMLElement).querySelectorAll('article')].find((node) => node.textContent?.includes('CJ-001'))!;
+    const disparador = [...articulo.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Cerrar turno')!;
+    disparador.focus();
+    disparador.click();
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('[data-cancelar]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await Promise.resolve();
+    expect(store.turnoAbierto('demo-caja-1')).toBeDefined();
+    expect(document.activeElement).toBe(disparador);
+  });
 });

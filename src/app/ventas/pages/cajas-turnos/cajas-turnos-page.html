@@ -108,7 +108,7 @@
                   </div>
                 </div>
                 @if (item.turnoAbierto) { <span class="badge badge-success badge-soft">Turno abierto</span> }
-                @else if (item.diaCerrado) { <span class="badge badge-neutral badge-soft">Día cerrado</span> }
+                @else if (item.diaCerrado) { <span class="badge badge-outline border-base-300 text-base-content">Día cerrado</span> }
                 @else { <span class="badge badge-ghost">Sin turno activo</span> }
               </div>
 
@@ -123,7 +123,7 @@
               </div>
 
               @if (item.turnoAbierto && item.resumen) {
-                <dl class="grid grid-cols-3 gap-2 rounded-field bg-base-200 p-3 text-xs">
+                <dl class="grid gap-3 rounded-field bg-base-200 p-3 text-xs sm:grid-cols-3">
                   <div><dt class="text-base-content/70">Saldo inicial</dt><dd class="mt-1 font-semibold tabular-nums">{{ moneda(item.resumen.saldoInicialCentavos) }}</dd></div>
                   <div><dt class="text-base-content/70">Efectivo neto</dt><dd class="mt-1 font-semibold tabular-nums">{{ moneda(item.resumen.ventasEfectivoCentavos) }}</dd></div>
                   <div><dt class="text-base-content/70">Yape neto</dt><dd class="mt-1 font-semibold tabular-nums">{{ moneda(item.resumen.ventasYapeCentavos) }}</dd></div>

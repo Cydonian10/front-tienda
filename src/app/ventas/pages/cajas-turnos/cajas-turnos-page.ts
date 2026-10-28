@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
 import { Icon } from '../../../shared/components/icon/icon';
 import { ActividadRecienteCaja } from './components/actividad-reciente';
 import { parsearCentavos, reporteCaja, resumenTurno } from '../../demo/cajas-turnos-demo-calculos';
@@ -33,6 +34,8 @@ const formatoFecha = new Intl.DateTimeFormat('es-PE', {
 })
 export default class CajasTurnosPage {
   readonly store = inject(CajasTurnosDemoStore);
+  private readonly injector = inject(Injector);
+  private readonly document = inject(DOCUMENT);
   readonly filtro = signal<FiltroCajas>('todas');
   readonly busqueda = signal('');
   readonly mostrarCrearCaja = signal(false);
@@ -200,7 +203,7 @@ export default class CajasTurnosPage {
   verReporte(cajaId: string, fechaOperativa: string): void {
     if (!reporteCaja(this.store.datos(), cajaId, fechaOperativa)) return;
     this.reporteSeleccion.set({ cajaId, fechaOperativa });
-    queueMicrotask(() => document.getElementById('reporte-caja')?.focus());
+    afterNextRender(() => this.document.getElementById('reporte-caja')?.focus(), { injector: this.injector });
   }
 
   avanzarDia(): void {

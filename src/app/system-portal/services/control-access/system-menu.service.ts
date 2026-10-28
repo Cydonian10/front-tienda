@@ -139,12 +139,28 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
       },
     ],
   },
+  VENTAS: {
+    icon: 'chart-line',
+    menu: [
+      {
+        label: 'Operaciones',
+        icon: 'chart-line',
+        items: [
+          {
+            label: 'Cajas y turnos',
+            url: '/admin/ventas/cajas-turnos',
+            icon: 'chart-line',
+            permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
+          },
+        ],
+      },
+    ],
+  },
 };
 
 const SYSTEM_ICONS: Readonly<Record<string, IconName>> = {
   ACCESS_CONTROL: 'shield-check',
   INVENTARIO: 'package',
-  SALES: 'chart-line',
 };
 
 @Injectable({ providedIn: 'root' })

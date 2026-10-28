@@ -18,7 +18,7 @@ const systems = [
   },
   {
     id: 'sales',
-    code: 'SALES',
+    code: 'VENTAS',
     name: 'Ventas',
     description: 'Gestiona pedidos, ventas y clientes.',
     active: true,
@@ -56,15 +56,36 @@ describe('MySystemsPage', () => {
 
     expect(accessLink).not.toBeNull();
     expect(accessLink?.textContent).toContain('Ingresar');
-    expect(element.textContent).toContain('Aún no disponible');
+    expect(element.querySelector('a[href="/admin/ventas/cajas-turnos"]')).not.toBeNull();
     expect(element.querySelector('a[href^="http"]')).toBeNull();
+  });
+
+  it('offers Ventas only to users with its permission in VENTAS', () => {
+    const { fixture, element } = setup();
+    const store = TestBed.inject(AuthStore);
+
+    store.setProfile({ isSuperAdmin: false, permissions: [] } as never);
+    fixture.detectChanges();
+    expect(element.querySelector('a[href="/admin/ventas/cajas-turnos"]')).toBeNull();
+
+    store.setProfile({ isSuperAdmin: false, permissions: [
+      { code: 'CAJAS_TURNOS_LEER', systemCode: 'INVENTARIO' },
+    ] } as never);
+    fixture.detectChanges();
+    expect(element.querySelector('a[href="/admin/ventas/cajas-turnos"]')).toBeNull();
+
+    store.setProfile({ isSuperAdmin: false, permissions: [
+      { code: 'CAJAS_TURNOS_LEER', systemCode: 'VENTAS' },
+    ] } as never);
+    fixture.detectChanges();
+    expect(element.querySelector('a[href="/admin/ventas/cajas-turnos"]')).not.toBeNull();
   });
 
   it('filters systems by name, description, or code', () => {
     const { fixture, element } = setup();
     const input = element.querySelector<HTMLInputElement>('input[type="search"]')!;
 
-    input.value = 'sales';
+    input.value = 'ventas';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 

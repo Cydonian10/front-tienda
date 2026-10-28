@@ -120,6 +120,37 @@ describe('SystemMenuService', () => {
     expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/atributos');
   });
 
+  it('offers Cajas y turnos only with its permission in VENTAS', () => {
+    const service = TestBed.inject(SystemMenuService);
+    const store = TestBed.inject(AuthStore);
+    const permissions = (systemCode: string) =>
+      store.setProfile({
+        isSuperAdmin: false,
+        permissions: [{ code: PERMISSION_CODES.CAJAS_TURNOS_READ, systemCode }],
+      } as never);
+
+    expect(service.isImplemented('VENTAS')).toBe(true);
+    expect(service.iconFor('VENTAS')).toBe('chart-line');
+    expect(service.routeFor('VENTAS')).toBeNull();
+
+    permissions('INVENTARIO');
+    expect(service.menuFor('VENTAS')).toEqual([]);
+    expect(service.routeFor('VENTAS')).toBeNull();
+
+    permissions('VENTAS');
+    expect(service.menuFor('VENTAS')).toEqual([
+      expect.objectContaining({
+        label: 'Operaciones',
+        items: [expect.objectContaining({
+          label: 'Cajas y turnos',
+          url: '/admin/ventas/cajas-turnos',
+          permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
+        })],
+      }),
+    ]);
+    expect(service.routeFor('VENTAS')).toBe('/admin/ventas/cajas-turnos');
+  });
+
   it('muestra Operaciones → Compras solo con COMPRAS_LEER de INVENTARIO', () => {
     const service = TestBed.inject(SystemMenuService);
     const store = TestBed.inject(AuthStore);

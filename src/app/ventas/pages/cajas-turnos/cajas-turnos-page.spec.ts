@@ -118,4 +118,33 @@ describe('página de cajas y turnos de prueba', () => {
     (articulo.querySelector('form') as HTMLFormElement).dispatchEvent(new Event('submit', { cancelable: true }));
     expect(store.turnoAbierto('demo-caja-1')?.saldoInicialCentavos).toBe(15500);
   });
+
+  it('registra solo movimientos manuales en la actividad y cambia el efectivo esperado', () => {
+    const { fixture, store } = montar();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('Apertura · Turno #1');
+    expect(root.textContent).toContain('Cierre del día');
+    expect(root.querySelector('app-actividad-reciente-caja')?.textContent).not.toContain('demo-venta');
+    const principal = [...root.querySelectorAll('article')].find((node) => node.textContent?.includes('CJ-001'))!;
+    (principal.querySelector('button[aria-controls^="movimiento-"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    (principal.querySelector('form[id^="movimiento-"]') as HTMLFormElement).dispatchEvent(new Event('submit', { cancelable: true }));
+    fixture.detectChanges();
+    expect(principal.textContent).toContain('importe mayor');
+    const importe = principal.querySelector('input[inputmode="decimal"]') as HTMLInputElement;
+    importe.value = '5,25';
+    importe.dispatchEvent(new Event('input'));
+    const motivo = principal.querySelector('input[placeholder="Describe el movimiento"]') as HTMLInputElement;
+    motivo.value = 'Gasto imprevisto';
+    motivo.dispatchEvent(new Event('input'));
+    const tipo = principal.querySelector('select') as HTMLSelectElement;
+    tipo.value = 'egreso';
+    tipo.dispatchEvent(new Event('change'));
+    (principal.querySelector('form[id^="movimiento-"]') as HTMLFormElement).dispatchEvent(new Event('submit', { cancelable: true }));
+    fixture.detectChanges();
+    expect(store.resumen().efectivoEnCajaCentavos).toBe(15475);
+    expect(root.querySelector('app-actividad-reciente-caja')?.textContent).toContain('Gasto imprevisto');
+    expect(store.datos().ventas).toHaveLength(2);
+    expect(store.datos().movimientos).toHaveLength(4);
+  });
 });

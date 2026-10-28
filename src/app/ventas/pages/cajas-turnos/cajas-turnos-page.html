@@ -122,6 +122,36 @@
                   <div><dt class="text-base-content/70">Efectivo neto</dt><dd class="mt-1 font-semibold tabular-nums">{{ moneda(item.resumen.ventasEfectivoCentavos) }}</dd></div>
                   <div><dt class="text-base-content/70">Yape neto</dt><dd class="mt-1 font-semibold tabular-nums">{{ moneda(item.resumen.ventasYapeCentavos) }}</dd></div>
                 </dl>
+                <div class="border-t border-base-300 pt-4">
+                  <button type="button" class="btn btn-outline min-h-11" [attr.aria-expanded]="cajaMovimientoId() === item.caja.id" [attr.aria-controls]="'movimiento-' + item.caja.id" (click)="alternarMovimiento(item.caja.id)">Registrar movimiento</button>
+                  @if (cajaMovimientoId() === item.caja.id) {
+                    <form [id]="'movimiento-' + item.caja.id" class="mt-4 space-y-3" novalidate (submit)="registrarMovimiento($event, item.caja.id)">
+                      <h4 class="font-semibold">Movimiento de efectivo · Turno #{{ item.turnoAbierto.numero }}</h4>
+                      <div class="grid gap-3 sm:grid-cols-2">
+                        <label class="grid gap-2 text-sm font-semibold" [for]="'tipo-movimiento-' + item.caja.id">
+                          Tipo de movimiento
+                          <select [id]="'tipo-movimiento-' + item.caja.id" class="select min-h-11 w-full" [value]="tipoMovimiento()" (change)="tipoMovimiento.set($any($event.target).value)">
+                            <option value="ingreso">Ingreso de efectivo</option>
+                            <option value="egreso">Egreso de efectivo</option>
+                          </select>
+                        </label>
+                        <label class="grid gap-2 text-sm font-semibold" [for]="'importe-movimiento-' + item.caja.id">
+                          Importe (S/)
+                          <input [id]="'importe-movimiento-' + item.caja.id" class="input min-h-11 w-full tabular-nums" type="text" inputmode="decimal" placeholder="0.00" [value]="importeMovimiento()" [attr.aria-invalid]="errorMovimiento() ? 'true' : null" [attr.aria-describedby]="errorMovimiento() ? 'error-movimiento' : null" (input)="importeMovimiento.set($any($event.target).value); errorMovimiento.set('')" />
+                        </label>
+                      </div>
+                      <label class="grid gap-2 text-sm font-semibold" [for]="'motivo-movimiento-' + item.caja.id">
+                        Motivo
+                        <input [id]="'motivo-movimiento-' + item.caja.id" class="input min-h-11 w-full" type="text" maxlength="250" placeholder="Describe el movimiento" [value]="motivoMovimiento()" (input)="motivoMovimiento.set($any($event.target).value); errorMovimiento.set('')" />
+                      </label>
+                      @if (errorMovimiento()) { <p id="error-movimiento" role="alert" class="text-sm text-error">{{ errorMovimiento() }}</p> }
+                      <div class="flex flex-wrap gap-2">
+                        <button class="btn btn-primary min-h-11" type="submit">Guardar movimiento de prueba</button>
+                        <button class="btn btn-ghost min-h-11" type="button" (click)="alternarMovimiento(item.caja.id)">Cancelar</button>
+                      </div>
+                    </form>
+                  }
+                </div>
               } @else if (item.diaCerrado) {
                 <p class="text-sm text-base-content/70">Operación del día finalizada. La caja podrá volver a abrirse en la siguiente fecha de prueba.</p>
               } @else {
@@ -165,4 +195,6 @@
       </div>
     }
   </section>
+
+  <app-actividad-reciente-caja [datos]="store.datos()" [fechaOperativa]="store.fechaOperativa()" />
 </div>

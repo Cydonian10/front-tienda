@@ -1,8 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Icon } from '../../../shared/components/icon/icon';
+import { ActividadRecienteCaja } from './components/actividad-reciente';
 import { resumenTurno } from '../../demo/cajas-turnos-demo-calculos';
 import { CajasTurnosDemoStore } from '../../demo/cajas-turnos-demo.store';
-import type { DemoCaja, DemoTurno, ResumenTurnoDemo } from '../../demo/cajas-turnos-demo.models';
+import type { DemoCaja, DemoTurno, ResumenTurnoDemo, TipoMovimientoDemo } from '../../demo/cajas-turnos-demo.models';
 
 type FiltroCajas = 'todas' | 'abiertas' | 'cerradas';
 
@@ -30,7 +31,7 @@ export function parsearCentavos(texto: string): number | null {
 
 @Component({
   selector: 'app-cajas-turnos-page',
-  imports: [Icon],
+  imports: [Icon, ActividadRecienteCaja],
   templateUrl: './cajas-turnos-page.html',
   providers: [CajasTurnosDemoStore],
   host: { class: 'block min-w-0' },
@@ -45,6 +46,11 @@ export default class CajasTurnosPage {
   readonly cajaAperturaId = signal<string | null>(null);
   readonly saldoInicial = signal('');
   readonly errorApertura = signal('');
+  readonly cajaMovimientoId = signal<string | null>(null);
+  readonly tipoMovimiento = signal<TipoMovimientoDemo>('ingreso');
+  readonly importeMovimiento = signal('');
+  readonly motivoMovimiento = signal('');
+  readonly errorMovimiento = signal('');
   readonly fechaVisible = computed(() => formatoFecha.format(new Date(`${this.store.fechaOperativa()}T12:00:00Z`)));
 
   readonly cajasVisibles = computed<CajaVisible[]>(() => {
@@ -121,6 +127,30 @@ export default class CajasTurnosPage {
       this.errorApertura.set('');
     } catch (error) {
       this.errorApertura.set((error as Error).message);
+    }
+  }
+
+  alternarMovimiento(cajaId: string): void {
+    this.cajaMovimientoId.set(this.cajaMovimientoId() === cajaId ? null : cajaId);
+    this.tipoMovimiento.set('ingreso');
+    this.importeMovimiento.set('');
+    this.motivoMovimiento.set('');
+    this.errorMovimiento.set('');
+  }
+
+  registrarMovimiento(evento: Event, cajaId: string): void {
+    evento.preventDefault();
+    const centavos = parsearCentavos(this.importeMovimiento());
+    if (centavos === null || centavos <= 0) {
+      this.errorMovimiento.set('Ingresa un importe mayor que S/ 0.00 con hasta dos decimales.');
+      return;
+    }
+    try {
+      this.store.registrarMovimiento(cajaId, this.tipoMovimiento(), centavos, this.motivoMovimiento());
+      this.cajaMovimientoId.set(null);
+      this.errorMovimiento.set('');
+    } catch (error) {
+      this.errorMovimiento.set((error as Error).message);
     }
   }
 }

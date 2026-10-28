@@ -147,4 +147,52 @@ describe('página de cajas y turnos de prueba', () => {
     expect(store.datos().ventas).toHaveLength(2);
     expect(store.datos().movimientos).toHaveLength(4);
   });
+
+  it('exige contar efectivo al cerrar turno y conserva la diferencia en la reapertura', async () => {
+    const { fixture, store } = montar();
+    const articulo = [...(fixture.nativeElement as HTMLElement).querySelectorAll('article')].find((node) => node.textContent?.includes('CJ-001'))!;
+    const disparador = [...articulo.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Cerrar turno')!;
+    disparador.focus();
+    disparador.click();
+    fixture.detectChanges();
+    const dialogo = fixture.nativeElement.querySelector('app-cierre-turno-dialog') as HTMLElement;
+    expect(dialogo.textContent).toContain('Efectivo esperado');
+    expect(dialogo.textContent).toContain('160.00');
+    (dialogo.querySelector('form:not([method="dialog"])') as HTMLFormElement).dispatchEvent(new Event('submit', { cancelable: true }));
+    fixture.detectChanges();
+    expect(dialogo.textContent).toContain('Ingresa el efectivo realmente contado');
+    expect(store.turnoAbierto('demo-caja-1')).toBeDefined();
+    const contado = dialogo.querySelector('#efectivo-contado-cierre') as HTMLInputElement;
+    contado.value = '155.00';
+    contado.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(dialogo.textContent).toContain('5.00');
+    (dialogo.querySelector('form:not([method="dialog"])') as HTMLFormElement).dispatchEvent(new Event('submit', { cancelable: true }));
+    fixture.detectChanges();
+    expect(store.turnosDeCaja('demo-caja-1')[0]).toMatchObject({
+      tipoCierre: 'turno', efectivoContadoCentavos: 15500, diferenciaCentavos: -500,
+    });
+    expect(fixture.nativeElement.querySelector('app-cierre-turno-dialog')).toBeNull();
+    await Promise.resolve();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[aria-controls="apertura-demo-caja-1"]'));
+    expect(store.saldoSiguiente('demo-caja-1')).toBe(15500);
+  });
+
+  it('advierte que cerrar día bloquea otra apertura y admite contado cero', () => {
+    const { fixture, store } = montar();
+    const articulo = [...(fixture.nativeElement as HTMLElement).querySelectorAll('article')].find((node) => node.textContent?.includes('CJ-001'))!;
+    [...articulo.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Cerrar día')!.click();
+    fixture.detectChanges();
+    const dialogo = fixture.nativeElement.querySelector('app-cierre-turno-dialog') as HTMLElement;
+    expect(dialogo.textContent).toContain('impide volver a abrir esta caja');
+    const contado = dialogo.querySelector('#efectivo-contado-cierre') as HTMLInputElement;
+    contado.value = '0';
+    contado.dispatchEvent(new Event('input'));
+    (dialogo.querySelector('form:not([method="dialog"])') as HTMLFormElement).dispatchEvent(new Event('submit', { cancelable: true }));
+    fixture.detectChanges();
+    expect(store.turnosDeCaja('demo-caja-1')[0]).toMatchObject({
+      tipoCierre: 'dia', efectivoContadoCentavos: 0, diferenciaCentavos: -16000,
+    });
+    expect(() => store.abrirTurno('demo-caja-1')).toThrow('día');
+  });
 });

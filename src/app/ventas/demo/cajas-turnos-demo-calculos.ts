@@ -2,6 +2,15 @@ import type {
   DatosDemoCaja, DemoMovimientoCaja, DemoTurno, DemoVenta, ResumenDiaDemo, ResumenTurnoDemo,
 } from './cajas-turnos-demo.models';
 
+/** Convierte a céntimos sin redondear importes escritos con más de dos decimales. */
+export function parsearCentavos(texto: string): number | null {
+  const limpio = texto.trim();
+  if (!/^(0|[1-9]\d*)(?:[.,](\d{1,2}))?$/.test(limpio)) return null;
+  const [entero, decimal = ''] = limpio.replace(',', '.').split('.');
+  const resultado = Number(entero) * 100 + Number(decimal.padEnd(2, '0'));
+  return Number.isSafeInteger(resultado) ? resultado : null;
+}
+
 export function resumenTurno(
   turno: DemoTurno,
   ventas: readonly DemoVenta[],

@@ -91,7 +91,7 @@
     } @else {
       <div class="grid min-w-0 gap-4 lg:grid-cols-2">
         @for (item of cajasVisibles(); track item.caja.id) {
-          <article class="card card-border min-w-0 bg-base-100" [attr.aria-label]="item.caja.nombre + ', ' + (item.turnoAbierto ? 'abierta' : item.diaCerrado ? 'día cerrado' : 'sin turno activo')">
+          <article class="card card-border min-w-0 bg-base-100" [id]="'caja-' + item.caja.id" tabindex="-1" [attr.aria-label]="item.caja.nombre + ', ' + (item.turnoAbierto ? 'abierta' : item.diaCerrado ? 'día cerrado' : 'sin turno activo')">
             <div class="card-body min-w-0 gap-5">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="flex min-w-0 items-center gap-3">
@@ -123,7 +123,11 @@
                   <div><dt class="text-base-content/70">Yape neto</dt><dd class="mt-1 font-semibold tabular-nums">{{ moneda(item.resumen.ventasYapeCentavos) }}</dd></div>
                 </dl>
                 <div class="border-t border-base-300 pt-4">
-                  <button type="button" class="btn btn-outline min-h-11" [attr.aria-expanded]="cajaMovimientoId() === item.caja.id" [attr.aria-controls]="'movimiento-' + item.caja.id" (click)="alternarMovimiento(item.caja.id)">Registrar movimiento</button>
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline min-h-11" [attr.aria-expanded]="cajaMovimientoId() === item.caja.id" [attr.aria-controls]="'movimiento-' + item.caja.id" (click)="alternarMovimiento(item.caja.id)">Registrar movimiento</button>
+                    <button type="button" class="btn min-h-11" (click)="abrirCierre(item.caja.id, 'turno')">Cerrar turno</button>
+                    <button type="button" class="btn min-h-11" (click)="abrirCierre(item.caja.id, 'dia')">Cerrar día</button>
+                  </div>
                   @if (cajaMovimientoId() === item.caja.id) {
                     <form [id]="'movimiento-' + item.caja.id" class="mt-4 space-y-3" novalidate (submit)="registrarMovimiento($event, item.caja.id)">
                       <h4 class="font-semibold">Movimiento de efectivo · Turno #{{ item.turnoAbierto.numero }}</h4>
@@ -197,4 +201,8 @@
   </section>
 
   <app-actividad-reciente-caja [datos]="store.datos()" [fechaOperativa]="store.fechaOperativa()" />
+
+  @if (cierreActivo(); as cierre) {
+    <app-cierre-turno-dialog [caja]="cierre.caja" [turno]="cierre.turno" [resumen]="cierre.resumen" [tipo]="tipoCierre()" [errorExterno]="errorCierre()" (cancelado)="cancelarCierre()" (confirmado)="confirmarCierre($event)" />
+  }
 </div>

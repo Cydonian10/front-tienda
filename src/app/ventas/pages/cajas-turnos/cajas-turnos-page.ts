@@ -1,9 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Icon } from '../../../shared/components/icon/icon';
 import { ActividadRecienteCaja } from './components/actividad-reciente';
-import { resumenTurno } from '../../demo/cajas-turnos-demo-calculos';
+import { parsearCentavos, resumenTurno } from '../../demo/cajas-turnos-demo-calculos';
+import { CierreTurnoDialog } from './components/cierre-turno-dialog';
 import { CajasTurnosDemoStore } from '../../demo/cajas-turnos-demo.store';
-import type { DemoCaja, DemoTurno, ResumenTurnoDemo, TipoMovimientoDemo } from '../../demo/cajas-turnos-demo.models';
+import type { DemoCaja, DemoTurno, ResumenTurnoDemo, TipoCierreDemo, TipoMovimientoDemo } from '../../demo/cajas-turnos-demo.models';
+
+export { parsearCentavos } from '../../demo/cajas-turnos-demo-calculos';
 
 type FiltroCajas = 'todas' | 'abiertas' | 'cerradas';
 
@@ -20,18 +23,9 @@ const formatoFecha = new Intl.DateTimeFormat('es-PE', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
 });
 
-/** No convierte a coma flotante importes que se guardarán en céntimos. */
-export function parsearCentavos(texto: string): number | null {
-  const limpio = texto.trim();
-  if (!/^(0|[1-9]\d*)(?:[.,](\d{1,2}))?$/.test(limpio)) return null;
-  const [entero, decimal = ''] = limpio.replace(',', '.').split('.');
-  const resultado = Number(entero) * 100 + Number(decimal.padEnd(2, '0'));
-  return Number.isSafeInteger(resultado) ? resultado : null;
-}
-
 @Component({
   selector: 'app-cajas-turnos-page',
-  imports: [Icon, ActividadRecienteCaja],
+  imports: [Icon, ActividadRecienteCaja, CierreTurnoDialog],
   templateUrl: './cajas-turnos-page.html',
   providers: [CajasTurnosDemoStore],
   host: { class: 'block min-w-0' },
@@ -51,6 +45,9 @@ export default class CajasTurnosPage {
   readonly importeMovimiento = signal('');
   readonly motivoMovimiento = signal('');
   readonly errorMovimiento = signal('');
+  readonly cierreCajaId = signal<string | null>(null);
+  readonly tipoCierre = signal<TipoCierreDemo>('turno');
+  readonly errorCierre = signal('');
   readonly fechaVisible = computed(() => formatoFecha.format(new Date(`${this.store.fechaOperativa()}T12:00:00Z`)));
 
   readonly cajasVisibles = computed<CajaVisible[]>(() => {
@@ -78,6 +75,15 @@ export default class CajasTurnosPage {
   });
 
   readonly cajasCerradas = computed(() => this.store.datos().cajas.filter((caja) => caja.activo).length - this.store.cajasAbiertas());
+  readonly cierreActivo = computed(() => {
+    const cajaId = this.cierreCajaId();
+    if (!cajaId) return null;
+    const datos = this.store.datos();
+    const caja = datos.cajas.find((item) => item.id === cajaId);
+    const turno = datos.turnos.find((item) => item.cajaId === cajaId && item.fechaCierre === null
+      && item.fechaOperativa === this.store.fechaOperativa());
+    return caja && turno ? { caja, turno, resumen: resumenTurno(turno, datos.ventas, datos.movimientos) } : null;
+  });
 
   moneda(centavos: number): string {
     return formatoMoneda.format(centavos / 100);
@@ -151,6 +157,30 @@ export default class CajasTurnosPage {
       this.errorMovimiento.set('');
     } catch (error) {
       this.errorMovimiento.set((error as Error).message);
+    }
+  }
+
+  abrirCierre(cajaId: string, tipo: TipoCierreDemo): void {
+    if (!this.store.turnoAbierto(cajaId)) return;
+    this.tipoCierre.set(tipo);
+    this.errorCierre.set('');
+    this.cierreCajaId.set(cajaId);
+  }
+
+  cancelarCierre(): void {
+    this.cierreCajaId.set(null);
+    this.errorCierre.set('');
+  }
+
+  confirmarCierre(datos: { contadoCentavos: number; observacion: string }): void {
+    const cajaId = this.cierreCajaId();
+    if (!cajaId) return;
+    try {
+      this.store.cerrarTurno(cajaId, this.tipoCierre(), datos.contadoCentavos, datos.observacion);
+      this.cancelarCierre();
+      this.cajaMovimientoId.set(null);
+    } catch (error) {
+      this.errorCierre.set((error as Error).message);
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { CajasTurnosHeader } from './components/cajas-turnos-header';
-import { CajasTurnosResumen } from './components/cajas-turnos-resumen';
+import { CajasTurnosHeader } from './components/cajas-turnos-header/cajas-turnos-header';
+import { CajasTurnosResumen } from './components/cajas-turnos-resumen/cajas-turnos-resumen';
 
 @Component({
   selector: 'app-cajas-turnos-page',

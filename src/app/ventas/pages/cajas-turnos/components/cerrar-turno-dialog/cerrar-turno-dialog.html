@@ -1,0 +1,57 @@
+<app-dialog-shell title="Cerrar turno" [titleId]="titleId">
+  <p class="mb-5 text-sm text-base-content/70">{{ data.nombre }}</p>
+
+  @if (resumenQuery.isPending()) {
+    <div class="flex items-center gap-3 py-6 text-sm" role="status">
+      <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+      Cargando el resumen del turno…
+    </div>
+  } @else if (resumenQuery.isError()) {
+    <div role="alert" class="alert alert-error alert-soft">
+      @if (turnoCerrado) {
+        <span>Este turno ya fue cerrado. Cierra el diálogo y actualiza el listado.</span>
+      } @else {
+        <span>No se pudo cargar el resumen del turno. Inténtalo de nuevo.</span>
+      }
+    </div>
+    @if (!turnoCerrado) {
+      <button type="button" class="btn mt-3" [disabled]="resumenQuery.isFetching()" (click)="resumenQuery.refetch()">
+        {{ resumenQuery.isFetching() ? 'Reintentando…' : 'Reintentar' }}
+      </button>
+    }
+  } @else if (resumenQuery.data(); as resumen) {
+    <section aria-label="Desglose del efectivo" class="rounded-box bg-base-200 p-4">
+      <dl class="space-y-2 text-sm">
+        <div class="flex flex-wrap justify-between gap-x-4"><dt>Saldo inicial</dt><dd class="tabular-nums">S/ {{ resumen.saldoInicial }}</dd></div>
+        <div class="flex flex-wrap justify-between gap-x-4"><dt>Cobros en efectivo</dt><dd class="tabular-nums">S/ {{ resumen.cobrosEfectivo }}</dd></div>
+        <div class="flex flex-wrap justify-between gap-x-4"><dt>Vueltos en efectivo</dt><dd class="tabular-nums">− S/ {{ resumen.vueltosEfectivo }}</dd></div>
+        <div class="flex flex-wrap justify-between gap-x-4"><dt>Ingresos manuales</dt><dd class="tabular-nums">S/ {{ resumen.ingresosManuales }}</dd></div>
+        <div class="flex flex-wrap justify-between gap-x-4"><dt>Egresos manuales</dt><dd class="tabular-nums">− S/ {{ resumen.egresosManuales }}</dd></div>
+        <div class="flex flex-wrap justify-between gap-x-4"><dt>Reintegros en efectivo</dt><dd class="tabular-nums">− S/ {{ resumen.reintegrosEfectivo }}</dd></div>
+        <div class="flex flex-wrap justify-between gap-x-4 border-t border-base-300 pt-3 font-semibold"><dt>Efectivo esperado</dt><dd class="tabular-nums">S/ {{ resumen.efectivoEsperado }}</dd></div>
+      </dl>
+    </section>
+
+    <form [id]="formId" class="mt-5 space-y-4" novalidate>
+      <fieldset class="fieldset">
+        <label class="fieldset-legend" [attr.for]="formId + '-contado'">Efectivo realmente contado (S/)</label>
+        <input [id]="formId + '-contado'" class="input w-full" type="text" inputmode="decimal" placeholder="0.00"
+          [value]="efectivoContado()" (input)="efectivoContado.set($any($event.target).value)" />
+      </fieldset>
+      <p class="flex flex-wrap justify-between gap-x-4 text-sm text-base-content/70">
+        <span>Diferencia de cuadre</span><span>Ingresa el efectivo contado</span>
+      </p>
+      <fieldset class="fieldset">
+        <label class="fieldset-legend" [attr.for]="formId + '-observacion'">Observación del cierre (opcional)</label>
+        <textarea [id]="formId + '-observacion'" class="textarea w-full" rows="2" placeholder="Explica una diferencia, si la hay"
+          [value]="observacionCierre()" (input)="observacionCierre.set($any($event.target).value)"></textarea>
+      </fieldset>
+      <p class="text-sm text-base-content/70">Se permite cerrar con diferencia y se conservará en el historial. Para registrar un movimiento omitido, cancela este cierre y añádelo explícitamente.</p>
+    </form>
+  }
+
+  <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
+    <button type="button" class="btn" data-dialog-cancel (click)="dialogRef.close()">Cancelar</button>
+    <button type="button" class="btn btn-primary" disabled>Cuadrar y cerrar turno</button>
+  </div>
+</app-dialog-shell>

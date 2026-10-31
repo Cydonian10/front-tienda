@@ -36,15 +36,32 @@
       <fieldset class="fieldset">
         <label class="fieldset-legend" [attr.for]="formId + '-contado'">Efectivo realmente contado (S/)</label>
         <input [id]="formId + '-contado'" class="input w-full" type="text" inputmode="decimal" placeholder="0.00"
-          [value]="efectivoContado()" (input)="efectivoContado.set($any($event.target).value)" />
+          [class.input-error]="contadoInvalido()" [attr.aria-invalid]="contadoInvalido()"
+          [attr.aria-describedby]="contadoInvalido() ? formId + '-contado-error' : null"
+          [value]="efectivoContado()" (input)="efectivoContado.set($any($event.target).value)" (blur)="contadoTocado.set(true)" />
+        @if (contadoInvalido()) {
+          <p [id]="formId + '-contado-error'" class="text-sm text-error">Ingresa un importe no negativo de hasta 16 dígitos y dos decimales.</p>
+        }
       </fieldset>
       <p class="flex flex-wrap justify-between gap-x-4 text-sm text-base-content/70">
-        <span>Diferencia de cuadre</span><span>Ingresa el efectivo contado</span>
+        <span>Diferencia de cuadre</span>
+        <span class="font-semibold tabular-nums" aria-live="polite">
+          @if (diferenciaTexto(); as texto) {
+            {{ texto }} · {{ diferencia()! < 0 ? 'Faltante' : diferencia()! > 0 ? 'Sobrante' : 'Sin diferencia' }}
+          } @else {
+            Ingresa el efectivo contado
+          }
+        </span>
       </p>
       <fieldset class="fieldset">
         <label class="fieldset-legend" [attr.for]="formId + '-observacion'">Observación del cierre (opcional)</label>
         <textarea [id]="formId + '-observacion'" class="textarea w-full" rows="2" placeholder="Explica una diferencia, si la hay"
+          [class.textarea-error]="observacionInvalida()" [attr.aria-invalid]="observacionInvalida()"
+          [attr.aria-describedby]="observacionInvalida() ? formId + '-observacion-error' : null"
           [value]="observacionCierre()" (input)="observacionCierre.set($any($event.target).value)"></textarea>
+        @if (observacionInvalida()) {
+          <p [id]="formId + '-observacion-error'" class="text-sm text-error">La observación no puede superar los 500 caracteres.</p>
+        }
       </fieldset>
       <p class="text-sm text-base-content/70">Se permite cerrar con diferencia y se conservará en el historial. Para registrar un movimiento omitido, cancela este cierre y añádelo explícitamente.</p>
     </form>

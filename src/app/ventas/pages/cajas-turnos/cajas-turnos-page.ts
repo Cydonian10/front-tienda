@@ -16,7 +16,7 @@ export default class CajasTurnosPage {
 
   abrirCrearCaja(): void {
     const id = 'crear-caja';
-    const dialogRef = this.dialog.open(CrearCajaDialog, {
+    this.dialog.open(CrearCajaDialog, {
       id,
       width: '34rem',
       maxWidth: 'calc(100vw - 2rem)',
@@ -27,8 +27,5 @@ export default class CajasTurnosPage {
       closeOnNavigation: true,
     });
 
-    dialogRef.closed.subscribe((resp) => {
-      console.log(resp);
-    });
   }
 }

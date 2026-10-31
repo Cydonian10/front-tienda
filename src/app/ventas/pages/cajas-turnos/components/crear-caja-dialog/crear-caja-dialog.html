@@ -1,19 +1,42 @@
 <app-dialog-shell title="Crear caja" [titleId]="titleId">
   <p class="mb-5 text-sm text-base-content/70">Cada caja representa un punto físico de efectivo.</p>
 
-  <fieldset class="fieldset">
-    <legend class="fieldset-legend">Nombre de la caja</legend>
-    <input class="input w-full" type="text" placeholder="Ej. Caja del mostrador" [formField]="cajaForm.nombre" />
-  </fieldset>
-
-  <p class="mt-3 text-xs text-base-content/70">
-    La creación de cajas estará disponible próximamente.
-  </p>
+  <form [id]="formId" (submit)="submitForm($event)" novalidate>
+    <fieldset class="fieldset">
+      <label class="fieldset-legend" [attr.for]="formId + '-nombre'">Nombre de la caja</label>
+      <input
+        [id]="formId + '-nombre'"
+        class="input w-full"
+        type="text"
+        placeholder="Ej. Caja del mostrador"
+        [formField]="cajaForm.nombre"
+        [class.input-error]="cajaForm.nombre().touched() && cajaForm.nombre().invalid()"
+        [attr.aria-describedby]="errorId"
+      />
+      <app-field-errors [field]="cajaForm.nombre()" [errorId]="errorId" />
+    </fieldset>
+    @if (serverError()) {
+      <div role="alert" class="alert alert-error alert-soft mt-3">{{ serverError() }}</div>
+    }
+  </form>
 
   <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
-    <button type="button" class="btn" data-dialog-cancel (click)="dialogRef.close()">
+    <button
+      type="button"
+      class="btn"
+      data-dialog-cancel
+      [disabled]="createMutation.isPending()"
+      (click)="dialogRef.close()"
+    >
       Cancelar
     </button>
-    <button type="button" class="btn btn-primary" disabled>Crear caja</button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [attr.form]="formId"
+      [disabled]="createMutation.isPending()"
+    >
+      {{ createMutation.isPending() ? 'Creando…' : 'Crear caja' }}
+    </button>
   </div>
 </app-dialog-shell>

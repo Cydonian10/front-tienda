@@ -2,7 +2,7 @@ import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ENVIRONMENT } from '../../config/env-dev';
-import type { AbrirTurnoDto, TurnoAbierto } from '../../interfaces/ventas/caja-turno.interface';
+import type { AbrirTurnoDto, CerrarTurnoDto, CierreTurnoResultado, TurnoAbierto } from '../../interfaces/ventas/caja-turno.interface';
 import { SKIP_API_ERROR_TOAST } from '../../../shared/interceptors/api-error.interceptor';
 
 @Injectable({ providedIn: 'root' })
@@ -15,6 +15,16 @@ export class CajaTurnosApi {
       this.http.post<TurnoAbierto>(`${this.environment.apiUrl}/cajas/${cajaId}/turnos`, dto, {
         context: new HttpContext().set(SKIP_API_ERROR_TOAST, true),
       }),
+    );
+  }
+
+  cerrar(cajaId: string, turnoId: string, dto: CerrarTurnoDto): Promise<CierreTurnoResultado> {
+    return firstValueFrom(
+      this.http.post<CierreTurnoResultado>(
+        `${this.environment.apiUrl}/cajas/${cajaId}/turnos/${turnoId}/cierre`,
+        dto,
+        { context: new HttpContext().set(SKIP_API_ERROR_TOAST, true) },
+      ),
     );
   }
 }

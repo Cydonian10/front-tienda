@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { injectMutation, QueryClient } from '@tanstack/angular-query-experimental';
-import type { AbrirTurnoDto } from '../../api/interfaces/ventas/caja-turno.interface';
+import type { AbrirTurnoDto, CerrarTurnoDto } from '../../api/interfaces/ventas/caja-turno.interface';
 import { CajaTurnosApi } from '../../api/ventas/caja-turnos/caja-turnos-api';
 import { ToastService } from '../../shared/services/toast/toast.service';
 import { cajasListadoQueryKey } from './use-cajas-action';
@@ -18,5 +18,14 @@ export function useCajaTurnos() {
     },
   }));
 
-  return { abrirMutation };
+  const cerrarMutation = injectMutation(() => ({
+    mutationFn: ({ cajaId, turnoId, dto }: { cajaId: string; turnoId: string; dto: CerrarTurnoDto }) =>
+      api.cerrar(cajaId, turnoId, dto),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: cajasListadoQueryKey });
+      toast.success('Turno cerrado correctamente.');
+    },
+  }));
+
+  return { abrirMutation, cerrarMutation };
 }

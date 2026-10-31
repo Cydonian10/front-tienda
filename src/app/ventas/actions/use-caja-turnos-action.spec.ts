@@ -7,6 +7,7 @@ import { useCajaTurnos } from './use-caja-turnos-action';
 
 describe('useCajaTurnos', () => {
   const abrir = vi.fn();
+  const cerrar = vi.fn();
   const success = vi.fn();
   let client: QueryClient;
 
@@ -15,7 +16,7 @@ describe('useCajaTurnos', () => {
     client = new QueryClient();
     TestBed.configureTestingModule({ providers: [
       provideTanStackQuery(client),
-      { provide: CajaTurnosApi, useValue: { abrir } },
+      { provide: CajaTurnosApi, useValue: { abrir, cerrar } },
       { provide: ToastService, useValue: { success } },
     ] });
   });
@@ -38,6 +39,27 @@ describe('useCajaTurnos', () => {
     abrir.mockRejectedValue(new Error('Error'));
     const { abrirMutation } = TestBed.runInInjectionContext(() => useCajaTurnos());
     await expect(abrirMutation.mutateAsync({ cajaId: 'c1' })).rejects.toThrow('Error');
+    expect(client.getQueryState(key)?.isInvalidated).toBe(false);
+    expect(success).not.toHaveBeenCalled();
+  });
+
+  it('cierra el turno e invalida los listados de cajas', async () => {
+    const key = cajasQueryKey({ estado: 'activas' });
+    client.setQueryData(key, []);
+    cerrar.mockResolvedValue({ id: 't1' });
+    const { cerrarMutation } = TestBed.runInInjectionContext(() => useCajaTurnos());
+    await cerrarMutation.mutateAsync({ cajaId: 'c1', turnoId: 't1', dto: { efectivoContado: '160.00' } });
+    expect(cerrar).toHaveBeenCalledWith('c1', 't1', { efectivoContado: '160.00' });
+    expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(success).toHaveBeenCalledWith('Turno cerrado correctamente.');
+  });
+
+  it('no invalida ni notifica éxito si falla el cierre', async () => {
+    const key = cajasQueryKey({});
+    client.setQueryData(key, []);
+    cerrar.mockRejectedValue(new Error('Error'));
+    const { cerrarMutation } = TestBed.runInInjectionContext(() => useCajaTurnos());
+    await expect(cerrarMutation.mutateAsync({ cajaId: 'c1', turnoId: 't1', dto: { efectivoContado: '0' } })).rejects.toThrow('Error');
     expect(client.getQueryState(key)?.isInvalidated).toBe(false);
     expect(success).not.toHaveBeenCalled();
   });

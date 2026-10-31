@@ -1,9 +1,27 @@
 import { inject } from '@angular/core';
-import { injectMutation, QueryClient } from '@tanstack/angular-query-experimental';
+import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import type { AbrirTurnoDto, CerrarTurnoDto } from '../../api/interfaces/ventas/caja-turno.interface';
 import { CajaTurnosApi } from '../../api/ventas/caja-turnos/caja-turnos-api';
 import { ToastService } from '../../shared/services/toast/toast.service';
 import { cajasListadoQueryKey } from './use-cajas-action';
+
+export const resumenTurnoQueryKey = (cajaId: string, turnoId: string) =>
+  ['cajas', cajaId, 'turnos', turnoId, 'resumen'] as const;
+
+export function useResumenTurno(cajaId: () => string, turnoId: () => string) {
+  const api = inject(CajaTurnosApi);
+
+  return injectQuery(() => {
+    const caja = cajaId();
+    const turno = turnoId();
+    return {
+      queryKey: resumenTurnoQueryKey(caja, turno),
+      queryFn: () => api.resumen(caja, turno),
+      enabled: !!caja && !!turno,
+      retry: false,
+    };
+  });
+}
 
 export function useCajaTurnos() {
   const api = inject(CajaTurnosApi);

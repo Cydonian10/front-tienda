@@ -29,6 +29,7 @@ export interface TurnoCaja {
   saldoInicial: string;
   efectivoEsperado: string;
   efectivoContado: string | null;
+  observacionCierre: string | null;
 }
 
 export interface CajaConTurnos extends Caja {

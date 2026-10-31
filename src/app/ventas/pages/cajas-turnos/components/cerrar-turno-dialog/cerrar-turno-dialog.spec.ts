@@ -3,10 +3,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { CajaTurnosApi } from '../../../../../api/ventas/caja-turnos/caja-turnos-api';
+import { ToastService } from '../../../../../shared/services/toast/toast.service';
 import { CerrarTurnoDialog, diferenciaFormateada, importeEnCentavos } from './cerrar-turno-dialog';
 
 describe('CerrarTurnoDialog', () => {
   const resumen = vi.fn();
+  const cerrar = vi.fn();
   const close = vi.fn();
   const datos = {
     id: 't1', cajaId: 'c1', saldoInicial: '50.00', cobrosEfectivo: '100.00',
@@ -20,7 +22,8 @@ describe('CerrarTurnoDialog', () => {
     client = new QueryClient();
     TestBed.configureTestingModule({ providers: [
       provideTanStackQuery(client),
-      { provide: CajaTurnosApi, useValue: { resumen } },
+      { provide: CajaTurnosApi, useValue: { resumen, cerrar } },
+      { provide: ToastService, useValue: { success: vi.fn() } },
       { provide: DIALOG_DATA, useValue: { cajaId: 'c1', nombre: 'Caja principal', turnoId: 't1' } },
       { provide: DialogRef, useValue: { id: 'cerrar-turno-c1', close } },
     ] });
@@ -132,5 +135,75 @@ describe('CerrarTurnoDialog', () => {
     expect(fixture.nativeElement.textContent).toContain('importe no negativo');
     expect(fixture.nativeElement.textContent).toContain('500 caracteres');
     expect(fixture.componentInstance.formularioValido()).toBe(false);
+  });
+
+  it('solicita otra confirmación si cambia el total y conserva los datos', async () => {
+    resumen.mockResolvedValueOnce(datos).mockResolvedValue({ ...datos, efectivoEsperado: '160.00' });
+    cerrar.mockResolvedValue({ id: 't1' });
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    const dialog = fixture.componentInstance;
+    dialog.efectivoContado.set('158');
+    dialog.observacionCierre.set('Revisar');
+    await dialog.submitForm(new Event('submit'));
+    expect(cerrar).not.toHaveBeenCalled();
+    expect(dialog.aviso()).toContain('confirma nuevamente');
+    await vi.waitFor(() => expect(dialog.resumenQuery.data()?.efectivoEsperado).toBe('160.00'));
+    expect(dialog.efectivoContado()).toBe('158');
+    expect(dialog.observacionCierre()).toBe('Revisar');
+    await dialog.submitForm(new Event('submit'));
+    expect(cerrar).toHaveBeenCalledWith('c1', 't1', {
+      efectivoContado: '158', efectivoEsperadoConfirmado: '160.00', observacionCierre: 'Revisar',
+    });
+  });
+
+  it('cierra sin confirmación adicional si cambia el desglose pero no el total', async () => {
+    resumen.mockResolvedValueOnce(datos).mockResolvedValue({ ...datos, cobrosEfectivo: '110.00', efectivoEsperado: '157.0' });
+    cerrar.mockResolvedValue({ id: 't1' });
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    fixture.componentInstance.efectivoContado.set('0');
+    await fixture.componentInstance.submitForm(new Event('submit'));
+    expect(cerrar).toHaveBeenCalledWith('c1', 't1', { efectivoContado: '0', efectivoEsperadoConfirmado: '157.0' });
+    expect(close).toHaveBeenCalledWith({ id: 't1' });
+  });
+
+  it('reconsulta tras un conflicto de total y exige otra confirmación sin perder lo escrito', async () => {
+    resumen.mockResolvedValueOnce(datos).mockResolvedValueOnce(datos).mockResolvedValue({ ...datos, efectivoEsperado: '161.00' });
+    cerrar.mockRejectedValueOnce(new HttpErrorResponse({ status: 409, error: { code: 'EFECTIVO_ESPERADO_CAMBIO' } }))
+      .mockResolvedValueOnce({ id: 't1' });
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    const dialog = fixture.componentInstance;
+    dialog.efectivoContado.set('158');
+    dialog.observacionCierre.set('Nota');
+    await dialog.submitForm(new Event('submit'));
+    expect(cerrar).toHaveBeenCalledTimes(1);
+    expect(close).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(dialog.resumenQuery.data()?.efectivoEsperado).toBe('161.00'));
+    expect(dialog.aviso()).toContain('confirma nuevamente');
+    expect(dialog.observacionCierre()).toBe('Nota');
+    await dialog.submitForm(new Event('submit'));
+    expect(cerrar).toHaveBeenLastCalledWith('c1', 't1', {
+      efectivoContado: '158', efectivoEsperadoConfirmado: '161.00', observacionCierre: 'Nota',
+    });
+  });
+
+  it('no envía el cierre cuando falla la reconsulta', async () => {
+    resumen.mockResolvedValueOnce(datos).mockRejectedValue(new Error('Sin conexión'));
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    fixture.componentInstance.efectivoContado.set('157');
+    await fixture.componentInstance.submitForm(new Event('submit'));
+    expect(cerrar).not.toHaveBeenCalled();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('No se pudo actualizar el resumen');
+    });
+    expect(fixture.componentInstance.efectivoContado()).toBe('157');
   });
 });

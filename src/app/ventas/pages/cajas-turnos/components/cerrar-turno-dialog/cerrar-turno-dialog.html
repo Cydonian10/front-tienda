@@ -6,7 +6,7 @@
       <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
       Cargando el resumen del turno…
     </div>
-  } @else if (resumenQuery.isError()) {
+  } @else if (turnoCerrado || (resumenQuery.isError() && !resumenQuery.data())) {
     <div role="alert" class="alert alert-error alert-soft">
       @if (turnoCerrado) {
         <span>Este turno ya fue cerrado. Cierra el diálogo y actualiza el listado.</span>
@@ -20,6 +20,16 @@
       </button>
     }
   } @else if (resumenQuery.data(); as resumen) {
+    @if (resumenQuery.isError()) {
+      <div role="alert" class="alert alert-error alert-soft mb-4">No se pudo actualizar el resumen. Reintenta antes de cerrar el turno.</div>
+      <button type="button" class="btn mb-4" [disabled]="procesando() || resumenQuery.isFetching()" (click)="resumenQuery.refetch()">Reintentar</button>
+    }
+    @if (aviso()) {
+      <div role="alert" class="alert alert-warning alert-soft mb-4">{{ aviso() }}</div>
+    }
+    @if (errorCierre()) {
+      <div role="alert" class="alert alert-error alert-soft mb-4">{{ errorCierre() }}</div>
+    }
     <section aria-label="Desglose del efectivo" class="rounded-box bg-base-200 p-4">
       <dl class="space-y-2 text-sm">
         <div class="flex flex-wrap justify-between gap-x-4"><dt>Saldo inicial</dt><dd class="tabular-nums">S/ {{ resumen.saldoInicial }}</dd></div>
@@ -32,13 +42,13 @@
       </dl>
     </section>
 
-    <form [id]="formId" class="mt-5 space-y-4" novalidate>
+    <form [id]="formId" class="mt-5 space-y-4" (submit)="submitForm($event)" novalidate>
       <fieldset class="fieldset">
         <label class="fieldset-legend" [attr.for]="formId + '-contado'">Efectivo realmente contado (S/)</label>
         <input [id]="formId + '-contado'" class="input w-full" type="text" inputmode="decimal" placeholder="0.00"
           [class.input-error]="contadoInvalido()" [attr.aria-invalid]="contadoInvalido()"
           [attr.aria-describedby]="contadoInvalido() ? formId + '-contado-error' : null"
-          [value]="efectivoContado()" (input)="efectivoContado.set($any($event.target).value)" (blur)="contadoTocado.set(true)" />
+          [disabled]="procesando()" [value]="efectivoContado()" (input)="efectivoContado.set($any($event.target).value)" (blur)="contadoTocado.set(true)" />
         @if (contadoInvalido()) {
           <p [id]="formId + '-contado-error'" class="text-sm text-error">Ingresa un importe no negativo de hasta 16 dígitos y dos decimales.</p>
         }
@@ -58,7 +68,7 @@
         <textarea [id]="formId + '-observacion'" class="textarea w-full" rows="2" placeholder="Explica una diferencia, si la hay"
           [class.textarea-error]="observacionInvalida()" [attr.aria-invalid]="observacionInvalida()"
           [attr.aria-describedby]="observacionInvalida() ? formId + '-observacion-error' : null"
-          [value]="observacionCierre()" (input)="observacionCierre.set($any($event.target).value)"></textarea>
+          [disabled]="procesando()" [value]="observacionCierre()" (input)="observacionCierre.set($any($event.target).value)"></textarea>
         @if (observacionInvalida()) {
           <p [id]="formId + '-observacion-error'" class="text-sm text-error">La observación no puede superar los 500 caracteres.</p>
         }
@@ -68,7 +78,10 @@
   }
 
   <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
-    <button type="button" class="btn" data-dialog-cancel (click)="dialogRef.close()">Cancelar</button>
-    <button type="button" class="btn btn-primary" disabled>Cuadrar y cerrar turno</button>
+    <button type="button" class="btn" data-dialog-cancel [disabled]="procesando()" (click)="dialogRef.close()">Cancelar</button>
+    <button type="submit" class="btn btn-primary" [attr.form]="formId"
+      [disabled]="procesando() || resumenQuery.isFetching() || resumenQuery.isError() || turnoCerrado || !resumenQuery.data() || !formularioValido()">
+      {{ procesando() ? 'Verificando…' : 'Cuadrar y cerrar turno' }}
+    </button>
   </div>
 </app-dialog-shell>

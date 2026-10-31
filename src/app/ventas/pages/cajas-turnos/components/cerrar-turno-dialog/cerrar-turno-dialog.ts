@@ -2,7 +2,8 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { DialogShell } from '../../../../../shared/components/dialog-shell/dialog-shell';
-import { useResumenTurno } from '../../../../actions/use-caja-turnos-action';
+import { apiMessage } from '../../../../../shared/interceptors/api-error.interceptor';
+import { useCajaTurnos, useResumenTurno } from '../../../../actions/use-caja-turnos-action';
 
 export function importeEnCentavos(importe: string, admiteNegativo = false): bigint | null {
   const patron = admiteNegativo ? /^-?\d{1,16}(\.\d{1,2})?$/ : /^\d{1,16}(\.\d{1,2})?$/;
@@ -33,7 +34,12 @@ export class CerrarTurnoDialog {
   readonly efectivoContado = signal('');
   readonly observacionCierre = signal('');
   readonly contadoTocado = signal(false);
+  readonly procesando = signal(false);
+  readonly aviso = signal('');
+  readonly errorCierre = signal('');
+  readonly cerradoPorOtroUsuario = signal(false);
   readonly resumenQuery = useResumenTurno(() => this.data.cajaId, () => this.data.turnoId);
+  readonly cerrarMutation = useCajaTurnos().cerrarMutation;
   readonly contadoCentavos = computed(() => importeEnCentavos(this.efectivoContado().trim()));
   readonly contadoInvalido = computed(() =>
     this.contadoCentavos() === null && (this.contadoTocado() || this.efectivoContado().length > 0),
@@ -53,6 +59,59 @@ export class CerrarTurnoDialog {
 
   get turnoCerrado(): boolean {
     const error = this.resumenQuery.error();
-    return error instanceof HttpErrorResponse && error.status === 409;
+    return this.cerradoPorOtroUsuario() || (error instanceof HttpErrorResponse && error.status === 409);
+  }
+
+  async submitForm(event: Event): Promise<void> {
+    event.preventDefault();
+    this.contadoTocado.set(true);
+    const resumen = this.resumenQuery.data();
+    if (this.procesando() || this.resumenQuery.isFetching() || this.resumenQuery.isError() ||
+      this.turnoCerrado || !resumen || !this.formularioValido()) return;
+    const esperadoAnterior = importeEnCentavos(resumen.efectivoEsperado, true);
+    if (esperadoAnterior === null) {
+      this.errorCierre.set('El efectivo esperado recibido no es válido. Vuelve a consultar el resumen.');
+      return;
+    }
+
+    this.procesando.set(true);
+    this.dialogRef.disableClose = true;
+    this.errorCierre.set('');
+    this.aviso.set('');
+    try {
+      const actualizacion = await this.resumenQuery.refetch();
+      if (actualizacion.isError || !actualizacion.data) return;
+      const esperadoActual = importeEnCentavos(actualizacion.data.efectivoEsperado, true);
+      if (esperadoActual === null) {
+        this.errorCierre.set('El efectivo esperado recibido no es válido. Vuelve a consultar el resumen.');
+        return;
+      }
+      if (esperadoActual !== esperadoAnterior) {
+        this.aviso.set('El efectivo esperado cambió. Revisa el resumen actualizado y confirma nuevamente.');
+        return;
+      }
+      const cierre = await this.cerrarMutation.mutateAsync({
+        cajaId: this.data.cajaId,
+        turnoId: this.data.turnoId,
+        dto: {
+          efectivoContado: this.efectivoContado().trim(),
+          efectivoEsperadoConfirmado: actualizacion.data.efectivoEsperado,
+          ...(this.observacionCierre() ? { observacionCierre: this.observacionCierre() } : {}),
+        },
+      });
+      this.dialogRef.close(cierre);
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 409 && error.error?.code === 'EFECTIVO_ESPERADO_CAMBIO') {
+        this.aviso.set('El efectivo esperado cambió durante el cierre. Revisa el resumen actualizado y confirma nuevamente.');
+        await this.resumenQuery.refetch();
+      } else if (error instanceof HttpErrorResponse && error.status === 409) {
+        this.cerradoPorOtroUsuario.set(true);
+      } else {
+        this.errorCierre.set(error instanceof HttpErrorResponse ? apiMessage(error) : 'No se pudo cerrar el turno. Inténtalo de nuevo.');
+      }
+    } finally {
+      this.dialogRef.disableClose = false;
+      this.procesando.set(false);
+    }
   }
 }

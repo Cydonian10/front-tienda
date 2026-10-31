@@ -1,0 +1,42 @@
+<app-dialog-shell title="Abrir turno" [titleId]="titleId">
+  <p class="mb-5 text-sm text-base-content/70">{{ data.nombre }}</p>
+
+  <form [id]="formId" (submit)="submitForm($event)" novalidate>
+    <fieldset class="fieldset">
+      <label class="fieldset-legend" [attr.for]="formId + '-saldo'">Saldo inicial en efectivo (S/)</label>
+      <input
+        [id]="formId + '-saldo'"
+        class="input w-full"
+        type="text"
+        inputmode="decimal"
+        placeholder="0.00"
+        [value]="turnoAnterior()?.efectivoContado ?? saldoInicial()"
+        [readOnly]="!!turnoAnterior()"
+        [disabled]="abrirMutation.isPending()"
+        [attr.aria-describedby]="formId + '-ayuda'"
+        (input)="saldoInicial.set($any($event.target).value)"
+      />
+      <p class="mt-2 text-sm text-base-content/70" [id]="formId + '-ayuda'">
+        @if (faltaEfectivoContado()) {
+          El turno anterior no tiene efectivo contado. No se puede abrir un nuevo turno.
+        } @else if (turnoAnterior()) {
+          El saldo inicial se hereda del efectivo contado en el turno anterior.
+        } @else {
+          Ingresa el monto inicial del primer turno del día.
+        }
+      </p>
+    </fieldset>
+    @if (serverError()) {
+      <div role="alert" class="alert alert-error alert-soft mt-3">{{ serverError() }}</div>
+    }
+  </form>
+
+  <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
+    <button type="button" class="btn" data-dialog-cancel [disabled]="abrirMutation.isPending()" (click)="dialogRef.close()">
+      Cancelar
+    </button>
+    <button type="submit" class="btn btn-primary" [attr.form]="formId" [disabled]="abrirMutation.isPending() || faltaEfectivoContado()">
+      {{ abrirMutation.isPending() ? 'Abriendo…' : 'Abrir turno' }}
+    </button>
+  </div>
+</app-dialog-shell>

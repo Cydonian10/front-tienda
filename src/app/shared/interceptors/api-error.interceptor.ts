@@ -8,7 +8,7 @@ import { ToastService } from '../services/toast/toast.service';
 /** Para peticiones cuyo error ya se muestra en el formulario o en la página. */
 export const SKIP_API_ERROR_TOAST = new HttpContextToken<boolean>(() => false);
 
-function apiMessage(error: HttpErrorResponse): string {
+export function apiMessage(error: HttpErrorResponse): string {
   if (error.status === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión.';
 
   // No mostrar detalles internos del servidor ni mensajes técnicos del navegador.

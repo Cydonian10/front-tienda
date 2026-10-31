@@ -34,7 +34,8 @@
     } @else {
       <p class="text-sm text-base-content/70">Sin turnos registrados.</p>
     }
-    <button type="button" class="btn btn-outline mt-auto" disabled>
+    <button type="button" class="btn btn-outline mt-auto"
+      [disabled]="!!turnoAbierto() || !caja().activo" (click)="abrirTurno()">
       {{ turnoAbierto() ? 'Cerrar turno' : 'Abrir turno' }}
     </button>
   </div>

@@ -3,19 +3,7 @@
   <app-cajas-turnos-resumen />
 
   <section aria-labelledby="listado-cajas-titulo" class="space-y-5">
-    <div class="flex gap-x-3 border-b border-base-300 sm:gap-x-6" aria-label="Filtros de cajas">
-      <span
-        class="border-b-2 border-primary px-1 pb-3 text-xs font-semibold text-primary sm:text-sm"
-      >
-        Todas las cajas <span class="badge badge-sm badge-ghost ml-1">2</span>
-      </span>
-      <button type="button" disabled class="pb-3 text-xs text-base-content/60 sm:text-sm">
-        Abiertas <span class="badge badge-sm badge-ghost ml-1">1</span>
-      </button>
-      <button type="button" disabled class="pb-3 text-xs text-base-content/60 sm:text-sm">
-        Cerradas <span class="badge badge-sm badge-ghost ml-1">1</span>
-      </button>
-    </div>
+    <app-cajas-filtro [filtro]="filtro()" />
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <label class="input w-full sm:max-w-xs">
@@ -41,150 +29,25 @@
           disabled
         />
       </label>
-      <span class="text-sm text-base-content/70"
-        >viernes, 30 de octubre <span class="sr-only">(fecha de ejemplo)</span></span
-      >
     </div>
 
-    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-      <article class="card border border-success/40 bg-base-100">
-        <div class="flex flex-1 flex-col gap-5 p-5 sm:p-6">
-          <header class="flex items-center justify-between gap-3 border-b border-base-300 pb-5">
-            <div class="flex min-w-0 items-center gap-3">
-              <div
-                class="flex size-11 shrink-0 items-center justify-center rounded-field bg-success/15 text-success"
-              >
-                <svg
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="size-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                >
-                  <path stroke-linejoin="round" d="M4 5h16v14H4zM7 8h10v8H7z" />
-                </svg>
-              </div>
-              <div class="min-w-0">
-                <h3 class="font-semibold">Caja principal</h3>
-                <p class="mt-1 text-xs text-base-content/70">
-                  CJ-001 · Mostrador · Tienda principal
-                </p>
-              </div>
-            </div>
-            <span class="badge badge-success badge-soft shrink-0">Abierta</span>
-          </header>
-
-          <div class="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p class="text-xs text-base-content/70">Efectivo esperado</p>
-              <p class="mt-2 text-2xl font-bold tracking-tight tabular-nums">
-                <span class="text-base font-medium text-base-content/70">S/</span> 160.00
-              </p>
-            </div>
-            <p class="text-right text-xs leading-relaxed text-base-content/70">
-              Turno <strong class="text-base-content">#01</strong><br />Abierto a las 21:04
-            </p>
-          </div>
-
-          <dl
-            class="grid grid-cols-3 divide-x divide-base-300 rounded-field bg-base-200 px-3 py-3 sm:px-4"
-          >
-            <div class="pr-2">
-              <dt class="text-xs text-base-content/70">Saldo inicial</dt>
-              <dd class="mt-1 text-sm font-semibold tabular-nums">S/ 50.00</dd>
-            </div>
-            <div class="px-2 sm:px-4">
-              <dt class="text-xs text-base-content/70">Ventas en efectivo</dt>
-              <dd class="mt-1 text-sm font-semibold tabular-nums">S/ 100.00</dd>
-            </div>
-            <div class="pl-2 sm:pl-4">
-              <dt class="text-xs text-base-content/70">Ventas Yape</dt>
-              <dd class="mt-1 text-sm font-semibold tabular-nums">S/ 68.00</dd>
-            </div>
-          </dl>
-
-          <div class="mt-auto grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <button type="button" class="btn btn-outline" disabled>Movimiento</button>
-            <button type="button" class="btn btn-outline" disabled>Cerrar turno</button>
-            <button type="button" class="btn btn-primary" disabled>Cerrar día</button>
-          </div>
-        </div>
-        <footer
-          class="flex flex-wrap justify-between gap-2 border-t border-base-300 px-5 py-3 text-xs text-base-content/70 sm:px-6"
-        >
-          <span>Responsable: Gabriel</span><span>2 ventas en este turno</span>
-        </footer>
-      </article>
-
-      <article class="card border border-base-300 bg-base-100">
-        <div class="flex flex-1 flex-col gap-5 p-5 sm:p-6">
-          <header class="flex items-center justify-between gap-3 border-b border-base-300 pb-5">
-            <div class="flex min-w-0 items-center gap-3">
-              <div
-                class="flex size-11 shrink-0 items-center justify-center rounded-field bg-base-200 text-base-content/70"
-              >
-                <svg
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="size-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                >
-                  <path stroke-linejoin="round" d="M4 5h16v14H4zM7 8h10v8H7z" />
-                </svg>
-              </div>
-              <div class="min-w-0">
-                <h3 class="font-semibold">Caja secundaria</h3>
-                <p class="mt-1 text-xs text-base-content/70">
-                  CJ-002 · Mostrador 2 · Tienda principal
-                </p>
-              </div>
-            </div>
-            <span class="badge badge-ghost shrink-0">Cerrada</span>
-          </header>
-
-          <div class="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p class="text-xs text-base-content/70">Último efectivo contado</p>
-              <p class="mt-2 text-2xl font-bold tracking-tight tabular-nums">
-                <span class="text-base font-medium text-base-content/70">S/</span> 0.00
-              </p>
-            </div>
-            <p class="text-right text-xs leading-relaxed text-base-content/70">
-              Sin turnos hoy<br />Lista para empezar
-            </p>
-          </div>
-
-          <p class="flex flex-1 items-center gap-2 py-3 text-sm text-base-content/70">
-            <svg
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              class="size-4 shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="1.7"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 8v4l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-              />
-            </svg>
-            Abre un turno para registrar ventas y movimientos.
-          </p>
-          <button type="button" class="btn btn-primary w-full" disabled>Abrir turno</button>
-        </div>
-        <footer
-          class="flex flex-wrap justify-between gap-2 border-t border-base-300 px-5 py-3 text-xs text-base-content/70 sm:px-6"
-        >
-          <span>Sin turno activo</span><span>Control de efectivo</span>
-        </footer>
-      </article>
-    </div>
+    @if (listQuery.isPending()) {
+      <p role="status" class="text-sm text-base-content/70">Cargando cajas...</p>
+    } @else if (listQuery.isError()) {
+      <div role="alert" class="text-sm text-error">
+        No se pudieron cargar las cajas.
+        <button type="button" class="btn btn-sm btn-ghost" (click)="listQuery.refetch()">
+          Reintentar
+        </button>
+      </div>
+    } @else if (cajas().length === 0) {
+      <p class="text-sm text-base-content/70">No hay cajas para este filtro.</p>
+    } @else {
+      <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        @for (caja of cajas(); track caja.id) {
+          <app-caja-card [caja]="caja" />
+        }
+      </div>
+    }
   </section>
 </section>

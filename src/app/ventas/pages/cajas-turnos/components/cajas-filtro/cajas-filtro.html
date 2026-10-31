@@ -1,0 +1,22 @@
+<nav class="flex gap-x-3 border-b border-base-300 sm:gap-x-6" aria-label="Filtros de cajas">
+  @for (
+    opcion of [
+      { valor: 'todas', texto: 'Todas las cajas' },
+      { valor: 'abiertas', texto: 'Abiertas' },
+      { valor: 'cerradas', texto: 'Cerradas' },
+    ];
+    track opcion.valor
+  ) {
+    <a
+      class="border-b-2 px-1 pb-3 pt-2 text-xs font-semibold sm:text-sm"
+      [class.border-primary]="filtro() === opcion.valor"
+      [class.text-primary]="filtro() === opcion.valor"
+      [class.border-transparent]="filtro() !== opcion.valor"
+      [attr.aria-current]="filtro() === opcion.valor ? 'page' : null"
+      [routerLink]="[]"
+      [queryParams]="{ turno: opcion.valor === 'todas' ? null : opcion.valor }"
+      queryParamsHandling="merge"
+      >{{ opcion.texto }}</a
+    >
+  }
+</nav>

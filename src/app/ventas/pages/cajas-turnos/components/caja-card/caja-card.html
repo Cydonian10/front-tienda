@@ -1,0 +1,41 @@
+<article class="card card-border h-full bg-base-100" [class.border-success/40]="!!turnoAbierto()">
+  <div class="card-body gap-5 p-5 sm:p-6">
+    <header class="flex items-center justify-between gap-3 border-b border-base-300 pb-5">
+      <div class="min-w-0">
+        <h3 class="font-semibold">{{ caja().nombre }}</h3>
+        <p class="mt-1 text-xs text-base-content/70">
+          {{ caja().codigo }} · {{ caja().activo ? 'Activa' : 'Inactiva' }}
+        </p>
+      </div>
+      <span
+        class="badge shrink-0"
+        [class.badge-success]="!!turnoAbierto()"
+        [class.badge-soft]="!!turnoAbierto()"
+        [class.badge-ghost]="!turnoAbierto()"
+        >{{ turnoAbierto() ? 'Abierta' : 'Cerrada' }}</span
+      >
+    </header>
+    @if (ultimoTurno(); as turno) {
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="text-xs text-base-content/70">
+            {{ turnoAbierto() ? 'Efectivo esperado' : 'Último efectivo contado' }}
+          </p>
+          <p class="mt-2 text-2xl font-bold tabular-nums">
+            S/ {{ turnoAbierto() ? turno.efectivoEsperado : (turno.efectivoContado ?? '—') }}
+          </p>
+        </div>
+        <p class="text-right text-xs text-base-content/70">
+          Abierto el {{ turno.fechaApertura | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+      <p class="text-sm text-base-content/70">Saldo inicial: S/ {{ turno.saldoInicial }}</p>
+      <p class="text-xs text-base-content/70">Responsable: {{ turno.usuarioApertura.nickName }}</p>
+    } @else {
+      <p class="text-sm text-base-content/70">Sin turnos registrados.</p>
+    }
+    <button type="button" class="btn btn-outline mt-auto" disabled>
+      {{ turnoAbierto() ? 'Cerrar turno' : 'Abrir turno' }}
+    </button>
+  </div>
+</article>

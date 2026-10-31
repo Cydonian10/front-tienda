@@ -1,15 +1,20 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { CajaTurnosApi } from '../../../../../api/ventas/caja-turnos/caja-turnos-api';
+import { AuthorizationService } from '../../../../../auth/services/authorization.service';
 import { ToastService } from '../../../../../shared/services/toast/toast.service';
+import { cajasQueryKey } from '../../../../actions/use-cajas-action';
 import { CerrarTurnoDialog, diferenciaFormateada, importeEnCentavos } from './cerrar-turno-dialog';
 
 describe('CerrarTurnoDialog', () => {
   const resumen = vi.fn();
   const cerrar = vi.fn();
   const close = vi.fn();
+  const permiso = signal(true);
+  const success = vi.fn();
   const datos = {
     id: 't1', cajaId: 'c1', saldoInicial: '50.00', cobrosEfectivo: '100.00',
     vueltosEfectivo: '1.00', ingresosManuales: '20.00', egresosManuales: '10.00',
@@ -19,11 +24,13 @@ describe('CerrarTurnoDialog', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
+    permiso.set(true);
     client = new QueryClient();
     TestBed.configureTestingModule({ providers: [
       provideTanStackQuery(client),
       { provide: CajaTurnosApi, useValue: { resumen, cerrar } },
-      { provide: ToastService, useValue: { success: vi.fn() } },
+      { provide: ToastService, useValue: { success } },
+      { provide: AuthorizationService, useValue: { hasPermission: () => permiso() } },
       { provide: DIALOG_DATA, useValue: { cajaId: 'c1', nombre: 'Caja principal', turnoId: 't1' } },
       { provide: DialogRef, useValue: { id: 'cerrar-turno-c1', close } },
     ] });
@@ -205,5 +212,101 @@ describe('CerrarTurnoDialog', () => {
       expect(fixture.nativeElement.textContent).toContain('No se pudo actualizar el resumen');
     });
     expect(fixture.componentInstance.efectivoContado()).toBe('157');
+  });
+
+  it('al cerrar invalida el listado, muestra confirmación y cierra el diálogo', async () => {
+    const key = cajasQueryKey({ estado: 'activas' });
+    client.setQueryData(key, []);
+    resumen.mockResolvedValue(datos);
+    cerrar.mockResolvedValue({ id: 't1' });
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    fixture.componentInstance.efectivoContado.set('157');
+    await fixture.componentInstance.submitForm(new Event('submit'));
+    expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(success).toHaveBeenCalledWith('Turno cerrado correctamente.');
+    expect(close).toHaveBeenCalledWith({ id: 't1' });
+  });
+
+  it('conserva lo escrito y permite reintentar cuando falla el cierre', async () => {
+    resumen.mockResolvedValue(datos);
+    cerrar.mockRejectedValueOnce(new HttpErrorResponse({ status: 503 })).mockResolvedValueOnce({ id: 't1' });
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    const dialog = fixture.componentInstance;
+    dialog.efectivoContado.set('158');
+    dialog.observacionCierre.set('Nota');
+    await dialog.submitForm(new Event('submit'));
+    expect(dialog.errorCierre()).toContain('servidor');
+    expect(dialog.efectivoContado()).toBe('158');
+    expect(dialog.observacionCierre()).toBe('Nota');
+    expect(close).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(dialog.resumenQuery.isFetching()).toBe(false));
+    await dialog.submitForm(new Event('submit'));
+    expect(cerrar).toHaveBeenCalledTimes(2);
+    expect(close).toHaveBeenCalledWith({ id: 't1' });
+  });
+
+  it('bloquea cierres duplicados durante la reconsulta y la mutación', async () => {
+    let resolverResumen!: (value: typeof datos) => void;
+    let resolverCierre!: (value: { id: string }) => void;
+    resumen.mockResolvedValueOnce(datos).mockImplementationOnce(() => new Promise((resolve) => { resolverResumen = resolve; }));
+    cerrar.mockImplementation(() => new Promise((resolve) => { resolverCierre = resolve; }));
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    const dialog = fixture.componentInstance;
+    dialog.efectivoContado.set('157');
+    const primerEnvio = dialog.submitForm(new Event('submit'));
+    await dialog.submitForm(new Event('submit'));
+    fixture.detectChanges();
+    expect(dialog.procesando()).toBe(true);
+    expect(dialog.dialogRef.disableClose).toBe(true);
+    expect(fixture.nativeElement.querySelector('.btn-primary').disabled).toBe(true);
+    expect(resumen).toHaveBeenCalledTimes(2);
+    resolverResumen(datos);
+    await vi.waitFor(() => expect(cerrar).toHaveBeenCalledTimes(1));
+    await dialog.submitForm(new Event('submit'));
+    expect(cerrar).toHaveBeenCalledTimes(1);
+    resolverCierre({ id: 't1' });
+    await primerEnvio;
+    expect(dialog.procesando()).toBe(false);
+    expect(dialog.dialogRef.disableClose).toBe(false);
+  });
+
+  it('vuelve a comprobar el permiso tras la reconsulta antes de enviar', async () => {
+    let resolverResumen!: (value: typeof datos) => void;
+    resumen.mockResolvedValueOnce(datos).mockImplementationOnce(() => new Promise((resolve) => { resolverResumen = resolve; }));
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    const dialog = fixture.componentInstance;
+    dialog.efectivoContado.set('157');
+    const envio = dialog.submitForm(new Event('submit'));
+    permiso.set(false);
+    resolverResumen(datos);
+    await envio;
+    fixture.detectChanges();
+    expect(cerrar).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('Ya no tienes permiso');
+    expect(fixture.nativeElement.querySelector('.btn-primary').disabled).toBe(true);
+    await dialog.submitForm(new Event('submit'));
+    expect(cerrar).not.toHaveBeenCalled();
+  });
+
+  it('identifica un turno cerrado por otro usuario durante la mutación', async () => {
+    resumen.mockResolvedValue(datos);
+    cerrar.mockRejectedValue(new HttpErrorResponse({ status: 409, error: { message: 'El turno ya está cerrado' } }));
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    fixture.componentInstance.efectivoContado.set('157');
+    await fixture.componentInstance.submitForm(new Event('submit'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Este turno ya fue cerrado');
+    expect(close).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('.btn-primary').disabled).toBe(true);
   });
 });

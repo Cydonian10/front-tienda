@@ -1,6 +1,8 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
+import { PERMISSION_CODES } from '../../../../../api/interfaces/access-control/permision.interface';
+import { usePermissions } from '../../../../../auth/services/use-permissions';
 import { DialogShell } from '../../../../../shared/components/dialog-shell/dialog-shell';
 import { apiMessage } from '../../../../../shared/interceptors/api-error.interceptor';
 import { useCajaTurnos, useResumenTurno } from '../../../../actions/use-caja-turnos-action';
@@ -40,6 +42,7 @@ export class CerrarTurnoDialog {
   readonly cerradoPorOtroUsuario = signal(false);
   readonly resumenQuery = useResumenTurno(() => this.data.cajaId, () => this.data.turnoId);
   readonly cerrarMutation = useCajaTurnos().cerrarMutation;
+  readonly permissions = usePermissions('VENTAS', { cajasTurnos: PERMISSION_CODES.CAJAS_TURNOS_READ });
   readonly contadoCentavos = computed(() => importeEnCentavos(this.efectivoContado().trim()));
   readonly contadoInvalido = computed(() =>
     this.contadoCentavos() === null && (this.contadoTocado() || this.efectivoContado().length > 0),
@@ -66,7 +69,7 @@ export class CerrarTurnoDialog {
     event.preventDefault();
     this.contadoTocado.set(true);
     const resumen = this.resumenQuery.data();
-    if (this.procesando() || this.resumenQuery.isFetching() || this.resumenQuery.isError() ||
+    if (!this.permissions.cajasTurnos() || this.procesando() || this.resumenQuery.isFetching() || this.resumenQuery.isError() ||
       this.turnoCerrado || !resumen || !this.formularioValido()) return;
     const esperadoAnterior = importeEnCentavos(resumen.efectivoEsperado, true);
     if (esperadoAnterior === null) {
@@ -90,6 +93,7 @@ export class CerrarTurnoDialog {
         this.aviso.set('El efectivo esperado cambió. Revisa el resumen actualizado y confirma nuevamente.');
         return;
       }
+      if (!this.permissions.cajasTurnos()) return;
       const cierre = await this.cerrarMutation.mutateAsync({
         cajaId: this.data.cajaId,
         turnoId: this.data.turnoId,

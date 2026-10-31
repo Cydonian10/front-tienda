@@ -1,12 +1,15 @@
 import { Dialog } from '@angular/cdk/dialog';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { CajaConTurnos, TurnoCaja } from '../../../../../api/interfaces/ventas/caja.interface';
+import { AuthorizationService } from '../../../../../auth/services/authorization.service';
 import { AbrirTurnoDialog } from '../abrir-turno-dialog/abrir-turno-dialog';
 import { CerrarTurnoDialog } from '../cerrar-turno-dialog/cerrar-turno-dialog';
 import { CajaCard } from './caja-card';
 
 describe('CajaCard', () => {
   const open = vi.fn();
+  const permiso = signal(true);
   const turno: TurnoCaja = {
     id: 't1', usuarioApertura: { id: 'u1', nickName: 'usuario' }, usuarioCierre: null,
     fechaOperativa: '2026-10-31', fechaApertura: '2026-10-31T10:00:00Z', fechaCierre: null,
@@ -16,7 +19,11 @@ describe('CajaCard', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    TestBed.configureTestingModule({ providers: [{ provide: Dialog, useValue: { open } }] });
+    permiso.set(true);
+    TestBed.configureTestingModule({ providers: [
+      { provide: Dialog, useValue: { open } },
+      { provide: AuthorizationService, useValue: { hasPermission: () => permiso() } },
+    ] });
   });
   afterEach(() => TestBed.resetTestingModule());
 
@@ -67,5 +74,16 @@ describe('CajaCard', () => {
     expect(button.disabled).toBe(false);
     button.click();
     expect(open).toHaveBeenCalledWith(CerrarTurnoDialog, expect.anything());
+  });
+
+  it('bloquea la acción cuando se revoca el permiso de acceso vigente', () => {
+    const fixture = TestBed.createComponent(CajaCard);
+    fixture.componentRef.setInput('caja', caja);
+    fixture.detectChanges();
+    permiso.set(false);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('button').disabled).toBe(true);
+    fixture.componentInstance.cerrarTurno();
+    expect(open).not.toHaveBeenCalled();
   });
 });

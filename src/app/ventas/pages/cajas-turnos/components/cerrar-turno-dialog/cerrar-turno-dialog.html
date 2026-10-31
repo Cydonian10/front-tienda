@@ -1,5 +1,8 @@
 <app-dialog-shell title="Cerrar turno" [titleId]="titleId">
   <p class="mb-5 text-sm text-base-content/70">{{ data.nombre }}</p>
+  @if (!permissions.cajasTurnos()) {
+    <div role="alert" class="alert alert-error alert-soft mb-4">Ya no tienes permiso para acceder a cajas y turnos.</div>
+  }
 
   @if (resumenQuery.isPending()) {
     <div class="flex items-center gap-3 py-6 text-sm" role="status">
@@ -80,7 +83,7 @@
   <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
     <button type="button" class="btn" data-dialog-cancel [disabled]="procesando()" (click)="dialogRef.close()">Cancelar</button>
     <button type="submit" class="btn btn-primary" [attr.form]="formId"
-      [disabled]="procesando() || resumenQuery.isFetching() || resumenQuery.isError() || turnoCerrado || !resumenQuery.data() || !formularioValido()">
+      [disabled]="!permissions.cajasTurnos() || procesando() || resumenQuery.isFetching() || resumenQuery.isError() || turnoCerrado || !resumenQuery.data() || !formularioValido()">
       {{ procesando() ? 'Verificando…' : 'Cuadrar y cerrar turno' }}
     </button>
   </div>

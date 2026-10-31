@@ -1,7 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { Dialog } from '@angular/cdk/dialog';
 import { Component, computed, inject, input } from '@angular/core';
+import { PERMISSION_CODES } from '../../../../../api/interfaces/access-control/permision.interface';
 import type { CajaConTurnos } from '../../../../../api/interfaces/ventas/caja.interface';
+import { usePermissions } from '../../../../../auth/services/use-permissions';
 import { AbrirTurnoDialog } from '../abrir-turno-dialog/abrir-turno-dialog';
 import { CerrarTurnoDialog } from '../cerrar-turno-dialog/cerrar-turno-dialog';
 
@@ -13,6 +15,7 @@ import { CerrarTurnoDialog } from '../cerrar-turno-dialog/cerrar-turno-dialog';
 })
 export class CajaCard {
   private readonly dialog = inject(Dialog);
+  readonly permissions = usePermissions('VENTAS', { cajasTurnos: PERMISSION_CODES.CAJAS_TURNOS_READ });
   readonly caja = input.required<CajaConTurnos>();
   readonly turnoAbierto = computed(() =>
     this.caja().turnos.find((turno) => turno.fechaCierre === null),
@@ -20,7 +23,7 @@ export class CajaCard {
   readonly ultimoTurno = computed(() => this.turnoAbierto() ?? this.caja().turnos.at(-1));
 
   abrirTurno(): void {
-    if (!this.caja().activo || this.turnoAbierto()) return;
+    if (!this.permissions.cajasTurnos() || !this.caja().activo || this.turnoAbierto()) return;
     const id = `abrir-turno-${this.caja().id}`;
     this.dialog.open(AbrirTurnoDialog, {
       id,
@@ -37,7 +40,7 @@ export class CajaCard {
 
   cerrarTurno(): void {
     const turno = this.turnoAbierto();
-    if (!turno) return;
+    if (!turno || !this.permissions.cajasTurnos()) return;
     const id = `cerrar-turno-${this.caja().id}`;
     this.dialog.open(CerrarTurnoDialog, {
       id,

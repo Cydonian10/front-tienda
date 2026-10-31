@@ -1,8 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { ENVIRONMENT } from '../config/env-dev';
-import type { Caja, CajaConTurnos, CrearCajaDto, FiltrarCajasDto } from '../interfaces/ventas/caja.interface';
+import { ENVIRONMENT } from '../../config/env-dev';
+import type { Caja, CajaConTurnos, CrearCajaDto, FiltrarCajasDto } from '../../interfaces/ventas/caja.interface';
 
 @Injectable({ providedIn: 'root' })
 export class CajaApi {

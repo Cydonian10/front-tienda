@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import type { CrearCajaDto, FiltrarCajasDto } from '../../api/interfaces/ventas/caja.interface';
-import { CajaApi } from '../../api/ventas/caja-api';
+import { CajaApi } from '../../api/ventas/caja/caja-api';
 import { ToastService } from '../../shared/services/toast/toast.service';
 
 export const cajasListadoQueryKey = ['cajas', 'listado'] as const;

@@ -3,6 +3,7 @@ import { Dialog } from '@angular/cdk/dialog';
 import { Component, computed, inject, input } from '@angular/core';
 import type { CajaConTurnos } from '../../../../../api/interfaces/ventas/caja.interface';
 import { AbrirTurnoDialog } from '../abrir-turno-dialog/abrir-turno-dialog';
+import { CerrarTurnoDialog } from '../cerrar-turno-dialog/cerrar-turno-dialog';
 
 @Component({
   selector: 'app-caja-card',
@@ -24,6 +25,23 @@ export class CajaCard {
     this.dialog.open(AbrirTurnoDialog, {
       id,
       data: { cajaId: this.caja().id, nombre: this.caja().nombre, turnos: this.caja().turnos },
+      width: '34rem',
+      maxWidth: 'calc(100vw - 2rem)',
+      ariaModal: true,
+      ariaLabelledBy: `${id}-title`,
+      autoFocus: '[data-dialog-cancel]',
+      restoreFocus: true,
+      closeOnNavigation: true,
+    });
+  }
+
+  cerrarTurno(): void {
+    const turno = this.turnoAbierto();
+    if (!turno) return;
+    const id = `cerrar-turno-${this.caja().id}`;
+    this.dialog.open(CerrarTurnoDialog, {
+      id,
+      data: { cajaId: this.caja().id, nombre: this.caja().nombre, turnoId: turno.id },
       width: '34rem',
       maxWidth: 'calc(100vw - 2rem)',
       ariaModal: true,

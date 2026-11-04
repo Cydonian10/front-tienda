@@ -2,7 +2,7 @@ import { Component, computed, signal } from '@angular/core';
 import { PuntoVentaHeader } from './components/punto-venta-header/punto-venta-header';
 import { PreparacionVenta } from './components/preparacion-venta/preparacion-venta';
 import { PasosVenta } from './components/pasos-venta/pasos-venta';
-import { VentasRecientes } from './components/ventas-recientes/ventas-recientes';
+import { VentaReciente, VentasRecientes } from './components/ventas-recientes/ventas-recientes';
 
 type Vista = 'preparacion' | 'venta' | 'cobro' | 'ticket';
 
@@ -25,6 +25,8 @@ export default class PuntoVentaPage {
   readonly turno = signal('');
   readonly busqueda = signal('');
   readonly ticketReciente = signal(false);
+  readonly ventasRecientes = signal<readonly VentaReciente[]>([]);
+  readonly ventaRecienteSeleccionada = signal<VentaReciente | null>(null);
   readonly productos: ProductoEjemplo[] = [
     { id: 1, nombre: 'Martillo de uña', detalle: '16 oz · Unidad', precio: 28.5 },
     { id: 2, nombre: 'Cinta métrica', detalle: '5 metros · Unidad', precio: 18.9 },

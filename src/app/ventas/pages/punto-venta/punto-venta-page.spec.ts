@@ -18,7 +18,12 @@ describe('PuntoVentaPage', () => {
     expect(continuar.disabled).toBe(false);
     continuar.click();
     expect(fixture.componentInstance.vista()).toBe('venta');
+    expect(element.textContent).toContain('No hay ventas recientes');
+    const venta = { id: 'V-0003', caja: 'Caja principal', total: 60.8 };
+    fixture.componentInstance.ventasRecientes.set([venta]);
+    fixture.detectChanges();
     element.querySelector<HTMLButtonElement>('app-ventas-recientes button')!.click();
+    expect(fixture.componentInstance.ventaRecienteSeleccionada()).toEqual(venta);
     expect(fixture.componentInstance.ticketReciente()).toBe(true);
     expect(fixture.componentInstance.vista()).toBe('ticket');
   });

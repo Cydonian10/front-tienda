@@ -7,12 +7,15 @@
       (almacenChange)="almacen.set($event)"
       (turnoChange)="turno.set($event)"
       (continuar)="vista.set('venta')"
-    >
-      <app-preparacion-venta-header />
-    </app-preparacion-venta>
+    />
     <div class="space-y-5">
       <app-pasos-venta />
-      <app-ventas-recientes (verTicket)="ticketReciente.set(true); vista.set('ticket')" />
+      <app-ventas-recientes
+        [ventas]="ventasRecientes()"
+        (verTicket)="
+          ventaRecienteSeleccionada.set($event); ticketReciente.set(true); vista.set('ticket')
+        "
+      />
     </div>
   </div>
 </section>

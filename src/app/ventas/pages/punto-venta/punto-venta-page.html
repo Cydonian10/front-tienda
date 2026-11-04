@@ -4,18 +4,20 @@
     <app-preparacion-venta
       [almacen]="almacen()"
       [turno]="turno()"
+      [almacenes]="almacenesQuery.data()?.data ?? []"
+      [turnos]="turnos()"
+      [almacenesCargando]="almacenesQuery.isPending()"
+      [almacenesError]="almacenesQuery.isError()"
+      [turnosCargando]="cajasQuery.isPending()"
+      [turnosError]="cajasQuery.isError()"
       (almacenChange)="almacen.set($event)"
       (turnoChange)="turno.set($event)"
-      (continuar)="vista.set('venta')"
+      (reintentarAlmacenes)="almacenesQuery.refetch()"
+      (reintentarTurnos)="cajasQuery.refetch()"
     />
     <div class="space-y-5">
       <app-pasos-venta />
-      <app-ventas-recientes
-        [ventas]="ventasRecientes()"
-        (verTicket)="
-          ventaRecienteSeleccionada.set($event); ticketReciente.set(true); vista.set('ticket')
-        "
-      />
+      <app-ventas-recientes [ventas]="[]" />
     </div>
   </div>
 </section>

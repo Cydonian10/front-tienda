@@ -1,30 +1,38 @@
 import { TestBed } from '@angular/core/testing';
+import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
+import { AlmacenApi } from '../../../api/inventario/almacen-api';
+import { CajaApi } from '../../../api/ventas/caja/caja-api';
 import PuntoVentaPage from './punto-venta-page';
 
 describe('PuntoVentaPage', () => {
-  it('comunica la preparación y la selección de un ticket a la página', () => {
+  it('muestra almacenes activos y turnos abiertos y conserva los identificadores', async () => {
+    const client = new QueryClient();
+    const almacenes = vi.fn().mockResolvedValue({ data: [{ id: 'a1', nombre: 'Principal', activo: true }], meta: { totalPages: 1 } });
+    const cajas = vi.fn().mockResolvedValue([{ nombre: 'Caja 1', turnos: [
+      { id: 't1', fechaCierre: null, usuarioApertura: { nickName: 'Ana' } },
+      { id: 't2', fechaCierre: '2026-01-01', usuarioApertura: { nickName: 'Luis' } },
+    ] }]);
+    TestBed.configureTestingModule({ providers: [provideTanStackQuery(client),
+      { provide: AlmacenApi, useValue: { list: almacenes } },
+      { provide: CajaApi, useValue: { list: cajas } },
+    ] });
     const fixture = TestBed.createComponent(PuntoVentaPage);
     fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.cajasQuery.isSuccess() && fixture.componentInstance.almacenesQuery.isSuccess()).toBe(true));
+    fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
+    expect(element.textContent).toContain('Principal');
+    expect(element.textContent).toContain('Caja 1 · Ana');
+    expect(element.textContent).not.toContain('Luis');
     const almacen = element.querySelector<HTMLSelectElement>('#almacen')!;
     const turno = element.querySelector<HTMLSelectElement>('#turno')!;
-    const continuar = element.querySelector<HTMLButtonElement>('.btn-primary')!;
-    expect(continuar.disabled).toBe(true);
-    almacen.value = 'Almacén principal';
-    almacen.dispatchEvent(new Event('change'));
-    turno.value = 'Caja principal';
-    turno.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-    expect(continuar.disabled).toBe(false);
-    continuar.click();
-    expect(fixture.componentInstance.vista()).toBe('venta');
-    expect(element.textContent).toContain('No hay ventas recientes');
-    const venta = { id: 'V-0003', caja: 'Caja principal', total: 60.8 };
-    fixture.componentInstance.ventasRecientes.set([venta]);
-    fixture.detectChanges();
-    element.querySelector<HTMLButtonElement>('app-ventas-recientes button')!.click();
-    expect(fixture.componentInstance.ventaRecienteSeleccionada()).toEqual(venta);
-    expect(fixture.componentInstance.ticketReciente()).toBe(true);
-    expect(fixture.componentInstance.vista()).toBe('ticket');
+    almacen.value = 'a1'; almacen.dispatchEvent(new Event('change'));
+    turno.value = 't1'; turno.dispatchEvent(new Event('change'));
+    expect(fixture.componentInstance.almacen()).toBe('a1');
+    expect(fixture.componentInstance.turno()).toBe('t1');
+    expect(almacenes).toHaveBeenCalledWith(1, 100, '', true);
+    expect(cajas).toHaveBeenCalledWith({ estado: 'activas' });
+    fixture.destroy();
+    client.clear();
   });
 });

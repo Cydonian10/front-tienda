@@ -8,23 +8,35 @@
           class="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/30 text-xs font-semibold text-primary"
           >1</span
         >
-        <div class="min-w-0 flex-1">
-          <label for="almacen" class="block text-sm font-semibold">Almacén</label>
-          <p id="almacen-ayuda" class="mt-1 text-xs text-base-content/70">
-            ¿De dónde salen los productos?
-          </p>
+        <fieldset class="fieldset w-full">
+          <legend class="fieldset-legend">Almacén</legend>
           <select
             id="almacen"
-            class="select mt-3 w-full"
+            class="select w-full"
             [value]="almacen()"
+            [disabled]="almacenesCargando() || almacenesError() || !almacenes().length"
             (change)="seleccionar($event, 'almacen')"
             aria-describedby="almacen-ayuda"
           >
-            <option value="">Selecciona un almacén</option>
-            <option value="Almacén principal">Almacén principal · ejemplo</option>
-            <option value="Almacén secundario">Almacén secundario · ejemplo</option>
+            <option value="" disabled>Selecciona un almacén</option>
+            @for (item of almacenes(); track item.id) {
+              <option [value]="item.id">{{ item.nombre }}</option>
+            }
           </select>
-        </div>
+          <p id="almacen-ayuda" class="label">¿De dónde salen los productos?</p>
+        </fieldset>
+        @if (almacenesCargando()) {
+          <p role="status">Cargando almacenes…</p>
+        } @else if (almacenesError()) {
+          <p role="alert">
+            No se pudieron cargar los almacenes.
+            <button type="button" class="btn btn-sm" (click)="reintentarAlmacenes.emit()">
+              Reintentar
+            </button>
+          </p>
+        } @else if (!almacenes().length) {
+          <p>No hay almacenes activos disponibles.</p>
+        }
       </div>
       <div class="flex gap-4">
         <span
@@ -32,28 +44,48 @@
           >2</span
         >
         <div class="min-w-0 flex-1">
-          <label for="turno" class="block text-sm font-semibold">Turno de caja abierto</label>
-          <p id="turno-ayuda" class="mt-1 text-xs text-base-content/70">
-            ¿Dónde se registraría el cobro?
-          </p>
-          <select
-            id="turno"
-            class="select mt-3 w-full"
-            [value]="turno()"
-            (change)="seleccionar($event, 'turno')"
-            aria-describedby="turno-ayuda"
-          >
-            <option value="">Selecciona un turno</option>
-            <option value="Caja principal">Caja principal · turno de ejemplo</option>
-          </select>
-          <p class="mt-4 text-xs text-base-content/70">
-            <span class="mr-2 inline-block size-2 rounded-full bg-success" aria-hidden="true"></span
-            >Se muestra un turno de ejemplo.
-          </p>
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">Turno de caja abierto</legend>
+            <select
+              id="turno"
+              class="select mt-3 w-full"
+              [value]="turno()"
+              [disabled]="turnosCargando() || turnosError() || !turnos().length"
+              (change)="seleccionar($event, 'turno')"
+              aria-describedby="turno-ayuda"
+            >
+              <option value="" disabled>Selecciona un turno</option>
+              @for (item of turnos(); track item.id) {
+                <option [value]="item.id">{{ item.nombre }}</option>
+              }
+            </select>
+            <p id="turno-ayuda" class="label">¿Dónde se registraría el cobro?</p>
+          </fieldset>
+          <div class="mt-3">
+            @if (turnosCargando()) {
+              <p role="status">Cargando turnos…</p>
+            } @else if (turnosError()) {
+              <p role="alert">
+                No se pudieron cargar los turnos.
+                <button type="button" class="btn btn-sm" (click)="reintentarTurnos.emit()">
+                  Reintentar
+                </button>
+              </p>
+            } @else if (!turnos().length) {
+              <p>No hay turnos abiertos disponibles.</p>
+            }
+          </div>
           <button
             class="btn btn-primary mt-5 w-full justify-between"
             type="button"
-            [disabled]="!almacen() || !turno()"
+            [disabled]="
+              almacenesCargando() ||
+              almacenesError() ||
+              turnosCargando() ||
+              turnosError() ||
+              !almacen() ||
+              !turno()
+            "
             (click)="continuar.emit()"
           >
             Continuar a vender <span aria-hidden="true">→</span>

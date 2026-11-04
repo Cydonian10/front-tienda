@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { PreparacionVentaHeader } from '../preparacion-venta-header/preparacion-venta-header';
+import type { Almacen } from '../../../../../api/interfaces/inventario/almacen.interface';
 
 @Component({
   selector: 'app-preparacion-venta',
@@ -8,6 +9,14 @@ import { PreparacionVentaHeader } from '../preparacion-venta-header/preparacion-
   host: { class: 'block' },
 })
 export class PreparacionVenta {
+  readonly almacenes = input.required<readonly Almacen[]>();
+  readonly turnos = input.required<readonly { id: string; nombre: string }[]>();
+  readonly almacenesCargando = input(false);
+  readonly almacenesError = input(false);
+  readonly turnosCargando = input(false);
+  readonly turnosError = input(false);
+  readonly reintentarAlmacenes = output<void>();
+  readonly reintentarTurnos = output<void>();
   readonly almacen = input.required<string>();
   readonly turno = input.required<string>();
   readonly almacenChange = output<string>();

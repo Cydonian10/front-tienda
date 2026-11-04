@@ -46,12 +46,18 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
       {
         label: 'Inicio',
         icon: 'chart-line',
-        items: [{
-          label: 'Resumen',
-          url: '/admin/inventario',
-          icon: 'chart-line',
-          permission: [PERMISSION_CODES.EXISTENCIAS_READ, PERMISSION_CODES.COMPRAS_READ, PERMISSION_CODES.MOVIMIENTOS_READ],
-        }],
+        items: [
+          {
+            label: 'Resumen',
+            url: '/admin/inventario',
+            icon: 'chart-line',
+            permission: [
+              PERMISSION_CODES.EXISTENCIAS_READ,
+              PERMISSION_CODES.COMPRAS_READ,
+              PERMISSION_CODES.MOVIMIENTOS_READ,
+            ],
+          },
+        ],
       },
       {
         label: 'Catálogo',
@@ -154,7 +160,7 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
           },
           {
             label: 'Punto de venta',
-            url: '/admin/ventas/punto-venta',
+            url: '/admin/ventas/preparacion',
             icon: 'file',
             permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
           },
@@ -193,7 +199,10 @@ export class SystemMenuService {
         ...group,
         items: group.items.filter((item) =>
           (Array.isArray(item.permission) ? item.permission : [item.permission]).some((code) =>
-            this.authorization.hasPermission(systemCode, code as (typeof PERMISSION_CODES)[keyof typeof PERMISSION_CODES]),
+            this.authorization.hasPermission(
+              systemCode,
+              code as (typeof PERMISSION_CODES)[keyof typeof PERMISSION_CODES],
+            ),
           ),
         ),
       }))
@@ -208,9 +217,11 @@ export class SystemMenuService {
       matrixParams: 'ignored',
       fragment: 'ignored',
     } as const;
-    return containsTree(currentUrl, this.router.parseUrl(item.url), options) ||
+    return (
+      containsTree(currentUrl, this.router.parseUrl(item.url), options) ||
       (item.url === '/admin/inventario' &&
-        containsTree(currentUrl, this.router.parseUrl('/admin/inventario/resumen'), options));
+        containsTree(currentUrl, this.router.parseUrl('/admin/inventario/resumen'), options))
+    );
   }
 
   isActiveGroup(group: SystemMenuGroup): boolean {

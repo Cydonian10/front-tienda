@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { PERMISSION_CODES } from '../api/interfaces/access-control/permision.interface';
 import { permissionGuard } from '../auth/guards/permission.guard';
+import { preparacionVentaGuard } from './guards/preparacion-venta.guard';
 
 const ventasRoutes: Routes = [
   {
@@ -15,9 +16,18 @@ const ventasRoutes: Routes = [
     title: 'Cajas y turnos',
   },
   {
+    path: 'preparacion',
+    loadComponent: () => import('./pages/preparacion-venta/preparacion-venta-page'),
+    canActivate: [permissionGuard('VENTAS', PERMISSION_CODES.CAJAS_TURNOS_READ)],
+    title: 'Preparación de venta',
+  },
+  {
     path: 'punto-venta',
     loadComponent: () => import('./pages/punto-venta/punto-venta-page'),
-    canActivate: [permissionGuard('VENTAS', PERMISSION_CODES.CAJAS_TURNOS_READ)],
+    canActivate: [
+      permissionGuard('VENTAS', PERMISSION_CODES.CAJAS_TURNOS_READ),
+      preparacionVentaGuard,
+    ],
     title: 'Punto de venta',
   },
 ];

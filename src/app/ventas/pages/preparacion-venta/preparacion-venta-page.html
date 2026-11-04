@@ -12,6 +12,7 @@
       [turnosError]="cajasQuery.isError()"
       (almacenChange)="almacen.set($event)"
       (turnoChange)="turno.set($event)"
+      (continuar)="continuar()"
       (reintentarAlmacenes)="almacenesQuery.refetch()"
       (reintentarTurnos)="cajasQuery.refetch()"
     />

@@ -151,7 +151,7 @@ describe('SystemMenuService', () => {
           }),
           expect.objectContaining({
             label: 'Punto de venta',
-            url: '/admin/ventas/punto-venta',
+            url: '/admin/ventas/venta/preparacion',
             permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
           }),
         ],

@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { PreparacionVentaService } from '../../services/preparacion-venta.service';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { AlmacenApi } from '../../../api/inventario/almacen-api';
 import { CajaApi } from '../../../api/ventas/caja/caja-api';
-import PuntoVentaPage from './punto-venta-page';
+import PreparacionVentaPage from './preparacion-venta-page';
 
-describe('PuntoVentaPage', () => {
+describe('PreparacionVentaPage', () => {
   it('muestra almacenes activos y turnos abiertos y conserva los identificadores', async () => {
     const client = new QueryClient();
     const almacenes = vi.fn().mockResolvedValue({ data: [{ id: 'a1', nombre: 'Principal', activo: true }], meta: { totalPages: 1 } });
@@ -12,11 +14,11 @@ describe('PuntoVentaPage', () => {
       { id: 't1', fechaCierre: null, usuarioApertura: { nickName: 'Ana' } },
       { id: 't2', fechaCierre: '2026-01-01', usuarioApertura: { nickName: 'Luis' } },
     ] }]);
-    TestBed.configureTestingModule({ providers: [provideTanStackQuery(client),
+    TestBed.configureTestingModule({ providers: [provideRouter([]), provideTanStackQuery(client),
       { provide: AlmacenApi, useValue: { list: almacenes } },
       { provide: CajaApi, useValue: { list: cajas } },
     ] });
-    const fixture = TestBed.createComponent(PuntoVentaPage);
+    const fixture = TestBed.createComponent(PreparacionVentaPage);
     fixture.detectChanges();
     await vi.waitFor(() => expect(fixture.componentInstance.cajasQuery.isSuccess() && fixture.componentInstance.almacenesQuery.isSuccess()).toBe(true));
     fixture.detectChanges();
@@ -30,6 +32,10 @@ describe('PuntoVentaPage', () => {
     turno.value = 't1'; turno.dispatchEvent(new Event('change'));
     expect(fixture.componentInstance.almacen()).toBe('a1');
     expect(fixture.componentInstance.turno()).toBe('t1');
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    fixture.componentInstance.continuar();
+    expect(TestBed.inject(PreparacionVentaService).seleccion()).toEqual({ almacenId: 'a1', turnoId: 't1' });
+    expect(navegar).toHaveBeenCalledWith(['/admin/ventas/venta/punto-venta']);
     expect(almacenes).toHaveBeenCalledWith(1, 100, '', true);
     expect(cajas).toHaveBeenCalledWith({ estado: 'activas' });
     fixture.destroy();

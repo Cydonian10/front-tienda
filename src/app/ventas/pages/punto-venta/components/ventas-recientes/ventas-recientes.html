@@ -1,0 +1,22 @@
+<section class="card card-border bg-base-100">
+  <div class="card-body gap-0 p-6">
+    <h2 class="text-lg font-bold">Ventas recientes</h2>
+    <p class="mt-1 text-xs text-base-content/70">Vista de ejemplo · no son ventas registradas</p>
+    <div
+      class="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-base-300 pt-4"
+    >
+      <div>
+        <p class="text-sm font-semibold">
+          V-0003 <span class="font-normal text-base-content/70">· Ejemplo</span>
+        </p>
+        <p class="mt-1 text-xs text-base-content/70">Caja principal</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <strong class="text-sm tabular-nums">S/ 60.80</strong
+        ><button type="button" class="btn btn-ghost btn-sm" (click)="verTicket.emit()">
+          Ver ticket
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

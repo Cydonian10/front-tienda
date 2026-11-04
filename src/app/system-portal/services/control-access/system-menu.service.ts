@@ -152,6 +152,12 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             icon: 'chart-line',
             permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
           },
+          {
+            label: 'Punto de venta',
+            url: '/admin/ventas/punto-venta',
+            icon: 'file',
+            permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
+          },
         ],
       },
     ],

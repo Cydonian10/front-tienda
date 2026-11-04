@@ -14,6 +14,12 @@ const ventasRoutes: Routes = [
     canActivate: [permissionGuard('VENTAS', PERMISSION_CODES.CAJAS_TURNOS_READ)],
     title: 'Cajas y turnos',
   },
+  {
+    path: 'punto-venta',
+    loadComponent: () => import('./pages/punto-venta/punto-venta-page'),
+    canActivate: [permissionGuard('VENTAS', PERMISSION_CODES.CAJAS_TURNOS_READ)],
+    title: 'Punto de venta',
+  },
 ];
 
 export default ventasRoutes;

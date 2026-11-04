@@ -1,0 +1,22 @@
+import { Component, input, output } from '@angular/core';
+import { PreparacionVentaHeader } from '../preparacion-venta-header/preparacion-venta-header';
+
+@Component({
+  selector: 'app-preparacion-venta',
+  imports: [PreparacionVentaHeader],
+  templateUrl: './preparacion-venta.html',
+  host: { class: 'block' },
+})
+export class PreparacionVenta {
+  readonly almacen = input.required<string>();
+  readonly turno = input.required<string>();
+  readonly almacenChange = output<string>();
+  readonly turnoChange = output<string>();
+  readonly continuar = output<void>();
+
+  seleccionar(event: Event, campo: 'almacen' | 'turno'): void {
+    const valor = (event.target as HTMLSelectElement).value;
+    if (campo === 'almacen') this.almacenChange.emit(valor);
+    else this.turnoChange.emit(valor);
+  }
+}

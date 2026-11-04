@@ -1,0 +1,18 @@
+<section class="space-y-6" aria-labelledby="punto-venta-titulo">
+  <app-punto-venta-header />
+  <div class="grid items-start gap-5 lg:grid-cols-[1.08fr_0.92fr]">
+    <app-preparacion-venta
+      [almacen]="almacen()"
+      [turno]="turno()"
+      (almacenChange)="almacen.set($event)"
+      (turnoChange)="turno.set($event)"
+      (continuar)="vista.set('venta')"
+    >
+      <app-preparacion-venta-header />
+    </app-preparacion-venta>
+    <div class="space-y-5">
+      <app-pasos-venta />
+      <app-ventas-recientes (verTicket)="ticketReciente.set(true); vista.set('ticket')" />
+    </div>
+  </div>
+</section>

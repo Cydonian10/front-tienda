@@ -109,7 +109,9 @@ describe('SystemMenuService', () => {
     expect(service.isImplemented('INVENTARIO')).toBe(true);
     expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/productos');
     expect(service.menuFor('INVENTARIO')[0].items.map((item) => item.label)).toEqual([
-      'Productos', 'Marcas', 'Categorías',
+      'Productos',
+      'Marcas',
+      'Categorías',
     ]);
 
     TestBed.inject(AuthStore).setProfile({
@@ -141,11 +143,18 @@ describe('SystemMenuService', () => {
     expect(service.menuFor('VENTAS')).toEqual([
       expect.objectContaining({
         label: 'Operaciones',
-        items: [expect.objectContaining({
-          label: 'Cajas y turnos',
-          url: '/admin/ventas/cajas-turnos',
-          permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
-        })],
+        items: [
+          expect.objectContaining({
+            label: 'Cajas y turnos',
+            url: '/admin/ventas/cajas-turnos',
+            permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
+          }),
+          expect.objectContaining({
+            label: 'Punto de venta',
+            url: '/admin/ventas/punto-venta',
+            permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
+          }),
+        ],
       }),
     ]);
     expect(service.routeFor('VENTAS')).toBe('/admin/ventas/cajas-turnos');
@@ -171,7 +180,10 @@ describe('SystemMenuService', () => {
       permissions: [{ code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' }],
     } as never);
     expect(service.menuFor('INVENTARIO')).toEqual([
-      expect.objectContaining({ label: 'Inicio', items: [expect.objectContaining({ label: 'Resumen', url: '/admin/inventario' })] }),
+      expect.objectContaining({
+        label: 'Inicio',
+        items: [expect.objectContaining({ label: 'Resumen', url: '/admin/inventario' })],
+      }),
       expect.objectContaining({
         label: 'Operaciones',
         items: [
@@ -191,31 +203,41 @@ describe('SystemMenuService', () => {
     const store = TestBed.inject(AuthStore);
     const items = () => service.menuFor('INVENTARIO').flatMap((group) => group.items);
 
-    store.setProfile({ isSuperAdmin: false, permissions: [
-      { code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'ACCESS_CONTROL' },
-    ] } as never);
+    store.setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'ACCESS_CONTROL' }],
+    } as never);
     expect(items()).toEqual([]);
 
-    store.setProfile({ isSuperAdmin: false, permissions: [
-      { code: PERMISSION_CODES.PROVEEDORES_CREATE, systemCode: 'INVENTARIO' },
-      { code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' },
-    ] } as never);
+    store.setProfile({
+      isSuperAdmin: false,
+      permissions: [
+        { code: PERMISSION_CODES.PROVEEDORES_CREATE, systemCode: 'INVENTARIO' },
+        { code: PERMISSION_CODES.COMPRAS_READ, systemCode: 'INVENTARIO' },
+      ],
+    } as never);
     expect(items().map((item) => item.label)).toEqual(['Resumen', 'Compras']);
 
-    store.setProfile({ isSuperAdmin: false, permissions: [
-      { code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'INVENTARIO' },
-    ] } as never);
+    store.setProfile({
+      isSuperAdmin: false,
+      permissions: [{ code: PERMISSION_CODES.PROVEEDORES_READ, systemCode: 'INVENTARIO' }],
+    } as never);
     expect(service.menuFor('INVENTARIO')).toEqual([
-      expect.objectContaining({ label: 'Operaciones', items: [
-        expect.objectContaining({
-          label: 'Proveedores',
-          url: '/admin/inventario/proveedores',
-          permission: PERMISSION_CODES.PROVEEDORES_READ,
-        }),
-      ] }),
+      expect.objectContaining({
+        label: 'Operaciones',
+        items: [
+          expect.objectContaining({
+            label: 'Proveedores',
+            url: '/admin/inventario/proveedores',
+            permission: PERMISSION_CODES.PROVEEDORES_READ,
+          }),
+        ],
+      }),
     ]);
     expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario/proveedores');
-    await TestBed.inject(Router).navigateByUrl('/admin/inventario/proveedores/123?desde=2026-10-01');
+    await TestBed.inject(Router).navigateByUrl(
+      '/admin/inventario/proveedores/123?desde=2026-10-01',
+    );
     expect(service.isActiveItem(items()[0])).toBe(true);
   });
 
@@ -228,7 +250,10 @@ describe('SystemMenuService', () => {
     } as never);
 
     expect(service.menuFor('INVENTARIO')).toEqual([
-      expect.objectContaining({ label: 'Inicio', items: [expect.objectContaining({ label: 'Resumen', url: '/admin/inventario' })] }),
+      expect.objectContaining({
+        label: 'Inicio',
+        items: [expect.objectContaining({ label: 'Resumen', url: '/admin/inventario' })],
+      }),
       expect.objectContaining({
         label: 'Operaciones',
         items: [
@@ -247,7 +272,10 @@ describe('SystemMenuService', () => {
       permissions: [{ code: PERMISSION_CODES.MOVIMIENTOS_READ, systemCode: 'INVENTARIO' }],
     } as never);
     expect(service.menuFor('INVENTARIO')).toEqual([
-      expect.objectContaining({ label: 'Inicio', items: [expect.objectContaining({ label: 'Resumen' })] }),
+      expect.objectContaining({
+        label: 'Inicio',
+        items: [expect.objectContaining({ label: 'Resumen' })],
+      }),
       expect.objectContaining({
         label: 'Operaciones',
         items: [

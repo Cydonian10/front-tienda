@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../store/auth/auth.store';
 import { useAlmacenSeleccionado } from '../../actions/use-almacen-seleccionado-action';
@@ -16,6 +16,7 @@ export default class PuntoVentaPage {
   private readonly authStore = inject(AuthStore);
 
   readonly seleccion = this.preparacion.seleccion;
+  readonly vistaMovil = signal<'productos' | 'venta'>('productos');
   readonly almacenQuery = useAlmacenSeleccionado(() => this.seleccion()?.almacenId ?? '');
   readonly cajasQuery = useCajas(() => ({ estado: 'activas' })).listQuery;
 

@@ -66,6 +66,30 @@ describe('PuntoVentaPage', () => {
     expect(contenido).toContain('Ana Pérez');
     expect(contenido).not.toContain('Otra persona');
     expect(listarAlmacenes).toHaveBeenCalledTimes(2);
+
+    // Cambiar la vista móvil sin eliminar ninguno de los paneles del escritorio.
+    const pagina = fixture.nativeElement as HTMLElement;
+    const productos = pagina.querySelector<HTMLElement>(
+      'section[aria-labelledby="catalogo-titulo"]',
+    )!;
+    const venta = pagina.querySelector<HTMLElement>(
+      'aside[aria-labelledby="venta-actual-titulo"]',
+    )!;
+    const selectorVenta = pagina.querySelector<HTMLInputElement>('#vista-venta')!;
+    const selectorProductos = pagina.querySelector<HTMLInputElement>('#vista-productos')!;
+    expect(productos.classList.contains('hidden')).toBe(false);
+    expect(venta.classList.contains('hidden')).toBe(true);
+    selectorVenta.click();
+    fixture.detectChanges();
+    expect(productos.classList.contains('hidden')).toBe(true);
+    expect(venta.classList.contains('hidden')).toBe(false);
+    expect(selectorVenta.checked).toBe(true);
+    selectorProductos.click();
+    fixture.detectChanges();
+    expect(productos.classList.contains('hidden')).toBe(false);
+    expect(venta.classList.contains('hidden')).toBe(true);
+    expect(productos.classList.contains('xl:block')).toBe(true);
+    expect(venta.classList.contains('xl:block')).toBe(true);
     fixture.destroy();
     client.clear();
   });

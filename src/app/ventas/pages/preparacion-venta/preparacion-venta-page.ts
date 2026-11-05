@@ -47,7 +47,7 @@ export default class PreparacionVentaPage {
       !this.turnos().some((item) => item.id === turnoId)
     )
       return;
-    this.preparacion.seleccion.set({ almacenId, turnoId });
+    this.preparacion.seleccionar({ almacenId, turnoId });
     void this.router.navigate(['/admin/ventas/punto-venta']);
   }
 }

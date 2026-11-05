@@ -8,36 +8,75 @@ import PreparacionVentaPage from './preparacion-venta-page';
 
 describe('PreparacionVentaPage', () => {
   it('muestra almacenes activos y turnos abiertos y conserva los identificadores', async () => {
+    // Preparar las respuestas simuladas de almacenes y cajas.
     const client = new QueryClient();
-    const almacenes = vi.fn().mockResolvedValue({ data: [{ id: 'a1', nombre: 'Principal', activo: true }], meta: { totalPages: 1 } });
-    const cajas = vi.fn().mockResolvedValue([{ nombre: 'Caja 1', turnos: [
-      { id: 't1', fechaCierre: null, usuarioApertura: { nickName: 'Ana' } },
-      { id: 't2', fechaCierre: '2026-01-01', usuarioApertura: { nickName: 'Luis' } },
-    ] }]);
-    TestBed.configureTestingModule({ providers: [provideRouter([]), provideTanStackQuery(client),
-      { provide: AlmacenApi, useValue: { list: almacenes } },
-      { provide: CajaApi, useValue: { list: cajas } },
-    ] });
+    const consultarAlmacenes = vi.fn().mockResolvedValue({
+      data: [{ id: 'a1', nombre: 'Principal', activo: true }],
+      meta: { totalPages: 1 },
+    });
+    const consultarCajas = vi.fn().mockResolvedValue([
+      {
+        nombre: 'Caja 1',
+        turnos: [
+          { id: 't1', fechaCierre: null, usuarioApertura: { nickName: 'Ana' } },
+          { id: 't2', fechaCierre: '2026-01-01', usuarioApertura: { nickName: 'Luis' } },
+        ],
+      },
+    ]);
+    // Configurar la página con las consultas simuladas y el enrutador.
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        provideTanStackQuery(client),
+        { provide: AlmacenApi, useValue: { list: consultarAlmacenes } },
+        { provide: CajaApi, useValue: { list: consultarCajas } },
+      ],
+    });
     const fixture = TestBed.createComponent(PreparacionVentaPage);
     fixture.detectChanges();
-    await vi.waitFor(() => expect(fixture.componentInstance.cajasQuery.isSuccess() && fixture.componentInstance.almacenesQuery.isSuccess()).toBe(true));
+
+    // Esperar a que ambas consultas terminen antes de revisar la página.
+    await vi.waitFor(() => {
+      const cajasCargadas = fixture.componentInstance.cajasQuery.isSuccess();
+      const almacenesCargados = fixture.componentInstance.almacenesQuery.isSuccess();
+      expect(cajasCargadas && almacenesCargados).toBe(true);
+    });
     fixture.detectChanges();
-    const element: HTMLElement = fixture.nativeElement;
-    expect(element.textContent).toContain('Principal');
-    expect(element.textContent).toContain('Caja 1 · Ana');
-    expect(element.textContent).not.toContain('Luis');
-    const almacen = element.querySelector<HTMLSelectElement>('#almacen')!;
-    const turno = element.querySelector<HTMLSelectElement>('#turno')!;
-    almacen.value = 'a1'; almacen.dispatchEvent(new Event('change'));
-    turno.value = 't1'; turno.dispatchEvent(new Event('change'));
-    expect(fixture.componentInstance.almacen()).toBe('a1');
-    expect(fixture.componentInstance.turno()).toBe('t1');
+
+    // Mostrar el almacén y el turno abierto, pero no el turno cerrado.
+    const pagina: HTMLElement = fixture.nativeElement;
+    const textoPagina = pagina.textContent;
+    expect(textoPagina).toContain('Principal');
+    expect(textoPagina).toContain('Caja 1 · Ana');
+    expect(textoPagina).not.toContain('Luis');
+
+    // Seleccionar el almacén y el turno como lo haría el usuario.
+    const almacen = pagina.querySelector<HTMLSelectElement>('#almacen')!;
+    const turno = pagina.querySelector<HTMLSelectElement>('#turno')!;
+    almacen.value = 'a1';
+    almacen.dispatchEvent(new Event('change'));
+    turno.value = 't1';
+    turno.dispatchEvent(new Event('change'));
+    const almacenSeleccionado = fixture.componentInstance.almacen();
+    const turnoSeleccionado = fixture.componentInstance.turno();
+    expect(almacenSeleccionado).toBe('a1');
+    expect(turnoSeleccionado).toBe('t1');
+
+    // Continuar debe guardar los identificadores y navegar al punto de venta.
     const navegar = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture.componentInstance.continuar();
-    expect(TestBed.inject(PreparacionVentaService).seleccion()).toEqual({ almacenId: 'a1', turnoId: 't1' });
-    expect(navegar).toHaveBeenCalledWith(['/admin/ventas/venta/punto-venta']);
-    expect(almacenes).toHaveBeenCalledWith(1, 100, '', true);
-    expect(cajas).toHaveBeenCalledWith({ estado: 'activas' });
+    const servicio = TestBed.inject(PreparacionVentaService);
+    const seleccionGuardada = servicio.seleccion();
+    expect(seleccionGuardada).toEqual({
+      almacenId: 'a1',
+      turnoId: 't1',
+    });
+    expect(navegar).toHaveBeenCalledWith(['/admin/ventas/punto-venta']);
+    // Verificar los filtros enviados a las consultas.
+    expect(consultarAlmacenes).toHaveBeenCalledWith(1, 100, '', true);
+    expect(consultarCajas).toHaveBeenCalledWith({ estado: 'activas' });
+
+    // Liberar el componente y los datos de las consultas.
     fixture.destroy();
     client.clear();
   });

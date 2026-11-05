@@ -13,5 +13,6 @@
 - Usar señales de Angular para estado local y derivaciones (`computed`); usar TanStack Query para estado remoto. No duplicar respuestas de consultas en señales locales salvo necesidad concreta.
 - En TanStack Query, incluir todos los parámetros de la petición en una `queryKey` estable, mantener la llamada HTTP en `queryFn`, y usar `injectMutation` para escrituras. Tras mutar, invalidar solo las claves afectadas; contemplar carga, error y estado vacío en la UI.
 - Mantener permisos en comprobaciones reutilizables y reactivas (véase `src/app/auth/services/use-permissions.ts`); ocultar controles no sustituye las verificaciones al ejecutar acciones. Priorizar nombres claros, código sencillo y pruebas para el comportamiento relevante.
+- Escribir pruebas fáciles de entender: explicar sus pasos con comentarios breves y usar variables con nombres descriptivos para los resultados antes de comprobarlos (por ejemplo, `seleccionRecuperada` en lugar de una llamada directamente dentro de `expect`).
 - Correr el test del componente, service, etc modificados o implementados no todos los test.
 - No hacer build

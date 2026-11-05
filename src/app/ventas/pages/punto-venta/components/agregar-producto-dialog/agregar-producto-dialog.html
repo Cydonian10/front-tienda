@@ -1,0 +1,91 @@
+<app-dialog-shell title="Agregar a la venta" [titleId]="titleId">
+  <h3 class="font-semibold">{{ variante.nombre }}</h3>
+  <p class="mt-1 text-sm text-base-content/70">SKU: {{ variante.sku }}</p>
+  @if (variante.atributos.length) {
+    <ul class="mt-2 text-sm text-base-content/70" aria-label="Atributos de la variante">
+      @for (atributo of variante.atributos; track atributo.nombre) {
+        <li>{{ atributo.nombre }}: {{ atributo.valor }}</li>
+      }
+    </ul>
+  }
+  <form [id]="formId" (submit)="agregar($event)" novalidate class="mt-5 space-y-4">
+    <div>
+      <label class="mb-2 block text-sm font-semibold" [attr.for]="formId + '-unidad'"
+        >Unidad de venta</label
+      >
+      <select
+        class="select min-h-11 w-full"
+        [id]="formId + '-unidad'"
+        [value]="unidadId()"
+        (change)="unidadId.set($any($event.target).value)"
+      >
+        @for (opcion of variante.unidades; track opcion.id) {
+          <option [value]="opcion.id">{{ opcion.nombre }}</option>
+        }
+      </select>
+      @if (unidad(); as seleccion) {
+        <p class="mt-2 text-sm text-base-content/70">
+          1 {{ seleccion.nombre }} = {{ decimalCompacto(seleccion.factorABase) }}
+          {{ variante.unidadBase.simbolo }}
+        </p>
+      }
+    </div>
+    <div>
+      <label class="mb-2 block text-sm font-semibold" [attr.for]="formId + '-cantidad'"
+        >Cantidad</label
+      >
+      <input
+        class="input min-h-11 w-full"
+        [id]="formId + '-cantidad'"
+        type="text"
+        inputmode="decimal"
+        [value]="cantidad()"
+        [attr.aria-describedby]="calculo().error ? formId + '-error' : null"
+        [attr.aria-invalid]="!!calculo().error"
+        (input)="cantidad.set($any($event.target).value)"
+      />
+      @if (calculo().error) {
+        <p class="mt-2 text-sm text-error" role="alert" [id]="formId + '-error'">
+          {{ calculo().error }}
+        </p>
+      }
+    </div>
+    <dl class="space-y-2 border-t border-base-300 pt-4 text-sm">
+      <div class="flex justify-between gap-4">
+        <dt>Stock disponible</dt>
+        <dd class="tabular-nums">
+          {{ texto(carrito.disponible(variante), 6) }} {{ variante.unidadBase.simbolo }}
+        </dd>
+      </div>
+      @if (calculo().cantidadBase !== undefined) {
+        <div class="flex justify-between gap-4">
+          <dt>Equivalencia</dt>
+          <dd class="tabular-nums">
+            {{ texto(calculo().cantidadBase!, 6) }} {{ variante.unidadBase.simbolo }}
+          </dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt>Precio por {{ unidad()?.nombre }}</dt>
+          <dd class="tabular-nums">{{ soles(calculo().precioCentavos!) }}</dd>
+        </div>
+        <div class="flex justify-between gap-4 border-t border-base-300 pt-3 font-semibold">
+          <dt>Subtotal estimado</dt>
+          <dd class="tabular-nums">{{ soles(calculo().subtotalCentavos!) }}</dd>
+        </div>
+      }
+    </dl>
+  </form>
+  <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
+    <button type="button" class="btn min-h-11" data-dialog-cancel (click)="dialogRef.close()">
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      class="btn btn-primary min-h-11"
+      [attr.form]="formId"
+      [disabled]="!!calculo().error"
+    >
+      Agregar a la venta
+    </button>
+  </div>
+</app-dialog-shell>

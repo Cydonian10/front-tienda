@@ -15,7 +15,7 @@
         [responsable]="responsable()"
       />
 
-      <app-selector-vista-movil [vista]="vistaMovil()" (vistaChange)="vistaMovil.set($event)" />
+      <app-selector-vista-movil [vista]="vistaMovil()" [cantidadLineas]="carrito.lineas().length" (vistaChange)="vistaMovil.set($event)" />
 
       <div
         class="mt-4 grid items-start gap-5 xl:mt-6 xl:grid-cols-[minmax(0,1fr)_minmax(19rem,23rem)]"

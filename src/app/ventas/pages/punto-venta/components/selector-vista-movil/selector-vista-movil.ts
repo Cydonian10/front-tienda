@@ -9,5 +9,6 @@ export type VistaPuntoVenta = 'productos' | 'venta';
 })
 export class SelectorVistaMovil {
   readonly vista = input.required<VistaPuntoVenta>();
+  readonly cantidadLineas = input(0);
   readonly vistaChange = output<VistaPuntoVenta>();
 }

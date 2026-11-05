@@ -5,37 +5,71 @@
   <div class="border-b border-base-300 p-5">
     <div class="flex items-center gap-2">
       <h2 id="venta-actual-titulo" class="text-xl font-semibold tracking-tight">Tu venta</h2>
-      <span class="badge badge-soft">0</span>
+      <span class="badge badge-soft">{{ carrito.lineas().length }}</span>
     </div>
-    <p class="mt-1 text-xs text-base-content/70">Venta actual · ejemplo</p>
+    <p class="mt-1 text-xs text-base-content/70">Venta actual · temporal</p>
   </div>
-  <div class="flex min-h-44 flex-col items-center justify-center px-5 py-8 text-center">
-    <span
-      class="flex size-12 items-center justify-center rounded-full bg-base-200 text-base-content/70"
-    >
-      <svg
-        aria-hidden="true"
-        class="size-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        stroke-width="1.6"
+  @if (carrito.lineas().length === 0) {
+    <div class="flex min-h-44 flex-col items-center justify-center px-5 py-8 text-center">
+      <span
+        class="flex size-12 items-center justify-center rounded-full bg-base-200 text-base-content/70"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M5 3h14v18H5zM8 8h8M8 12h8M8 16h5"
-        />
-      </svg>
-    </span>
-    <p class="mt-4 font-semibold">Tu venta está vacía</p>
-    <p class="mt-1 text-sm text-base-content/70">Busca y agrega productos para comenzar.</p>
-  </div>
+        <svg
+          aria-hidden="true"
+          class="size-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M5 3h14v18H5zM8 8h8M8 12h8M8 16h5"
+          />
+        </svg>
+      </span>
+      <p class="mt-4 font-semibold">Tu venta está vacía</p>
+      <p class="mt-1 text-sm text-base-content/70">Busca y agrega productos para comenzar.</p>
+    </div>
+  } @else {
+    <ul class="divide-y divide-base-300">
+      @for (linea of carrito.lineas(); track linea.variante.id + ':' + linea.unidad.id) {
+        <li class="px-5 py-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-semibold">{{ linea.variante.nombre }}</p>
+              <p class="mt-1 text-xs text-base-content/70">SKU: {{ linea.variante.sku }}</p>
+              @for (atributo of linea.variante.atributos; track atributo.nombre) {
+                <p class="text-xs text-base-content/70">
+                  {{ atributo.nombre }}: {{ atributo.valor }}
+                </p>
+              }
+              <p class="mt-2 text-sm tabular-nums">
+                {{ linea.cantidad }} {{ linea.unidad.nombre }} × {{ soles(linea.precioCentavos) }}
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold tabular-nums">{{ soles(linea.subtotalCentavos) }}</p>
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm mt-1 min-h-11"
+                [attr.aria-label]="'Quitar ' + linea.variante.nombre + ', ' + linea.unidad.nombre"
+                (click)="carrito.quitar(linea)"
+              >
+                Quitar
+              </button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
   <div class="border-t border-base-300 bg-base-200/40 p-5">
     <dl class="space-y-3 text-sm">
       <div class="flex justify-between gap-4">
         <dt class="text-base-content/70">Subtotal</dt>
-        <dd class="tabular-nums">S/ 0.00</dd>
+        <dd class="tabular-nums">{{ soles(carrito.total()) }}</dd>
       </div>
       <div class="flex justify-between gap-4">
         <dt class="text-base-content/70">Descuentos</dt>
@@ -44,16 +78,19 @@
       <div class="flex items-start justify-between gap-4 border-t border-base-300 pt-4">
         <dt class="font-semibold">
           Total a cobrar
-          <span class="mt-1 block text-xs font-normal text-base-content/70">0 artículos</span>
+          <span class="mt-1 block text-xs font-normal text-base-content/70"
+            >{{ carrito.lineas().length }}
+            {{ carrito.lineas().length === 1 ? 'línea' : 'líneas' }}</span
+          >
         </dt>
-        <dd class="text-xl font-semibold tabular-nums">S/ 0.00</dd>
+        <dd class="text-xl font-semibold tabular-nums">{{ soles(carrito.total()) }}</dd>
       </div>
     </dl>
     <button type="button" class="btn btn-primary mt-5 min-h-11 w-full justify-between" disabled>
       Ir a cobrar <span aria-hidden="true">→</span>
     </button>
     <p class="mt-3 text-center text-xs text-base-content/70">
-      Al confirmar se generará un ticket de venta.
+      El carrito es temporal y no reserva stock. El cobro aún no está disponible.
     </p>
   </div>
 </aside>

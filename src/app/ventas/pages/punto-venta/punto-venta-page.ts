@@ -8,13 +8,16 @@ import { PuntoVentaCabecera } from './components/punto-venta-cabecera/punto-vent
 import { SelectorVistaMovil } from './components/selector-vista-movil/selector-vista-movil';
 import { CatalogoProductos } from './components/catalogo-productos/catalogo-productos';
 import { ResumenVenta } from './components/resumen-venta/resumen-venta';
+import { CarritoVentaService } from './service/carrito-venta.service';
 
 @Component({
   selector: 'app-punto-venta-page',
   imports: [PuntoVentaCabecera, SelectorVistaMovil, CatalogoProductos, ResumenVenta, RouterLink],
+  providers: [CarritoVentaService],
   templateUrl: './punto-venta-page.html',
 })
 export default class PuntoVentaPage {
+  readonly carrito = inject(CarritoVentaService);
   private readonly preparacion = inject(PreparacionVentaService);
   private readonly authStore = inject(AuthStore);
 

@@ -3,7 +3,7 @@
   class="rounded-box border border-base-300 bg-base-100 p-4 sm:p-6"
 >
   <h2 id="catalogo-titulo" class="text-xl font-semibold tracking-tight">Productos</h2>
-  <p class="mt-1 text-sm text-base-content/70">Consulta los productos del almacén seleccionado.</p>
+  <p class="mt-1 text-sm text-base-content/70">Consulta las variantes del almacén seleccionado.</p>
 
   <label class="input mt-6 flex min-h-11 w-full items-center gap-3">
     <svg
@@ -17,33 +17,33 @@
       <circle cx="11" cy="11" r="7" />
       <path stroke-linecap="round" d="m16 16 4 4" />
     </svg>
-    <span class="sr-only">Buscar producto por nombre</span>
+    <span class="sr-only">Buscar por producto, SKU, código de barras o variante</span>
     <input
       type="search"
-      placeholder="Buscar producto..."
+      placeholder="Buscar producto, SKU o variante..."
       [value]="busqueda()"
       (input)="buscar($event)"
     />
   </label>
 
   @if (catalogo.isPending()) {
-    <p class="mt-6 text-sm" role="status">Cargando productos...</p>
+    <p class="mt-6 text-sm" role="status">Cargando variantes...</p>
   } @else if (catalogo.isError()) {
     <div class="mt-6 space-y-3" role="alert">
-      <p>No se pudieron cargar los productos.</p>
+      <p>No se pudieron cargar las variantes.</p>
       <button type="button" class="btn btn-outline min-h-11" (click)="catalogo.refetch()">
         Reintentar
       </button>
     </div>
   } @else if (catalogo.data(); as resultado) {
     @if (resultado.items.length === 0) {
-      <p class="mt-6 text-sm text-base-content/70">No se encontraron productos.</p>
+      <p class="mt-6 text-sm text-base-content/70">No se encontraron variantes.</p>
     } @else {
       <p class="mt-5 text-xs text-base-content/70">
-        {{ resultado.totalItems }} productos encontrados
+        {{ resultado.totalItems }} {{ resultado.totalItems === 1 ? 'variante encontrada' : 'variantes encontradas' }}
       </p>
       <div class="mt-3 grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
-        @for (producto of resultado.items; track producto.id) {
+        @for (variante of resultado.items; track variante.id) {
           <article class="producto-entrada flex min-w-0 flex-col rounded-field border border-base-300 p-4">
             <span
               class="flex size-11 items-center justify-center rounded-field bg-base-200 text-base-content/70"
@@ -63,23 +63,29 @@
                 />
               </svg>
             </span>
-            <h3 class="mt-4 font-semibold">{{ producto.nombre }}</h3>
-            <p class="mt-3 text-xs text-base-content/70">
-              {{ producto.variantes }} {{ producto.variantes === 1 ? 'variante' : 'variantes' }}
-            </p>
+            <h3 class="mt-4 font-semibold">{{ variante.nombre }}</h3>
+            @if (variante.atributos.length) {
+              <ul class="mt-2 text-xs text-base-content/70" aria-label="Atributos de la variante">
+                @for (atributo of variante.atributos; track atributo.nombre) {
+                  <li>{{ atributo.nombre }}: {{ atributo.valor }}</li>
+                }
+              </ul>
+            }
+            <p class="mt-3 text-xs text-base-content/70">SKU: {{ variante.sku }}</p>
             <p class="mt-1 text-xs text-base-content/70">
-              Stock total (unidad base): {{ producto.stock }}
+              Stock (unidad base): {{ variante.stock }}
             </p>
             <div class="mt-4 flex items-end justify-between gap-2">
               <div>
-                <p class="text-xs text-base-content/70">Desde</p>
-                <p class="mt-1 font-semibold tabular-nums">S/ {{ producto.precioDesde }}</p>
+                <p class="text-xs text-base-content/70">Precio</p>
+                <p class="mt-1 font-semibold tabular-nums">S/ {{ variante.precio }}</p>
               </div>
               <button
                 type="button"
                 class="btn btn-outline btn-sm min-h-11"
-                disabled
-                [attr.aria-label]="'Agregar ' + producto.nombre"
+                [disabled]="!variante.unidadBase || !variante.unidades?.length || carrito.disponible(variante) <= 0"
+                (click)="abrirAgregar(variante)"
+                [attr.aria-label]="'Agregar ' + variante.nombre + ', SKU ' + variante.sku"
               >
                 + Agregar
               </button>

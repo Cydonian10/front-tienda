@@ -5,10 +5,13 @@ import { useAlmacenSeleccionado } from '../../actions/use-almacen-seleccionado-a
 import { useCajas } from '../../actions/use-cajas-action';
 import { PreparacionVentaService } from '../../services/preparacion-venta.service';
 import { PuntoVentaCabecera } from './components/punto-venta-cabecera/punto-venta-cabecera';
+import { SelectorVistaMovil } from './components/selector-vista-movil/selector-vista-movil';
+import { CatalogoProductos } from './components/catalogo-productos/catalogo-productos';
+import { ResumenVenta } from './components/resumen-venta/resumen-venta';
 
 @Component({
   selector: 'app-punto-venta-page',
-  imports: [PuntoVentaCabecera, RouterLink],
+  imports: [PuntoVentaCabecera, SelectorVistaMovil, CatalogoProductos, ResumenVenta, RouterLink],
   templateUrl: './punto-venta-page.html',
 })
 export default class PuntoVentaPage {

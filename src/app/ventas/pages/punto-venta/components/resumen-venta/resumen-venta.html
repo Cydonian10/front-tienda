@@ -1,0 +1,59 @@
+<aside
+  aria-labelledby="venta-actual-titulo"
+  class="overflow-hidden rounded-box border border-base-300 bg-base-100"
+>
+  <div class="border-b border-base-300 p-5">
+    <div class="flex items-center gap-2">
+      <h2 id="venta-actual-titulo" class="text-xl font-semibold tracking-tight">Tu venta</h2>
+      <span class="badge badge-soft">0</span>
+    </div>
+    <p class="mt-1 text-xs text-base-content/70">Venta actual · ejemplo</p>
+  </div>
+  <div class="flex min-h-44 flex-col items-center justify-center px-5 py-8 text-center">
+    <span
+      class="flex size-12 items-center justify-center rounded-full bg-base-200 text-base-content/70"
+    >
+      <svg
+        aria-hidden="true"
+        class="size-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="1.6"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M5 3h14v18H5zM8 8h8M8 12h8M8 16h5"
+        />
+      </svg>
+    </span>
+    <p class="mt-4 font-semibold">Tu venta está vacía</p>
+    <p class="mt-1 text-sm text-base-content/70">Busca y agrega productos para comenzar.</p>
+  </div>
+  <div class="border-t border-base-300 bg-base-200/40 p-5">
+    <dl class="space-y-3 text-sm">
+      <div class="flex justify-between gap-4">
+        <dt class="text-base-content/70">Subtotal</dt>
+        <dd class="tabular-nums">S/ 0.00</dd>
+      </div>
+      <div class="flex justify-between gap-4">
+        <dt class="text-base-content/70">Descuentos</dt>
+        <dd class="tabular-nums">− S/ 0.00</dd>
+      </div>
+      <div class="flex items-start justify-between gap-4 border-t border-base-300 pt-4">
+        <dt class="font-semibold">
+          Total a cobrar
+          <span class="mt-1 block text-xs font-normal text-base-content/70">0 artículos</span>
+        </dt>
+        <dd class="text-xl font-semibold tabular-nums">S/ 0.00</dd>
+      </div>
+    </dl>
+    <button type="button" class="btn btn-primary mt-5 min-h-11 w-full justify-between" disabled>
+      Ir a cobrar <span aria-hidden="true">→</span>
+    </button>
+    <p class="mt-3 text-center text-xs text-base-content/70">
+      Al confirmar se generará un ticket de venta.
+    </p>
+  </div>
+</aside>

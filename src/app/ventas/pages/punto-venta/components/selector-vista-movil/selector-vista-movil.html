@@ -1,0 +1,35 @@
+<fieldset class="mt-6 grid grid-cols-2 gap-1 rounded-field bg-base-200 p-1">
+  <legend class="sr-only">Vista del punto de venta</legend>
+  <div>
+    <input
+      id="vista-productos"
+      class="peer sr-only"
+      type="radio"
+      name="vista-punto-venta"
+      value="productos"
+      [checked]="vista() === 'productos'"
+      (change)="vistaChange.emit('productos')"
+    />
+    <label
+      for="vista-productos"
+      class="flex min-h-11 cursor-pointer items-center justify-center rounded-field text-sm font-semibold text-base-content/70 peer-checked:bg-base-100 peer-checked:text-base-content peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary"
+      >Productos</label
+    >
+  </div>
+  <div>
+    <input
+      id="vista-venta"
+      class="peer sr-only"
+      type="radio"
+      name="vista-punto-venta"
+      value="venta"
+      [checked]="vista() === 'venta'"
+      (change)="vistaChange.emit('venta')"
+    />
+    <label
+      for="vista-venta"
+      class="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-field text-sm font-semibold text-base-content/70 peer-checked:bg-base-100 peer-checked:text-base-content peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary"
+      >Tu venta <span class="badge badge-soft badge-sm">0</span></label
+    >
+  </div>
+</fieldset>

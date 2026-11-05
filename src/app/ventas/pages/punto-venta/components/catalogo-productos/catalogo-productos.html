@@ -1,0 +1,125 @@
+<section
+  aria-labelledby="catalogo-titulo"
+  class="rounded-box border border-base-300 bg-base-100 p-4 sm:p-6"
+>
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h2 id="catalogo-titulo" class="text-xl font-semibold tracking-tight">Productos</h2>
+      <p class="mt-1 text-sm text-base-content/70">Elige un producto para agregarlo a la venta.</p>
+    </div>
+    <span class="badge badge-ghost">Catálogo de ejemplo</span>
+  </div>
+  <label class="input mt-6 flex min-h-11 w-full items-center gap-3">
+    <svg
+      aria-hidden="true"
+      class="size-4 shrink-0 text-base-content/60"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="1.8"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path stroke-linecap="round" d="m16 16 4 4" />
+    </svg>
+    <span class="sr-only">Buscar producto o categoría</span>
+    <input type="search" placeholder="Buscar producto o categoría..." disabled />
+  </label>
+  <div class="mt-4 flex flex-wrap gap-2" aria-label="Categorías de ejemplo">
+    <button type="button" class="btn btn-sm min-h-11 rounded-full" disabled>Todas</button>
+    <button type="button" class="btn btn-sm btn-outline min-h-11 rounded-full" disabled>
+      Abarrotes
+    </button>
+    <button type="button" class="btn btn-sm btn-outline min-h-11 rounded-full" disabled>
+      Lácteos
+    </button>
+    <button type="button" class="btn btn-sm btn-outline min-h-11 rounded-full" disabled>
+      Bebidas
+    </button>
+  </div>
+  <p class="mt-5 text-xs text-base-content/70">5 productos disponibles</p>
+  <div class="mt-3 grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+    @for (
+      producto of [
+        {
+          nombre: 'Arroz extra Costeño',
+          categoria: 'Abarrotes',
+          presentaciones: '2 presentaciones',
+          precio: '4.05',
+          oferta: '10% DTO.',
+        },
+        {
+          nombre: 'Aceite vegetal Primor',
+          categoria: 'Abarrotes',
+          presentaciones: '2 presentaciones',
+          precio: '5.85',
+          oferta: '10% DTO.',
+        },
+        {
+          nombre: 'Leche evaporada Gloria',
+          categoria: 'Lácteos',
+          presentaciones: '1 presentación',
+          precio: '3.70',
+          oferta: 'OFERTA',
+        },
+        {
+          nombre: 'Azúcar rubia',
+          categoria: 'Abarrotes',
+          presentaciones: '1 presentación',
+          precio: '3.90',
+          oferta: '',
+        },
+        {
+          nombre: 'Café Altomayo',
+          categoria: 'Bebidas',
+          presentaciones: '2 presentaciones',
+          precio: '9.50',
+          oferta: '',
+        },
+      ];
+      track producto.nombre
+    ) {
+      <article class="flex min-w-0 flex-col rounded-field border border-base-300 p-4">
+        <div class="flex items-start justify-between gap-2">
+          <span
+            class="flex size-11 items-center justify-center rounded-field bg-base-200 text-base-content/70"
+          >
+            <svg
+              aria-hidden="true"
+              class="size-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm-8 4.5 8 4.5 8-4.5M12 12v9"
+              />
+            </svg>
+          </span>
+          @if (producto.oferta) {
+            <span class="badge badge-soft badge-success badge-sm">{{ producto.oferta }}</span>
+          }
+        </div>
+        <p class="mt-4 text-xs text-base-content/70">{{ producto.categoria }}</p>
+        <h3 class="mt-1 font-semibold">{{ producto.nombre }}</h3>
+        <p class="mt-3 text-xs text-base-content/70">{{ producto.presentaciones }}</p>
+        <div class="mt-4 flex items-end justify-between gap-2">
+          <div>
+            <p class="text-xs text-base-content/70">Desde</p>
+            <p class="mt-1 font-semibold tabular-nums">S/ {{ producto.precio }}</p>
+          </div>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm min-h-11"
+            disabled
+            [attr.aria-label]="'Agregar ' + producto.nombre"
+          >
+            + Agregar
+          </button>
+        </div>
+      </article>
+    }
+  </div>
+</section>

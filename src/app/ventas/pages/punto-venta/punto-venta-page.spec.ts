@@ -69,12 +69,8 @@ describe('PuntoVentaPage', () => {
 
     // Cambiar la vista móvil sin eliminar ninguno de los paneles del escritorio.
     const pagina = fixture.nativeElement as HTMLElement;
-    const productos = pagina.querySelector<HTMLElement>(
-      'section[aria-labelledby="catalogo-titulo"]',
-    )!;
-    const venta = pagina.querySelector<HTMLElement>(
-      'aside[aria-labelledby="venta-actual-titulo"]',
-    )!;
+    const productos = pagina.querySelector<HTMLElement>('app-catalogo-productos')!;
+    const venta = pagina.querySelector<HTMLElement>('app-resumen-venta')!;
     const selectorVenta = pagina.querySelector<HTMLInputElement>('#vista-venta')!;
     const selectorProductos = pagina.querySelector<HTMLInputElement>('#vista-productos')!;
     expect(productos.classList.contains('hidden')).toBe(false);

@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
+import { PuntoVentaCabecera } from './components/punto-venta-cabecera/punto-venta-cabecera';
 
 @Component({
   selector: 'app-punto-venta-page',
-  template: '<section><h1>Punto de venta</h1><p>La venta aún no está disponible.</p></section>',
+  imports: [PuntoVentaCabecera],
+  templateUrl: './punto-venta-page.html',
 })
 export default class PuntoVentaPage {}

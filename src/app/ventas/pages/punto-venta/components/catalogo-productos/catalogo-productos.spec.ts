@@ -10,20 +10,45 @@ describe('CatalogoProductos', () => {
     const client = new QueryClient();
     const carrito = new CarritoVentaService();
     const variante = {
-      id: 'v1', productoId: 'p1', nombre: 'Tornillo', marca: 'Acme', sku: 'TOR', precio: '0.50', stock: '30', atributos: [],
+      id: 'v1',
+      productoId: 'p1',
+      nombre: 'Tornillo',
+      marca: 'Acme',
+      sku: 'TOR',
+      precio: '0.50',
+      stock: '30',
+      atributos: [],
       unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
-      unidades: [{ id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' }, { id: 'u2', nombre: 'Caja', simbolo: 'caja', factorABase: '12' }],
+      unidades: [
+        { id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' },
+        { id: 'u2', nombre: 'Caja', simbolo: 'caja', factorABase: '12' },
+      ],
     };
     TestBed.configureTestingModule({
       imports: [CatalogoProductos],
-      providers: [provideTanStackQuery(client), { provide: CatalogoApi, useValue: { list: vi.fn().mockResolvedValue({ items: [variante], page: 1, limit: 5, totalItems: 1 }) } }],
+      providers: [
+        provideTanStackQuery(client),
+        {
+          provide: CatalogoApi,
+          useValue: {
+            list: vi
+              .fn()
+              .mockResolvedValue({ items: [variante], page: 1, limit: 5, totalItems: 1 }),
+          },
+        },
+      ],
     });
-    TestBed.overrideComponent(CatalogoProductos, { add: { providers: [{ provide: CarritoVentaService, useValue: carrito }] } });
+    TestBed.overrideComponent(CatalogoProductos, {
+      add: { providers: [{ provide: CarritoVentaService, useValue: carrito }] },
+    });
     const fixture = TestBed.createComponent(CatalogoProductos);
     fixture.componentRef.setInput('almacenId', 'a1');
     fixture.detectChanges();
     await vi.waitFor(() => expect(fixture.componentInstance.catalogo.isSuccess()).toBe(true));
     fixture.detectChanges();
+    const precioEnTarjeta = (fixture.nativeElement.querySelector('article') as HTMLElement)
+      .textContent?.replace(/\s+/g, ' ');
+    expect(precioEnTarjeta).toContain('S/ 0.50 u');
 
     // Elegir cajas, introducir una cantidad y confirmar en el diálogo.
     (fixture.nativeElement.querySelector('article button') as HTMLButtonElement).click();
@@ -63,14 +88,41 @@ describe('CatalogoProductos', () => {
     const client = new QueryClient();
     const listar = vi.fn().mockResolvedValue({
       items: [
-        { id: 'v1', productoId: 'p1', nombre: 'Martillo', marca: 'Stanley', sku: 'MAR-16', precio: '10.00', stock: '3', atributos: [{ nombre: 'Peso', valor: '16 oz' }] },
-        { id: 'v2', productoId: 'p1', nombre: 'Martillo', marca: 'Stanley', sku: 'MAR-20', precio: '12.00', stock: '0', atributos: [{ nombre: 'Peso', valor: '20 oz' }] },
+        {
+          id: 'v1',
+          productoId: 'p1',
+          nombre: 'Martillo',
+          marca: 'Stanley',
+          sku: 'MAR-16',
+          precio: '10.00',
+          stock: '3',
+          atributos: [{ nombre: 'Peso', valor: '16 oz' }],
+          unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
+          unidades: [{ id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' }],
+        },
+        {
+          id: 'v2',
+          productoId: 'p1',
+          nombre: 'Martillo',
+          marca: 'Stanley',
+          sku: 'MAR-20',
+          precio: '12.00',
+          stock: '0',
+          atributos: [{ nombre: 'Peso', valor: '20 oz' }],
+          unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
+          unidades: [{ id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' }],
+        },
       ],
-      page: 1, limit: 5, totalItems: 2,
+      page: 1,
+      limit: 5,
+      totalItems: 2,
     });
     TestBed.configureTestingModule({
       imports: [CatalogoProductos],
-      providers: [provideTanStackQuery(client), { provide: CatalogoApi, useValue: { list: listar } }],
+      providers: [
+        provideTanStackQuery(client),
+        { provide: CatalogoApi, useValue: { list: listar } },
+      ],
     });
     const fixture = TestBed.createComponent(CatalogoProductos);
     fixture.componentRef.setInput('almacenId', 'almacen-1');
@@ -110,6 +162,8 @@ describe('CatalogoProductos', () => {
           sku: `SKU-${page}`,
           precio: '10.00',
           stock: '3',
+          unidadBase: { id: 'kg', nombre: 'Kilogramo', simbolo: 'kg' },
+          unidades: [{ id: 'kg', nombre: 'Kilogramo', simbolo: 'kg', factorABase: '1' }],
           atributos: [{ nombre: 'Tamaño', valor: `${page} pulgadas` }],
         },
       ],
@@ -133,7 +187,8 @@ describe('CatalogoProductos', () => {
     expect(contenidoInicial).toContain('Producto 1');
     expect(contenidoInicial).toContain('SKU-1');
     expect(contenidoInicial).toContain('Tamaño: 1 pulgadas');
-    expect(contenidoInicial).toContain('S/ 10.00');
+    const contenidoNormalizado = contenidoInicial.replace(/\s+/g, ' ');
+    expect(contenidoNormalizado).toContain('S/ 10.00 kg');
     expect(listar).toHaveBeenCalledWith({ almacenId: 'almacen-1', q: '', page: 1, limit: 5 });
 
     // Navegar a la segunda página mediante el componente compartido.

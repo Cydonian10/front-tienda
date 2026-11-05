@@ -1,5 +1,14 @@
 <app-dialog-shell title="Agregar a la venta" [titleId]="titleId">
-  <h3 class="font-semibold">{{ variante.nombre }}</h3>
+  <div class="flex items-start justify-between gap-3">
+    <h3 class="min-w-0 font-semibold">{{ variante.nombre }}</h3>
+    @if (variante.marca) {
+      <span
+        class="badge badge-ghost max-w-[45%] min-w-0 shrink-0 gap-0"
+        [attr.title]="'Marca: ' + variante.marca"
+        ><span class="sr-only">Marca: </span><span class="truncate">{{ variante.marca }}</span></span
+      >
+    }
+  </div>
   <p class="mt-1 text-sm text-base-content/70">SKU: {{ variante.sku }}</p>
   @if (variante.atributos.length) {
     <ul class="mt-2 text-sm text-base-content/70" aria-label="Atributos de la variante">

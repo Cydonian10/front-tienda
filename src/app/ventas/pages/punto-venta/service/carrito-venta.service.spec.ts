@@ -6,6 +6,7 @@ const variante: VarianteCatalogo = {
   id: 'v1',
   productoId: 'p1',
   nombre: 'Tornillo',
+  marca: 'Acme',
   sku: 'TOR',
   precio: '0.50',
   stock: '30.000000',

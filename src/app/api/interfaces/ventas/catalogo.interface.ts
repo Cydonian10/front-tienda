@@ -2,6 +2,7 @@ export interface VarianteCatalogo {
   id: string;
   productoId: string;
   nombre: string;
+  marca: string;
   sku: string;
   precio: string;
   stock: string;

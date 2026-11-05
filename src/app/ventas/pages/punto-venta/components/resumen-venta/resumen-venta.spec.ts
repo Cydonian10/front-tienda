@@ -11,6 +11,7 @@ describe('ResumenVenta', () => {
       id: 'v1',
       productoId: 'p1',
       nombre: 'Martillo',
+      marca: 'Stanley',
       sku: 'MAR',
       precio: '10.00',
       stock: '3',
@@ -27,6 +28,9 @@ describe('ResumenVenta', () => {
     fixture.detectChanges();
     const contenido = fixture.nativeElement.textContent as string;
     expect(contenido).toContain('Martillo');
+    expect(contenido).toContain('Marca: Stanley');
+    const marcaEnResumen = fixture.nativeElement.querySelector('[title="Marca: Stanley"]') as HTMLElement;
+    expect(marcaEnResumen.classList.contains('badge')).toBe(true);
     expect(contenido).toContain('S/ 20.00');
 
     // Quitar devuelve el resumen al estado vacío sin habilitar el cobro.

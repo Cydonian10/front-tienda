@@ -49,7 +49,14 @@
                 {{ linea.cantidad }} {{ linea.unidad.nombre }} × {{ soles(linea.precioCentavos) }}
               </p>
             </div>
-            <div class="text-right">
+            <div class="flex max-w-[40%] shrink-0 flex-col items-end text-right">
+              @if (linea.variante.marca) {
+                <span
+                  class="badge badge-ghost max-w-full min-w-0 gap-0"
+                  [attr.title]="'Marca: ' + linea.variante.marca"
+                  ><span class="sr-only">Marca: </span><span class="truncate">{{ linea.variante.marca }}</span></span
+                >
+              }
               <p class="font-semibold tabular-nums">{{ soles(linea.subtotalCentavos) }}</p>
               <button
                 type="button"

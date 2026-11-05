@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
 import { CatalogoApi } from '../../../../../api/ventas/catalogo/catalogo-api';
 import { CatalogoProductos } from './catalogo-productos';
-import { CarritoVentaService } from '../../carrito-venta.service';
+import { CarritoVentaService } from '../../service/carrito-venta.service';
 
 describe('CatalogoProductos', () => {
   it('abre el modal y agrega la unidad elegida al carrito de la página', async () => {
@@ -10,7 +10,7 @@ describe('CatalogoProductos', () => {
     const client = new QueryClient();
     const carrito = new CarritoVentaService();
     const variante = {
-      id: 'v1', productoId: 'p1', nombre: 'Tornillo', sku: 'TOR', precio: '0.50', stock: '30', atributos: [],
+      id: 'v1', productoId: 'p1', nombre: 'Tornillo', marca: 'Acme', sku: 'TOR', precio: '0.50', stock: '30', atributos: [],
       unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
       unidades: [{ id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' }, { id: 'u2', nombre: 'Caja', simbolo: 'caja', factorABase: '12' }],
     };
@@ -30,6 +30,9 @@ describe('CatalogoProductos', () => {
     fixture.detectChanges();
     const dialogo = document.querySelector('[role="dialog"]') as HTMLElement;
     expect(dialogo.textContent).toContain('Tornillo');
+    expect(dialogo.textContent).toContain('Marca: Acme');
+    const marcaEnDialogo = dialogo.querySelector('[title="Marca: Acme"]');
+    expect(marcaEnDialogo?.classList.contains('badge')).toBe(true);
     const unidad = dialogo.querySelector('select') as HTMLSelectElement;
     unidad.value = 'u2';
     unidad.dispatchEvent(new Event('change'));
@@ -60,8 +63,8 @@ describe('CatalogoProductos', () => {
     const client = new QueryClient();
     const listar = vi.fn().mockResolvedValue({
       items: [
-        { id: 'v1', productoId: 'p1', nombre: 'Martillo', sku: 'MAR-16', precio: '10.00', stock: '3', atributos: [{ nombre: 'Peso', valor: '16 oz' }] },
-        { id: 'v2', productoId: 'p1', nombre: 'Martillo', sku: 'MAR-20', precio: '12.00', stock: '0', atributos: [{ nombre: 'Peso', valor: '20 oz' }] },
+        { id: 'v1', productoId: 'p1', nombre: 'Martillo', marca: 'Stanley', sku: 'MAR-16', precio: '10.00', stock: '3', atributos: [{ nombre: 'Peso', valor: '16 oz' }] },
+        { id: 'v2', productoId: 'p1', nombre: 'Martillo', marca: 'Stanley', sku: 'MAR-20', precio: '12.00', stock: '0', atributos: [{ nombre: 'Peso', valor: '20 oz' }] },
       ],
       page: 1, limit: 5, totalItems: 2,
     });
@@ -81,6 +84,9 @@ describe('CatalogoProductos', () => {
     const segundaTarjeta = tarjetas[1].textContent;
     expect(tarjetas).toHaveLength(2);
     expect(primeraTarjeta).toContain('16 oz');
+    expect(primeraTarjeta).toContain('Marca: Stanley');
+    const marcaEnTarjeta = tarjetas[0].querySelector('[title="Marca: Stanley"]');
+    expect(marcaEnTarjeta?.classList.contains('badge')).toBe(true);
     expect(primeraTarjeta).toContain('MAR-16');
     expect(primeraTarjeta).toContain('10.00');
     expect(segundaTarjeta).toContain('20 oz');
@@ -100,6 +106,7 @@ describe('CatalogoProductos', () => {
           id: `p${page}`,
           productoId: 'producto-1',
           nombre: `Producto ${page}`,
+          marca: 'Acme',
           sku: `SKU-${page}`,
           precio: '10.00',
           stock: '3',

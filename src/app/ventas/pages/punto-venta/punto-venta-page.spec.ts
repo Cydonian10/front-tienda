@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import { AlmacenApi } from '../../../api/inventario/almacen-api';
 import { CajaApi } from '../../../api/ventas/caja/caja-api';
+import { CatalogoApi } from '../../../api/ventas/catalogo/catalogo-api';
 import { AuthStore } from '../../../store/auth/auth.store';
 import { PreparacionVentaService } from '../../services/preparacion-venta.service';
 import PuntoVentaPage from './punto-venta-page';
@@ -36,6 +37,7 @@ describe('PuntoVentaPage', () => {
         provideTanStackQuery(client),
         { provide: AlmacenApi, useValue: { list: listarAlmacenes } },
         { provide: CajaApi, useValue: { list: listarCajas } },
+        { provide: CatalogoApi, useValue: { list: vi.fn().mockResolvedValue({ items: [], page: 1, limit: 5, totalItems: 0 }) } },
         {
           provide: PreparacionVentaService,
           useValue: { seleccion: () => ({ almacenId: 'a1', turnoId: 'seleccionado' }) },

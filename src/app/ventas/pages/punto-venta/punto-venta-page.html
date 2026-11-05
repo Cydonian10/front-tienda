@@ -21,6 +21,7 @@
         class="mt-4 grid items-start gap-5 xl:mt-6 xl:grid-cols-[minmax(0,1fr)_minmax(19rem,23rem)]"
       >
         <app-catalogo-productos
+          [almacenId]="almacen.id"
           class="block xl:block"
           [class.hidden]="vistaMovil() !== 'productos'"
         />

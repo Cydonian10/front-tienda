@@ -1,3 +1,27 @@
-<section aria-labelledby="nueva-venta-titulo">
-  <app-punto-venta-cabecera />
+<section>
+  @if (almacenQuery.isError() || cajasQuery.isError()) {
+    <div role="alert" class="space-y-4">
+      <p>No se pudo cargar la información de la venta.</p>
+      <button type="button" class="btn btn-outline" (click)="reintentar()">Reintentar</button>
+    </div>
+  } @else if (almacenQuery.isPending() || cajasQuery.isPending()) {
+    <p role="status">Cargando información de la venta...</p>
+  } @else if (almacenQuery.data(); as almacen) {
+    @if (turnoSeleccionado(); as turno) {
+      <app-punto-venta-cabecera
+        [almacen]="almacen.nombre"
+        [caja]="turno.caja"
+        [numeroTurno]="turno.numero"
+        [responsable]="responsable()"
+      />
+    } @else {
+      <p role="alert">El turno seleccionado ya no está disponible o está cerrado.</p>
+      <a class="btn btn-outline mt-4" routerLink="/admin/ventas/preparacion"
+        >Volver a preparación</a
+      >
+    }
+  } @else {
+    <p role="alert">El almacén seleccionado ya no está disponible.</p>
+    <a class="btn btn-outline mt-4" routerLink="/admin/ventas/preparacion">Volver a preparación</a>
+  }
 </section>

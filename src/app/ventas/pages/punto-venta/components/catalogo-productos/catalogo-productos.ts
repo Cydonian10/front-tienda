@@ -13,6 +13,7 @@ import type { VarianteCatalogo } from '../../../../../api/interfaces/ventas/cata
 import { CarritoVentaService } from '../../service/carrito-venta.service';
 import { AgregarProductoDialog } from '../agregar-producto-dialog/agregar-producto-dialog';
 import { Pagination } from '../../../../../shared/components/pagination/pagination';
+import { decimalCompacto } from '../../../../../shared/formatters/decimal';
 import { useCatalogoVentas } from '../../../../actions/use-catalogo-ventas-action';
 
 @Component({
@@ -25,6 +26,7 @@ export class CatalogoProductos {
   private readonly dialog = inject(Dialog);
   private readonly injector = inject(Injector);
   readonly carrito = inject(CarritoVentaService);
+  readonly decimalCompacto = decimalCompacto;
   readonly almacenId = input.required<string>();
   readonly pagina = signal(1);
   readonly limite = signal(5);

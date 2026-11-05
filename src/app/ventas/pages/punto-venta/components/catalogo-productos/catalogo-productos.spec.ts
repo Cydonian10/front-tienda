@@ -95,7 +95,7 @@ describe('CatalogoProductos', () => {
           marca: 'Stanley',
           sku: 'MAR-16',
           precio: '10.00',
-          stock: '3',
+          stock: '40.000000',
           atributos: [{ nombre: 'Peso', valor: '16 oz' }],
           unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
           unidades: [{ id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' }],
@@ -107,7 +107,7 @@ describe('CatalogoProductos', () => {
           marca: 'Stanley',
           sku: 'MAR-20',
           precio: '12.00',
-          stock: '0',
+          stock: '0.000000',
           atributos: [{ nombre: 'Peso', valor: '20 oz' }],
           unidadBase: { id: 'u1', nombre: 'Unidad', simbolo: 'u' },
           unidades: [{ id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' }],
@@ -141,6 +141,8 @@ describe('CatalogoProductos', () => {
     expect(marcaEnTarjeta?.classList.contains('badge')).toBe(true);
     expect(primeraTarjeta).toContain('MAR-16');
     expect(primeraTarjeta).toContain('10.00');
+    expect(primeraTarjeta).toContain('Stock (unidad base): 40');
+    expect(primeraTarjeta).not.toContain('40.000000');
     expect(segundaTarjeta).toContain('20 oz');
     expect(segundaTarjeta).toContain('MAR-20');
     expect(segundaTarjeta).toContain('12.00');
@@ -161,7 +163,7 @@ describe('CatalogoProductos', () => {
           marca: 'Acme',
           sku: `SKU-${page}`,
           precio: '10.00',
-          stock: '3',
+          stock: '3.500000',
           unidadBase: { id: 'kg', nombre: 'Kilogramo', simbolo: 'kg' },
           unidades: [{ id: 'kg', nombre: 'Kilogramo', simbolo: 'kg', factorABase: '1' }],
           atributos: [{ nombre: 'Tamaño', valor: `${page} pulgadas` }],
@@ -187,6 +189,8 @@ describe('CatalogoProductos', () => {
     expect(contenidoInicial).toContain('Producto 1');
     expect(contenidoInicial).toContain('SKU-1');
     expect(contenidoInicial).toContain('Tamaño: 1 pulgadas');
+    expect(contenidoInicial).toContain('Stock (unidad base): 3.5');
+    expect(contenidoInicial).not.toContain('3.500000');
     const contenidoNormalizado = contenidoInicial.replace(/\s+/g, ' ');
     expect(contenidoNormalizado).toContain('S/ 10.00 kg');
     expect(listar).toHaveBeenCalledWith({ almacenId: 'almacen-1', q: '', page: 1, limit: 5 });

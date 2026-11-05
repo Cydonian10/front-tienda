@@ -160,7 +160,7 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
           },
           {
             label: 'Punto de venta',
-            url: '/admin/ventas/preparacion',
+            url: '/admin/ventas/punto-venta',
             icon: 'file',
             permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
           },

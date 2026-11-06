@@ -43,6 +43,42 @@ describe('CajaCard', () => {
     }));
   });
 
+  it('muestra el primer turno abierto del día como Turno #01', () => {
+    // Un turno de otro día no forma parte de la numeración actual.
+    const turnoAnterior = { ...turno, id: 'anterior', fechaOperativa: '2026-10-30', fechaCierre: '2026-10-30T12:00:00Z' };
+    const fixture = TestBed.createComponent(CajaCard);
+    fixture.componentRef.setInput('caja', { ...caja, turnos: [turnoAnterior, turno] });
+    fixture.detectChanges();
+
+    const textoTarjeta = fixture.nativeElement.textContent;
+    expect(textoTarjeta).toContain('Turno #01');
+  });
+
+  it('numera el turno abierto según el orden de apertura de su fecha operativa', () => {
+    // Los turnos llegan desordenados y dos comparten la misma fecha de apertura.
+    const primero = { ...turno, id: 't1', fechaCierre: '2026-10-31T11:00:00Z' };
+    const segundo = { ...turno, id: 't2', fechaCierre: '2026-10-31T12:00:00Z' };
+    const tercero = { ...turno, id: 't3', fechaApertura: '2026-10-31T13:00:00Z' };
+    const fixture = TestBed.createComponent(CajaCard);
+    fixture.componentRef.setInput('caja', { ...caja, turnos: [tercero, segundo, primero] });
+    fixture.detectChanges();
+
+    const textoTarjeta = fixture.nativeElement.textContent;
+    expect(textoTarjeta).toContain('Turno #03');
+  });
+
+  it('no muestra un número de turno cuando no hay turno abierto', () => {
+    // La tarjeta sigue mostrando los datos del último turno cerrado sin numerarlo.
+    const turnoCerrado = { ...turno, fechaCierre: '2026-10-31T11:00:00Z' };
+    const fixture = TestBed.createComponent(CajaCard);
+    fixture.componentRef.setInput('caja', { ...caja, turnos: [turnoCerrado] });
+    fixture.detectChanges();
+
+    const textoTarjeta = fixture.nativeElement.textContent;
+    expect(textoTarjeta).not.toContain('Turno #');
+    expect(textoTarjeta).toContain('Último efectivo contado');
+  });
+
   it('conserva la apertura cuando no hay turno abierto', () => {
     const fixture = TestBed.createComponent(CajaCard);
     fixture.componentRef.setInput('caja', { ...caja, turnos: [] });

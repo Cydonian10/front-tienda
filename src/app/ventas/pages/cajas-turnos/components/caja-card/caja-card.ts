@@ -20,6 +20,16 @@ export class CajaCard {
   readonly turnoAbierto = computed(() =>
     this.caja().turnos.find((turno) => turno.fechaCierre === null),
   );
+  readonly numeroTurnoAbierto = computed(() => {
+    const abierto = this.turnoAbierto();
+    if (!abierto) return null;
+
+    const turnosDelDia = this.caja().turnos
+      .filter((turno) => turno.fechaOperativa === abierto.fechaOperativa)
+      .sort((a, b) => Date.parse(a.fechaApertura) - Date.parse(b.fechaApertura) || a.id.localeCompare(b.id));
+    const posicion = turnosDelDia.findIndex((turno) => turno.id === abierto.id) + 1;
+    return String(posicion).padStart(2, '0');
+  });
   readonly ultimoTurno = computed(() => this.turnoAbierto() ?? this.caja().turnos.at(-1));
 
   abrirTurno(): void {

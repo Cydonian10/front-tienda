@@ -16,6 +16,9 @@
       >
     </header>
     @if (ultimoTurno(); as turno) {
+      @if (numeroTurnoAbierto(); as numero) {
+        <p class="text-sm font-semibold tabular-nums">Turno #{{ numero }}</p>
+      }
       <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p class="text-xs text-base-content/70">

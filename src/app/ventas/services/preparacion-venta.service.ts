@@ -13,6 +13,20 @@ export class PreparacionVentaService {
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly estado = signal<SeleccionVenta | null>(this.recuperar());
   readonly seleccion = this.estado.asReadonly();
+  private readonly almacenEnRecuperacion = signal<string | null>(null);
+  readonly recuperandoAlmacen = this.almacenEnRecuperacion.asReadonly();
+  private readonly turnoEnRecuperacion = signal<string | null>(null);
+  readonly turnoAnterior = this.turnoEnRecuperacion.asReadonly();
+
+  recuperarTurno(): void {
+    this.almacenEnRecuperacion.set(this.seleccion()?.almacenId ?? null);
+    this.turnoEnRecuperacion.set(this.seleccion()?.turnoId ?? null);
+  }
+
+  finalizarRecuperacion(): void {
+    this.almacenEnRecuperacion.set(null);
+    this.turnoEnRecuperacion.set(null);
+  }
 
   seleccionar(seleccion: SeleccionVenta | null): void {
     this.estado.set(seleccion);

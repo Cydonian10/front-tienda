@@ -5,6 +5,7 @@ import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-exper
 import { AlmacenApi } from '../../../api/inventario/almacen-api';
 import { CajaApi } from '../../../api/ventas/caja/caja-api';
 import PreparacionVentaPage from './preparacion-venta-page';
+import { CarritoVentaService } from '../punto-venta/service/carrito-venta.service';
 
 describe('PreparacionVentaPage', () => {
   it('muestra almacenes activos y turnos abiertos y conserva los identificadores', async () => {
@@ -78,6 +79,92 @@ describe('PreparacionVentaPage', () => {
 
     // Liberar el componente y los datos de las consultas.
     fixture.destroy();
+    client.clear();
+  });
+
+  it('conserva el carrito y almacén mientras se elige un turno distinto', async () => {
+    // Preparar una venta interrumpida por el cierre del turno seleccionado.
+    const client = new QueryClient();
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        provideTanStackQuery(client),
+        {
+          provide: AlmacenApi,
+          useValue: {
+            list: vi.fn().mockResolvedValue({
+              data: [
+                { id: 'a1', nombre: 'Principal', activo: true },
+                { id: 'a2', nombre: 'Otro', activo: true },
+              ],
+              meta: { totalPages: 1 },
+            }),
+          },
+        },
+        {
+          provide: CajaApi,
+          useValue: {
+            list: vi.fn().mockResolvedValue([
+              {
+                nombre: 'Caja',
+                turnos: [
+                  { id: 't1', fechaCierre: null, usuarioApertura: { nickName: 'Ana' } },
+                  { id: 't2', fechaCierre: null, usuarioApertura: { nickName: 'Luis' } },
+                ],
+              },
+            ]),
+          },
+        },
+      ],
+    });
+    const preparacion = TestBed.inject(PreparacionVentaService);
+    const carrito = TestBed.inject(CarritoVentaService);
+    const unidad = { id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' };
+    carrito.agregar(
+      {
+        id: 'v1',
+        productoId: 'p1',
+        nombre: 'Martillo',
+        marca: '',
+        sku: 'SKU',
+        precio: '10.00',
+        stock: '2',
+        atributos: [],
+        unidadBase: unidad,
+        unidades: [unidad],
+      },
+      unidad,
+      '1',
+    );
+    preparacion.seleccionar({ almacenId: 'a1', turnoId: 't1' });
+    preparacion.recuperarTurno();
+    const fixture = TestBed.createComponent(PreparacionVentaPage);
+    fixture.detectChanges();
+    await vi.waitFor(() => {
+      expect(fixture.componentInstance.almacenesQuery.isSuccess()).toBe(true);
+      expect(fixture.componentInstance.cajasQuery.isFetching()).toBe(false);
+    });
+    fixture.detectChanges();
+
+    // El almacén no se puede cambiar y el turno anterior no se ofrece aunque la caché lo muestre abierto.
+    const pagina = fixture.nativeElement as HTMLElement;
+    expect(pagina.querySelector<HTMLSelectElement>('#almacen')?.disabled).toBe(true);
+    expect(fixture.componentInstance.turnos().map((turno) => turno.id)).toEqual(['t2']);
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    fixture.componentInstance.almacen.set('a2');
+    fixture.componentInstance.turno.set('t2');
+    fixture.componentInstance.continuar();
+    expect(navegar).not.toHaveBeenCalled();
+
+    // Al elegir el otro turno, la venta permanece en memoria al salir de preparación.
+    fixture.componentInstance.almacen.set('a1');
+    fixture.componentInstance.continuar();
+    fixture.destroy();
+    const seleccionGuardada = preparacion.seleccion();
+    expect(seleccionGuardada).toEqual({ almacenId: 'a1', turnoId: 't2' });
+    expect(carrito.lineas()).toHaveLength(1);
+    expect(navegar).toHaveBeenCalledWith(['/admin/ventas/punto-venta']);
+    preparacion.finalizarRecuperacion();
     client.clear();
   });
 });

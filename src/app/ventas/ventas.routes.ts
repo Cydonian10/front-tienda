@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { PERMISSION_CODES } from '../api/interfaces/access-control/permision.interface';
 import { permissionGuard } from '../auth/guards/permission.guard';
 import { preparacionVentaGuard } from './guards/preparacion-venta.guard';
+import type PuntoVentaPage from './pages/punto-venta/punto-venta-page';
 
 const ventasRoutes: Routes = [
   {
@@ -28,6 +29,7 @@ const ventasRoutes: Routes = [
       permissionGuard('VENTAS', PERMISSION_CODES.CAJAS_TURNOS_READ),
       preparacionVentaGuard,
     ],
+    canDeactivate: [(pagina: PuntoVentaPage) => pagina.puedeSalir()],
     title: 'Punto de venta',
   },
 ];

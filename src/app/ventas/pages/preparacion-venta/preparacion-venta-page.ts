@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { PreparacionVentaService } from '../../services/preparacion-venta.service';
 import { useAlmacenes } from '../../../inventario/actions/use-almacenes-action';
@@ -7,6 +7,7 @@ import { PuntoVentaHeader } from './components/punto-venta-header/punto-venta-he
 import { PreparacionVenta } from './components/preparacion-venta/preparacion-venta';
 import { PasosVenta } from './components/pasos-venta/pasos-venta';
 import { VentasRecientes } from './components/ventas-recientes/ventas-recientes';
+import { CarritoVentaService } from '../punto-venta/service/carrito-venta.service';
 
 @Component({
   selector: 'app-preparacion-venta-page',
@@ -14,10 +15,12 @@ import { VentasRecientes } from './components/ventas-recientes/ventas-recientes'
   templateUrl: './preparacion-venta-page.html',
   host: { class: 'block' },
 })
-export default class PreparacionVentaPage {
+export default class PreparacionVentaPage implements OnDestroy {
   private readonly router = inject(Router);
-  private readonly preparacion = inject(PreparacionVentaService);
-  readonly almacen = signal('');
+  readonly preparacion = inject(PreparacionVentaService);
+  private readonly carrito = inject(CarritoVentaService);
+  private continuando = false;
+  readonly almacen = signal(this.preparacion.recuperandoAlmacen() ?? '');
   readonly turno = signal('');
   readonly almacenesQuery = useAlmacenes({
     page: () => 1,
@@ -29,7 +32,9 @@ export default class PreparacionVentaPage {
   readonly turnos = computed(() =>
     (this.cajasQuery.data() ?? []).flatMap((caja) =>
       caja.turnos
-        .filter((turno) => turno.fechaCierre === null)
+        .filter(
+          (turno) => turno.fechaCierre === null && turno.id !== this.preparacion.turnoAnterior(),
+        )
         .map((turno) => ({
           id: turno.id,
           nombre: `${caja.nombre} · ${turno.usuarioApertura.nickName}`,
@@ -37,17 +42,34 @@ export default class PreparacionVentaPage {
     ),
   );
 
+  constructor() {
+    if (this.preparacion.recuperandoAlmacen()) void this.cajasQuery.refetch();
+  }
+
   continuar(): void {
     const almacenId = this.almacen();
     const turnoId = this.turno();
     if (
       this.almacenesQuery.isError() ||
       this.cajasQuery.isError() ||
+      (!!this.preparacion.recuperandoAlmacen() && this.cajasQuery.isFetching()) ||
+      (!!this.preparacion.recuperandoAlmacen() &&
+        almacenId !== this.preparacion.recuperandoAlmacen()) ||
       !this.almacenesQuery.data()?.data.some((item) => item.id === almacenId) ||
       !this.turnos().some((item) => item.id === turnoId)
     )
       return;
     this.preparacion.seleccionar({ almacenId, turnoId });
-    void this.router.navigate(['/admin/ventas/punto-venta']);
+    this.continuando = true;
+    void this.router.navigate(['/admin/ventas/punto-venta']).then((navego) => {
+      if (!navego) this.continuando = false;
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.preparacion.recuperandoAlmacen() && !this.continuando) {
+      this.carrito.vaciar();
+      this.preparacion.finalizarRecuperacion();
+    }
   }
 }

@@ -1,0 +1,18 @@
+<app-dialog-shell title="Venta registrada" [titleId]="titleId">
+  <p class="text-sm text-base-content/70">El cobro se registró correctamente.</p>
+  <dl class="mt-5 space-y-3 tabular-nums">
+    <div class="flex justify-between gap-4">
+      <dt class="font-semibold">Total registrado</dt>
+      <dd class="font-semibold">{{ formato(venta.total) }}</dd>
+    </div>
+    <div class="flex justify-between gap-4 border-t border-base-300 pt-3">
+      <dt class="font-semibold">Vuelto</dt>
+      <dd class="font-semibold">{{ formato(venta.vuelto?.importe ?? '0.00') }}</dd>
+    </div>
+  </dl>
+  <div dialog-actions>
+    <button type="button" class="btn btn-primary min-h-11" (click)="dialogRef.close()">
+      Cerrar
+    </button>
+  </div>
+</app-dialog-shell>

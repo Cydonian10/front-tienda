@@ -124,4 +124,8 @@ export class CarritoVentaService {
   quitar(linea: LineaCarrito): void {
     this.estado.update((lineas) => lineas.filter((item) => item !== linea));
   }
+
+  vaciar(): void {
+    this.estado.set([]);
+  }
 }

@@ -13,6 +13,7 @@ export class PreparacionVenta {
   readonly turnos = input.required<readonly { id: string; nombre: string }[]>();
   readonly almacenesCargando = input(false);
   readonly almacenesError = input(false);
+  readonly almacenFijo = input(false);
   readonly turnosCargando = input(false);
   readonly turnosError = input(false);
   readonly reintentarAlmacenes = output<void>();
@@ -25,6 +26,7 @@ export class PreparacionVenta {
 
   seleccionar(event: Event, campo: 'almacen' | 'turno'): void {
     const valor = (event.target as HTMLSelectElement).value;
+    if (campo === 'almacen' && this.almacenFijo()) return;
     if (campo === 'almacen') this.almacenChange.emit(valor);
     else this.turnoChange.emit(valor);
   }

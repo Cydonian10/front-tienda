@@ -41,7 +41,7 @@ describe('RegistrarVentaAction', () => {
       ],
     });
     auth = TestBed.inject(AuthStore);
-    auth.setProfile({ id: 'usuario-1' } as AuthPerfil);
+    auth.setProfile({ id: 'usuario-1', isSuperAdmin: true } as AuthPerfil);
     action = TestBed.runInInjectionContext(() => useRegistrarVenta());
   });
 
@@ -106,7 +106,7 @@ describe('RegistrarVentaAction', () => {
     if (estadoInicial.tipo !== 'incierto') throw new Error('Se esperaba un resultado incierto');
 
     // Otro usuario y una sesión ausente no pueden reenviar la venta.
-    auth.setProfile({ id: 'usuario-2' } as AuthPerfil);
+    auth.setProfile({ id: 'usuario-2', isSuperAdmin: true } as AuthPerfil);
     await action.reintentar();
     expect(crear).toHaveBeenCalledTimes(1);
     const estadoOtroUsuario = action.estado();
@@ -184,6 +184,23 @@ describe('RegistrarVentaAction', () => {
     await action.registrar(solicitud());
 
     // El intento se rechaza antes de llegar al cliente HTTP.
+    const estado = action.estado();
+    expect(estado.tipo).toBe('rechazado');
+    expect(crear).not.toHaveBeenCalled();
+  });
+
+  it('comprueba de nuevo el permiso después de actualizar el perfil', async () => {
+    // La autorización puede cambiar mientras el vendedor tiene el diálogo abierto.
+    cargarPerfil.mockImplementation(async () => {
+      auth.setProfile({
+        id: 'usuario-1',
+        isSuperAdmin: false,
+        permissions: [],
+      } as unknown as AuthPerfil);
+    });
+    await action.registrar(solicitud());
+
+    // La solicitud no llega a la API si el perfil actualizado perdió acceso.
     const estado = action.estado();
     expect(estado.tipo).toBe('rechazado');
     expect(crear).not.toHaveBeenCalled();

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import { AlmacenApi } from '../../../api/inventario/almacen-api';
@@ -6,12 +7,15 @@ import { CajaApi } from '../../../api/ventas/caja/caja-api';
 import { CatalogoApi } from '../../../api/ventas/catalogo/catalogo-api';
 import { AuthStore } from '../../../store/auth/auth.store';
 import { PreparacionVentaService } from '../../services/preparacion-venta.service';
+import { RegistrarVentaAction } from '../../actions/use-registrar-venta-action';
 import PuntoVentaPage from './punto-venta-page';
 
 describe('PuntoVentaPage', () => {
   it('muestra el almacén seleccionado, el orden del turno y el usuario autenticado', async () => {
     // Preparar un almacén en la segunda página y turnos de distintos días.
     const client = new QueryClient();
+    const registroBloqueado = signal(false);
+    const almacenRecuperacion = signal<string | null>(null);
     const listarAlmacenes = vi.fn().mockImplementation(async (pagina: number) => ({
       data: pagina === 1 ? [] : [{ id: 'a1', nombre: 'Almacén norte', activo: true }],
       meta: { totalPages: 2 },
@@ -37,11 +41,21 @@ describe('PuntoVentaPage', () => {
         provideTanStackQuery(client),
         { provide: AlmacenApi, useValue: { list: listarAlmacenes } },
         { provide: CajaApi, useValue: { list: listarCajas } },
-        { provide: CatalogoApi, useValue: { list: vi.fn().mockResolvedValue({ items: [], page: 1, limit: 5, totalItems: 0 }) } },
+        {
+          provide: CatalogoApi,
+          useValue: {
+            list: vi.fn().mockResolvedValue({ items: [], page: 1, limit: 5, totalItems: 0 }),
+          },
+        },
         {
           provide: PreparacionVentaService,
-          useValue: { seleccion: () => ({ almacenId: 'a1', turnoId: 'seleccionado' }) },
+          useValue: {
+            seleccion: () => ({ almacenId: 'a1', turnoId: 'seleccionado' }),
+            finalizarRecuperacion: vi.fn(),
+            recuperandoAlmacen: almacenRecuperacion,
+          },
         },
+        { provide: RegistrarVentaAction, useValue: { bloqueado: registroBloqueado } },
         {
           provide: AuthStore,
           useValue: {
@@ -88,7 +102,41 @@ describe('PuntoVentaPage', () => {
     expect(venta.classList.contains('hidden')).toBe(true);
     expect(productos.classList.contains('xl:block')).toBe(true);
     expect(venta.classList.contains('xl:block')).toBe(true);
+
+    // Un cobro pendiente impide navegar y solicita la advertencia del navegador al salir.
+    registroBloqueado.set(true);
+    const salidaPermitida = fixture.componentInstance.puedeSalir();
+    const evento = {
+      preventDefault: vi.fn(),
+      returnValue: 'sin advertencia',
+    } as unknown as BeforeUnloadEvent;
+    fixture.componentInstance.advertirSalida(evento);
+    expect(salidaPermitida).toBe(false);
+    expect(evento.preventDefault).toHaveBeenCalledOnce();
+    expect(evento.returnValue).toBe('');
+
+    // Al recuperar un turno, destruir la página no descarta el carrito compartido.
+    const carrito = fixture.componentInstance.carrito;
+    const unidad = { id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' };
+    carrito.agregar(
+      {
+        id: 'v1',
+        productoId: 'p1',
+        nombre: 'Martillo',
+        marca: '',
+        sku: 'SKU',
+        precio: '10.00',
+        stock: '2',
+        atributos: [],
+        unidadBase: unidad,
+        unidades: [unidad],
+      },
+      unidad,
+      '1',
+    );
+    almacenRecuperacion.set('a1');
     fixture.destroy();
+    expect(carrito.lineas()).toHaveLength(1);
     client.clear();
   });
 
@@ -120,8 +168,13 @@ describe('PuntoVentaPage', () => {
         },
         {
           provide: PreparacionVentaService,
-          useValue: { seleccion: () => ({ almacenId: 'a1', turnoId: 't1' }) },
+          useValue: {
+            seleccion: () => ({ almacenId: 'a1', turnoId: 't1' }),
+            finalizarRecuperacion: vi.fn(),
+            recuperandoAlmacen: () => null,
+          },
         },
+        { provide: RegistrarVentaAction, useValue: { bloqueado: () => false } },
         { provide: AuthStore, useValue: { authPerfil: () => null } },
       ],
     });

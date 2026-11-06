@@ -8,7 +8,7 @@
     <span class="text-xl font-semibold tabular-nums">{{ soles(carrito.total()) }}</span>
   </div>
 
-  <fieldset class="mt-5">
+  <fieldset class="mt-5" [disabled]="bloqueado()">
     <legend class="mb-2 text-sm font-semibold">Medio de pago</legend>
     <div class="grid grid-cols-2 gap-3">
       <label
@@ -46,6 +46,7 @@
       inputmode="decimal"
       autocomplete="off"
       class="input min-h-11 w-full tabular-nums"
+      [disabled]="bloqueado()"
       [value]="monto()"
       (input)="monto.set($any($event.target).value)"
       [attr.aria-invalid]="monto() && errorMonto() ? 'true' : null"
@@ -60,13 +61,19 @@
     <div class="mt-4" role="group" aria-label="Montos rápidos de efectivo">
       <p class="mb-2 text-sm text-base-content/70">Recibí</p>
       <div class="flex flex-wrap gap-2">
-        <button type="button" class="btn btn-outline btn-sm min-h-11" (click)="usarMontoExacto()">
+        <button
+          type="button"
+          class="btn btn-outline btn-sm min-h-11"
+          [disabled]="bloqueado()"
+          (click)="usarMontoExacto()"
+        >
           Monto exacto
         </button>
         @for (importe of [20, 50, 100]; track importe) {
           <button
             type="button"
             class="btn btn-outline btn-sm min-h-11 tabular-nums"
+            [disabled]="bloqueado()"
             (click)="monto.set('' + importe)"
           >
             S/ {{ importe }}
@@ -82,11 +89,68 @@
     </div>
   }
 
-  <p class="mt-5 text-sm text-base-content/70">El registro del cobro aún no está disponible.</p>
+  @if (enCurso()) {
+    <p class="mt-5 text-sm text-base-content/70" role="status">
+      Registrando la venta. No cierres ni recargues la pestaña: podrías perder la recuperación del
+      cobro.
+    </p>
+  }
+  @if (mensajeError()) {
+    <div class="alert alert-soft alert-warning mt-5" role="alert">
+      <div>
+        <p>{{ mensajeError() }}</p>
+        @if (registro.estado().tipo === 'incierto' || registro.estado().tipo === 'revision') {
+          <p class="mt-2 text-sm">
+            Si recargas o cierras la pestaña, perderás la recuperación. Verifica la venta
+            manualmente antes de cobrarla otra vez.
+          </p>
+        }
+      </div>
+    </div>
+  }
+  @if (!seleccionValida()) {
+    <p class="mt-4 text-sm text-error" role="alert">
+      Selecciona un almacén y un turno antes de cobrar.
+    </p>
+  } @else if (!puedeVender()) {
+    <p class="mt-4 text-sm text-error" role="alert">Ya no tienes acceso al punto de venta.</p>
+  } @else if (!lineasValidas() || !totalValido()) {
+    <p class="mt-4 text-sm text-error" role="alert">
+      La venta debe tener productos válidos y un total mayor que cero.
+    </p>
+  }
+  @if (turnoCerrado()) {
+    <button type="button" class="btn btn-outline mt-4 min-h-11" (click)="cambiarTurno()">
+      Elegir otro turno
+    </button>
+  }
   <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
-    <button type="button" class="btn min-h-11" data-dialog-cancel (click)="dialogRef.close()">
+    <button
+      type="button"
+      class="btn min-h-11"
+      data-dialog-cancel
+      [disabled]="bloqueado()"
+      (click)="cancelar()"
+    >
       Cancelar
     </button>
-    <button type="button" class="btn btn-primary min-h-11" disabled>Registrar cobro</button>
+    @if (registro.estado().tipo === 'incierto') {
+      <button type="button" class="btn btn-primary min-h-11" (click)="reintentar()">
+        Reintentar registro
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="btn btn-primary min-h-11"
+        [disabled]="!puedeRegistrar()"
+        (click)="registrarCobro()"
+      >
+        @if (enCurso()) {
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span> Registrando…
+        } @else {
+          Registrar cobro
+        }
+      </button>
+    }
   </div>
 </app-dialog-shell>

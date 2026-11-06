@@ -28,7 +28,7 @@ export class ResumenVenta {
       ariaDescribedBy: `${id}-descripcion`,
       autoFocus: '[data-dialog-cancel]',
       restoreFocus: true,
-      closeOnNavigation: true,
+      closeOnNavigation: false,
     });
   }
 }

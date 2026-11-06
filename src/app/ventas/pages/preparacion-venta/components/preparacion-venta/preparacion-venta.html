@@ -14,7 +14,7 @@
             id="almacen"
             class="select w-full"
             [value]="almacen()"
-            [disabled]="almacenesCargando() || almacenesError() || !almacenes().length"
+            [disabled]="almacenFijo() || almacenesCargando() || almacenesError() || !almacenes().length"
             (change)="seleccionar($event, 'almacen')"
             aria-describedby="almacen-ayuda"
           >
@@ -23,7 +23,10 @@
               <option [value]="item.id">{{ item.nombre }}</option>
             }
           </select>
-          <p id="almacen-ayuda" class="label">¿De dónde salen los productos?</p>
+          <p id="almacen-ayuda" class="label">
+            @if (almacenFijo()) { El almacén se conserva para recuperar la venta. }
+            @else { ¿De dónde salen los productos? }
+          </p>
         </fieldset>
         @if (almacenesCargando()) {
           <p role="status">Cargando almacenes…</p>

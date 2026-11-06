@@ -1,21 +1,21 @@
 export type MedioPagoVenta = 'efectivo' | 'yape';
 
 export interface DetalleCrearVenta {
-  varianteId: string;
-  unidadId: string;
-  cantidad: string;
+  readonly varianteId: string;
+  readonly unidadId: string;
+  readonly cantidad: string;
 }
 
 export interface PagoCrearVenta {
-  medio: MedioPagoVenta;
-  importe: string;
+  readonly medio: MedioPagoVenta;
+  readonly importe: string;
 }
 
 export interface CrearVentaDto {
-  turnoId: string;
-  almacenId: string;
-  detalles: DetalleCrearVenta[];
-  pagos: [PagoCrearVenta];
+  readonly turnoId: string;
+  readonly almacenId: string;
+  readonly detalles: readonly DetalleCrearVenta[];
+  readonly pagos: readonly [PagoCrearVenta];
 }
 
 export interface DetalleVentaCreada {

@@ -1,10 +1,12 @@
+import { Dialog } from '@angular/cdk/dialog';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { TestBed } from '@angular/core/testing';
 import { CarritoVentaService } from '../../service/carrito-venta.service';
 import { ResumenVenta } from './resumen-venta';
 
 describe('ResumenVenta', () => {
-  it('abre el cobro y valida efectivo y Yape sin registrar la venta', () => {
-    // Preparar una venta y sustituir la apertura nativa del diálogo en jsdom.
+  it('abre el diálogo compartido y lo cierra sin modificar el carrito', async () => {
+    // Preparar una venta para abrir el diálogo desde el resumen.
     const carrito = new CarritoVentaService();
     const unidad = { id: 'u1', nombre: 'Unidad', simbolo: 'u', factorABase: '1' };
     carrito.agregar({
@@ -17,58 +19,34 @@ describe('ResumenVenta', () => {
     });
     const fixture = TestBed.createComponent(ResumenVenta);
     fixture.detectChanges();
-    const dialogo = fixture.nativeElement.querySelector('dialog') as HTMLDialogElement;
-    let aperturas = 0;
-    dialogo.showModal = () => { aperturas++; };
     const botonCobrar = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
       .find((boton) => boton.textContent?.includes('Ir a cobrar'))!;
     botonCobrar.click();
-    fixture.detectChanges();
-    expect(aperturas).toBe(1);
+    await TestBed.tick();
+    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
+    const dialogo = overlay.querySelector('[role="dialog"]')!;
+    const titulo = document.getElementById(dialogo.getAttribute('aria-labelledby')!);
+    const descripcion = document.getElementById(dialogo.getAttribute('aria-describedby')!);
+    expect(titulo?.textContent).toBe('Cobrar venta');
+    expect(descripcion?.textContent).toContain('Selecciona un medio de pago');
     expect(dialogo.textContent).toContain('S/ 20.00');
+    expect(dialogo.querySelector('app-dialog-shell')).not.toBeNull();
 
-    // En efectivo se valida el importe y se calcula el vuelto en centavos.
-    const monto = dialogo.querySelector('#monto-cobro') as HTMLInputElement;
-    monto.value = '19.99';
-    monto.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(dialogo.textContent).toContain('El monto recibido debe cubrir el total.');
-    monto.value = '25.50';
-    monto.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(dialogo.textContent).toContain('S/ 5.50');
-
-    // Los accesos rápidos sustituyen el monto y actualizan el vuelto.
-    const montosRapidos = dialogo.querySelector('[aria-label="Montos rápidos de efectivo"]')!;
-    const botonesRapidos = montosRapidos.querySelectorAll('button');
-    botonesRapidos[2].click();
-    fixture.detectChanges();
-    expect(monto.value).toBe('50');
-    expect(dialogo.textContent).toContain('S/ 30.00');
-    botonesRapidos[0].click();
-    fixture.detectChanges();
-    expect(monto.value).toBe('20.00');
-    expect(dialogo.textContent).toContain('S/ 0.00');
-
-    // Yape comienza con el total exacto, admite edición y no muestra vuelto.
-    const yape = dialogo.querySelectorAll<HTMLInputElement>('input[type="radio"]')[1];
-    yape.click();
-    fixture.detectChanges();
-    expect(monto.value).toBe('20.00');
-    expect(dialogo.textContent).not.toContain('Vuelto');
-    expect(dialogo.querySelector('[aria-label="Montos rápidos de efectivo"]')).toBeNull();
-    monto.value = '20.01';
-    monto.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(dialogo.textContent).toContain('El monto de Yape debe ser igual al total.');
-    monto.value = '20.001';
-    monto.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(dialogo.textContent).toContain('Ingresa un monto válido');
-    const botonRegistro = Array.from(dialogo.querySelectorAll('button'))
-      .find((boton) => boton.textContent?.includes('Registrar cobro'));
-    expect(botonRegistro?.disabled).toBe(true);
+    // Cancelar cierra el diálogo y al volver a abrirlo restablece sus datos.
+    dialogo.querySelectorAll<HTMLInputElement>('input[type="radio"]')[1].click();
+    await TestBed.tick();
+    dialogo.querySelector<HTMLButtonElement>('[data-dialog-cancel]')!.click();
+    const dialogoCerrado = overlay.querySelector('[role="dialog"]');
+    expect(dialogoCerrado).toBeNull();
     expect(carrito.lineas()).toHaveLength(1);
+    botonCobrar.click();
+    await TestBed.tick();
+    const dialogoReabierto = overlay.querySelector('[role="dialog"]')!;
+    const efectivo = dialogoReabierto.querySelector<HTMLInputElement>('input[type="radio"]')!;
+    const montoReabierto = dialogoReabierto.querySelector<HTMLInputElement>('input[inputmode="decimal"]')!;
+    expect(efectivo.checked).toBe(true);
+    expect(montoReabierto.value).toBe('');
+    TestBed.inject(Dialog).closeAll();
     fixture.destroy();
   });
 
@@ -111,6 +89,9 @@ describe('ResumenVenta', () => {
     ).find((boton) => boton.textContent?.includes('Ir a cobrar'));
     expect(contenidoVacio).toContain('Tu venta está vacía');
     expect(botonCobrar?.disabled).toBe(true);
+    fixture.componentInstance.abrirCobro();
+    const dialogosAbiertos = TestBed.inject(Dialog).openDialogs;
+    expect(dialogosAbiertos).toHaveLength(0);
     fixture.destroy();
   });
 });

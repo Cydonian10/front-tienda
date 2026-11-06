@@ -1,0 +1,92 @@
+<app-dialog-shell title="Cobrar venta" [titleId]="titleId">
+  <p [id]="descripcionId" class="text-sm text-base-content/70">
+    Selecciona un medio de pago e ingresa el monto recibido.
+  </p>
+
+  <div class="mt-5 flex items-center justify-between gap-4 rounded-box bg-base-200 p-4">
+    <span class="font-semibold">Total a cobrar</span>
+    <span class="text-xl font-semibold tabular-nums">{{ soles(carrito.total()) }}</span>
+  </div>
+
+  <fieldset class="mt-5">
+    <legend class="mb-2 text-sm font-semibold">Medio de pago</legend>
+    <div class="grid grid-cols-2 gap-3">
+      <label
+        class="flex min-h-11 cursor-pointer items-center gap-3 rounded-field border border-base-300 p-3"
+      >
+        <input
+          type="radio"
+          [name]="medioPagoId"
+          class="radio radio-sm"
+          [checked]="medioPago() === 'efectivo'"
+          (change)="seleccionarMedio('efectivo')"
+        />
+        <span>Efectivo</span>
+      </label>
+      <label
+        class="flex min-h-11 cursor-pointer items-center gap-3 rounded-field border border-base-300 p-3"
+      >
+        <input
+          type="radio"
+          [name]="medioPagoId"
+          class="radio radio-sm"
+          [checked]="medioPago() === 'yape'"
+          (change)="seleccionarMedio('yape')"
+        />
+        <span>Yape</span>
+      </label>
+    </div>
+  </fieldset>
+
+  <div class="mt-5">
+    <label [for]="montoId" class="mb-2 block text-sm font-semibold">Monto recibido (S/)</label>
+    <input
+      [id]="montoId"
+      type="text"
+      inputmode="decimal"
+      autocomplete="off"
+      class="input min-h-11 w-full tabular-nums"
+      [value]="monto()"
+      (input)="monto.set($any($event.target).value)"
+      [attr.aria-invalid]="monto() && errorMonto() ? 'true' : null"
+      [attr.aria-describedby]="monto() && errorMonto() ? errorMontoId : null"
+    />
+    @if (monto() && errorMonto()) {
+      <p [id]="errorMontoId" class="mt-2 text-sm text-error" role="alert">{{ errorMonto() }}</p>
+    }
+  </div>
+
+  @if (medioPago() === 'efectivo') {
+    <div class="mt-4" role="group" aria-label="Montos rápidos de efectivo">
+      <p class="mb-2 text-sm text-base-content/70">Recibí</p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline btn-sm min-h-11" (click)="usarMontoExacto()">
+          Monto exacto
+        </button>
+        @for (importe of [20, 50, 100]; track importe) {
+          <button
+            type="button"
+            class="btn btn-outline btn-sm min-h-11 tabular-nums"
+            (click)="monto.set('' + importe)"
+          >
+            S/ {{ importe }}
+          </button>
+        }
+      </div>
+    </div>
+    <div class="mt-5 flex justify-between gap-4 border-t border-base-300 pt-4">
+      <span class="font-semibold">Vuelto</span>
+      <span class="font-semibold tabular-nums">{{
+        vuelto() === null ? '—' : soles(vuelto()!)
+      }}</span>
+    </div>
+  }
+
+  <p class="mt-5 text-sm text-base-content/70">El registro del cobro aún no está disponible.</p>
+  <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
+    <button type="button" class="btn min-h-11" data-dialog-cancel (click)="dialogRef.close()">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-primary min-h-11" disabled>Registrar cobro</button>
+  </div>
+</app-dialog-shell>

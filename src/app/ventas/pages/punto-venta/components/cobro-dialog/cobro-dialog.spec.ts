@@ -224,6 +224,13 @@ describe('CobroDialog', () => {
     );
     expect(dialogo.textContent).toContain('No se sabe si la venta se registró');
     expect(dialogo.textContent).toContain('perderás la recuperación');
+    const advertencia = dialogo.querySelector('[role="alert"]')!;
+    const total = Array.from(dialogo.querySelectorAll('span')).find((item) =>
+      item.textContent?.includes('Total a cobrar'),
+    )!;
+    expect(
+      advertencia.compareDocumentPosition(total) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
 
     // El reintento se delega a la acción que conserva clave y cuerpo.
     await fixture.componentInstance.reintentar();

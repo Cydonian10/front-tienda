@@ -54,4 +54,20 @@ describe('CarritoVentaService', () => {
     expect(redondeo.precioCentavos).toBe(2n);
     expect(redondeo.subtotalCentavos).toBe(4n);
   });
+
+  it('vacía todas las líneas y recupera la disponibilidad para una nueva venta', () => {
+    // Agregar varias unidades y comprobar el total inicial.
+    const carrito = new CarritoVentaService();
+    carrito.agregar(variante, variante.unidades[1], '1');
+    carrito.agregar(variante, variante.unidades[0], '2');
+    expect(carrito.lineas()).toHaveLength(2);
+
+    // Al vaciarlo se restablecen el total y la disponibilidad calculada.
+    carrito.vaciar();
+    const lineasRestantes = carrito.lineas();
+    const totalRestante = carrito.total();
+    expect(lineasRestantes).toHaveLength(0);
+    expect(totalRestante).toBe(0n);
+    expect(carrito.disponible(variante)).toBe(30_000_000n);
+  });
 });

@@ -3,6 +3,31 @@
     Selecciona un medio de pago e ingresa el monto recibido.
   </p>
 
+  @if (enCurso()) {
+    <p class="mt-5 text-sm text-base-content/70" role="status">
+      Registrando la venta. No cierres ni recargues la pestaña: podrías perder la recuperación del
+      cobro.
+    </p>
+  }
+  @if (mensajeError()) {
+    <div class="alert alert-soft alert-warning mt-5" role="alert">
+      <div>
+        <p>{{ mensajeError() }}</p>
+        @if (registro.estado().tipo === 'incierto' || registro.estado().tipo === 'revision') {
+          <p class="mt-2 text-sm">
+            Si recargas o cierras la pestaña, perderás la recuperación. Verifica la venta
+            manualmente antes de cobrarla otra vez.
+          </p>
+        }
+      </div>
+    </div>
+  }
+  @if (turnoCerrado()) {
+    <button type="button" class="btn btn-outline mt-4 min-h-11" (click)="cambiarTurno()">
+      Elegir otro turno
+    </button>
+  }
+
   <div class="mt-5 flex items-center justify-between gap-4 rounded-box bg-base-200 p-4">
     <span class="font-semibold">Total a cobrar</span>
     <span class="text-xl font-semibold tabular-nums">{{ soles(carrito.total()) }}</span>
@@ -89,25 +114,6 @@
     </div>
   }
 
-  @if (enCurso()) {
-    <p class="mt-5 text-sm text-base-content/70" role="status">
-      Registrando la venta. No cierres ni recargues la pestaña: podrías perder la recuperación del
-      cobro.
-    </p>
-  }
-  @if (mensajeError()) {
-    <div class="alert alert-soft alert-warning mt-5" role="alert">
-      <div>
-        <p>{{ mensajeError() }}</p>
-        @if (registro.estado().tipo === 'incierto' || registro.estado().tipo === 'revision') {
-          <p class="mt-2 text-sm">
-            Si recargas o cierras la pestaña, perderás la recuperación. Verifica la venta
-            manualmente antes de cobrarla otra vez.
-          </p>
-        }
-      </div>
-    </div>
-  }
   @if (!seleccionValida()) {
     <p class="mt-4 text-sm text-error" role="alert">
       Selecciona un almacén y un turno antes de cobrar.
@@ -118,11 +124,6 @@
     <p class="mt-4 text-sm text-error" role="alert">
       La venta debe tener productos válidos y un total mayor que cero.
     </p>
-  }
-  @if (turnoCerrado()) {
-    <button type="button" class="btn btn-outline mt-4 min-h-11" (click)="cambiarTurno()">
-      Elegir otro turno
-    </button>
   }
   <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
     <button

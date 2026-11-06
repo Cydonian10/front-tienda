@@ -38,4 +38,21 @@ describe('PreparacionVentaService', () => {
     // El servicio ignora los datos incorrectos y devuelve una selección vacía.
     expect(seleccionRecuperada).toBeNull();
   });
+
+  it('conserva temporalmente el almacén y turno anterior durante la recuperación', () => {
+    // Iniciar la recuperación de una selección existente.
+    const servicio = TestBed.inject(PreparacionVentaService);
+    servicio.seleccionar({ almacenId: 'a1', turnoId: 't1' });
+    servicio.recuperarTurno();
+    servicio.seleccionar({ almacenId: 'a1', turnoId: 't2' });
+    expect(servicio.recuperandoAlmacen()).toBe('a1');
+    expect(servicio.turnoAnterior()).toBe('t1');
+
+    // Al finalizar la recuperación se conserva la nueva selección, no el estado temporal.
+    servicio.finalizarRecuperacion();
+    const seleccionFinal = servicio.seleccion();
+    expect(servicio.recuperandoAlmacen()).toBeNull();
+    expect(servicio.turnoAnterior()).toBeNull();
+    expect(seleccionFinal).toEqual({ almacenId: 'a1', turnoId: 't2' });
+  });
 });

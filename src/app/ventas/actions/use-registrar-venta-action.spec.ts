@@ -205,4 +205,58 @@ describe('RegistrarVentaAction', () => {
     expect(estado.tipo).toBe('rechazado');
     expect(crear).not.toHaveBeenCalled();
   });
+
+  it.each([
+    [400, 'Datos de venta no válidos'],
+    [403, 'Sin permiso'],
+    [404, 'La variante no existe'],
+    [409, 'El turno está cerrado'],
+    [409, 'Los pagos son insuficientes'],
+    [409, 'El vuelto supera el efectivo recibido'],
+  ])('conserva un rechazo concluyente HTTP %i sin reenviarlo', async (status, message) => {
+    // Preparar un rechazo explícito del primer envío.
+    const error = new HttpErrorResponse({ status, error: { message } });
+    crear.mockRejectedValueOnce(error);
+    await action.registrar(solicitud());
+
+    // La acción expone el motivo sin generar un reintento automático.
+    const estado = action.estado();
+    expect(estado).toEqual({ tipo: 'rechazado', error });
+    expect(action.bloqueado()).toBe(false);
+    expect(crear).toHaveBeenCalledTimes(1);
+  });
+
+  it('conserva la incertidumbre si un reintento recibe un rechazo de negocio', async () => {
+    // Un rechazo posterior no prueba qué pasó con la primera solicitud perdida.
+    crear
+      .mockRejectedValueOnce(new HttpErrorResponse({ status: 0 }))
+      .mockRejectedValueOnce(
+        new HttpErrorResponse({ status: 409, error: { message: 'Stock insuficiente' } }),
+      );
+    await action.registrar(solicitud());
+    const estadoInicial = action.estado();
+    await action.reintentar();
+
+    // La operación original permanece bloqueada con la misma clave y cuerpo.
+    const estadoFinal = action.estado();
+    expect(estadoInicial.tipo).toBe('incierto');
+    expect(estadoFinal.tipo).toBe('incierto');
+    expect(crear.mock.calls[1]).toEqual(crear.mock.calls[0]);
+    expect(action.bloqueado()).toBe(true);
+  });
+
+  it('bloquea una nueva venta hasta consumir la confirmación', async () => {
+    // Una respuesta confirmada debe procesarse antes de aceptar otra operación.
+    crear.mockResolvedValue(venta);
+    await action.registrar(solicitud());
+    await action.registrar(solicitud());
+    expect(action.bloqueado()).toBe(true);
+    expect(crear).toHaveBeenCalledTimes(1);
+
+    // Consumir la confirmación habilita una venta nueva con otra clave.
+    action.consumirConfirmacion();
+    await action.registrar(solicitud());
+    expect(crear).toHaveBeenCalledTimes(2);
+    expect(crear.mock.calls[1][1]).not.toBe(crear.mock.calls[0][1]);
+  });
 });

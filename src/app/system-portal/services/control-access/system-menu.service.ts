@@ -159,6 +159,12 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
             permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
           },
           {
+            label: 'Movimientos de caja',
+            url: '/admin/ventas/movimientos-caja',
+            icon: 'arrows-left-right',
+            permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
+          },
+          {
             label: 'Punto de venta',
             url: '/admin/ventas/punto-venta',
             icon: 'file',

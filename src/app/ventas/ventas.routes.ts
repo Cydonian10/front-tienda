@@ -17,6 +17,12 @@ const ventasRoutes: Routes = [
     title: 'Cajas y turnos',
   },
   {
+    path: 'movimientos-caja',
+    loadComponent: () => import('./pages/movimientos-caja/movimientos-caja-page'),
+    canActivate: [permissionGuard('VENTAS', PERMISSION_CODES.CAJAS_TURNOS_READ)],
+    title: 'Movimientos de caja',
+  },
+  {
     path: 'preparacion',
     loadComponent: () => import('./pages/preparacion-venta/preparacion-venta-page'),
     canActivate: [permissionGuard('VENTAS', PERMISSION_CODES.CAJAS_TURNOS_READ)],

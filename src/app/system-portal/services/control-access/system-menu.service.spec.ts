@@ -150,6 +150,11 @@ describe('SystemMenuService', () => {
             permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
           }),
           expect.objectContaining({
+            label: 'Movimientos de caja',
+            url: '/admin/ventas/movimientos-caja',
+            permission: PERMISSION_CODES.CAJAS_TURNOS_READ,
+          }),
+          expect.objectContaining({
             label: 'Punto de venta',
             url: '/admin/ventas/punto-venta',
             permission: PERMISSION_CODES.CAJAS_TURNOS_READ,

@@ -1,0 +1,44 @@
+<section aria-labelledby="movimientos-caja-titulo" class="space-y-7">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h1
+        id="movimientos-caja-titulo"
+        class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl"
+      >
+        Movimientos de caja
+      </h1>
+      <p class="mt-2 text-sm text-base-content/70">
+        Entradas y salidas de efectivo, con motivo y responsable.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="!permissions.cajasTurnos()"
+      (click)="abrirRegistro()"
+    >
+      <svg
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        class="size-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
+      </svg>
+      Registrar movimiento
+    </button>
+  </header>
+
+  <div class="card card-border bg-base-100">
+    <div class="card-body">
+      <h2 class="card-title">Próximamente</h2>
+      <p class="text-sm text-base-content/70">
+        El registro de entradas y salidas de caja aún no está disponible. Puedes conocer el flujo de
+        registro.
+      </p>
+    </div>
+  </div>
+</section>

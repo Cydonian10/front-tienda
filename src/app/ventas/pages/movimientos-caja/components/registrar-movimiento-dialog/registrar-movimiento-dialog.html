@@ -1,0 +1,184 @@
+<app-dialog-shell title="Registrar movimiento" [titleId]="titleId">
+  <ol class="steps w-full text-sm" aria-label="Pasos del registro">
+    <li class="step step-primary" [attr.aria-current]="paso() === 1 ? 'step' : null">Caja</li>
+    <li
+      class="step"
+      [class.step-primary]="paso() === 2"
+      [attr.aria-current]="paso() === 2 ? 'step' : null"
+    >
+      Movimiento
+    </li>
+  </ol>
+
+  @if (paso() === 1) {
+    <div class="mt-6 space-y-4">
+      <div>
+        <h3 class="font-semibold">Selecciona una caja</h3>
+        <p class="mt-1 text-sm text-base-content/70">
+          Solo se muestran cajas con un turno abierto.
+        </p>
+      </div>
+
+      @if (cajasQuery.isPending()) {
+        <p role="status" class="text-sm text-base-content/70">Cargando cajas abiertas…</p>
+      } @else if (cajasQuery.isError()) {
+        <div role="alert" class="text-sm text-error">
+          No se pudieron cargar las cajas.
+          <button type="button" class="btn btn-sm" (click)="cajasQuery.refetch()">
+            Reintentar
+          </button>
+        </div>
+      } @else if (cajasAbiertas().length === 0) {
+        <p class="rounded-box border border-base-300 bg-base-200 p-4 text-sm">
+          No hay cajas con turnos abiertos. Abre un turno en «Cajas y turnos» para continuar.
+        </p>
+      } @else {
+        <fieldset class="fieldset">
+          <label class="fieldset-legend" [attr.for]="fieldId + '-caja'">Caja</label>
+          <select
+            [id]="fieldId + '-caja'"
+            class="select w-full"
+            [value]="cajaId()"
+            (change)="cajaId.set($any($event.target).value)"
+          >
+            <option value="" disabled>Selecciona una caja</option>
+            @for (item of cajasAbiertas(); track item.caja.id) {
+              <option [value]="item.caja.id">
+                {{ item.caja.nombre }} · {{ item.caja.codigo }}
+              </option>
+            }
+          </select>
+        </fieldset>
+        @if (seleccion(); as item) {
+          <dl class="space-y-2 rounded-box border border-base-300 bg-base-200 p-4 text-sm">
+            <div class="flex flex-wrap justify-between gap-x-4 gap-y-1">
+              <dt class="text-base-content/70">Turno abierto</dt>
+              <dd class="font-semibold tabular-nums">#{{ item.numero }}</dd>
+            </div>
+            <div class="flex flex-wrap justify-between gap-x-4 gap-y-1">
+              <dt class="text-base-content/70">Responsable del turno</dt>
+              <dd class="font-semibold">{{ item.turno.responsable.nickName }}</dd>
+            </div>
+          </dl>
+        }
+      }
+    </div>
+  } @else {
+    <div class="mt-6 space-y-4">
+      @if (seleccion(); as item) {
+        <div class="rounded-box border border-base-300 bg-base-200 p-4 text-sm">
+          <p class="font-semibold">{{ item.caja.nombre }} · Turno #{{ item.numero }}</p>
+          <p class="mt-1 text-base-content/70">
+            Responsable del turno: {{ item.turno.responsable.nickName }}
+          </p>
+        </div>
+      } @else {
+        <p role="alert" class="text-sm text-error">
+          La caja seleccionada ya no tiene un turno abierto. Vuelve para seleccionar otra caja.
+        </p>
+      }
+
+      <fieldset class="fieldset">
+        <label class="fieldset-legend" [attr.for]="fieldId + '-tipo'">Tipo de movimiento</label>
+        <select
+          [id]="fieldId + '-tipo'"
+          class="select w-full"
+          [value]="tipo()"
+          (change)="tipo.set($any($event.target).value)"
+        >
+          <option value="" disabled>Selecciona el tipo</option>
+          <option value="ingreso">Ingreso de efectivo</option>
+          <option value="egreso">Salida de efectivo</option>
+        </select>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <label class="fieldset-legend" [attr.for]="fieldId + '-monto'"
+          >Monto en efectivo (S/)</label
+        >
+        <input
+          [id]="fieldId + '-monto'"
+          class="input w-full"
+          type="text"
+          inputmode="decimal"
+          placeholder="0.00"
+          [value]="monto()"
+          [attr.aria-invalid]="montoTocado() && !montoValido() ? 'true' : null"
+          [attr.aria-describedby]="
+            montoTocado() && !montoValido() ? fieldId + '-monto-error' : null
+          "
+          (input)="monto.set($any($event.target).value)"
+          (blur)="montoTocado.set(true)"
+        />
+        @if (montoTocado() && !montoValido()) {
+          <p [id]="fieldId + '-monto-error'" class="text-sm text-error">
+            Ingresa un monto mayor que cero, con hasta dos decimales.
+          </p>
+        }
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <label class="fieldset-legend" [attr.for]="fieldId + '-motivo'">Motivo</label>
+        <input
+          [id]="fieldId + '-motivo'"
+          class="input w-full"
+          type="text"
+          placeholder="Describe el movimiento"
+          [value]="motivo()"
+          [attr.aria-invalid]="motivoTocado() && !motivoValido() ? 'true' : null"
+          [attr.aria-describedby]="
+            motivoTocado() && !motivoValido() ? fieldId + '-motivo-error' : null
+          "
+          (input)="motivo.set($any($event.target).value)"
+          (blur)="motivoTocado.set(true)"
+        />
+        @if (motivoTocado() && !motivoValido()) {
+          <p [id]="fieldId + '-motivo-error'" class="text-sm text-error">
+            Ingresa el motivo del movimiento.
+          </p>
+        }
+      </fieldset>
+
+      <div class="text-sm">
+        <p class="font-semibold">Usuario que realiza la operación</p>
+        <p class="mt-1 text-base-content/70">{{ usuario() }}</p>
+      </div>
+      <p class="text-sm text-base-content/70">
+        Registra solo movimientos reales de efectivo. Los cobros de ventas se registran por
+        separado.
+      </p>
+      <p class="rounded-box border border-base-300 bg-base-200 p-4 text-sm">
+        El registro aún no está disponible. Los datos ingresados no se guardarán.
+      </p>
+    </div>
+  }
+
+  <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
+    <button type="button" class="btn" data-dialog-cancel (click)="dialogRef.close()">
+      Cancelar
+    </button>
+    @if (paso() === 1) {
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!seleccion() || cajasQuery.isPending() || cajasQuery.isError()"
+        (click)="continuar()"
+      >
+        Continuar
+      </button>
+    } @else {
+      <button type="button" class="btn" (click)="volver()">Volver</button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        disabled
+        aria-describedby="registro-no-disponible"
+      >
+        Registro no disponible
+      </button>
+      <span id="registro-no-disponible" class="sr-only"
+        >El registro se habilitará cuando esté disponible el servicio.</span
+      >
+    }
+  </div>
+</app-dialog-shell>

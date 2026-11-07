@@ -29,7 +29,7 @@ export function diferenciaFormateada(centavos: bigint): string {
   host: { class: 'block min-w-0' },
 })
 export class CerrarTurnoDialog {
-  readonly data = inject<{ cajaId: string; nombre: string; turnoId: string }>(DIALOG_DATA);
+  readonly data = inject<{ cajaId: string; nombre: string; turnoId: string; tipoCierre?: 'turno' | 'dia' }>(DIALOG_DATA);
   readonly dialogRef = inject(DialogRef);
   readonly titleId = `${this.dialogRef.id}-title`;
   readonly formId = `${this.dialogRef.id}-form`;
@@ -100,6 +100,7 @@ export class CerrarTurnoDialog {
         dto: {
           efectivoContado: this.efectivoContado().trim(),
           efectivoEsperadoConfirmado: actualizacion.data.efectivoEsperado,
+          ...(this.data.tipoCierre === 'dia' ? { tipoCierre: 'dia' as const } : {}),
           ...(this.observacionCierre() ? { observacionCierre: this.observacionCierre() } : {}),
         },
       });

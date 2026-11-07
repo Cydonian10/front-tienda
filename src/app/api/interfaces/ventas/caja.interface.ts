@@ -30,6 +30,7 @@ export interface TurnoCaja {
   efectivoEsperado: string;
   efectivoContado: string | null;
   observacionCierre: string | null;
+  tipoCierre?: 'turno' | 'dia' | null;
 }
 
 export interface CajaConTurnos extends Caja {

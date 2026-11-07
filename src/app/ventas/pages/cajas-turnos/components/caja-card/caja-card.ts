@@ -48,13 +48,13 @@ export class CajaCard {
     });
   }
 
-  cerrarTurno(): void {
+  cerrarTurno(tipoCierre: 'turno' | 'dia' = 'turno'): void {
     const turno = this.turnoAbierto();
     if (!turno || !this.permissions.cajasTurnos()) return;
-    const id = `cerrar-turno-${this.caja().id}`;
+    const id = `cerrar-${tipoCierre}-${this.caja().id}`;
     this.dialog.open(CerrarTurnoDialog, {
       id,
-      data: { cajaId: this.caja().id, nombre: this.caja().nombre, turnoId: turno.id },
+      data: { cajaId: this.caja().id, nombre: this.caja().nombre, turnoId: turno.id, ...(tipoCierre === 'dia' ? { tipoCierre } : {}) },
       width: '34rem',
       maxWidth: 'calc(100vw - 2rem)',
       ariaModal: true,

@@ -14,6 +14,7 @@ export interface CerrarTurnoDto {
   efectivoContado: string;
   efectivoEsperadoConfirmado: string;
   observacionCierre?: string;
+  tipoCierre?: 'turno' | 'dia';
 }
 
 export interface ResumenTurno {

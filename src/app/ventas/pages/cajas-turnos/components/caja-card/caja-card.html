@@ -34,12 +34,21 @@
       </div>
       <p class="text-sm text-base-content/70">Saldo inicial: S/ {{ turno.saldoInicial }}</p>
       <p class="text-xs text-base-content/70">Responsable: {{ turno.usuarioApertura.nickName }}</p>
+      @if (!turnoAbierto() && turno.tipoCierre === 'dia') {
+        <p class="text-xs text-base-content/70">Día cerrado para la fecha operativa {{ turno.fechaOperativa }}.</p>
+      }
     } @else {
       <p class="text-sm text-base-content/70">Sin turnos registrados.</p>
     }
-    <button type="button" class="btn btn-outline mt-auto"
-      [disabled]="!permissions.cajasTurnos() || (!turnoAbierto() && !caja().activo)" (click)="turnoAbierto() ? cerrarTurno() : abrirTurno()">
-      {{ turnoAbierto() ? 'Cerrar turno' : 'Abrir turno' }}
-    </button>
+    <div class="mt-auto flex flex-col gap-3 lg:flex-row">
+      <button type="button" class="btn btn-outline lg:flex-1"
+        [disabled]="!permissions.cajasTurnos() || (!turnoAbierto() && !caja().activo)" (click)="turnoAbierto() ? cerrarTurno() : abrirTurno()">
+        {{ turnoAbierto() ? 'Cerrar turno' : 'Abrir turno' }}
+      </button>
+      <button type="button" class="btn btn-outline lg:flex-1"
+        [disabled]="!permissions.cajasTurnos() || !turnoAbierto()" (click)="cerrarTurno('dia')">
+        Cerrar día
+      </button>
+    </div>
   </div>
 </article>

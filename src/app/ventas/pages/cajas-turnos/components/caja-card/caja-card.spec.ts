@@ -43,6 +43,42 @@ describe('CajaCard', () => {
     }));
   });
 
+  it('habilita cerrar día solo con turno abierto y permiso', () => {
+    // La acción de día abre el arqueo con el tipo de cierre correspondiente.
+    const fixture = TestBed.createComponent(CajaCard);
+    fixture.componentRef.setInput('caja', caja);
+    fixture.detectChanges();
+    const botonDia: HTMLButtonElement = fixture.nativeElement.querySelectorAll('button')[1];
+    expect(botonDia.textContent).toContain('Cerrar día');
+    expect(botonDia.disabled).toBe(false);
+    botonDia.click();
+    expect(open).toHaveBeenCalledWith(CerrarTurnoDialog, expect.objectContaining({
+      id: 'cerrar-dia-c1',
+      data: { cajaId: 'c1', nombre: 'Principal', turnoId: 't1', tipoCierre: 'dia' },
+    }));
+
+    // Al perder el permiso o el turno abierto, el botón y la acción quedan bloqueados.
+    open.mockClear();
+    permiso.set(false);
+    fixture.detectChanges();
+    expect(botonDia.disabled).toBe(true);
+    fixture.componentInstance.cerrarTurno('dia');
+    permiso.set(true);
+    fixture.componentRef.setInput('caja', { ...caja, turnos: [] });
+    fixture.detectChanges();
+    expect(botonDia.disabled).toBe(true);
+    fixture.componentInstance.cerrarTurno('dia');
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it('identifica el día cerrado para la fecha operativa del último turno', () => {
+    const fixture = TestBed.createComponent(CajaCard);
+    fixture.componentRef.setInput('caja', { ...caja, turnos: [{ ...turno, fechaCierre: '2026-10-31T12:00:00Z', tipoCierre: 'dia' }] });
+    fixture.detectChanges();
+    const textoTarjeta = fixture.nativeElement.textContent;
+    expect(textoTarjeta).toContain('Día cerrado para la fecha operativa 2026-10-31');
+  });
+
   it('muestra el primer turno abierto del día como Turno #01', () => {
     // Un turno de otro día no forma parte de la numeración actual.
     const turnoAnterior = { ...turno, id: 'anterior', fechaOperativa: '2026-10-30', fechaCierre: '2026-10-30T12:00:00Z' };

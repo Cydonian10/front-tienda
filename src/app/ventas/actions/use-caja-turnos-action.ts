@@ -39,9 +39,9 @@ export function useCajaTurnos() {
   const cerrarMutation = injectMutation(() => ({
     mutationFn: ({ cajaId, turnoId, dto }: { cajaId: string; turnoId: string; dto: CerrarTurnoDto }) =>
       api.cerrar(cajaId, turnoId, dto),
-    onSuccess: async () => {
+    onSuccess: async (_resultado, { dto }) => {
       await client.invalidateQueries({ queryKey: cajasListadoQueryKey });
-      toast.success('Turno cerrado correctamente.');
+      toast.success(dto.tipoCierre === 'dia' ? 'Día cerrado correctamente.' : 'Turno cerrado correctamente.');
     },
   }));
 

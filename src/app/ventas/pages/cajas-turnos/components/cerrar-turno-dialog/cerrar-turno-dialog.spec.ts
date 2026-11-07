@@ -229,6 +229,25 @@ describe('CerrarTurnoDialog', () => {
     expect(close).toHaveBeenCalledWith({ id: 't1' });
   });
 
+  it('confirma el cierre de día con el arqueo del turno abierto', async () => {
+    // Se informa que el cierre del día también termina el turno.
+    TestBed.overrideProvider(DIALOG_DATA, { useValue: { cajaId: 'c1', nombre: 'Caja principal', turnoId: 't1', tipoCierre: 'dia' } });
+    resumen.mockResolvedValue(datos);
+    cerrar.mockResolvedValue({ id: 't1', tipoCierre: 'dia' });
+    const fixture = TestBed.createComponent(CerrarTurnoDialog);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.resumenQuery.data()).toBeDefined());
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('no se podrán abrir nuevos turnos');
+    expect(fixture.nativeElement.textContent).toContain('Cuadrar y cerrar día');
+
+    fixture.componentInstance.efectivoContado.set('157');
+    await fixture.componentInstance.submitForm(new Event('submit'));
+    const cierreEnviado = cerrar.mock.calls[0];
+    expect(cierreEnviado).toEqual(['c1', 't1', { efectivoContado: '157', efectivoEsperadoConfirmado: '157.00', tipoCierre: 'dia' }]);
+    expect(success).toHaveBeenCalledWith('Día cerrado correctamente.');
+  });
+
   it('conserva lo escrito y permite reintentar cuando falla el cierre', async () => {
     resumen.mockResolvedValue(datos);
     cerrar.mockRejectedValueOnce(new HttpErrorResponse({ status: 503 })).mockResolvedValueOnce({ id: 't1' });

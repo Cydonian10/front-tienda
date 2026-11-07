@@ -1,5 +1,8 @@
-<app-dialog-shell title="Cerrar turno" [titleId]="titleId">
+<app-dialog-shell [title]="data.tipoCierre === 'dia' ? 'Cerrar día' : 'Cerrar turno'" [titleId]="titleId">
   <p class="mb-5 text-sm text-base-content/70">{{ data.nombre }}</p>
+  @if (data.tipoCierre === 'dia') {
+    <p class="mb-5 text-sm text-base-content/70">Se cerrará el turno y no se podrán abrir nuevos turnos en esta caja para su fecha operativa.</p>
+  }
   @if (!permissions.cajasTurnos()) {
     <div role="alert" class="alert alert-error alert-soft mb-4">Ya no tienes permiso para acceder a cajas y turnos.</div>
   }
@@ -84,7 +87,7 @@
     <button type="button" class="btn" data-dialog-cancel [disabled]="procesando()" (click)="dialogRef.close()">Cancelar</button>
     <button type="submit" class="btn btn-primary" [attr.form]="formId"
       [disabled]="!permissions.cajasTurnos() || procesando() || resumenQuery.isFetching() || resumenQuery.isError() || turnoCerrado || !resumenQuery.data() || !formularioValido()">
-      {{ procesando() ? 'Verificando…' : 'Cuadrar y cerrar turno' }}
+      {{ procesando() ? 'Verificando…' : data.tipoCierre === 'dia' ? 'Cuadrar y cerrar día' : 'Cuadrar y cerrar turno' }}
     </button>
   </div>
 </app-dialog-shell>

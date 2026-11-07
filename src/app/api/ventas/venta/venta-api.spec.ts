@@ -121,4 +121,23 @@ describe('VentaApi', () => {
     expect(errorRecuperado.status).toBe(409);
     expect(errorRecuperado.error).toEqual({ message: 'Stock insuficiente' });
   });
+
+  it('consulta el ticket y descarga el PDF como blob', async () => {
+    // Ambas peticiones usan el identificador de la venta ya registrada.
+    const api = TestBed.inject(VentaApi);
+    const http = TestBed.inject(HttpTestingController);
+    const detallePendiente = api.ticket('venta-1');
+    const detalle = http.expectOne('http://localhost:3000/api/ventas/venta-1/ticket');
+    detalle.flush({ id: 'venta-1', total: '19.00' });
+    const ticket = await detallePendiente;
+    expect(ticket.total).toBe('19.00');
+
+    const pdfPendiente = api.ticketPdf('venta-1');
+    const solicitudPdf = http.expectOne('http://localhost:3000/api/ventas/venta-1/ticket/pdf');
+    expect(solicitudPdf.request.responseType).toBe('blob');
+    const archivo = new Blob(['pdf'], { type: 'application/pdf' });
+    solicitudPdf.flush(archivo);
+    const pdf = await pdfPendiente;
+    expect(pdf).toBe(archivo);
+  });
 });

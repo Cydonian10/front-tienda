@@ -63,3 +63,29 @@ export interface VentaCreada {
   pagos: PagoVentaCreada[];
   vuelto: VueltoVentaCreada | null;
 }
+
+export interface TicketVenta {
+  id: string;
+  fecha: string;
+  caja: string;
+  turnoId: string;
+  almacen: string;
+  atendidoPor: string;
+  subtotal: string;
+  descuentoPromocional: string;
+  descuentoManual: string;
+  total: string;
+  detalles: {
+    id: string;
+    producto: string;
+    sku: string;
+    unidad: string;
+    cantidad: string;
+    precioUnitario: string;
+    descuentoPromocional: string;
+    descuentoManual: string;
+    total: string;
+  }[];
+  pagos: { medio: MedioPagoVenta; importe: string }[];
+  vuelto: string;
+}

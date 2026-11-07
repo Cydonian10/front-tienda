@@ -1,18 +1,120 @@
-<app-dialog-shell title="Venta registrada" [titleId]="titleId">
-  <p class="text-sm text-base-content/70">El cobro se registró correctamente.</p>
-  <dl class="mt-5 space-y-3 tabular-nums">
-    <div class="flex justify-between gap-4">
-      <dt class="font-semibold">Total registrado</dt>
-      <dd class="font-semibold">{{ formato(venta.total) }}</dd>
+<app-dialog-shell title="¡Venta completada!" [titleId]="titleId">
+  <p class="text-sm text-base-content/70">El cobro quedó registrado en el turno seleccionado.</p>
+
+  <div role="status" class="alert alert-success alert-soft mt-5 text-sm">
+    <div>
+      <p class="font-semibold">Pago registrado correctamente</p>
+      <p class="mt-1 text-xs">La venta quedó guardada.</p>
     </div>
-    <div class="flex justify-between gap-4 border-t border-base-300 pt-3">
-      <dt class="font-semibold">Vuelto</dt>
-      <dd class="font-semibold">{{ formato(venta.vuelto?.importe ?? '0.00') }}</dd>
+  </div>
+
+  @if (ticket.isPending()) {
+    <p class="py-8 text-center text-sm" role="status">Cargando ticket…</p>
+  } @else if (ticket.isError()) {
+    <div role="alert" class="mt-5 rounded-box border border-error/40 p-4 text-sm">
+      <p>No se pudo cargar el ticket. La venta ya está registrada.</p>
+      <button type="button" class="btn btn-sm mt-3" (click)="ticket.refetch()">Reintentar</button>
     </div>
-  </dl>
-  <div dialog-actions>
-    <button type="button" class="btn btn-primary min-h-11" (click)="dialogRef.close()">
-      Cerrar
+  } @else if (ticket.data(); as datos) {
+    <article
+      aria-label="Ticket de venta"
+      class="mt-5 rounded-box border border-base-300 p-4 text-sm tabular-nums sm:p-5"
+    >
+      <div class="text-center">
+        <h3 class="font-semibold">Ticket de venta</h3>
+        <p class="mt-1 break-all text-xs text-base-content/70">{{ datos.id }}</p>
+      </div>
+      <dl class="mt-4 space-y-2 border-t border-dashed border-base-300 pt-4 text-xs">
+        <div class="flex justify-between gap-3">
+          <dt>Fecha</dt>
+          <dd class="text-right">{{ fecha(datos.fecha) }}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt>Caja</dt>
+          <dd class="text-right">{{ datos.caja }}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt>Turno</dt>
+          <dd class="break-all text-right">{{ datos.turnoId }}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt>Almacén</dt>
+          <dd class="text-right">{{ datos.almacen }}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt>Atendido por</dt>
+          <dd class="text-right">{{ datos.atendidoPor }}</dd>
+        </div>
+      </dl>
+      <ul class="mt-4 space-y-3 border-t border-dashed border-base-300 pt-4">
+        @for (detalle of datos.detalles; track detalle.id) {
+          <li>
+            <div class="flex justify-between gap-3 font-semibold">
+              <span>{{ detalle.producto }}</span
+              ><span class="shrink-0">{{ formato(detalle.total) }}</span>
+            </div>
+            <p class="mt-1 text-xs text-base-content/70">
+              {{ cantidad(detalle.cantidad) }} × {{ detalle.unidad }} · {{ detalle.sku }} ·
+              {{ formato(detalle.precioUnitario) }}
+            </p>
+            @if (tieneImporte(detalle.descuentoPromocional)) {
+              <p class="mt-1 text-xs">
+                Descuento promocional: − {{ formato(detalle.descuentoPromocional) }}
+              </p>
+            }
+            @if (tieneImporte(detalle.descuentoManual)) {
+              <p class="mt-1 text-xs">Descuento manual: − {{ formato(detalle.descuentoManual) }}</p>
+            }
+          </li>
+        }
+      </ul>
+      <dl class="mt-4 space-y-2 border-t border-dashed border-base-300 pt-4 text-xs">
+        <div class="flex justify-between gap-3">
+          <dt>Subtotal</dt>
+          <dd>{{ formato(datos.subtotal) }}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt>Descuento promocional</dt>
+          <dd>{{ formato(datos.descuentoPromocional) }}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt>Descuento manual</dt>
+          <dd>{{ formato(datos.descuentoManual) }}</dd>
+        </div>
+        <div
+          class="flex justify-between gap-3 border-t border-dashed border-base-300 pt-3 text-sm font-bold"
+        >
+          <dt>TOTAL</dt>
+          <dd>{{ formato(datos.total) }}</dd>
+        </div>
+        @for (pago of datos.pagos; track $index) {
+          <div class="flex justify-between gap-3">
+            <dt>{{ pago.medio === 'yape' ? 'Yape' : 'Efectivo' }}</dt>
+            <dd>{{ formato(pago.importe) }}</dd>
+          </div>
+        }
+        <div class="flex justify-between gap-3">
+          <dt>Vuelto en efectivo</dt>
+          <dd>{{ formato(datos.vuelto) }}</dd>
+        </div>
+      </dl>
+      <p class="mt-5 text-center text-xs text-base-content/70">¡Gracias por tu compra!</p>
+    </article>
+  }
+  @if (errorImpresion()) {
+    <p role="alert" class="mt-4 text-sm text-error">{{ errorImpresion() }}</p>
+  }
+  <div dialog-actions class="flex w-full flex-col gap-2 sm:flex-row">
+    <button
+      type="button"
+      class="btn min-h-11 flex-1"
+      [disabled]="!ticket.data() || imprimiendo() || !puedeImprimir()"
+      (click)="imprimir()"
+    >
+      {{ imprimiendo() ? 'Preparando PDF…' : 'Imprimir ticket' }}
+    </button>
+    <button type="button" class="btn btn-primary min-h-11 flex-1" (click)="dialogRef.close()">
+      Nueva venta
     </button>
   </div>
 </app-dialog-shell>

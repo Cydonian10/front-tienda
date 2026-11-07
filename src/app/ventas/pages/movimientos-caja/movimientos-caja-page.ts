@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { PERMISSION_CODES } from '../../../api/interfaces/access-control/permision.interface';
 import { usePermissions } from '../../../auth/services/use-permissions';
+import { Pagination } from '../../../shared/components/pagination/pagination';
 import { RegistrarMovimientoDialog } from './components/registrar-movimiento-dialog/registrar-movimiento-dialog';
 import {
   RegistrarMovimientoCajaAction,
@@ -11,7 +12,7 @@ import {
 
 @Component({
   selector: 'app-movimientos-caja-page',
-  imports: [DatePipe],
+  imports: [DatePipe, Pagination],
   templateUrl: './movimientos-caja-page.html',
   host: { class: 'block' },
 })
@@ -26,7 +27,7 @@ export default class MovimientosCajaPage {
   }).format(new Date());
   readonly desde = signal(this.hoy);
   readonly hasta = signal(this.hoy);
-  readonly filtro = signal({ desde: this.hoy, hasta: this.hoy, page: 1, limit: 20 });
+  readonly filtro = signal({ desde: this.hoy, hasta: this.hoy, page: 1, limit: 5 });
   readonly errorFechas = signal('');
   readonly confirmacion = signal('');
   readonly listado = useListadoMovimientosCaja(() => this.filtro());
@@ -46,12 +47,17 @@ export default class MovimientosCajaPage {
       return;
     }
     this.errorFechas.set('');
-    this.filtro.set({ desde, hasta, page: 1, limit: 20 });
+    this.filtro.update((filtro) => ({ ...filtro, desde, hasta, page: 1 }));
   }
 
   cambiarPagina(page: number): void {
     if (page < 1 || page > this.totalPaginas()) return;
     this.filtro.update((filtro) => ({ ...filtro, page }));
+  }
+
+  cambiarLimite(limit: number): void {
+    if (![5, 10, 20].includes(limit) || limit === this.filtro().limit) return;
+    this.filtro.update((filtro) => ({ ...filtro, limit, page: 1 }));
   }
 
   async reintentarRegistro(): Promise<void> {

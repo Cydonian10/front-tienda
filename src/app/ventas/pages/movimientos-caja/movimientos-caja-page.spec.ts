@@ -9,6 +9,48 @@ import MovimientosCajaPage from './movimientos-caja-page';
 import { RegistrarMovimientoDialog } from './components/registrar-movimiento-dialog/registrar-movimiento-dialog';
 
 describe('MovimientosCajaPage', () => {
+  it('pagina el historial y cambia el tamaño con el componente compartido', async () => {
+    // Preparar resultados suficientes para navegar entre páginas.
+    const movimiento = {
+      id: 'm1', fecha: '2026-11-07T15:00:00Z', cajaNombre: 'Caja principal', cajaCodigo: 'C001',
+      tipo: 'ingreso', importe: '10.00', motivo: 'Fondo', usuarioNombre: 'Gabriel', responsableNombre: 'Ana',
+    };
+    const listar = vi.fn().mockImplementation(async (filtro) => ({
+      data: [movimiento], total: 25, page: filtro.page, limit: filtro.limit,
+    }));
+    TestBed.configureTestingModule({ providers: [
+      provideTanStackQuery(new QueryClient()),
+      { provide: MovimientoCajaApi, useValue: { listar } },
+      { provide: RegistrarMovimientoCajaAction, useValue: { bloqueado: signal(false), pendiente: signal(null), error: signal('') } },
+      { provide: Dialog, useValue: { open: vi.fn() } },
+      { provide: AuthorizationService, useValue: { hasPermission: () => true } },
+    ] });
+    const fixture = TestBed.createComponent(MovimientosCajaPage);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(fixture.componentInstance.listado.isSuccess()).toBe(true));
+    fixture.detectChanges();
+
+    // La navegación solicita otra página sin cambiar las fechas.
+    const fechas = fixture.componentInstance.filtro();
+    const paginador = fixture.nativeElement.querySelector('app-pagination') as HTMLElement;
+    expect(paginador).not.toBeNull();
+    expect(paginador.querySelector('[aria-current="page"]')?.textContent?.trim()).toBe('1');
+    (paginador.querySelector('[aria-label="Página siguiente"]') as HTMLButtonElement).click();
+    await vi.waitFor(() => expect(listar).toHaveBeenCalledWith({ ...fechas, page: 2 }));
+    await vi.waitFor(() => expect(fixture.componentInstance.listado.data()?.page).toBe(2));
+    fixture.detectChanges();
+
+    // Cambiar la cantidad vuelve a la primera página y mantiene el rango.
+    const selector = fixture.nativeElement.querySelector('app-pagination select') as HTMLSelectElement;
+    selector.value = '10';
+    selector.dispatchEvent(new Event('change'));
+    await vi.waitFor(() => expect(listar).toHaveBeenCalledWith({ ...fechas, page: 1, limit: 10 }));
+    const filtroActualizado = fixture.componentInstance.filtro();
+    expect(filtroActualizado.page).toBe(1);
+    fixture.componentInstance.aplicarFiltro();
+    expect(fixture.componentInstance.filtro().limit).toBe(10);
+  });
+
   it('inicia con el día de Lima y aplica rangos válidos', () => {
     // El primer filtro usa la fecha local del negocio, no la del navegador.
     TestBed.configureTestingModule({
@@ -34,7 +76,7 @@ describe('MovimientosCajaPage', () => {
       month: '2-digit',
       day: '2-digit',
     }).format(new Date());
-    expect(pagina.filtro()).toEqual({ desde: hoy, hasta: hoy, page: 1, limit: 20 });
+    expect(pagina.filtro()).toEqual({ desde: hoy, hasta: hoy, page: 1, limit: 5 });
     pagina.desde.set('2026-11-09');
     pagina.hasta.set('2026-11-07');
     pagina.aplicarFiltro();

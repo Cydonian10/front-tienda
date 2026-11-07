@@ -147,29 +147,15 @@
           </tbody>
         </table>
       </div>
-      <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
-        <p>
-          {{ listado.data()?.total }} movimientos · Página {{ filtro().page }} de
-          {{ totalPaginas() }}
-        </p>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            class="btn btn-sm"
-            [disabled]="filtro().page <= 1"
-            (click)="cambiarPagina(filtro().page - 1)"
-          >
-            Anterior</button
-          ><button
-            type="button"
-            class="btn btn-sm"
-            [disabled]="filtro().page >= totalPaginas()"
-            (click)="cambiarPagina(filtro().page + 1)"
-          >
-            Siguiente
-          </button>
-        </div>
-      </div>
+      <app-pagination
+        [page]="filtro().page"
+        [totalPages]="totalPaginas()"
+        [pageSize]="filtro().limit"
+        [pageSizeOptions]="[5, 10, 20]"
+        [disabled]="listado.isFetching()"
+        (pageChange)="cambiarPagina($event)"
+        (pageSizeChange)="cambiarLimite($event)"
+      />
     }
   </section>
 </section>

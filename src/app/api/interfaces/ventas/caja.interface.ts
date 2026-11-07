@@ -22,6 +22,7 @@ export interface UsuarioTurno {
 export interface TurnoCaja {
   id: string;
   usuarioApertura: UsuarioTurno;
+  responsable: UsuarioTurno;
   usuarioCierre: UsuarioTurno | null;
   fechaOperativa: string;
   fechaApertura: string;

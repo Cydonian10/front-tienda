@@ -48,24 +48,20 @@ export default class PuntoVentaPage implements OnDestroy {
   }
 
   readonly responsable = computed(() => {
-    const perfil = this.authStore.authPerfil();
-    return (
-      [perfil?.person?.firstName, perfil?.person?.lastName].filter(Boolean).join(' ').trim() ||
-      perfil?.nickName ||
-      'Usuario no disponible'
-    );
+    return this.turnoSeleccionado()?.responsable ?? 'Usuario no disponible';
   });
 
   readonly turnoSeleccionado = computed(() => {
     const turnoId = this.seleccion()?.turnoId;
     for (const caja of this.cajasQuery.data() ?? []) {
       const turno = caja.turnos.find((item) => item.id === turnoId);
-      if (!turno || turno.fechaCierre !== null) continue;
+      const usuarioId = this.authStore.authPerfil()?.id;
+      if (!turno || turno.fechaCierre !== null || !usuarioId || turno.responsable.id !== usuarioId) continue;
       const turnosDelDia = caja.turnos.filter(
         (item) => item.fechaOperativa === turno.fechaOperativa,
       );
       const numero = turnosDelDia.findIndex((item) => item.id === turno.id) + 1;
-      return { caja: caja.nombre, numero: String(numero).padStart(2, '0') };
+      return { caja: caja.nombre, numero: String(numero).padStart(2, '0'), responsable: turno.responsable.nickName };
     }
     return null;
   });

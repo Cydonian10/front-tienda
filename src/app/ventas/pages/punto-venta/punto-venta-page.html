@@ -28,7 +28,7 @@
         <app-resumen-venta class="block xl:block" [class.hidden]="vistaMovil() !== 'venta'" />
       </div>
     } @else {
-      <p role="alert">El turno seleccionado ya no está disponible o está cerrado.</p>
+      <p role="alert">El turno seleccionado ya no está disponible, está cerrado o no está asignado a tu usuario.</p>
       <a class="btn btn-outline mt-4" routerLink="/admin/ventas/preparacion"
         >Volver a preparación</a
       >

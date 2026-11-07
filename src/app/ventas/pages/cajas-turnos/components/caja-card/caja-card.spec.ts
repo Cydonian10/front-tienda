@@ -11,7 +11,7 @@ describe('CajaCard', () => {
   const open = vi.fn();
   const permiso = signal(true);
   const turno: TurnoCaja = {
-    id: 't1', usuarioApertura: { id: 'u1', nickName: 'usuario' }, usuarioCierre: null,
+    id: 't1', usuarioApertura: { id: 'u1', nickName: 'usuario' }, responsable: { id: 'u2', nickName: 'cajero' }, usuarioCierre: null,
     fechaOperativa: '2026-10-31', fechaApertura: '2026-10-31T10:00:00Z', fechaCierre: null,
     saldoInicial: '50.00', efectivoEsperado: '100.00', efectivoContado: null, observacionCierre: null,
   };

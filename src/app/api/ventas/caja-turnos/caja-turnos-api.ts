@@ -10,7 +10,7 @@ export class CajaTurnosApi {
   private readonly http = inject(HttpClient);
   private readonly environment = inject(ENVIRONMENT);
 
-  abrir(cajaId: string, dto: AbrirTurnoDto = {}): Promise<TurnoAbierto> {
+  abrir(cajaId: string, dto: AbrirTurnoDto): Promise<TurnoAbierto> {
     return firstValueFrom(
       this.http.post<TurnoAbierto>(`${this.environment.apiUrl}/cajas/${cajaId}/turnos`, dto, {
         context: new HttpContext().set(SKIP_API_ERROR_TOAST, true),

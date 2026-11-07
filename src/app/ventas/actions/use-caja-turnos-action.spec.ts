@@ -48,8 +48,8 @@ describe('useCajaTurnos', () => {
     client.setQueryData(key, []);
     abrir.mockResolvedValue({ id: 't1' });
     const { abrirMutation } = TestBed.runInInjectionContext(() => useCajaTurnos());
-    await abrirMutation.mutateAsync({ cajaId: 'c1', dto: { saldoInicial: '10' } });
-    expect(abrir).toHaveBeenCalledWith('c1', { saldoInicial: '10' });
+    await abrirMutation.mutateAsync({ cajaId: 'c1', dto: { responsableId: 'u1', saldoInicial: '10' } });
+    expect(abrir).toHaveBeenCalledWith('c1', { responsableId: 'u1', saldoInicial: '10' });
     expect(client.getQueryState(key)?.isInvalidated).toBe(true);
     expect(success).toHaveBeenCalled();
   });
@@ -59,7 +59,7 @@ describe('useCajaTurnos', () => {
     client.setQueryData(key, []);
     abrir.mockRejectedValue(new Error('Error'));
     const { abrirMutation } = TestBed.runInInjectionContext(() => useCajaTurnos());
-    await expect(abrirMutation.mutateAsync({ cajaId: 'c1' })).rejects.toThrow('Error');
+    await expect(abrirMutation.mutateAsync({ cajaId: 'c1', dto: { responsableId: 'u1' } })).rejects.toThrow('Error');
     expect(client.getQueryState(key)?.isInvalidated).toBe(false);
     expect(success).not.toHaveBeenCalled();
   });

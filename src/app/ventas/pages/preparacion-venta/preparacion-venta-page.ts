@@ -8,6 +8,7 @@ import { PreparacionVenta } from './components/preparacion-venta/preparacion-ven
 import { PasosVenta } from './components/pasos-venta/pasos-venta';
 import { VentasRecientes } from './components/ventas-recientes/ventas-recientes';
 import { CarritoVentaService } from '../punto-venta/service/carrito-venta.service';
+import { AuthStore } from '../../../store/auth/auth.store';
 
 @Component({
   selector: 'app-preparacion-venta-page',
@@ -19,6 +20,7 @@ export default class PreparacionVentaPage implements OnDestroy {
   private readonly router = inject(Router);
   readonly preparacion = inject(PreparacionVentaService);
   private readonly carrito = inject(CarritoVentaService);
+  private readonly auth = inject(AuthStore);
   private continuando = false;
   readonly almacen = signal(this.preparacion.recuperandoAlmacen() ?? '');
   readonly turno = signal('');
@@ -33,11 +35,12 @@ export default class PreparacionVentaPage implements OnDestroy {
     (this.cajasQuery.data() ?? []).flatMap((caja) =>
       caja.turnos
         .filter(
-          (turno) => turno.fechaCierre === null && turno.id !== this.preparacion.turnoAnterior(),
+          (turno) => turno.fechaCierre === null && turno.id !== this.preparacion.turnoAnterior() &&
+            !!this.auth.authPerfil()?.id && turno.responsable.id === this.auth.authPerfil()?.id,
         )
         .map((turno) => ({
           id: turno.id,
-          nombre: `${caja.nombre} · ${turno.usuarioApertura.nickName}`,
+          nombre: `${caja.nombre} · ${turno.responsable.nickName}`,
         })),
     ),
   );

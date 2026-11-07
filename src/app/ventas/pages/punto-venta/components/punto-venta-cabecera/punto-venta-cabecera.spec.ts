@@ -23,7 +23,8 @@ describe('PuntoVentaCabecera', () => {
     expect(contenido).toContain('Almacén principal');
     expect(contenido).toContain('Caja principal · #01');
     expect(contenido).toContain('Gabriel');
-    expect(botones).toHaveLength(2);
+    expect(contenido).toContain('Responsable del turno');
+    expect(botones).toHaveLength(1);
     expect(botones.every((boton) => boton.disabled)).toBe(true);
   });
 });

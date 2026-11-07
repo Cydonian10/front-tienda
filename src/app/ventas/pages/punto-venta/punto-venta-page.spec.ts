@@ -15,6 +15,7 @@ describe('PuntoVentaPage', () => {
     // Preparar un almacén en la segunda página y turnos de distintos días.
     const client = new QueryClient();
     const registroBloqueado = signal(false);
+    const usuarioId = signal('u1');
     const almacenRecuperacion = signal<string | null>(null);
     const listarAlmacenes = vi.fn().mockImplementation(async (pagina: number) => ({
       data: pagina === 1 ? [] : [{ id: 'a1', nombre: 'Almacén norte', activo: true }],
@@ -31,6 +32,7 @@ describe('PuntoVentaPage', () => {
             fechaOperativa: '2026-11-05',
             fechaCierre: null,
             usuarioApertura: { nickName: 'Otra persona' },
+            responsable: { id: 'u1', nickName: 'Ana Pérez' },
           },
         ],
       },
@@ -60,6 +62,7 @@ describe('PuntoVentaPage', () => {
           provide: AuthStore,
           useValue: {
             authPerfil: () => ({
+              id: usuarioId(),
               person: { firstName: 'Ana', lastName: 'Pérez' },
               nickName: 'ana',
             }),
@@ -114,6 +117,13 @@ describe('PuntoVentaPage', () => {
     expect(salidaPermitida).toBe(false);
     expect(evento.preventDefault).toHaveBeenCalledOnce();
     expect(evento.returnValue).toBe('');
+
+    // Cambiar de sesión no permite usar el turno de otra persona.
+    usuarioId.set('u2');
+    fixture.detectChanges();
+    const turnoAjeno = fixture.componentInstance.turnoSeleccionado();
+    expect(turnoAjeno).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('no está asignado a tu usuario');
 
     // Al recuperar un turno, destruir la página no descarta el carrito compartido.
     const carrito = fixture.componentInstance.carrito;
@@ -188,7 +198,7 @@ describe('PuntoVentaPage', () => {
 
     // Mostrar una salida clara en lugar de información desactualizada.
     const contenido = fixture.nativeElement.textContent as string;
-    expect(contenido).toContain('El turno seleccionado ya no está disponible o está cerrado');
+    expect(contenido).toContain('El turno seleccionado ya no está disponible, está cerrado');
     expect(contenido).toContain('Volver a preparación');
     fixture.destroy();
     client.clear();

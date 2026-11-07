@@ -29,7 +29,7 @@ export function useCajaTurnos() {
   const toast = inject(ToastService);
 
   const abrirMutation = injectMutation(() => ({
-    mutationFn: ({ cajaId, dto }: { cajaId: string; dto?: AbrirTurnoDto }) => api.abrir(cajaId, dto),
+    mutationFn: ({ cajaId, dto }: { cajaId: string; dto: AbrirTurnoDto }) => api.abrir(cajaId, dto),
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: cajasListadoQueryKey });
       toast.success('Turno abierto correctamente.');

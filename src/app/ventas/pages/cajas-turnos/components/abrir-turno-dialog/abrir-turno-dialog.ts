@@ -1,7 +1,9 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
+import { injectQuery } from '@tanstack/angular-query-experimental';
 import type { TurnoCaja } from '../../../../../api/interfaces/ventas/caja.interface';
+import { CajaApi } from '../../../../../api/ventas/caja/caja-api';
 import { DialogShell } from '../../../../../shared/components/dialog-shell/dialog-shell';
 import { apiMessage } from '../../../../../shared/interceptors/api-error.interceptor';
 import { useCajaTurnos } from '../../../../actions/use-caja-turnos-action';
@@ -18,8 +20,15 @@ export class AbrirTurnoDialog {
   readonly titleId = `${this.dialogRef.id}-title`;
   readonly formId = `${this.dialogRef.id}-form`;
   readonly saldoInicial = signal('');
+  readonly responsableId = signal('');
   readonly serverError = signal('');
   readonly abrirMutation = useCajaTurnos().abrirMutation;
+  private readonly cajaApi = inject(CajaApi);
+  readonly responsablesQuery = injectQuery(() => ({
+    queryKey: ['cajas', 'responsables'],
+    queryFn: () => this.cajaApi.responsables(),
+    retry: false,
+  }));
   readonly fechaOperativa = signal(new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit',
   }).format(new Date()));
@@ -39,11 +48,16 @@ export class AbrirTurnoDialog {
       this.serverError.set('Ingresa un saldo válido con hasta dos decimales, por ejemplo 100.00.');
       return;
     }
+    const responsableId = this.responsableId();
+    if (this.responsablesQuery.isError() || !this.responsablesQuery.data()?.some((usuario) => usuario.id === responsableId)) {
+      this.serverError.set('Selecciona un responsable disponible para el turno.');
+      return;
+    }
     this.dialogRef.disableClose = true;
     try {
       const turno = await this.abrirMutation.mutateAsync({
         cajaId: this.data.cajaId,
-        dto: this.turnoAnterior() ? {} : { saldoInicial },
+        dto: this.turnoAnterior() ? { responsableId } : { responsableId, saldoInicial },
       });
       this.dialogRef.close(turno);
     } catch (error) {

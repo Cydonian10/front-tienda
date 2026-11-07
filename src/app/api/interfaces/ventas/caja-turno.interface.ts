@@ -1,4 +1,5 @@
 export interface AbrirTurnoDto {
+  responsableId: string;
   saldoInicial?: string;
 }
 

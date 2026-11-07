@@ -35,6 +35,17 @@ describe('CajaApi', () => {
     http.verify();
   });
 
+  it('consulta los responsables disponibles para abrir un turno', async () => {
+    const http = TestBed.inject(HttpTestingController);
+    const resultado = TestBed.inject(CajaApi).responsables();
+    const request = http.expectOne('http://localhost:3000/api/cajas/responsables');
+    expect(request.request.method).toBe('GET');
+    request.flush([{ id: 'u1', nickName: 'Ana' }]);
+    const responsables = await resultado;
+    expect(responsables).toEqual([{ id: 'u1', nickName: 'Ana' }]);
+    http.verify();
+  });
+
   it('crea una caja con el nombre y devuelve la respuesta del servidor', async () => {
     const api = TestBed.inject(CajaApi);
     const http = TestBed.inject(HttpTestingController);

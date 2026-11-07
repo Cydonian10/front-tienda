@@ -3,6 +3,28 @@
 
   <form [id]="formId" (submit)="submitForm($event)" novalidate>
     <fieldset class="fieldset">
+      <label class="fieldset-legend" [attr.for]="formId + '-responsable'">Responsable del turno</label>
+      <select [id]="formId + '-responsable'" class="select w-full" [value]="responsableId()"
+        [disabled]="responsablesQuery.isPending() || responsablesQuery.isError() || abrirMutation.isPending()"
+        [attr.aria-describedby]="formId + '-responsable-ayuda'"
+        (change)="responsableId.set($any($event.target).value)">
+        <option value="" disabled>Selecciona un responsable</option>
+        @for (usuario of responsablesQuery.data() ?? []; track usuario.id) {
+          <option [value]="usuario.id">{{ usuario.nickName }}</option>
+        }
+      </select>
+      <p class="label" [id]="formId + '-responsable-ayuda'">Solo esta persona podrá vender y cobrar en el turno. Debe tener acceso a ventas.</p>
+      @if (responsablesQuery.isPending()) {
+        <p role="status">Cargando responsables…</p>
+      } @else if (responsablesQuery.isError()) {
+        <p role="alert">No se pudieron cargar los responsables.
+          <button type="button" class="btn btn-sm" (click)="responsablesQuery.refetch()">Reintentar</button>
+        </p>
+      } @else if (!responsablesQuery.data()?.length) {
+        <p>No hay usuarios activos disponibles.</p>
+      }
+    </fieldset>
+    <fieldset class="fieldset">
       <label class="fieldset-legend" [attr.for]="formId + '-saldo'">Saldo inicial en efectivo (S/)</label>
       <input
         [id]="formId + '-saldo'"
@@ -35,7 +57,7 @@
     <button type="button" class="btn" data-dialog-cancel [disabled]="abrirMutation.isPending()" (click)="dialogRef.close()">
       Cancelar
     </button>
-    <button type="submit" class="btn btn-primary" [attr.form]="formId" [disabled]="abrirMutation.isPending() || faltaEfectivoContado()">
+    <button type="submit" class="btn btn-primary" [attr.form]="formId" [disabled]="abrirMutation.isPending() || faltaEfectivoContado() || responsablesQuery.isPending() || responsablesQuery.isError() || !responsableId()">
       {{ abrirMutation.isPending() ? 'Abriendo…' : 'Abrir turno' }}
     </button>
   </div>

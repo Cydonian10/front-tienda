@@ -33,7 +33,8 @@
         </p>
       </div>
       <p class="text-sm text-base-content/70">Saldo inicial: S/ {{ turno.saldoInicial }}</p>
-      <p class="text-xs text-base-content/70">Responsable: {{ turno.usuarioApertura.nickName }}</p>
+      <p class="text-xs text-base-content/70">Responsable: {{ turno.responsable.nickName }}</p>
+      <p class="text-xs text-base-content/70">Abierto por: {{ turno.usuarioApertura.nickName }}</p>
       @if (!turnoAbierto() && turno.tipoCierre === 'dia') {
         <p class="text-xs text-base-content/70">Día cerrado para la fecha operativa {{ turno.fechaOperativa }}.</p>
       }

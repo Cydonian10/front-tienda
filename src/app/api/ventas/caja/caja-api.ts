@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ENVIRONMENT } from '../../config/env-dev';
-import type { Caja, CajaConTurnos, CrearCajaDto, FiltrarCajasDto } from '../../interfaces/ventas/caja.interface';
+import type { Caja, CajaConTurnos, CrearCajaDto, FiltrarCajasDto, UsuarioTurno } from '../../interfaces/ventas/caja.interface';
 
 @Injectable({ providedIn: 'root' })
 export class CajaApi {
@@ -19,5 +19,9 @@ export class CajaApi {
 
   create(dto: CrearCajaDto): Promise<Caja> {
     return firstValueFrom(this.http.post<Caja>(this.url, dto));
+  }
+
+  responsables(): Promise<UsuarioTurno[]> {
+    return firstValueFrom(this.http.get<UsuarioTurno[]>(`${this.url}/responsables`));
   }
 }

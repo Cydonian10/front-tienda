@@ -6,6 +6,7 @@ import { AlmacenApi } from '../../../api/inventario/almacen-api';
 import { CajaApi } from '../../../api/ventas/caja/caja-api';
 import PreparacionVentaPage from './preparacion-venta-page';
 import { CarritoVentaService } from '../punto-venta/service/carrito-venta.service';
+import { AuthStore } from '../../../store/auth/auth.store';
 
 describe('PreparacionVentaPage', () => {
   it('muestra almacenes activos y turnos abiertos y conserva los identificadores', async () => {
@@ -19,8 +20,9 @@ describe('PreparacionVentaPage', () => {
       {
         nombre: 'Caja 1',
         turnos: [
-          { id: 't1', fechaCierre: null, usuarioApertura: { nickName: 'Ana' } },
-          { id: 't2', fechaCierre: '2026-01-01', usuarioApertura: { nickName: 'Luis' } },
+          { id: 't1', fechaCierre: null, responsable: { id: 'u1', nickName: 'Ana' } },
+          { id: 't2', fechaCierre: '2026-01-01', responsable: { id: 'u1', nickName: 'Ana' } },
+          { id: 't3', fechaCierre: null, responsable: { id: 'u2', nickName: 'Luis' } },
         ],
       },
     ]);
@@ -31,6 +33,7 @@ describe('PreparacionVentaPage', () => {
         provideTanStackQuery(client),
         { provide: AlmacenApi, useValue: { list: consultarAlmacenes } },
         { provide: CajaApi, useValue: { list: consultarCajas } },
+        { provide: AuthStore, useValue: { authPerfil: () => ({ id: 'u1' }) } },
       ],
     });
     const fixture = TestBed.createComponent(PreparacionVentaPage);
@@ -51,6 +54,13 @@ describe('PreparacionVentaPage', () => {
     expect(textoPagina).toContain('Caja 1 · Ana');
     expect(textoPagina).not.toContain('Luis');
 
+    // Tampoco se puede continuar con un turno ajeno indicado manualmente.
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    fixture.componentInstance.almacen.set('a1');
+    fixture.componentInstance.turno.set('t3');
+    fixture.componentInstance.continuar();
+    expect(navegar).not.toHaveBeenCalled();
+
     // Seleccionar el almacén y el turno como lo haría el usuario.
     const almacen = pagina.querySelector<HTMLSelectElement>('#almacen')!;
     const turno = pagina.querySelector<HTMLSelectElement>('#turno')!;
@@ -64,7 +74,6 @@ describe('PreparacionVentaPage', () => {
     expect(turnoSeleccionado).toBe('t1');
 
     // Continuar debe guardar los identificadores y navegar al punto de venta.
-    const navegar = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture.componentInstance.continuar();
     const servicio = TestBed.inject(PreparacionVentaService);
     const seleccionGuardada = servicio.seleccion();
@@ -108,13 +117,14 @@ describe('PreparacionVentaPage', () => {
               {
                 nombre: 'Caja',
                 turnos: [
-                  { id: 't1', fechaCierre: null, usuarioApertura: { nickName: 'Ana' } },
-                  { id: 't2', fechaCierre: null, usuarioApertura: { nickName: 'Luis' } },
+                  { id: 't1', fechaCierre: null, responsable: { id: 'u1', nickName: 'Ana' } },
+                  { id: 't2', fechaCierre: null, responsable: { id: 'u1', nickName: 'Ana' } },
                 ],
               },
             ]),
           },
         },
+        { provide: AuthStore, useValue: { authPerfil: () => ({ id: 'u1' }) } },
       ],
     });
     const preparacion = TestBed.inject(PreparacionVentaService);

@@ -5,6 +5,10 @@ import { CajaApi } from '../../../../../api/ventas/caja/caja-api';
 import { DialogShell } from '../../../../../shared/components/dialog-shell/dialog-shell';
 import { AuthStore } from '../../../../../store/auth/auth.store';
 import { cajasQueryKey } from '../../../../actions/use-cajas-action';
+import { RegistrarMovimientoCajaAction } from '../../../../actions/use-movimientos-caja-action';
+import { PERMISSION_CODES } from '../../../../../api/interfaces/access-control/permision.interface';
+import { usePermissions } from '../../../../../auth/services/use-permissions';
+import { ToastService } from '../../../../../shared/services/toast/toast.service';
 
 @Component({
   selector: 'app-registrar-movimiento-dialog',
@@ -17,6 +21,11 @@ export class RegistrarMovimientoDialog {
   private readonly injector = inject(Injector);
   private readonly api = inject(CajaApi);
   private readonly auth = inject(AuthStore);
+  private readonly toast = inject(ToastService);
+  readonly registro = inject(RegistrarMovimientoCajaAction);
+  readonly permissions = usePermissions('VENTAS', {
+    crear: PERMISSION_CODES.MOVIMIENTOS_CAJA_CREATE,
+  });
   readonly titleId = `${this.dialogRef.id}-title`;
   readonly fieldId = `${this.dialogRef.id}-field`;
   readonly paso = signal<1 | 2>(1);
@@ -57,7 +66,42 @@ export class RegistrarMovimientoDialog {
     const monto = this.monto().trim();
     return /^\d{1,16}(\.\d{1,2})?$/.test(monto) && /[1-9]/.test(monto);
   });
-  readonly motivoValido = computed(() => this.motivo().trim().length > 0);
+  readonly motivoValido = computed(
+    () => this.motivo().trim().length > 0 && this.motivo().trim().length <= 500,
+  );
+  readonly puedeRegistrar = computed(
+    () =>
+      !!this.seleccion() &&
+      this.permissions.crear() &&
+      !this.registro.bloqueado() &&
+      (this.tipo() === 'ingreso' || this.tipo() === 'egreso') &&
+      this.montoValido() &&
+      this.motivoValido(),
+  );
+
+  async registrar(): Promise<void> {
+    const seleccion = this.seleccion();
+    const tipo = this.tipo();
+    if (!this.puedeRegistrar() || !seleccion || (tipo !== 'ingreso' && tipo !== 'egreso')) return;
+    this.dialogRef.disableClose = true;
+    try {
+      const registrado = await this.registro.registrar(
+        {
+          turnoId: seleccion.turno.id,
+          tipo,
+          importe: this.monto().trim(),
+          motivo: this.motivo().trim(),
+        },
+        seleccion.caja.id,
+      );
+      if (registrado) {
+        this.toast.success('Movimiento registrado correctamente.');
+        this.dialogRef.close();
+      }
+    } finally {
+      this.dialogRef.disableClose = false;
+    }
+  }
 
   continuar(): void {
     if (!this.seleccion() || this.cajasQuery.isError() || this.cajasQuery.isPending()) return;

@@ -1,4 +1,7 @@
 import { Component, signal } from '@angular/core';
+import { QueryClient, provideTanStackQuery } from '@tanstack/angular-query-experimental';
+import { MovimientoCajaApi } from '../api/ventas/movimiento-caja/movimiento-caja-api';
+import { RegistrarMovimientoCajaAction } from './actions/use-movimientos-caja-action';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -27,6 +30,15 @@ describe('Rutas de ventas', () => {
     const autorizacion = { hasPermission: vi.fn().mockReturnValue(permitido) };
     TestBed.configureTestingModule({
       providers: [
+        provideTanStackQuery(new QueryClient()),
+        {
+          provide: MovimientoCajaApi,
+          useValue: { listar: vi.fn().mockResolvedValue({ data: [], total: 0 }) },
+        },
+        {
+          provide: RegistrarMovimientoCajaAction,
+          useValue: { bloqueado: signal(false), pendiente: signal(null) },
+        },
         provideRouter([
           { ...movimientos, path: 'admin/ventas/movimientos-caja' },
           { path: 'admin', component: OtraPaginaPrueba },
@@ -41,13 +53,16 @@ describe('Rutas de ventas', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/admin/ventas/movimientos-caja');
     const urlResultante = TestBed.inject(Router).url;
-    expect(autorizacion.hasPermission).toHaveBeenCalledWith('VENTAS', PERMISSION_CODES.CAJAS_TURNOS_READ);
+    expect(autorizacion.hasPermission).toHaveBeenCalledWith(
+      'VENTAS',
+      PERMISSION_CODES.CAJAS_TURNOS_READ,
+    );
     expect(urlResultante).toBe(permitido ? '/admin/ventas/movimientos-caja' : '/admin');
     if (permitido) {
       const paginaMostrada = harness.routeDebugElement?.componentInstance;
       const textoMostrado = harness.routeNativeElement?.textContent;
       expect(paginaMostrada).toBeInstanceOf(MovimientosCajaPage);
-      expect(textoMostrado).toContain('Próximamente');
+      expect(textoMostrado).toContain('Historial de movimientos');
       expect(textoMostrado).toContain('Registrar movimiento');
     }
   });

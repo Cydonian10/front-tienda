@@ -14,7 +14,7 @@
     <button
       type="button"
       class="btn btn-primary"
-      [disabled]="!permissions.cajasTurnos()"
+      [disabled]="!permissions.crearMovimiento() || registro.bloqueado()"
       (click)="abrirRegistro()"
     >
       <svg
@@ -32,13 +32,144 @@
     </button>
   </header>
 
-  <div class="card card-border bg-base-100">
-    <div class="card-body">
-      <h2 class="card-title">Próximamente</h2>
-      <p class="text-sm text-base-content/70">
-        El registro de entradas y salidas de caja aún no está disponible. Puedes conocer el flujo de
-        registro.
+  @if (registro.pendiente(); as pendiente) {
+    <div class="rounded-box border border-warning bg-base-100 p-4" role="status">
+      <p class="font-semibold">Registro pendiente de confirmación</p>
+      <p class="mt-1 text-sm">
+        {{ pendiente.dto.tipo === 'ingreso' ? 'Ingreso' : 'Salida' }} de S/
+        {{ pendiente.dto.importe }} · {{ pendiente.dto.motivo }}
       </p>
+      <p class="mt-1 text-sm">
+        No registres el movimiento nuevamente. Reintenta con el mismo usuario para verificar el
+        resultado.
+      </p>
+      @if (registro.error()) {
+        <p class="mt-2 text-sm text-error">{{ registro.error() }}</p>
+      }
+      <button
+        type="button"
+        class="btn btn-sm mt-3"
+        [disabled]="registro.enviando()"
+        (click)="reintentarRegistro()"
+      >
+        {{ registro.enviando() ? 'Verificando…' : 'Reintentar registro' }}
+      </button>
     </div>
-  </div>
+  }
+  @if (confirmacion()) {
+    <p role="status" class="text-sm text-success">{{ confirmacion() }}</p>
+  }
+
+  <section aria-labelledby="historial-movimientos" class="space-y-4">
+    <h2 id="historial-movimientos" class="text-lg font-semibold">Historial de movimientos</h2>
+    <form
+      class="flex flex-col gap-3 sm:flex-row sm:items-end"
+      (submit)="$event.preventDefault(); aplicarFiltro()"
+    >
+      <fieldset class="fieldset">
+        <label class="fieldset-legend" for="movimientos-desde">Desde</label
+        ><input
+          id="movimientos-desde"
+          class="input"
+          type="date"
+          [value]="desde()"
+          (input)="desde.set($any($event.target).value)"
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <label class="fieldset-legend" for="movimientos-hasta">Hasta</label
+        ><input
+          id="movimientos-hasta"
+          class="input"
+          type="date"
+          [value]="hasta()"
+          (input)="hasta.set($any($event.target).value)"
+        />
+      </fieldset>
+      <button type="submit" class="btn">Aplicar fechas</button>
+    </form>
+    <p class="text-sm text-base-content/70">
+      Fechas y horas según Lima. Para consultar un día, selecciona la misma fecha en ambos campos.
+    </p>
+    @if (errorFechas()) {
+      <p role="alert" class="text-sm text-error">{{ errorFechas() }}</p>
+    }
+    @if (listado.isPending()) {
+      <p role="status" class="text-sm">Cargando movimientos…</p>
+    } @else if (listado.isError()) {
+      <p role="alert" class="text-sm text-error">
+        No se pudieron cargar los movimientos.
+        <button type="button" class="btn btn-sm" (click)="listado.refetch()">Reintentar</button>
+      </p>
+    } @else if (!listado.data()?.data?.length) {
+      <p class="rounded-box border border-base-300 bg-base-100 p-5 text-sm">
+        No hay movimientos en las fechas seleccionadas.
+      </p>
+    } @else {
+      <div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Fecha y hora</th>
+              <th>Caja</th>
+              <th>Movimiento</th>
+              <th>Monto</th>
+              <th>Motivo</th>
+              <th>Registrado por</th>
+              <th>Responsable del turno</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (movimiento of listado.data()?.data; track movimiento.id) {
+              <tr>
+                <td class="whitespace-nowrap tabular-nums">
+                  {{ movimiento.fecha | date: 'dd/MM/yyyy HH:mm' : '-0500' }}
+                </td>
+                <td>
+                  {{ movimiento.cajaNombre }}<br /><span class="text-xs text-base-content/70">{{
+                    movimiento.cajaCodigo
+                  }}</span>
+                </td>
+                <td>
+                  <span
+                    class="badge badge-soft"
+                    [class.badge-success]="movimiento.tipo === 'ingreso'"
+                    [class.badge-warning]="movimiento.tipo === 'egreso'"
+                    >{{ movimiento.tipo === 'ingreso' ? 'Ingreso' : 'Salida' }}</span
+                  >
+                </td>
+                <td class="whitespace-nowrap tabular-nums">S/ {{ movimiento.importe }}</td>
+                <td>{{ movimiento.motivo }}</td>
+                <td>{{ movimiento.usuarioNombre }}</td>
+                <td>{{ movimiento.responsableNombre }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
+        <p>
+          {{ listado.data()?.total }} movimientos · Página {{ filtro().page }} de
+          {{ totalPaginas() }}
+        </p>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="btn btn-sm"
+            [disabled]="filtro().page <= 1"
+            (click)="cambiarPagina(filtro().page - 1)"
+          >
+            Anterior</button
+          ><button
+            type="button"
+            class="btn btn-sm"
+            [disabled]="filtro().page >= totalPaginas()"
+            (click)="cambiarPagina(filtro().page + 1)"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+    }
+  </section>
 </section>

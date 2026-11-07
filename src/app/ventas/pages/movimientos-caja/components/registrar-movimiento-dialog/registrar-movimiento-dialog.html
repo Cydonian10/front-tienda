@@ -83,6 +83,7 @@
         <select
           [id]="fieldId + '-tipo'"
           class="select w-full"
+          [disabled]="registro.bloqueado()"
           [value]="tipo()"
           (change)="tipo.set($any($event.target).value)"
         >
@@ -101,6 +102,7 @@
           class="input w-full"
           type="text"
           inputmode="decimal"
+          [disabled]="registro.bloqueado()"
           placeholder="0.00"
           [value]="monto()"
           [attr.aria-invalid]="montoTocado() && !montoValido() ? 'true' : null"
@@ -123,6 +125,8 @@
           [id]="fieldId + '-motivo'"
           class="input w-full"
           type="text"
+          maxlength="500"
+          [disabled]="registro.bloqueado()"
           placeholder="Describe el movimiento"
           [value]="motivo()"
           [attr.aria-invalid]="motivoTocado() && !motivoValido() ? 'true' : null"
@@ -147,14 +151,25 @@
         Registra solo movimientos reales de efectivo. Los cobros de ventas se registran por
         separado.
       </p>
-      <p class="rounded-box border border-base-300 bg-base-200 p-4 text-sm">
-        El registro aún no está disponible. Los datos ingresados no se guardarán.
-      </p>
+      @if (registro.error()) {
+        <p role="alert" class="text-sm text-error">{{ registro.error() }}</p>
+      }
+      @if (registro.pendiente()) {
+        <p class="text-sm">
+          Cierra este diálogo y usa «Reintentar registro» para verificar el resultado.
+        </p>
+      }
     </div>
   }
 
   <div dialog-actions class="flex flex-col gap-2 sm:flex-row">
-    <button type="button" class="btn" data-dialog-cancel (click)="dialogRef.close()">
+    <button
+      type="button"
+      class="btn"
+      data-dialog-cancel
+      [disabled]="registro.enviando()"
+      (click)="dialogRef.close()"
+    >
       Cancelar
     </button>
     @if (paso() === 1) {
@@ -167,18 +182,17 @@
         Continuar
       </button>
     } @else {
-      <button type="button" class="btn" (click)="volver()">Volver</button>
+      <button type="button" class="btn" [disabled]="registro.bloqueado()" (click)="volver()">
+        Volver
+      </button>
       <button
         type="button"
         class="btn btn-primary"
-        disabled
-        aria-describedby="registro-no-disponible"
+        [disabled]="!puedeRegistrar()"
+        (click)="registrar()"
       >
-        Registro no disponible
+        {{ registro.enviando() ? 'Registrando…' : 'Registrar movimiento' }}
       </button>
-      <span id="registro-no-disponible" class="sr-only"
-        >El registro se habilitará cuando esté disponible el servicio.</span
-      >
     }
   </div>
 </app-dialog-shell>

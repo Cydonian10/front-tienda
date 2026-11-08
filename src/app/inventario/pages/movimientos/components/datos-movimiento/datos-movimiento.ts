@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import type { AlmacenMovimiento, TipoMovimiento } from '../../../../api/interfaces/inventario/movimiento.interface';
+import type { AlmacenMovimiento, TipoMovimiento } from '../../../../../api/interfaces/inventario/movimiento.interface';
 
 @Component({
   selector: 'app-datos-movimiento',

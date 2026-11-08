@@ -3,11 +3,11 @@ import type {
   FiltroVariantesMovimiento,
   TipoMovimiento,
   VarianteMovimiento,
-} from '../../../../api/interfaces/inventario/movimiento.interface';
-import { useVariantesMovimiento } from '../../../actions/use-movimientos-action';
-import { Icon } from '../../../../shared/components/icon/icon';
-import { decimalCompacto } from '../../../../shared/formatters/decimal';
-import type { FilaMovimiento } from '../movimiento-form.model';
+} from '../../../../../api/interfaces/inventario/movimiento.interface';
+import { useVariantesMovimiento } from '../../../../actions/use-movimientos-action';
+import { Icon } from '../../../../../shared/components/icon/icon';
+import { decimalCompacto } from '../../../../../shared/formatters/decimal';
+import type { FilaMovimiento } from '../../movimiento-form.model';
 
 const PAGE_LIMIT = 20;
 const FACTOR_SCALE = 100_000_000n;

@@ -17,8 +17,8 @@ import { AuthorizationService } from '../../../auth/services/authorization.servi
 import { usePermissions } from '../../../auth/services/use-permissions';
 import { useAlmacenesMovimiento, useCrearMovimiento } from '../../actions/use-movimientos-action';
 import { Icon } from '../../../shared/components/icon/icon';
-import { DatosMovimiento } from './components/datos-movimiento';
-import { DetalleMovimiento } from './components/detalle-movimiento';
+import { DatosMovimiento } from './components/datos-movimiento/datos-movimiento';
+import { DetalleMovimiento } from './components/detalle-movimiento/detalle-movimiento';
 import { FilaMovimiento, nuevaFilaMovimiento } from './movimiento-form.model';
 
 const WRITE_PERMISSIONS = {

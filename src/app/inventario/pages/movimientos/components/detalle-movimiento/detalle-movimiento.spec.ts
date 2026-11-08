@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
-import { MovimientoApi } from '../../../../api/inventario/movimiento-api';
-import type { VarianteMovimiento } from '../../../../api/interfaces/inventario/movimiento.interface';
-import { nuevaFilaMovimiento } from '../movimiento-form.model';
+import { MovimientoApi } from '../../../../../api/inventario/movimiento-api';
+import type { VarianteMovimiento } from '../../../../../api/interfaces/inventario/movimiento.interface';
+import { nuevaFilaMovimiento } from '../../movimiento-form.model';
 import { DetalleMovimiento, equivalenciaBase } from './detalle-movimiento';
 
 describe('DetalleMovimiento', () => {

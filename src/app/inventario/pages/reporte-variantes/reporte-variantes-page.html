@@ -1,0 +1,169 @@
+<section class="mx-auto w-full max-w-6xl space-y-6" aria-labelledby="reporte-title">
+  <header>
+    <h1 id="reporte-title" class="text-2xl font-semibold tracking-tight sm:text-3xl">
+      Reporte de variantes
+    </h1>
+    <p class="mt-2 text-sm text-base-content/70">Consulta precios y existencias por almacén.</p>
+  </header>
+
+  <section aria-label="Filtros del reporte" class="space-y-4">
+    <p class="text-sm text-base-content/70">Cada fila representa una variante en un almacén.</p>
+    <div class="grid gap-4 md:grid-cols-4">
+      <form class="space-y-2 md:col-span-2" (submit)="buscar($event)">
+        <label for="reporte-busqueda" class="block text-sm font-semibold"
+          >Buscar producto o SKU</label
+        >
+        <div class="flex gap-2">
+          <input
+            id="reporte-busqueda"
+            type="search"
+            class="input h-11 w-full min-w-0"
+            maxlength="150"
+            placeholder="Nombre o SKU"
+            [value]="borrador()"
+            (input)="borrador.set($any($event.target).value)"
+          />
+          <button class="btn h-11" type="submit">Buscar</button>
+        </div>
+      </form>
+      <div class="space-y-2">
+        <label for="reporte-almacen" class="block text-sm font-semibold">Almacén</label>
+        <select
+          id="reporte-almacen"
+          class="select h-11 w-full"
+          [value]="almacenId()"
+          (change)="seleccionarAlmacen($any($event.target).value)"
+        >
+          <option value="todos">Todos los almacenes</option>
+          @for (almacen of almacenes.data() ?? []; track almacen.id) {
+            <option [value]="almacen.id">{{ almacen.nombre }}</option>
+          }
+        </select>
+        @if (almacenes.isError()) {
+          <p class="text-sm text-error">
+            No se pudieron cargar los almacenes.
+            <button type="button" class="underline" (click)="almacenes.refetch()">
+              Reintentar
+            </button>
+          </p>
+        }
+      </div>
+      <div class="space-y-2">
+        <label for="reporte-disponibilidad" class="block text-sm font-semibold"
+          >Disponibilidad</label
+        >
+        <select
+          id="reporte-disponibilidad"
+          class="select h-11 w-full"
+          [value]="disponibilidad()"
+          (change)="seleccionarDisponibilidad($any($event.target).value)"
+        >
+          <option value="todas">Todas</option>
+          <option value="con_stock">Con stock</option>
+          <option value="sin_stock">Sin stock</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <p class="text-sm text-base-content/70">Vista previa del reporte · formato horizontal</p>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="exportando() || existencias.isPending() || existencias.isError()"
+      (click)="descargarPdf()"
+    >
+      {{ exportando() ? 'Generando PDF…' : 'Descargar PDF' }}
+    </button>
+  </div>
+  @if (errorPdf()) {
+    <p role="alert" class="text-sm text-error">No se pudo generar el PDF. Inténtalo de nuevo.</p>
+  }
+  <section
+    class="rounded-box border border-base-300 bg-base-100 p-5 sm:p-8"
+    aria-labelledby="vista-previa-title"
+  >
+    <div
+      class="flex flex-col gap-2 border-b border-base-300 pb-5 sm:flex-row sm:items-end sm:justify-between"
+    >
+      <div>
+        <h2 id="vista-previa-title" class="text-xl font-semibold">Reporte de variantes</h2>
+        <p class="mt-1 text-sm text-base-content/70">Precios de venta y existencias por almacén</p>
+      </div>
+      <p class="text-sm text-base-content/70">{{ alcance() }}</p>
+    </div>
+    @if (existencias.isPending()) {
+      <p role="status" class="py-8 text-sm">Cargando variantes…</p>
+    } @else if (existencias.isError()) {
+      <p role="alert" class="py-8 text-sm text-error">
+        No se pudo cargar el reporte.
+        <button type="button" class="underline" (click)="existencias.refetch()">Reintentar</button>
+      </p>
+    } @else if (existencias.data(); as resultado) {
+      <p class="py-4 text-sm text-base-content/70">
+        {{ resultado.totalItems }} filas en el reporte
+      </p>
+      @if (resultado.items.length) {
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr>
+                <th>Producto / variante</th>
+                <th>SKU</th>
+                <th>Almacén</th>
+                <th class="text-right">Precio de venta</th>
+                <th class="text-right">Stock</th>
+                <th>Disponibilidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (fila of resultado.items; track fila.variante.id + ':' + fila.almacen.id) {
+                <tr>
+                  <td>
+                    <strong>{{ fila.producto.nombre }}</strong>
+                    <div class="mt-1 text-xs text-base-content/70">
+                      @for (
+                        valor of fila.variante.valores;
+                        track valor.atributoId;
+                        let ultimo = $last
+                      ) {
+                        {{ valor.atributo }}: {{ valor.valor }}{{ ultimo ? '' : ' · ' }}
+                      }
+                    </div>
+                  </td>
+                  <td>{{ fila.variante.sku }}</td>
+                  <td>{{ fila.almacen.nombre }}</td>
+                  <td class="text-right tabular-nums">{{ soles(fila.variante.precioVenta) }}</td>
+                  <td class="text-right tabular-nums">
+                    {{ decimal(fila.cantidadBase) }} {{ fila.producto.unidadBase.simbolo }}
+                  </td>
+                  <td>
+                    @if (+fila.cantidadBase > 0) {
+                      <span class="text-success">Con stock</span>
+                    } @else {
+                      <span class="text-warning">Sin stock</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <app-pagination
+          class="mt-5"
+          [page]="page()"
+          [totalPages]="totalPages()"
+          [pageSize]="pageSize()"
+          [disabled]="existencias.isFetching()"
+          (pageChange)="page.set($event)"
+          (pageSizeChange)="cambiarTamano($event)"
+        />
+      } @else {
+        <p class="py-8 text-sm text-base-content/70">
+          No hay variantes para los filtros seleccionados.
+        </p>
+      }
+    }
+  </section>
+</section>

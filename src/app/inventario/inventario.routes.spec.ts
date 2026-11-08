@@ -345,16 +345,16 @@ describe('rutas de inventario', () => {
     expect(TestBed.inject(Router).url).toBe('/admin');
   });
 
-  it('protege el reporte de variantes con PRODUCTOS_LEER de INVENTARIO', async () => {
+  it('protege el reporte de variantes con EXISTENCIAS_LEER de INVENTARIO', async () => {
     // El permiso de productos permite abrir el reporte.
-    setPermissions([{ code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' }]);
+    setPermissions([{ code: PERMISSION_CODES.EXISTENCIAS_READ, systemCode: 'INVENTARIO' }]);
     const harness = await RouterTestingHarness.create('/admin/inventario/reportes/variantes');
     const urlPermitida = TestBed.inject(Router).url;
     expect(urlPermitida).toBe('/admin/inventario/reportes/variantes');
     expect(harness.routeNativeElement?.textContent).toContain('Reporte de variantes');
 
     // Otro permiso no permite acceder directamente a la ruta.
-    setPermissions([{ code: PERMISSION_CODES.PRODUCTS_UPDATE, systemCode: 'INVENTARIO' }]);
+    setPermissions([{ code: PERMISSION_CODES.PRODUCTS_READ, systemCode: 'INVENTARIO' }]);
     await harness.navigateByUrl('/admin/inventario/marcas');
     await harness.navigateByUrl('/admin/inventario/reportes/variantes');
     const urlDenegada = TestBed.inject(Router).url;

@@ -269,6 +269,14 @@ describe('SystemMenuService', () => {
           }),
         ],
       }),
+      expect.objectContaining({
+        label: 'Reportes',
+        items: [expect.objectContaining({
+          label: 'Reporte de variantes',
+          url: '/admin/inventario/reportes/variantes',
+          permission: PERMISSION_CODES.EXISTENCIAS_READ,
+        })],
+      }),
     ]);
     expect(service.routeFor('INVENTARIO')).toBe('/admin/inventario');
 

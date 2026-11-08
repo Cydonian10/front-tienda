@@ -52,4 +52,11 @@ export class ExistenciaApi {
 
     return firstValueFrom(this.http.get<ListaExistenciasResponse>(this.url, { params }));
   }
+
+  reporteVariantesPdf(filtro: FiltroExistencias): Promise<Blob> {
+    let params = new HttpParams().set('almacenId', filtro.almacenId).set('page', 1).set('limit', 20);
+    if (filtro.q) params = params.set('q', filtro.q);
+    if (filtro.disponibilidad) params = params.set('disponibilidad', filtro.disponibilidad);
+    return firstValueFrom(this.http.get(`${this.url}/reporte-variantes.pdf`, { params, responseType: 'blob' }));
+  }
 }

@@ -57,6 +57,11 @@ const inventarioRoutes: Routes = [
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.ATRIBUTOS_READ)],
   },
   {
+    path: 'reportes/variantes',
+    loadComponent: () => import('./pages/reporte-variantes/reporte-variantes-page'),
+    canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.PRODUCTS_READ)],
+  },
+  {
     path: 'almacenes',
     loadComponent: () => import('./pages/almacenes/almacenes-page'),
     canActivate: [permissionGuard('INVENTARIO', PERMISSION_CODES.ALMACENES_READ)],

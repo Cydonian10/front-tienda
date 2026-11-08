@@ -132,6 +132,18 @@ const SYSTEMS: Readonly<Record<string, FrontendSystem>> = {
         ],
       },
       {
+        label: 'Reportes',
+        icon: 'chart-line',
+        items: [
+          {
+            label: 'Reporte de variantes',
+            url: '/admin/inventario/reportes/variantes',
+            icon: 'file',
+            permission: PERMISSION_CODES.PRODUCTS_READ,
+          },
+        ],
+      },
+      {
         label: 'Configuración',
         icon: 'settings',
         items: [

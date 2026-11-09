@@ -6,11 +6,23 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { apiUrlFromEnvironment } from './app/api/config/runtime-config';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+
+const apiUrl = apiUrlFromEnvironment(process.env['API_URL']);
+
+app.get('/health', (_req, res) => res.status(200).send('ok'));
+
+app.get('/runtime-config.js', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.type('application/javascript').send(
+    `window.__FRONT_CONFIG__ = ${JSON.stringify(apiUrl ? { apiUrl } : null)};`,
+  );
+});
 
 /**
  * Example Express Rest API endpoints can be defined here.
@@ -52,6 +64,9 @@ app.use((req, res, next) => {
  * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
  */
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
+  if (process.env['NODE_ENV'] === 'production' && !apiUrl) {
+    throw new Error('API_URL es obligatoria en producción y debe ser accesible desde el navegador y el servidor.');
+  }
   const port = process.env['PORT'] || 4000;
   app.listen(port, (error) => {
     if (error) {

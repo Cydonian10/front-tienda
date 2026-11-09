@@ -5,27 +5,28 @@
     </div>
   </div>
   <header class="header wrap">
-    <a class="brand" href="#inicio"
+    <a class="brand" [attr.href]="enlaceSeccion() + '#inicio'"
       ><span class="brand-mark">J</span><span>Jauja<small>SERVICIOS GENERALES</small></span></a
     >
     <nav aria-label="Navegación principal">
-      <a href="#inicio">Inicio</a><a href="#catalogo">Productos</a><a href="#nosotros">Nosotros</a>
+      <a [attr.href]="enlaceSeccion() + '#inicio'">Inicio</a
+      ><a [attr.href]="enlaceSeccion() + '#catalogo'">Productos</a
+      ><a [attr.href]="enlaceSeccion() + '#nosotros'">Nosotros</a>
     </nav>
-    <a class="action dark" href="#catalogo">Explorar catálogo ↗</a>
+    <a class="action dark" [attr.href]="enlaceSeccion() + '#catalogo'">Explorar catálogo ↗</a>
   </header>
   <main class="wrap">
     <section class="jauja-hero" aria-labelledby="hero-title">
       <div class="jauja-hero-content">
         <p class="eyebrow">Bienvenido a Jauja</p>
-        <h1 id="hero-title">Para cada trabajo,<br /><em>la herramienta<br />ideal.</em></h1>
+        <h1 id="hero-title">
+          Para cada trabajo,<br /><em>la herramienta<br />ideal.</em>
+        </h1>
         <p>
           Encuentra productos para mecánica y artículos en general, pensados para ayudarte en cada
           proyecto.
         </p>
-        <div class="hero-actions">
-          <a class="action gold" href="#catalogo">Ver productos ↗</a
-          ><a class="action outline" href="#nosotros">Conócenos</a>
-        </div>
+        <div class="hero-actions"></div>
       </div>
     </section>
     <div class="benefits">
@@ -48,8 +49,9 @@
             type="search"
             placeholder="¿Qué estás buscando?"
             maxlength="150"
-            [value]="busqueda()"
-          /><button class="action dark" type="submit">Buscar</button>
+            [value]="borradorBusqueda()"
+            (input)="escribirBusqueda(buscarInput.value)"
+          />@if (borradorBusqueda()) {<button class="clear-search" type="button" (click)="limpiarBusqueda()" aria-label="Limpiar búsqueda">Limpiar</button>}
         </form>
       </div>
       <div class="category-desktop" aria-label="Categorías">
@@ -95,6 +97,17 @@
           <button type="button" (click)="categorias.refetch()">Reintentar</button>
         </p>
       }
+      @if (busqueda() || categoria()) {
+        <div class="active-filters" aria-label="Filtros activos">
+          <span>Filtrando por:</span>
+          @if (busqueda()) {<span class="filter-chip">Búsqueda: <strong>{{ busqueda() }}</strong><button type="button" (click)="limpiarBusqueda()" aria-label="Quitar búsqueda">×</button></span>}
+          @if (categoria()) {<span class="filter-chip">Categoría: <strong>{{ nombreCategoria() }}</strong><button type="button" (click)="filtrar('')" aria-label="Quitar categoría">×</button></span>}
+          <button class="clear-filters" type="button" (click)="limpiarFiltros()">Limpiar filtros</button>
+        </div>
+      }
+      @if (navegandoBusqueda() || borradorBusqueda().trim() !== busqueda() || productos.isFetching()) {
+        <p class="filter-status" role="status">Filtrando productos…</p>
+      }
       @if (productos.isPending()) {
         <p class="message" role="status">Cargando productos…</p>
       } @else if (productos.isError()) {
@@ -112,14 +125,19 @@
               <article class="product">
                 <div class="product-art">
                   @if (producto.tieneImagen && !imagenesFallidas().has(producto.id)) {
-                    <img [src]="imagenUrl(producto.id)" [alt]="producto.nombre" loading="lazy" (error)="imagenFallida(producto.id)" />
-                  } @else {
-                  <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.3">
-                    <path
-                      d="M39 8a15 15 0 0 0-17 19L8 41a7 7 0 0 0 10 10l14-14a15 15 0 0 0 19-17l-9 9-9-3-3-9z"
+                    <img
+                      [src]="imagenUrl(producto.id)"
+                      [alt]="producto.nombre"
+                      loading="lazy"
+                      (error)="imagenFallida(producto.id)"
                     />
-                    <circle cx="13" cy="46" r="2" />
-                  </svg>
+                  } @else {
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.3">
+                      <path
+                        d="M39 8a15 15 0 0 0-17 19L8 41a7 7 0 0 0 10 10l14-14a15 15 0 0 0 19-17l-9 9-9-3-3-9z"
+                      />
+                      <circle cx="13" cy="46" r="2" />
+                    </svg>
                   }
                 </div>
                 <div class="product-body">
@@ -128,7 +146,15 @@
                   </p>
                   <h3>{{ producto.nombre }}</h3>
                   @if (producto.atributos.length) {
-                    <p class="variant-details">@for (atributo of producto.atributos; track atributo.atributo; let ultimo = $last) { {{ atributo.atributo }}: {{ atributo.valor }}{{ ultimo ? '' : ' · ' }} }</p>
+                    <p class="variant-details">
+                      @for (
+                        atributo of producto.atributos;
+                        track atributo.atributo;
+                        let ultimo = $last
+                      ) {
+                        {{ atributo.atributo }}: {{ atributo.valor }}{{ ultimo ? '' : ' · ' }}
+                      }
+                    </p>
                   }
                   <p class="availability">
                     <span [class.available]="producto.disponible">●</span>
@@ -163,7 +189,6 @@
           encontrar lo que necesitas para seguir adelante.
         </p>
       </div>
-      <a class="action gold" href="#catalogo">Explorar productos ↗</a>
     </section>
   </main>
   <footer>

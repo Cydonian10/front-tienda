@@ -1,9 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { injectQuery } from '@tanstack/angular-query-experimental';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject, switchMap, timer, map, takeUntil } from 'rxjs';
 import { ENVIRONMENT } from '../api/config/env-dev';
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
@@ -45,9 +45,22 @@ export default class CatalogoPublicoPage {
     initialValue: this.route.snapshot.queryParamMap,
   });
   private readonly datos = toSignal(this.route.data, { initialValue: this.route.snapshot.data });
-  private readonly datosCatalogo = computed(() => this.datos()['catalogo'] as DatosCatalogo | undefined);
+  private readonly datosCatalogo = computed(
+    () => this.datos()['catalogo'] as DatosCatalogo | undefined,
+  );
   readonly categoria = computed(() => this.params().get('categoria') ?? '');
   readonly busqueda = computed(() => this.params().get('q') ?? '');
+  readonly borradorBusqueda = signal(this.route.snapshot.queryParamMap.get('q') ?? '');
+  private readonly cambiosBusqueda = new Subject<{ valor: string; inmediato: boolean }>();
+  private readonly cancelarBusqueda = new Subject<void>();
+  readonly enlaceSeccion = computed(() => {
+    const params = new URLSearchParams();
+    for (const key of this.params().keys) {
+      for (const value of this.params().getAll(key)) params.append(key, value);
+    }
+    const query = params.toString();
+    return `/vsqz${query ? `?${query}` : ''}`;
+  });
   readonly pagina = computed(() => Math.max(1, Number(this.params().get('page')) || 1));
   readonly pageSizeOptions = [6, 12, 24] as const;
   readonly pageSize = computed(() => {
@@ -55,6 +68,7 @@ export default class CatalogoPublicoPage {
     return this.pageSizeOptions.find((option) => option === size) ?? 12;
   });
   readonly menu = signal(false);
+  readonly navegandoBusqueda = signal(false);
   readonly imagenesFallidas = signal<ReadonlySet<string>>(new Set());
   imagenUrl(id: string): string {
     return `${this.api}/catalogo-publico/variantes/${encodeURIComponent(id)}/imagen`;
@@ -79,12 +93,21 @@ export default class CatalogoPublicoPage {
       queryKey: ['catalogo-publico', 'productos', categoria, q, page, limit],
       enabled: this.browser,
       gcTime: this.browser ? 300_000 : Infinity,
-      initialData: this.datosCatalogo()?.categoria === categoria && this.datosCatalogo()?.q === q && this.datosCatalogo()?.page === page && this.datosCatalogo()?.limit === limit
-        ? this.datosCatalogo()?.productos : undefined,
+      initialData:
+        this.datosCatalogo()?.categoria === categoria &&
+        this.datosCatalogo()?.q === q &&
+        this.datosCatalogo()?.page === page &&
+        this.datosCatalogo()?.limit === limit
+          ? this.datosCatalogo()?.productos
+          : undefined,
       queryFn: () =>
         firstValueFrom(
           this.http.get<Catalogo>(`${this.api}/catalogo-publico/productos`, {
-            params: new HttpParams().set('categoria', categoria).set('q', q).set('page', page).set('limit', limit),
+            params: new HttpParams()
+              .set('categoria', categoria)
+              .set('q', q)
+              .set('page', page)
+              .set('limit', limit),
           }),
         ),
     };
@@ -94,7 +117,38 @@ export default class CatalogoPublicoPage {
       this.categorias.data()?.find((c) => c.id === this.categoria())?.nombre ??
       'Todas las categorías',
   );
-  readonly totalPaginas = computed(() => Math.ceil((this.productos.data()?.totalItems ?? 0) / this.pageSize()));
+  readonly totalPaginas = computed(() =>
+    Math.ceil((this.productos.data()?.totalItems ?? 0) / this.pageSize()),
+  );
+
+  constructor() {
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const valor = params.get('q') ?? '';
+      if (valor !== this.busquedaAnterior) {
+        this.busquedaAnterior = valor;
+        this.borradorBusqueda.set(valor);
+      }
+    });
+    this.cambiosBusqueda.pipe(
+      switchMap(({ valor, inmediato }) => timer(inmediato ? 0 : 350).pipe(takeUntil(this.cancelarBusqueda), map(() => valor))),
+      takeUntilDestroyed(),
+    ).subscribe((valor) => this.aplicarBusqueda(valor));
+  }
+  private busquedaAnterior = this.route.snapshot.queryParamMap.get('q') ?? '';
+
+  escribirBusqueda(valor: string): void {
+    this.borradorBusqueda.set(valor);
+    this.cambiosBusqueda.next({ valor, inmediato: false });
+  }
+  limpiarBusqueda(): void {
+    this.borradorBusqueda.set('');
+    this.cambiosBusqueda.next({ valor: '', inmediato: true });
+  }
+  limpiarFiltros(): void {
+    this.cancelarBusqueda.next();
+    this.borradorBusqueda.set('');
+    void this.router.navigate([], { relativeTo: this.route, queryParams: { q: null, categoria: null, page: null }, queryParamsHandling: 'merge', preserveFragment: true });
+  }
 
   filtrar(categoria: string): void {
     this.menu.set(false);
@@ -107,12 +161,18 @@ export default class CatalogoPublicoPage {
   }
   buscar(event: Event, valor: string): void {
     event.preventDefault();
+    this.cambiosBusqueda.next({ valor, inmediato: true });
+  }
+  private aplicarBusqueda(valor: string): void {
+    if (valor.trim() === this.busqueda()) return;
+    this.navegandoBusqueda.set(true);
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { q: valor.trim() || null, page: null },
       queryParamsHandling: 'merge',
-      fragment: 'catalogo',
-    });
+      preserveFragment: true,
+      replaceUrl: true,
+    }).finally(() => this.navegandoBusqueda.set(false));
   }
   cambiarPagina(page: number): void {
     void this.router.navigate([], {

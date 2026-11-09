@@ -213,6 +213,13 @@
   outline: none;
   font-size: 0.8rem;
 }
+.search:focus-within { outline: 2px solid #99762f; outline-offset: 2px; }
+.clear-search, .clear-filters { color: var(--ink); font-size: 0.75rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.clear-search { padding: 0.65rem; }
+.active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 1.25rem; color: var(--muted); font-size: 0.75rem; }
+.filter-chip { display: inline-flex; align-items: center; gap: 0.35rem; border: 1px solid #d3dfd1; border-radius: 6px; padding: 0.35rem 0.5rem; color: var(--ink); background: #edf3eb; overflow-wrap: anywhere; }
+.filter-chip button { min-width: 1.75rem; min-height: 1.75rem; font-size: 1.1rem; cursor: pointer; }
+.filter-status { margin-top: 1rem; font-size: 0.8rem; color: var(--ink); }
 .category-desktop {
   display: flex;
   flex-wrap: wrap;

@@ -63,10 +63,10 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'auth/login',
+    redirectTo: 'vsqz',
   },
   {
     path: '**',
-    redirectTo: 'auth/login',
+    redirectTo: 'vsqz',
   },
 ];

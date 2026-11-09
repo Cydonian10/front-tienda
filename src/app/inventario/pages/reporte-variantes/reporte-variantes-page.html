@@ -105,7 +105,35 @@
         {{ resultado.totalItems }} filas en el reporte
       </p>
       @if (resultado.items.length) {
-        <div class="overflow-x-auto">
+        <ul class="space-y-3 lg:hidden" aria-label="Variantes por almacén">
+          @for (fila of resultado.items; track fila.variante.id + ':' + fila.almacen.id) {
+            <li class="card card-border min-w-0 bg-base-100 p-4">
+              <h3 class="break-words font-semibold">{{ fila.producto.nombre }}</h3>
+              @if (fila.variante.valores.length) {
+                <p class="mt-1 break-words text-sm text-base-content/70">
+                  @for (valor of fila.variante.valores; track valor.atributoId; let ultimo = $last) {
+                    {{ valor.atributo }}: {{ valor.valor }}{{ ultimo ? '' : ' · ' }}
+                  }
+                </p>
+              }
+              <dl class="mt-4 grid grid-cols-1 gap-3 text-sm min-[400px]:grid-cols-2">
+                <div class="min-w-0"><dt class="text-base-content/70">SKU</dt><dd class="break-words">{{ fila.variante.sku }}</dd></div>
+                <div class="min-w-0"><dt class="text-base-content/70">Almacén</dt><dd class="break-words">{{ fila.almacen.nombre }}</dd></div>
+                <div><dt class="text-base-content/70">Última compra / unidad base</dt><dd class="tabular-nums">{{ fila.variante.precioUltimaCompraBase != null ? soles(fila.variante.precioUltimaCompraBase) : '—' }}</dd></div>
+                <div><dt class="text-base-content/70">Precio de venta</dt><dd class="tabular-nums">{{ soles(fila.variante.precioVenta) }}</dd></div>
+                <div><dt class="text-base-content/70">Stock</dt><dd class="tabular-nums">{{ decimal(fila.cantidadBase) }} {{ fila.producto.unidadBase.simbolo }}</dd></div>
+                <div><dt class="text-base-content/70">Disponibilidad</dt><dd>
+                  @if (+fila.cantidadBase > 0) {
+                    <span class="text-success">Con stock</span>
+                  } @else {
+                    <span class="text-warning">Sin stock</span>
+                  }
+                </dd></div>
+              </dl>
+            </li>
+          }
+        </ul>
+        <div class="hidden overflow-x-auto lg:block">
           <table class="table w-full">
             <thead>
               <tr>

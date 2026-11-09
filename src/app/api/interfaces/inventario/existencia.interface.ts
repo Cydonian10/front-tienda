@@ -34,6 +34,7 @@ export interface VarianteExistencia {
   sku: string;
   activo: boolean;
   precioVenta: string;
+  precioUltimaCompraBase?: string | null;
   valores: ValorVarianteExistencia[];
 }
 

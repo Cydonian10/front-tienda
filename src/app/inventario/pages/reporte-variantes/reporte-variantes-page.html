@@ -89,7 +89,7 @@
     >
       <div>
         <h2 id="vista-previa-title" class="text-xl font-semibold">Reporte de variantes</h2>
-        <p class="mt-1 text-sm text-base-content/70">Precios de venta y existencias por almacén</p>
+        <p class="mt-1 text-sm text-base-content/70">Precios y existencias por almacén</p>
       </div>
       <p class="text-sm text-base-content/70">{{ alcance() }}</p>
     </div>
@@ -112,6 +112,7 @@
                 <th>Producto / variante</th>
                 <th>SKU</th>
                 <th>Almacén</th>
+                <th class="text-right">Última compra / unidad base</th>
                 <th class="text-right">Precio de venta</th>
                 <th class="text-right">Stock</th>
                 <th>Disponibilidad</th>
@@ -134,6 +135,9 @@
                   </td>
                   <td>{{ fila.variante.sku }}</td>
                   <td>{{ fila.almacen.nombre }}</td>
+                  <td class="text-right tabular-nums">
+                    {{ fila.variante.precioUltimaCompraBase != null ? soles(fila.variante.precioUltimaCompraBase) : '—' }}
+                  </td>
                   <td class="text-right tabular-nums">{{ soles(fila.variante.precioVenta) }}</td>
                   <td class="text-right tabular-nums">
                     {{ decimal(fila.cantidadBase) }} {{ fila.producto.unidadBase.simbolo }}

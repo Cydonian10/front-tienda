@@ -1,0 +1,178 @@
+<div class="jauja" id="inicio">
+  <div class="topline">
+    <div class="wrap">
+      Productos para cada proyecto <span>JAUJA · Mecánica y artículos en general</span>
+    </div>
+  </div>
+  <header class="header wrap">
+    <a class="brand" href="#inicio"
+      ><span class="brand-mark">J</span><span>Jauja<small>SERVICIOS GENERALES</small></span></a
+    >
+    <nav aria-label="Navegación principal">
+      <a href="#inicio">Inicio</a><a href="#catalogo">Productos</a><a href="#nosotros">Nosotros</a>
+    </nav>
+    <a class="action dark" href="#catalogo">Explorar catálogo ↗</a>
+  </header>
+  <main class="wrap">
+    <section class="jauja-hero" aria-labelledby="hero-title">
+      <div class="jauja-hero-content">
+        <p class="eyebrow">Bienvenido a Jauja</p>
+        <h1 id="hero-title">Para cada trabajo,<br /><em>la herramienta<br />ideal.</em></h1>
+        <p>
+          Encuentra productos para mecánica y artículos en general, pensados para ayudarte en cada
+          proyecto.
+        </p>
+        <div class="hero-actions">
+          <a class="action gold" href="#catalogo">Ver productos ↗</a
+          ><a class="action outline" href="#nosotros">Conócenos</a>
+        </div>
+      </div>
+    </section>
+    <div class="benefits">
+      <p><strong>Para tus proyectos</strong><span>Opciones para cada trabajo</span></p>
+      <p><strong>Encuentra lo que buscas</strong><span>Explora por categoría</span></p>
+      <p><strong>Mecánica y más</strong><span>Productos de uso general</span></p>
+    </div>
+    <section id="catalogo" class="catalog" aria-labelledby="catalog-title">
+      <div class="catalog-heading">
+        <div>
+          <p class="eyebrow">Nuestro catálogo</p>
+          <h2 id="catalog-title">Encuentra lo que necesitas.</h2>
+          <p>Explora las categorías o busca un producto específico.</p>
+        </div>
+        <form class="search" (submit)="buscar($event, buscarInput.value)">
+          <label class="sr-only" for="busqueda-publica">Buscar productos</label
+          ><input
+            #buscarInput
+            id="busqueda-publica"
+            type="search"
+            placeholder="¿Qué estás buscando?"
+            maxlength="150"
+            [value]="busqueda()"
+          /><button class="action dark" type="submit">Buscar</button>
+        </form>
+      </div>
+      <div class="category-desktop" aria-label="Categorías">
+        <button type="button" [class.active]="!categoria()" (click)="filtrar('')">Todos</button>
+        @for (item of categorias.data() ?? []; track item.id) {
+          <button type="button" [class.active]="categoria() === item.id" (click)="filtrar(item.id)">
+            {{ item.nombre }}
+          </button>
+        }
+      </div>
+      <button type="button" class="category-mobile" (click)="menu.set(true)" aria-haspopup="dialog">
+        Categoría: {{ nombreCategoria() }} <span>⌄</span>
+      </button>
+      @if (menu()) {
+        <div class="overlay" (click)="menu.set(false)">
+          <div
+            class="sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="categorias-title"
+            (click)="$event.stopPropagation()"
+            (keydown.escape)="menu.set(false)"
+          >
+            <div class="sheet-header">
+              <h3 id="categorias-title">Elige una categoría</h3>
+              <button type="button" (click)="menu.set(false)" aria-label="Cerrar">✕</button>
+            </div>
+            <button type="button" (click)="filtrar('')">Todas las categorías</button>
+            @for (item of categorias.data() ?? []; track item.id) {
+              <button type="button" (click)="filtrar(item.id)">
+                {{ item.nombre }}
+                @if (categoria() === item.id) {
+                  ✓
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+      @if (categorias.isError()) {
+        <p class="message">
+          No se pudieron cargar las categorías.
+          <button type="button" (click)="categorias.refetch()">Reintentar</button>
+        </p>
+      }
+      @if (productos.isPending()) {
+        <p class="message" role="status">Cargando productos…</p>
+      } @else if (productos.isError()) {
+        <p class="message" role="alert">
+          No se pudo cargar el catálogo.
+          <button type="button" (click)="productos.refetch()">Reintentar</button>
+        </p>
+      } @else if (productos.data(); as resultado) {
+        <p class="count">
+          <strong>{{ resultado.totalItems }} variantes</strong> en el catálogo
+        </p>
+        @if (resultado.items.length) {
+          <div class="products">
+            @for (producto of resultado.items; track producto.id) {
+              <article class="product">
+                <div class="product-art">
+                  @if (producto.tieneImagen && !imagenesFallidas().has(producto.id)) {
+                    <img [src]="imagenUrl(producto.id)" [alt]="producto.nombre" loading="lazy" (error)="imagenFallida(producto.id)" />
+                  } @else {
+                  <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.3">
+                    <path
+                      d="M39 8a15 15 0 0 0-17 19L8 41a7 7 0 0 0 10 10l14-14a15 15 0 0 0 19-17l-9 9-9-3-3-9z"
+                    />
+                    <circle cx="13" cy="46" r="2" />
+                  </svg>
+                  }
+                </div>
+                <div class="product-body">
+                  <p class="product-category">
+                    {{ producto.categorias[0]?.nombre ?? 'Productos en general' }}
+                  </p>
+                  <h3>{{ producto.nombre }}</h3>
+                  @if (producto.atributos.length) {
+                    <p class="variant-details">@for (atributo of producto.atributos; track atributo.atributo; let ultimo = $last) { {{ atributo.atributo }}: {{ atributo.valor }}{{ ultimo ? '' : ' · ' }} }</p>
+                  }
+                  <p class="availability">
+                    <span [class.available]="producto.disponible">●</span>
+                    {{ producto.disponible ? 'Disponible' : 'Sin stock' }}
+                  </p>
+                </div>
+              </article>
+            }
+          </div>
+          <div class="catalog-pagination" data-theme="light">
+            <app-pagination
+              [page]="pagina()"
+              [totalPages]="totalPaginas()"
+              [pageSize]="pageSize()"
+              [pageSizeOptions]="pageSizeOptions"
+              [disabled]="productos.isFetching()"
+              (pageChange)="cambiarPagina($event)"
+              (pageSizeChange)="cambiarTamano($event)"
+            />
+          </div>
+        } @else {
+          <p class="message">No encontramos productos para esta búsqueda.</p>
+        }
+      }
+    </section>
+    <section class="closing" id="nosotros">
+      <div>
+        <p class="eyebrow">Servicios Generales Jauja</p>
+        <h2>Estamos para acompañar tus proyectos.</h2>
+        <p>
+          Desde productos para mecánica hasta artículos de uso general, queremos ayudarte a
+          encontrar lo que necesitas para seguir adelante.
+        </p>
+      </div>
+      <a class="action gold" href="#catalogo">Explorar productos ↗</a>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap footer-inner">
+      <div>
+        <strong>Jauja</strong><small>SERVICIOS GENERALES</small>
+        <p>Herramientas, mecánica y productos en general.</p>
+      </div>
+      <a routerLink="/auth/login">Administrar inventario ↗</a>
+    </div>
+  </footer>
+</div>

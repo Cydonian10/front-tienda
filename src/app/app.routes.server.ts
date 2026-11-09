@@ -2,6 +2,10 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
   {
+    path: 'vsqz',
+    renderMode: RenderMode.Server,
+  },
+  {
     path: 'auth/**',
     renderMode: RenderMode.Client,
   },

@@ -1,0 +1,482 @@
+:host {
+  display: block;
+}
+.jauja {
+  --ink: #203c34;
+  --muted: #667d72;
+  --paper: #f6f7f2;
+  --gold: #edc05d;
+  background: var(--paper);
+  color: #172922;
+  min-height: 100vh;
+  font-family: Montserrat, sans-serif;
+}
+.wrap {
+  width: min(100% - 3rem, 1200px);
+  margin: auto;
+}
+.topline {
+  background: #263f35;
+  color: #eef3eb;
+  font-size: 0.68rem;
+  padding: 0.45rem 0;
+}
+.topline .wrap {
+  display: flex;
+  justify-content: space-between;
+}
+.header {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: none;
+}
+.brand small,
+.footer-inner small {
+  display: block;
+  font-size: 0.48rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  background: var(--ink);
+  color: var(--gold);
+  border-radius: 10px;
+  font-size: 1.4rem;
+}
+.header nav {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.header nav a,
+.footer-inner a {
+  color: inherit;
+  text-decoration: none;
+}
+.header > .action {
+  margin-left: auto;
+}
+.action {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.8rem 1.2rem;
+  border: 0;
+  border-radius: 7px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.dark {
+  background: var(--ink);
+  color: #fff;
+}
+.gold {
+  background: var(--gold);
+  color: #1c332a;
+}
+.outline {
+  border: 1px solid #a8b9ad;
+  color: white;
+}
+.jauja-hero {
+  min-height: 450px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15, 35, 28, 0.96) 0%,
+      rgba(15, 35, 28, 0.88) 32%,
+      rgba(15, 35, 28, 0.35) 64%,
+      rgba(15, 35, 28, 0.12) 100%
+    ),
+    url('/images/portada-ferreteria.png') center/cover;
+  color: white;
+  overflow: hidden;
+}
+.jauja-hero-content {
+  display: block;
+  width: min(100%, 690px);
+  padding: clamp(2rem, 5vw, 3.5rem);
+}
+.jauja-hero .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.jauja-hero .eyebrow::before {
+  content: '';
+  width: 1.35rem;
+  height: 2px;
+  background: var(--gold);
+}
+.eyebrow {
+  color: #cba753;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+.jauja-hero h1 {
+  max-width: 580px;
+  font-size: clamp(2.4rem, 4.7vw, 3.65rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  font-weight: 700;
+  margin: 1.3rem 0;
+}
+.jauja-hero h1 em {
+  font-style: normal;
+  color: var(--gold);
+}
+.jauja-hero-content > p:not(.eyebrow) {
+  max-width: 420px;
+  line-height: 1.7;
+  font-size: 0.88rem;
+  color: #e2ebe3;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.8rem;
+}
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 1.5rem 0;
+  border-bottom: 1px solid #dfe6dc;
+  gap: 1rem;
+}
+.benefits p {
+  padding-left: 1rem;
+  border-left: 2px solid #d8e4d6;
+  font-size: 0.75rem;
+}
+.benefits span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.7rem;
+  margin-top: 0.3rem;
+}
+.catalog {
+  padding: 5rem 0;
+}
+.catalog-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.catalog h2,
+.closing h2 {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+  margin: 0.8rem 0;
+}
+.catalog-heading > div > p:last-child {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.search {
+  display: flex;
+  background: white;
+  border: 1px solid #dbe4d9;
+  border-radius: 8px;
+  padding: 4px;
+  min-width: min(100%, 350px);
+}
+.search input {
+  padding: 0.5rem 0.75rem;
+  min-width: 0;
+  flex: 1;
+  outline: none;
+  font-size: 0.8rem;
+}
+.category-desktop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 2rem;
+  border-bottom: 1px solid #dfe6dc;
+  padding-bottom: 1.25rem;
+}
+.category-desktop button,
+.category-mobile {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+}
+.category-desktop button.active {
+  background: var(--ink);
+  color: white;
+}
+.category-mobile {
+  display: none;
+}
+.count {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 1.5rem 0;
+}
+.count strong {
+  color: var(--ink);
+}
+.products {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+.product {
+  border: 1px solid #dfe7dc;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 0;
+}
+.product-art {
+  height: 170px;
+  min-width: 0;
+  overflow: hidden;
+  background: #eaf0e7;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+  color: #8ba89a;
+}
+.product-art svg {
+  width: 64px;
+  height: 64px;
+}
+.product-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+}
+.variant-details {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.product-body {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 160px;
+}
+.product-category {
+  text-transform: uppercase;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: #809286;
+}
+.product h3 {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin: 0.6rem 0;
+  overflow-wrap: anywhere;
+}
+.description {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.availability {
+  margin-top: auto;
+  padding-top: 1rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+.availability span {
+  color: #c4983d;
+}
+.availability span.available {
+  color: #43885d;
+}
+.message {
+  padding: 2rem 0;
+  color: var(--muted);
+}
+.message button {
+  text-decoration: underline;
+}
+.catalog-pagination {
+  margin-top: 2rem;
+}
+.closing {
+  background: #294238;
+  color: white;
+  border-radius: 14px;
+  padding: clamp(2rem, 4vw, 3rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+.closing h2 {
+  font-size: 1.5rem;
+}
+.closing p:last-child {
+  max-width: 600px;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: #c4d2c8;
+}
+footer {
+  background: #1b3029;
+  color: white;
+  padding: 2.5rem 0;
+}
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+.footer-inner p,
+.footer-inner a {
+  color: #b3c5b8;
+}
+.footer-inner p {
+  margin-top: 1rem;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #10231dbb;
+  z-index: 50;
+  display: flex;
+  align-items: end;
+}
+.sheet {
+  background: #fff;
+  color: #1b3029;
+  border-radius: 18px 18px 0 0;
+  padding: 1.5rem;
+  width: 100%;
+  max-height: 80vh;
+  overflow: auto;
+}
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.sheet > button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 1rem;
+  border-top: 1px solid #e4e9e3;
+}
+.sheet-header button {
+  padding: 0.6rem;
+}
+:focus-visible {
+  outline: 3px solid #cf9b2f;
+  outline-offset: 3px;
+}
+@media (max-width: 800px) {
+  .products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .header {
+    gap: 1rem;
+  }
+  .header nav {
+    display: none;
+  }
+  .catalog-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .category-desktop {
+    display: none;
+  }
+  .category-mobile {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    background: #e7eee5;
+    margin-top: 1.5rem;
+  }
+  .jauja-hero {
+    min-height: 430px;
+    background-position: center, 63% center;
+  }
+  .benefits {
+    grid-template-columns: 1fr;
+  }
+  .closing {
+    align-items: start;
+    flex-direction: column;
+  }
+}
+@media (max-width: 480px) {
+  .wrap {
+    width: calc(100% - 2rem);
+  }
+  .topline span {
+    display: none;
+  }
+  .header > .action {
+    font-size: 0.65rem;
+    padding: 0.7rem;
+  }
+  .jauja-hero-content {
+    padding: 2rem 1.5rem;
+  }
+  .jauja-hero h1 {
+    font-size: clamp(2.1rem, 9vw, 2.5rem);
+  }
+  .jauja-hero {
+    background-image: linear-gradient(90deg, rgba(15, 35, 28, 0.94), rgba(15, 35, 28, 0.72)), url('/images/portada-ferreteria.png');
+    background-position: center, 62% center;
+  }
+  .products {
+    grid-template-columns: 1fr;
+  }
+  .product-art {
+    height: 140px;
+  }
+  .catalog {
+    padding: 3.5rem 0;
+  }
+  .footer-inner {
+    align-items: start;
+    gap: 2rem;
+    flex-direction: column;
+  }
+}

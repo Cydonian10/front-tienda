@@ -1,0 +1,84 @@
+- generic [ref=f3e4]:
+  - generic [ref=f3e5]: Productos para cada proyecto
+  - banner [ref=f3e7]:
+    - link "J Jauja SERVICIOS GENERALES" [ref=f3e8] [cursor=pointer]:
+      - /url: "#inicio"
+      - generic [ref=f3e9]: J
+      - generic [ref=f3e10]:
+        - text: Jauja
+        - generic [ref=f3e11]: SERVICIOS GENERALES
+    - link "Explorar catálogo ↗" [ref=f3e12] [cursor=pointer]:
+      - /url: "#catalogo"
+  - main [ref=f3e13]:
+    - region [ref=f3e14]:
+      - generic [ref=f3e15]:
+        - paragraph [ref=f3e16]: Bienvenido a Jauja
+        - heading [level=1] [ref=f3e17]:
+          - text: Para cada trabajo,
+          - emphasis [ref=f3e18]: la herramienta ideal.
+        - paragraph [ref=f3e19]: Encuentra productos para mecánica y artículos en general, pensados para ayudarte en cada proyecto.
+        - generic [ref=f3e20]:
+          - link "Ver productos ↗" [ref=f3e21] [cursor=pointer]:
+            - /url: "#catalogo"
+          - link "Conócenos" [ref=f3e22] [cursor=pointer]:
+            - /url: "#nosotros"
+    - generic [ref=f3e23]:
+      - paragraph [ref=f3e24]:
+        - strong [ref=f3e25]: Para tus proyectos
+        - generic [ref=f3e26]: Opciones para cada trabajo
+      - paragraph [ref=f3e27]:
+        - strong [ref=f3e28]: Encuentra lo que buscas
+        - generic [ref=f3e29]: Explora por categoría
+      - paragraph [ref=f3e30]:
+        - strong [ref=f3e31]: Mecánica y más
+        - generic [ref=f3e32]: Productos de uso general
+    - region [ref=f3e33]:
+      - generic [ref=f3e34]:
+        - generic [ref=f3e35]:
+          - paragraph [ref=f3e36]: Nuestro catálogo
+          - heading "Encuentra lo que necesitas." [level=2] [ref=f3e37]
+          - paragraph [ref=f3e38]: Explora las categorías o busca un producto específico.
+        - generic [ref=f3e39]:
+          - generic [ref=f3e40]: Buscar productos
+          - searchbox "Buscar productos" [ref=f3e41]
+          - button "Buscar" [ref=f3e42] [cursor=pointer]
+      - 'button "Categoría: Todas las categorías ⌄" [ref=f3e43] [cursor=pointer]':
+        - text: "Categoría: Todas las categorías"
+        - generic [ref=f3e44]: ⌄
+      - paragraph [ref=f3e45]:
+        - strong [ref=f3e46]: 3 productos
+        - text: en el catálogo
+      - generic [ref=f3e47]:
+        - article [ref=f3e48]:
+          - generic [ref=f3e53]:
+            - paragraph [ref=f3e54]: Soldadura
+            - heading "Cellocord orlicon" [level=3] [ref=f3e55]
+            - paragraph [ref=f3e56]: para ventanas
+            - paragraph [ref=f3e57]: ● Disponible
+        - article [ref=f3e58]:
+          - generic [ref=f3e63]:
+            - paragraph [ref=f3e64]: Sin Categoria
+            - heading "Perno de 1/2" [level=3] [ref=f3e65]
+            - paragraph [ref=f3e66]: para arados
+            - paragraph [ref=f3e67]: ● Disponible
+        - article [ref=f3e68]:
+          - generic [ref=f3e73]:
+            - paragraph [ref=f3e74]: Soldadura
+            - heading "Supercito" [level=3] [ref=f3e75]
+            - paragraph [ref=f3e76]: para materiales fuertes
+            - paragraph [ref=f3e77]: ● Disponible
+    - generic [ref=f3e78]:
+      - generic [ref=f3e79]:
+        - paragraph [ref=f3e80]: Servicios Generales Jauja
+        - heading "Estamos para acompañar tus proyectos." [level=2] [ref=f3e81]
+        - paragraph [ref=f3e82]: Desde productos para mecánica hasta artículos de uso general, queremos ayudarte a encontrar lo que necesitas para seguir adelante.
+      - link "Explorar productos ↗" [ref=f3e83] [cursor=pointer]:
+        - /url: "#catalogo"
+  - contentinfo [ref=f3e84]:
+    - generic [ref=f3e85]:
+      - generic [ref=f3e86]:
+        - strong [ref=f3e87]: Jauja
+        - generic [ref=f3e88]: SERVICIOS GENERALES
+        - paragraph [ref=f3e89]: Herramientas, mecánica y productos en general.
+      - link "Administrar inventario ↗" [ref=f3e90] [cursor=pointer]:
+        - /url: /auth/login

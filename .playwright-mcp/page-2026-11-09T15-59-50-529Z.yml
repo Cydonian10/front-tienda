@@ -1,0 +1,129 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e4]:
+    - generic [ref=f6e6]:
+      - text: Productos para cada proyecto
+      - generic [ref=f6e7]: JAUJA · Mecánica y artículos en general
+    - banner [ref=f6e8]:
+      - link "J Jauja SERVICIOS GENERALES" [ref=f6e9] [cursor=pointer]:
+        - /url: "#inicio"
+        - generic [ref=f6e10]: J
+        - generic [ref=f6e11]:
+          - text: Jauja
+          - generic [ref=f6e12]: SERVICIOS GENERALES
+      - navigation "Navegación principal" [ref=f6e13]:
+        - link "Inicio" [ref=f6e14] [cursor=pointer]:
+          - /url: "#inicio"
+        - link "Productos" [ref=f6e15] [cursor=pointer]:
+          - /url: "#catalogo"
+        - link "Nosotros" [ref=f6e16] [cursor=pointer]:
+          - /url: "#nosotros"
+      - link "Explorar catálogo ↗" [ref=f6e17] [cursor=pointer]:
+        - /url: "#catalogo"
+    - main [ref=f6e18]:
+      - region [ref=f6e19]:
+        - generic [ref=f6e20]:
+          - paragraph [ref=f6e21]: Bienvenido a Jauja
+          - heading [level=1] [ref=f6e22]:
+            - text: Para cada trabajo,
+            - emphasis [ref=f6e23]: la herramientaideal.
+          - paragraph [ref=f6e24]: Encuentra productos para mecánica y artículos en general, pensados para ayudarte en cada proyecto.
+          - generic [ref=f6e25]:
+            - link "Ver productos ↗" [ref=f6e26] [cursor=pointer]:
+              - /url: "#catalogo"
+            - link "Conócenos" [ref=f6e27] [cursor=pointer]:
+              - /url: "#nosotros"
+      - generic [ref=f6e28]:
+        - paragraph [ref=f6e29]:
+          - strong [ref=f6e30]: Para tus proyectos
+          - generic [ref=f6e31]: Opciones para cada trabajo
+        - paragraph [ref=f6e32]:
+          - strong [ref=f6e33]: Encuentra lo que buscas
+          - generic [ref=f6e34]: Explora por categoría
+        - paragraph [ref=f6e35]:
+          - strong [ref=f6e36]: Mecánica y más
+          - generic [ref=f6e37]: Productos de uso general
+      - region [ref=f6e38]:
+        - generic [ref=f6e39]:
+          - generic [ref=f6e40]:
+            - paragraph [ref=f6e41]: Nuestro catálogo
+            - heading "Encuentra lo que necesitas." [level=2] [ref=f6e42]
+            - paragraph [ref=f6e43]: Explora las categorías o busca un producto específico.
+          - generic [ref=f6e44]:
+            - generic [ref=f6e45]: Buscar productos
+            - searchbox "Buscar productos" [ref=f6e46]
+            - button "Buscar" [ref=f6e47] [cursor=pointer]
+        - generic "Categorías" [ref=f6e48]:
+          - button "Todos" [ref=f6e49] [cursor=pointer]
+          - button "Sin Categoria" [ref=f6e50] [cursor=pointer]
+          - button "Soldadura" [ref=f6e51] [cursor=pointer]
+        - paragraph [ref=f6e52]:
+          - strong [ref=f6e53]: 6 variantes
+          - text: en el catálogo
+        - generic [ref=f6e54]:
+          - article [ref=f6e55]:
+            - img "Cellocord orlicon" [ref=f6e57]
+            - generic [ref=f6e58]:
+              - paragraph [ref=f6e59]: Soldadura
+              - heading "Cellocord orlicon" [level=3] [ref=f6e60]
+              - paragraph [ref=f6e61]: "Tamaño: 1/8"
+              - paragraph [ref=f6e62]: ● Disponible
+          - article [ref=f6e63]:
+            - generic [ref=f6e68]:
+              - paragraph [ref=f6e69]: Sin Categoria
+              - heading "Perno de 1/2" [level=3] [ref=f6e70]
+              - paragraph [ref=f6e71]: "Tamaño: 1/2 * 4"
+              - paragraph [ref=f6e72]: ● Sin stock
+          - article [ref=f6e73]:
+            - generic [ref=f6e78]:
+              - paragraph [ref=f6e79]: Sin Categoria
+              - heading "Perno de 1/2" [level=3] [ref=f6e80]
+              - paragraph [ref=f6e81]: "Tamaño: 1/2 * 5"
+              - paragraph [ref=f6e82]: ● Sin stock
+          - article [ref=f6e83]:
+            - generic [ref=f6e88]:
+              - paragraph [ref=f6e89]: Sin Categoria
+              - heading "Perno de 1/2" [level=3] [ref=f6e90]
+              - paragraph [ref=f6e91]: "Tamaño: 1/2 * 3"
+              - paragraph [ref=f6e92]: ● Disponible
+          - article [ref=f6e93]:
+            - img "Supercito" [ref=f6e95]
+            - generic [ref=f6e96]:
+              - paragraph [ref=f6e97]: Soldadura
+              - heading "Supercito" [level=3] [ref=f6e98]
+              - paragraph [ref=f6e99]: "Tamaño: 1/8"
+              - paragraph [ref=f6e100]: ● Disponible
+          - article [ref=f6e101]:
+            - img "Supercito" [ref=f6e103]
+            - generic [ref=f6e104]:
+              - paragraph [ref=f6e105]: Soldadura
+              - heading "Supercito" [level=3] [ref=f6e106]
+              - paragraph [ref=f6e107]: "Tamaño: 5/32"
+              - paragraph [ref=f6e108]: ● Disponible
+        - navigation "Paginación" [ref=f6e111]:
+          - generic [ref=f6e112]:
+            - text: Mostrar
+            - combobox "Elementos por página" [ref=f6e113]:
+              - option "6" [selected]
+              - option "12"
+              - option "24"
+            - text: por página
+          - generic [ref=f6e114]:
+            - button "Página anterior" [disabled]
+            - button "Página 1" [ref=f6e115] [cursor=pointer]: "1"
+            - button "Página siguiente" [disabled]
+      - generic [ref=f6e116]:
+        - generic [ref=f6e117]:
+          - paragraph [ref=f6e118]: Servicios Generales Jauja
+          - heading "Estamos para acompañar tus proyectos." [level=2] [ref=f6e119]
+          - paragraph [ref=f6e120]: Desde productos para mecánica hasta artículos de uso general, queremos ayudarte a encontrar lo que necesitas para seguir adelante.
+        - link "Explorar productos ↗" [ref=f6e121] [cursor=pointer]:
+          - /url: "#catalogo"
+    - contentinfo [ref=f6e122]:
+      - generic [ref=f6e123]:
+        - generic [ref=f6e124]:
+          - strong [ref=f6e125]: Jauja
+          - generic [ref=f6e126]: SERVICIOS GENERALES
+          - paragraph [ref=f6e127]: Herramientas, mecánica y productos en general.
+        - link "Administrar inventario ↗" [ref=f6e128] [cursor=pointer]:
+          - /url: /auth/login
+  - button "Open Tanstack query devtools" [ref=f6e182] [cursor=pointer]

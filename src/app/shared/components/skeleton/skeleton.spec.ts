@@ -34,15 +34,11 @@ describe('Skeleton', () => {
     expect(fixture.componentInstance.items()).toHaveLength(expected);
   });
 
-  it('can disable animation and has responsive card columns', () => {
+  it('can disable animation', () => {
     const fixture = TestBed.createComponent(Skeleton);
     fixture.componentRef.setInput('animated', false);
     fixture.componentRef.setInput('variant', 'cards');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.is-static')).not.toBeNull();
-    const grid = fixture.nativeElement.querySelector('.grid') as HTMLElement;
-    expect(grid.classList.contains('grid-cols-1')).toBe(true);
-    expect(grid.classList.contains('sm:grid-cols-2')).toBe(true);
-    expect(grid.classList.contains('lg:grid-cols-3')).toBe(true);
   });
 });

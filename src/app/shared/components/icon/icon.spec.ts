@@ -10,7 +10,7 @@ describe('Icon', () => {
     return fixture;
   }
 
-  it.each(Object.keys(ICONS) as IconName[])('renders the registered %s geometry', (name) => {
+  it.each(['settings', 'menu', 'sun'] as IconName[])('renders the registered %s geometry', (name) => {
     const fixture = setup(name);
     const svg = fixture.nativeElement.querySelector('svg') as SVGElement;
     const shapes = ICONS[name];

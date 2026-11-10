@@ -9,6 +9,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
+      API_URL: ${API_URL:?API_URL es obligatoria}
 
     ports:
       - '127.0.0.1:4000:4000'

@@ -11,6 +11,9 @@ services:
       PORT: 4000
       API_URL: ${API_URL:?API_URL es obligatoria}
 
+      # Hosts autorizados para Angular SSR
+      NG_ALLOWED_HOSTS: '127.0.0.1,localhost,192.168.18.29'
+
     ports:
       - '127.0.0.1:4000:4000'
 
@@ -27,12 +30,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
-
-    logging:
-      driver: json-file
-      options:
-        max-size: '10m'
-        max-file: '3'
 
 networks:
   ferreteria_network:

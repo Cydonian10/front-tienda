@@ -12,7 +12,8 @@ services:
       API_URL: ${API_URL:?API_URL es obligatoria}
 
       # Hosts autorizados para Angular SSR
-      NG_ALLOWED_HOSTS: '127.0.0.1,localhost,192.168.18.29'
+      #NG_ALLOWED_HOSTS: '127.0.0.1,localhost,192.168.18.29'
+      NG_ALLOWED_HOSTS: ${NG_ALLOWED_HOSTS:?Obligatorio}
 
     ports:
       - '127.0.0.1:4000:4000'
